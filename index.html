@@ -44,8 +44,11 @@
         .weather-icon { font-size: 18px; }
         .info-val { color: var(--primary); font-weight: bold; font-size: 11px; }
         
-        #user-monitor { background: #000; padding: 5px; border-top: 1px solid #222; max-height: 40px; overflow-y: auto; text-align: center; }
-        .user-tag { display: inline-block; background: #222; padding: 1px 6px; border-radius: 10px; margin: 2px; color: var(--primary); font-size: 8px; border: 1px solid #333; }
+        /* MONITOR ADM */
+        #user-monitor { background: #000; padding: 8px; border-top: 1px solid #222; max-height: 80px; overflow-y: auto; text-align: center; }
+        .monitor-row { background: #1a1a1a; margin: 4px 0; padding: 4px; border-radius: 4px; font-size: 9px; border-left: 3px solid var(--primary); display: flex; justify-content: space-between; align-items: center; }
+        .user-tag { color: var(--primary); font-weight: bold; margin-right: 5px; }
+        .status-tag { color: #888; font-style: italic; }
 
         .hidden { display: none; }
         .selection-item { background: #1a1a1a; padding: 10px; margin-bottom: 5px; border-radius: 5px; display: flex; justify-content: space-between; grid-column: span 2; font-size: 12px; align-items: center; }
@@ -157,8 +160,8 @@
             const n = document.getElementById('reg-name').value;
             const p = document.getElementById('reg-pass').value;
             if(p !== document.getElementById('reg-confirm').value) return alert("Senhas não batem!");
-            db.ref('usuarios/' + n.toUpperCase()).set({ nome: n, senha: p, lista: "" }).then(() => {
-                alert("Cadastrado! Faça login.");
+            db.ref('usuarios/' + n.toUpperCase()).set({ nome: n, senha: p, lista: "", ouvindo: "Nada" }).then(() => {
+                alert("Cadastrado!");
                 showScreen('login-screen');
             });
         }
@@ -190,7 +193,6 @@
             db.ref('radios').on('value', (snap) => {
                 const data = snap.val();
                 allRadios = data ? Object.keys(data).map(k => ({id: k, ...data[k]})) : [];
-                
                 if(isAdmin) {
                     currentList = allRadios.map(r => r.id);
                     renderPlayer(currentList);
@@ -211,8 +213,7 @@
         function renderSelection() {
             document.getElementById('player-zone').classList.add('hidden');
             document.getElementById('player-bar').classList.add('hidden');
-            document.getElementById('selection-zone').classList.remove('hidden');
-            document.getElementById('selection-zone').classList.add('active-edit');
+            document.getElementById('selection-zone').classList.remove('hidden').classList.add('active-edit');
             const container = document.getElementById('list-to-select');
             container.innerHTML = "";
             allRadios.forEach(r => {
@@ -225,9 +226,8 @@
             const selected = Array.from(document.querySelectorAll('.r-check:checked')).map(c => c.value);
             currentList = selected;
             db.ref('usuarios/' + currentUser).update({ lista: selected.join(',') }).then(() => {
-                const sz = document.getElementById('selection-zone');
-                sz.classList.remove('active-edit');
-                sz.classList.add('hidden');
+                document.getElementById('selection-zone').classList.remove('active-edit');
+                document.getElementById('selection-zone').classList.add('hidden');
                 document.getElementById('edit-list-btn').classList.remove('hidden');
                 renderPlayer(selected);
             });
@@ -237,7 +237,6 @@
             const container = document.getElementById('my-final-list');
             container.innerHTML = "";
             document.getElementById('player-zone').classList.remove('hidden');
-            
             ids.forEach(id => {
                 const r = allRadios.find(rad => rad.id === id);
                 if(r) {
@@ -259,13 +258,10 @@
 
             new Sortable(container, {
                 animation: 150,
-                ghostClass: 'sortable-ghost',
                 onEnd: function() {
                     const newOrder = Array.from(container.querySelectorAll('.radio-card')).map(c => c.getAttribute('data-id'));
                     currentList = newOrder;
-                    if(!isAdmin && currentUser) {
-                        db.ref('usuarios/' + currentUser).update({ lista: newOrder.join(',') });
-                    }
+                    if(!isAdmin && currentUser) db.ref('usuarios/' + currentUser).update({ lista: newOrder.join(',') });
                 }
             });
         }
@@ -277,6 +273,9 @@
             player.src = radio.url;
             player.play();
             
+            // Avisa ao banco o que está ouvindo
+            if(currentUser) db.ref('usuarios/' + currentUser).update({ ouvindo: radio.name });
+
             document.querySelectorAll('.radio-card').forEach(c => {
                 c.classList.remove('active');
                 const rid = c.getAttribute('data-id');
@@ -292,16 +291,10 @@
             document.getElementById('player-bar').classList.remove('hidden');
         }
 
-        function changeRadio(dir) {
-            let next = currentIndex + dir;
-            if(next >= currentList.length) next = 0;
-            if(next < 0) next = currentList.length - 1;
-            playRadio(currentList[next]);
-        }
-
         function stopRadio() {
             player.pause();
             player.src = "";
+            if(currentUser) db.ref('usuarios/' + currentUser).update({ ouvindo: "Nada" });
             document.querySelectorAll('.radio-card').forEach(c => {
                 c.classList.remove('active');
                 const rid = c.getAttribute('data-id');
@@ -311,56 +304,53 @@
             document.getElementById('player-bar').classList.add('hidden');
         }
 
-        function nextStep() { document.getElementById('step-2').classList.remove('hidden'); }
-        function saveRadio() {
-            const n = document.getElementById('new-name').value;
-            const u = document.getElementById('new-url').value;
-            if(editingKey) {
-                db.ref('radios/' + editingKey).update({ name: n, url: u });
-                editingKey = null;
-            } else {
-                const c = `rgb(${Math.random()*50+200},${Math.random()*50+200},${Math.random()*50+200})`;
-                db.ref('radios').push({ name: n, url: u, color: c });
-            }
-            document.getElementById('new-name').value=""; document.getElementById('new-url').value="";
-            document.getElementById('step-2').classList.add('hidden');
+        function changeRadio(dir) {
+            let next = currentIndex + dir;
+            if(next >= currentList.length) next = 0;
+            if(next < 0) next = currentList.length - 1;
+            playRadio(currentList[next]);
         }
-
-        function editR(id) {
-            const radio = allRadios.find(r => r.id === id);
-            document.getElementById('new-name').value = radio.name;
-            document.getElementById('new-url').value = radio.url;
-            editingKey = id;
-            document.getElementById('step-2').classList.remove('hidden');
-        }
-
-        function deleteR(id) { if(confirm("Excluir?")) db.ref('radios/'+id).remove(); }
-        function toggleEdit() { renderSelection(); }
 
         function monitorUsers() {
             db.ref('usuarios').on('value', (snap) => {
                 const users = snap.val();
                 const display = document.getElementById('user-monitor');
                 if(users) {
-                    display.innerHTML = `<div style="font-size:7px; color:#555">USUÁRIOS CADASTRADOS</div>`;
-                    Object.keys(users).forEach(u => { display.innerHTML += `<span class="user-tag">${u}</span>`; });
+                    display.innerHTML = `<div style="font-size:8px; color:var(--primary); margin-bottom:5px; font-weight:bold">MONITORAMENTO EM TEMPO REAL</div>`;
+                    Object.keys(users).forEach(u => {
+                        const info = users[u];
+                        const statusColor = info.ouvindo !== "Nada" ? "#1DB954" : "#555";
+                        display.innerHTML += `
+                            <div class="monitor-row" style="border-left-color: ${statusColor}">
+                                <div><span class="user-tag">${info.nome}</span></div>
+                                <div class="status-tag">${info.ouvindo !== "Nada" ? "🎧 " + info.ouvindo : "Offline"}</div>
+                            </div>`;
+                    });
                 }
             });
         }
 
+        function nextStep() { document.getElementById('step-2').classList.remove('hidden'); }
+        function saveRadio() {
+            const n = document.getElementById('new-name').value;
+            const u = document.getElementById('new-url').value;
+            if(editingKey) { db.ref('radios/' + editingKey).update({ name: n, url: u }); editingKey = null; }
+            else { const c = `rgb(${Math.random()*50+200},${Math.random()*50+200},${Math.random()*50+200})`; db.ref('radios').push({ name: n, url: u, color: c }); }
+            document.getElementById('new-name').value=""; document.getElementById('new-url').value=""; document.getElementById('step-2').classList.add('hidden');
+        }
+        function editR(id) { const radio = allRadios.find(r => r.id === id); document.getElementById('new-name').value = radio.name; document.getElementById('new-url').value = radio.url; editingKey = id; document.getElementById('step-2').classList.remove('hidden'); }
+        function deleteR(id) { if(confirm("Excluir?")) db.ref('radios/'+id).remove(); }
+        function toggleEdit() { renderSelection(); }
         function startWeather() {
             setInterval(() => { document.getElementById('display-time').innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}); }, 1000);
             fetch('https://ipapi.co/json/').then(r=>r.json()).then(l => {
                 document.getElementById('display-city').innerText = l.city.toUpperCase();
-                fetch(`https://api.open-meteo.com/v1/forecast?latitude=${l.latitude}&longitude=${l.longitude}&current_weather=true`)
-                .then(r=>r.json()).then(w => { 
+                fetch(`https://api.open-meteo.com/v1/forecast?latitude=${l.latitude}&longitude=${l.longitude}&current_weather=true`).then(r=>r.json()).then(w => { 
                     const code = w.current_weather.weathercode;
                     document.getElementById('display-temp').innerText = Math.round(w.current_weather.temperature) + "°C";
                     let icon = "☀️"; let desc = "Céu Limpo";
-                    if(code >= 1 && code <= 3) { icon = "⛅"; desc = "Nublado"; }
-                    else if(code >= 51) { icon = "🌧️"; desc = "Chuva"; }
-                    document.getElementById('weather-img').innerText = icon;
-                    document.getElementById('display-rain').innerText = desc;
+                    if(code >= 1 && code <= 3) { icon = "⛅"; desc = "Nublado"; } else if(code >= 51) { icon = "🌧️"; desc = "Chuva"; }
+                    document.getElementById('weather-img').innerText = icon; document.getElementById('display-rain').innerText = desc;
                 });
             });
         }
