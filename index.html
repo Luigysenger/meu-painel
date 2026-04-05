@@ -24,26 +24,27 @@
         .tablet-header { background: var(--primary); padding: 8px 15px; font-size: 11px; color: #000; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
         
         .stations-grid { flex: 1; overflow-y: auto; padding: 15px; background: #0a0a0a; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-content: start; }
-        .radio-card { padding: 15px 5px; border-radius: 8px; text-align: center; color: #000; font-weight: bold; cursor: grab; font-size: 12px; position: relative; border: 2px solid transparent; transition: 0.2s; display: flex; align-items: center; justify-content: center; min-height: 50px; user-select: none; touch-action: none; }
-        .radio-card:active { cursor: grabbing; }
+        .radio-card { padding: 15px 5px; border-radius: 8px; text-align: center; color: #000; font-weight: bold; cursor: grab; font-size: 12px; position: relative; border: 2px solid transparent; transition: 0.2s; display: flex; align-items: center; justify-content: center; min-height: 50px; user-select: none; }
+        .radio-card.active { border: 2px solid #fff; box-shadow: 0 0 10px var(--primary); transform: scale(1.02); }
 
         .btn-edit-small { position: absolute; top: 2px; left: 2px; font-size: 9px; background: rgba(0,0,0,0.4); border: none; cursor: pointer; padding: 2px 5px; border-radius: 3px; color: white; }
         .btn-del-small { position: absolute; top: 2px; right: 2px; font-size: 9px; background: rgba(255,0,0,0.4); border: none; cursor: pointer; padding: 2px 5px; border-radius: 3px; color: white; }
 
         .admin-only { background: #151515; padding: 10px; border-bottom: 1px solid #333; }
         .player-controls { background: #181818; padding: 10px; display: flex; justify-content: center; gap: 20px; border-top: 1px solid #333; }
-        .ctrl-btn { background: none; border: 1px solid #444; color: white; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; font-weight: bold; }
+        .ctrl-btn { background: none; border: 1px solid #444; color: white; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .ctrl-btn:active { background: #333; }
         .stop-btn { border-color: #ff4444; color: #ff4444; }
 
         .info-bar { background: #111; padding: 8px; border-top: 1px solid #333; }
         .info-row { display: grid; grid-template-columns: 1fr 1fr 1fr; width: 100%; align-items: center; text-align: center; }
-        .info-item-side { font-size: 10px; }
         
-        #user-monitor { background: #000; padding: 8px; border-top: 1px solid #222; max-height: 130px; overflow-y: auto; text-align: center; }
-        .monitor-row { background: #1a1a1a; margin: 4px 0; border-radius: 4px; font-size: 9px; display: flex; flex-direction: column; cursor: pointer; border-left: 3px solid transparent; }
-        .row-main { display: flex; justify-content: space-between; align-items: center; padding: 6px; }
-        .row-details { background: #0c0c0c; padding: 8px; text-align: left; display: none; border-top: 1px solid #222; color: #bbb; }
+        #user-monitor { background: #000; padding: 8px; border-top: 1px solid #222; max-height: 140px; overflow-y: auto; }
+        .monitor-row { background: #1a1a1a; margin: 5px 0; border-radius: 6px; cursor: pointer; border-left: 4px solid #333; overflow: hidden; transition: 0.3s; }
+        .row-main { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; font-size: 10px; font-weight: bold; }
+        .row-details { background: #050505; padding: 10px; text-align: left; display: none; border-top: 1px solid #222; font-size: 10px; color: #ccc; line-height: 1.5; }
         .row-details.show { display: block; }
+        
         .hidden { display: none; }
         .selection-item { background: #1a1a1a; padding: 10px; margin-bottom: 5px; border-radius: 5px; display: flex; justify-content: space-between; grid-column: span 2; font-size: 12px; align-items: center; }
     </style>
@@ -105,7 +106,7 @@
                     <div id="my-final-list" style="display:contents"></div>
                 </div>
 
-                <div id="player-bar" class="player-controls hidden">
+                <div id="player-bar" class="player-controls">
                     <button class="ctrl-btn" onclick="changeRadio(-1)">◀◀</button>
                     <button class="ctrl-btn stop-btn" onclick="stopRadio()">■</button>
                     <button class="ctrl-btn" onclick="changeRadio(1)">▶▶</button>
@@ -113,12 +114,12 @@
 
                 <div class="info-bar">
                     <div class="info-row">
-                        <div class="info-item-side">
+                        <div class="info-item-side" style="font-size:10px">
                             <span id="display-city">...</span><br>
-                            <span id="btn-edit-list" class="hidden" onclick="renderSelection()" style="color:var(--primary); cursor:pointer; text-decoration:underline; font-size:9px">EDITAR LISTA</span>
+                            <span id="btn-edit-list" class="hidden" onclick="renderSelection()" style="color:var(--primary); cursor:pointer; text-decoration:underline; font-size:9px">EDITAR MINHA LISTA</span>
                         </div>
                         <div class="info-item-center" style="text-align:center"><span id="weather-img">☀️</span><br><span id="display-temp">--°C</span></div>
-                        <div class="info-item-side"><span id="display-time">00:00</span></div>
+                        <div class="info-item-side" style="font-size:10px"><span id="display-time">00:00</span></div>
                     </div>
                     <div id="user-monitor" class="hidden"></div>
                 </div>
@@ -144,7 +145,7 @@
         
         let allRadios = []; let currentList = []; let currentIndex = -1;
         let currentUser = ""; let isAdmin = false; let editingKey = null;
-        let timerRealtime = null; let openUserDetail = null;
+        let timerRealtime = null; let openUserId = null;
 
         function showScreen(id) {
             document.querySelectorAll('.auth-card').forEach(s => s.classList.add('hidden'));
@@ -156,28 +157,7 @@
             const e = document.getElementById('reg-email').value;
             const p = document.getElementById('reg-pass').value;
             if(!n || !e || !p) return alert("Preencha tudo!");
-            db.ref('usuarios').once('value', snap => {
-                const users = snap.val();
-                let emailExiste = false;
-                if(users) Object.values(users).forEach(u => { if(u.email === e) emailExiste = true; });
-                if(emailExiste) return alert("E-mail em uso!");
-                db.ref('usuarios/' + n).set({ nome: n, email: e, senha: p, lista: "", ouvindo: "Nada", totalTempo: 0 }).then(() => { alert("Criada!"); showScreen('login-screen'); });
-            });
-        }
-
-        function verifyRecovery() {
-            const n = document.getElementById('forgot-name').value.toUpperCase();
-            const e = document.getElementById('forgot-email').value;
-            db.ref('usuarios/' + n).once('value', snap => {
-                const d = snap.val();
-                if(d && d.email === e) { document.getElementById('forgot-step1').classList.add('hidden'); document.getElementById('forgot-step2').classList.remove('hidden'); currentUser = n; }
-                else alert("Dados não conferem!");
-            });
-        }
-
-        function updatePassword() {
-            const p = document.getElementById('forgot-new-pass').value;
-            db.ref('usuarios/' + currentUser).update({ senha: p }).then(() => { alert("Alterada!"); location.reload(); });
+            db.ref('usuarios/' + n).set({ nome: n, email: e, senha: p, lista: "", ouvindo: "Nada", totalTempo: 0 }).then(() => { alert("Criada!"); showScreen('login-screen'); });
         }
 
         function handleLogin() {
@@ -198,14 +178,12 @@
             document.getElementById('user-display').innerText = name.toUpperCase();
             startWeather();
             
-            // Ativar ARRASTAR (Sortable)
             new Sortable(document.getElementById('my-final-list'), {
                 animation: 200,
                 onEnd: () => {
                     const ids = Array.from(document.querySelectorAll('.radio-card')).map(c => c.getAttribute('data-id'));
                     currentList = ids;
                     if(!isAdmin && currentUser) db.ref('usuarios/'+currentUser).update({ lista: ids.join(',') });
-                    // Se for ADM, opcionalmente você pode salvar a ordem global aqui
                 }
             });
 
@@ -225,7 +203,6 @@
 
         function renderSelection() {
             document.getElementById('player-zone').classList.add('hidden');
-            document.getElementById('player-bar').classList.add('hidden');
             document.getElementById('selection-zone').classList.remove('hidden');
             const container = document.getElementById('list-to-select');
             container.innerHTML = "";
@@ -237,7 +214,7 @@
 
         function saveUserList() {
             const selected = Array.from(document.querySelectorAll('.radio-sel:checked')).map(cb => cb.value);
-            if(selected.length === 0) return alert("Selecione uma!");
+            if(selected.length === 0) return alert("Selecione uma rádio!");
             currentList = selected;
             db.ref('usuarios/' + currentUser).update({ lista: selected.join(',') }).then(() => {
                 document.getElementById('selection-zone').classList.add('hidden');
@@ -264,8 +241,13 @@
         function playRadio(id) {
             const radio = allRadios.find(r => r.id === id); if(!radio) return;
             if(timerRealtime) clearInterval(timerRealtime);
-            player.src = radio.url; player.play(); currentIndex = currentList.indexOf(id);
-            document.getElementById('player-bar').classList.remove('hidden');
+            player.src = radio.url; player.play(); 
+            currentIndex = currentList.indexOf(id);
+            
+            document.querySelectorAll('.radio-card').forEach(c => c.classList.remove('active'));
+            const activeCard = document.getElementById("card-"+id);
+            if(activeCard) activeCard.classList.add('active');
+
             if(currentUser) {
                 db.ref('usuarios/'+currentUser).update({ ouvindo: radio.name, inicio: Date.now(), ultimaRadio: radio.name });
                 timerRealtime = setInterval(() => {
@@ -276,34 +258,42 @@
             }
         }
 
-        function stopRadio() { player.pause(); if(timerRealtime) clearInterval(timerRealtime); if(currentUser) db.ref('usuarios/'+currentUser).update({ ouvindo: "Nada", inicio: 0 }); document.getElementById('player-bar').classList.add('hidden'); }
-        
+        function stopRadio() { 
+            player.pause(); 
+            if(timerRealtime) clearInterval(timerRealtime); 
+            if(currentUser) db.ref('usuarios/'+currentUser).update({ ouvindo: "Nada", inicio: 0 }); 
+            document.querySelectorAll('.radio-card').forEach(c => c.classList.remove('active'));
+        }
+
+        function changeRadio(dir) { 
+            if(currentList.length === 0) return;
+            let n = currentIndex + dir; 
+            if(n >= currentList.length) n = 0; 
+            if(n < 0) n = currentList.length - 1; 
+            playRadio(currentList[n]); 
+        }
+
         function monitorUsers() {
             db.ref('usuarios').on('value', snap => {
                 const users = snap.val(); const display = document.getElementById('user-monitor');
-                if(users) {
-                    display.innerHTML = `<p style='font-size:9px; color:#555'>MONITORAMENTO</p>`;
-                    Object.keys(users).forEach(u => {
-                        const info = users[u]; 
-                        const isOnline = (info.ouvindo !== "Nada") && (Date.now() - (info.lastSeen || 0) < 30000);
-                        const color = isOnline ? "var(--primary)" : "var(--offline)";
-                        const detailClass = (openUserDetail === u) ? "show" : "";
-                        display.innerHTML += `
-                        <div class="monitor-row" style="border-left-color: ${color}" onclick="toggleDetail('${u}')">
-                            <div class="row-main"><span style="color:${color}">${info.nome}</span><span style="color:${color}">${isOnline ? '🎧 '+info.ouvindo : 'OFF'}</span></div>
-                            <div id="detail-${u}" class="row-details ${detailClass}">
-                                Rádio: ${isOnline ? info.ouvindo : '---'}<br>Total: ${formatDuration(info.totalTempo)}<br>Sessão: ${formatDuration(info.ultimoTempo)}
-                            </div>
-                        </div>`;
-                    });
-                }
+                if(!users) return;
+                display.innerHTML = `<p style='font-size:9px; color:#555; margin-bottom:5px'>MONITOR DE ACESSOS</p>`;
+                Object.keys(users).forEach(u => {
+                    const info = users[u];
+                    const isOnline = (info.ouvindo !== "Nada") && (Date.now() - (info.lastSeen || 0) < 30000);
+                    const color = isOnline ? "var(--primary)" : "var(--offline)";
+                    display.innerHTML += `
+                    <div class="monitor-row" style="border-left-color: ${color}" onclick="openUserId = (openUserId === '${u}' ? null : '${u}')">
+                        <div class="row-main"><span style="color:${color}">${info.nome}</span><span style="color:${color}">${isOnline ? 'ONLINE' : 'OFF'}</span></div>
+                        <div class="row-details ${openUserId === u ? 'show' : ''}">
+                            Rádio: ${isOnline ? info.ouvindo : (info.ultimaRadio || '---')}<br>Tempo: ${formatDuration(info.ultimoTempo)}
+                        </div>
+                    </div>`;
+                });
             });
         }
 
-        function toggleDetail(u) { openUserDetail = (openUserDetail === u) ? null : u; }
-
         function formatDuration(ms) { if(!ms) return "0s"; const s = Math.floor(ms/1000); const m = Math.floor(s/60); return (m>0?m+"m ":"")+s%60+"s"; }
-        function changeRadio(dir) { let n = currentIndex + dir; if(n >= currentList.length) n = 0; if(n < 0) n = currentList.length - 1; playRadio(currentList[n]); }
         function nextStep() { document.getElementById('step-2').classList.remove('hidden'); }
         function saveRadio() {
             const n = document.getElementById('new-name').value; const u = document.getElementById('new-url').value;
@@ -313,6 +303,7 @@
         }
         function editR(id) { const r = allRadios.find(x => x.id === id); document.getElementById('new-name').value = r.name; document.getElementById('new-url').value = r.url; editingKey = id; document.getElementById('step-2').classList.remove('hidden'); }
         function deleteR(id) { if(confirm("Excluir?")) db.ref('radios/'+id).remove(); }
+        
         function startWeather() {
             setInterval(() => { document.getElementById('display-time').innerText = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }, 1000);
             fetch('https://ipapi.co/json/').then(r=>r.json()).then(l => {
