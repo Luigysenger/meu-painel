@@ -22,23 +22,31 @@
         .tablet-header { background: var(--primary); padding: 8px 15px; font-size: 11px; color: #000; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
         
         .stations-grid { flex: 1; overflow-y: auto; padding: 15px; background: #0a0a0a; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-content: start; }
-        .radio-card { padding: 15px 5px; border-radius: 8px; text-align: center; color: #000; font-weight: bold; cursor: pointer; font-size: 12px; position: relative; border: 2px solid transparent; }
-        .radio-card.active { border: 2px solid #fff; box-shadow: 0 0 10px var(--primary); transform: scale(1.05); }
+        .radio-card { padding: 15px 5px; border-radius: 8px; text-align: center; color: #000; font-weight: bold; cursor: pointer; font-size: 12px; position: relative; border: 2px solid transparent; transition: 0.2s; }
+        
+        /* DESTAQUE RÁDIO TOCANDO */
+        .radio-card.active { border: 2px solid #fff; box-shadow: 0 0 15px var(--primary); color: var(--primary) !important; background: #000 !important; transform: scale(1.02); }
 
         .admin-btns { position: absolute; top: 2px; right: 2px; display: flex; gap: 2px; }
         .btn-tool { font-size: 9px; background: rgba(0,0,0,0.3); border: none; cursor: pointer; padding: 2px 4px; border-radius: 3px; color: white; }
 
         .admin-only { background: #151515; padding: 10px; border-bottom: 1px solid #333; }
         
-        /* BARRA INFERIOR REORGANIZADA */
+        /* CONTROLES DO PLAYER */
+        .player-controls { background: #181818; padding: 10px; display: flex; justify-content: center; gap: 20px; border-top: 1px solid #333; }
+        .ctrl-btn { background: none; border: 1px solid #444; color: white; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .ctrl-btn:hover { background: var(--primary); color: black; border-color: var(--primary); }
+        .stop-btn { border-color: #ff4444; color: #ff4444; }
+        .stop-btn:hover { background: #ff4444; color: white; }
+
         .info-bar { background: #111; padding: 8px; border-top: 1px solid #333; }
         .info-row { display: grid; grid-template-columns: 1fr 1fr 1fr; width: 100%; align-items: center; text-align: center; }
         .info-item-side { font-size: 10px; }
-        .info-item-center { display: flex; flex-direction: column; align-items: center; justify-content: center; border-left: 1px solid #222; border-right: 1px solid #222; }
-        .weather-icon { font-size: 20px; margin-bottom: -2px; }
+        .info-item-center { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .weather-icon { font-size: 18px; margin-bottom: -2px; }
         .info-val { color: var(--primary); font-weight: bold; font-size: 11px; }
         
-        #user-monitor { background: #000; padding: 5px; border-top: 1px solid #222; max-height: 45px; overflow-y: auto; text-align: center; }
+        #user-monitor { background: #000; padding: 5px; border-top: 1px solid #222; max-height: 40px; overflow-y: auto; text-align: center; }
         .user-tag { display: inline-block; background: #222; padding: 1px 6px; border-radius: 10px; margin: 2px; color: var(--primary); font-size: 8px; border: 1px solid #333; }
 
         .hidden { display: none; }
@@ -88,30 +96,31 @@
                     <div id="my-final-list" style="display:contents"></div>
                 </div>
 
+                <div id="player-bar" class="player-controls hidden">
+                    <button class="ctrl-btn" onclick="changeRadio(-1)">◀◀</button>
+                    <button class="ctrl-btn stop-btn" onclick="stopRadio()">■</button>
+                    <button class="ctrl-btn" onclick="changeRadio(1)">▶▶</button>
+                </div>
+
                 <div class="info-bar">
                     <div class="info-row">
                         <div class="info-item-side">
                             <span id="display-city" style="display:block; color:#888">BUSCANDO...</span>
-                            <div id="edit-list-btn" class="hidden" onclick="toggleEdit()" style="cursor:pointer;text-decoration:underline; color:var(--primary); font-size:9px">ALTERAR RÁDIOS</div>
+                            <div id="edit-list-btn" class="hidden" onclick="toggleEdit()" style="cursor:pointer;text-decoration:underline; color:var(--primary); font-size:9px">EDITAR LISTA</div>
                         </div>
-
                         <div class="info-item-center">
                             <span id="weather-img" class="weather-icon">☀️</span>
                             <div>
                                 <span class="info-val" id="display-temp">--°C</span>
-                                <span id="display-rain" style="font-size:8px; display:block; color:#aaa">Carregando...</span>
+                                <span id="display-rain" style="font-size:8px; display:block; color:#aaa">--</span>
                             </div>
                         </div>
-
                         <div class="info-item-side">
                             <span style="color:#888">HORÁRIO</span><br>
                             <span class="info-val" id="display-time">00:00</span>
                         </div>
                     </div>
-                    
-                    <div id="user-monitor" class="hidden">
-                        <div id="user-list-display"></div>
-                    </div>
+                    <div id="user-monitor" class="hidden"></div>
                 </div>
             </div>
         </div>
@@ -134,9 +143,10 @@
         const player = document.getElementById('audio-player');
         
         let allRadios = [];
+        let currentList = []; // IDs das rádios que o usuário está vendo
+        let currentIndex = -1;
         let currentUser = "";
         let isAdmin = false;
-        let userSavedIds = [];
         let editingKey = null;
 
         function showScreen(id) {
@@ -168,7 +178,6 @@
                 const data = snap.val();
                 if(data && data.senha === p) {
                     currentUser = u;
-                    userSavedIds = data.lista ? data.lista.split(',') : [];
                     enterDashboard(data.nome, data.lista);
                 } else { alert("Acesso negado!"); }
             });
@@ -185,12 +194,14 @@
                 allRadios = data ? Object.keys(data).map(k => ({id: k, ...data[k]})) : [];
                 
                 if(isAdmin) {
-                    renderPlayer(allRadios.map(r => r.id));
+                    currentList = allRadios.map(r => r.id);
+                    renderPlayer(currentList);
                     document.getElementById('adm-zone').classList.remove('hidden');
                     document.getElementById('user-monitor').classList.remove('hidden');
                 } else {
                     if(savedList && !document.getElementById('selection-zone').classList.contains('active-edit')) {
-                        renderPlayer(savedList.split(','));
+                        currentList = savedList.split(',');
+                        renderPlayer(currentList);
                         document.getElementById('edit-list-btn').classList.remove('hidden');
                     } else {
                         renderSelection();
@@ -201,19 +212,20 @@
 
         function renderSelection() {
             document.getElementById('player-zone').classList.add('hidden');
+            document.getElementById('player-bar').classList.add('hidden');
             document.getElementById('selection-zone').classList.remove('hidden');
             document.getElementById('selection-zone').classList.add('active-edit');
             const container = document.getElementById('list-to-select');
             container.innerHTML = "";
             allRadios.forEach(r => {
-                const isChecked = userSavedIds.includes(r.id) ? 'checked' : '';
+                const isChecked = currentList.includes(r.id) ? 'checked' : '';
                 container.innerHTML += `<div class="selection-item"><span>${r.name}</span> <input type="checkbox" class="r-check" value="${r.id}" ${isChecked}></div>`;
             });
         }
 
         function saveUserList() {
             const selected = Array.from(document.querySelectorAll('.r-check:checked')).map(c => c.value);
-            userSavedIds = selected;
+            currentList = selected;
             db.ref('usuarios/' + currentUser).update({ lista: selected.join(',') }).then(() => {
                 document.getElementById('selection-zone').classList.remove('active-edit');
                 document.getElementById('selection-zone').classList.add('hidden');
@@ -226,38 +238,69 @@
             document.getElementById('player-zone').classList.remove('hidden');
             const container = document.getElementById('my-final-list');
             container.innerHTML = "";
+            
             allRadios.forEach(r => {
                 if(ids.includes(r.id)) {
                     const card = document.createElement('div');
                     card.className = "radio-card";
+                    card.id = "card-" + r.id;
                     card.style.backgroundColor = r.color;
                     card.innerHTML = `
                         <div class="admin-btns">
                             ${isAdmin ? `<button class="btn-tool" onclick="editR('${r.id}')">✎</button>` : ''}
                             ${isAdmin ? `<button class="btn-tool" onclick="deleteR('${r.id}')">X</button>` : ''}
                         </div>
-                        <div>📻 ${r.name}</div>`;
-                    card.onclick = (e) => {
-                        if(e.target.tagName === 'BUTTON') return;
-                        document.querySelectorAll('.radio-card').forEach(c => c.classList.remove('active'));
-                        card.classList.add('active');
-                        player.src = r.url; player.play();
-                    };
+                        <div class="radio-name">📻 ${r.name}</div>`;
+                    card.onclick = (e) => { if(e.target.tagName !== 'BUTTON') playRadio(r.id); };
                     container.appendChild(card);
                 }
             });
         }
 
+        function playRadio(id) {
+            const radio = allRadios.find(r => r.id === id);
+            currentIndex = currentList.indexOf(id);
+            player.src = radio.url;
+            player.play();
+            
+            // UI Update
+            document.querySelectorAll('.radio-card').forEach(c => {
+                c.classList.remove('active');
+                c.querySelector('.radio-name').innerHTML = "📻 " + allRadios.find(r => r.id === c.id.replace('card-','')).name;
+            });
+            
+            const activeCard = document.getElementById('card-' + id);
+            activeCard.classList.add('active');
+            activeCard.querySelector('.radio-name').innerHTML = "📡 " + radio.name;
+            
+            document.getElementById('player-bar').classList.remove('hidden');
+        }
+
+        function changeRadio(dir) {
+            let next = currentIndex + dir;
+            if(next >= currentList.length) next = 0;
+            if(next < 0) next = currentList.length - 1;
+            playRadio(currentList[next]);
+        }
+
+        function stopRadio() {
+            player.pause();
+            player.src = "";
+            document.querySelectorAll('.radio-card').forEach(c => {
+                c.classList.remove('active');
+                const original = allRadios.find(r => r.id === c.id.replace('card-',''));
+                c.querySelector('.radio-name').innerHTML = "📻 " + original.name;
+            });
+            document.getElementById('player-bar').classList.add('hidden');
+        }
+
         function nextStep() { document.getElementById('step-2').classList.remove('hidden'); }
-        
         function saveRadio() {
             const n = document.getElementById('new-name').value;
             const u = document.getElementById('new-url').value;
-            if(!n || !u) return alert("Preencha tudo!");
             if(editingKey) {
                 db.ref('radios/' + editingKey).update({ name: n, url: u });
                 editingKey = null;
-                document.getElementById('btn-save-adm').innerText = "SALVAR";
             } else {
                 const c = `rgb(${Math.random()*50+200},${Math.random()*50+200},${Math.random()*50+200})`;
                 db.ref('radios').push({ name: n, url: u, color: c });
@@ -271,7 +314,6 @@
             document.getElementById('new-name').value = radio.name;
             document.getElementById('new-url').value = radio.url;
             editingKey = id;
-            document.getElementById('btn-save-adm').innerText = "ATUALIZAR";
             document.getElementById('step-2').classList.remove('hidden');
         }
 
@@ -281,9 +323,9 @@
         function monitorUsers() {
             db.ref('usuarios').on('value', (snap) => {
                 const users = snap.val();
-                const display = document.getElementById('user-list-display');
+                const display = document.getElementById('user-monitor');
                 if(users) {
-                    display.innerHTML = `<div style="font-size:7px; color:#555">USUÁRIOS CADASTRADOS</div>`;
+                    display.innerHTML = `<div style="font-size:7px; color:#555">USUÁRIOS ONLINE</div>`;
                     Object.keys(users).forEach(u => { display.innerHTML += `<span class="user-tag">${u}</span>`; });
                 }
             });
@@ -295,18 +337,11 @@
                 document.getElementById('display-city').innerText = l.city.toUpperCase();
                 fetch(`https://api.open-meteo.com/v1/forecast?latitude=${l.latitude}&longitude=${l.longitude}&current_weather=true`)
                 .then(r=>r.json()).then(w => { 
-                    const temp = Math.round(w.current_weather.temperature);
                     const code = w.current_weather.weathercode;
-                    document.getElementById('display-temp').innerText = temp + "°C";
-                    
-                    let icon = "☀️";
-                    let desc = "Céu Limpo";
-
-                    if(code >= 1 && code <= 3) { icon = "⛅"; desc = "Parcial. Nublado"; }
-                    else if(code >= 45 && code <= 48) { icon = "☁️"; desc = "Nevoeiro"; }
-                    else if(code >= 51 && code <= 67) { icon = "🌧️"; desc = "Garoa / Chuva"; }
-                    else if(code >= 71 && code <= 99) { icon = "⛈️"; desc = "Chuva Forte / Raio"; }
-
+                    document.getElementById('display-temp').innerText = Math.round(w.current_weather.temperature) + "°C";
+                    let icon = "☀️"; let desc = "Céu Limpo";
+                    if(code >= 1 && code <= 3) { icon = "⛅"; desc = "Nublado"; }
+                    else if(code >= 51) { icon = "🌧️"; desc = "Chuva"; }
                     document.getElementById('weather-img').innerText = icon;
                     document.getElementById('display-rain').innerText = desc;
                 });
