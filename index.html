@@ -8,7 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <style>
-        :root { --primary: #1DB954; --dark: #121212; --panel: #1e1e1e; }
+        :root { --primary: #1DB954; --dark: #121212; --panel: #1e1e1e; --offline: #a333ff; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
         
         .auth-card { background: var(--panel); padding: 30px; border-radius: 16px; text-align: center; width: 350px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
@@ -44,11 +44,12 @@
         .weather-icon { font-size: 18px; }
         .info-val { color: var(--primary); font-weight: bold; font-size: 11px; }
         
-        /* MONITOR ADM */
-        #user-monitor { background: #000; padding: 8px; border-top: 1px solid #222; max-height: 80px; overflow-y: auto; text-align: center; }
-        .monitor-row { background: #1a1a1a; margin: 4px 0; padding: 4px; border-radius: 4px; font-size: 9px; border-left: 3px solid var(--primary); display: flex; justify-content: space-between; align-items: center; }
-        .user-tag { color: var(--primary); font-weight: bold; margin-right: 5px; }
-        .status-tag { color: #888; font-style: italic; }
+        /* MONITOR ADM EXPANSÍVEL */
+        #user-monitor { background: #000; padding: 8px; border-top: 1px solid #222; max-height: 100px; overflow-y: auto; text-align: center; }
+        .monitor-row { background: #1a1a1a; margin: 4px 0; border-radius: 4px; font-size: 9px; display: flex; flex-direction: column; cursor: pointer; border-left: 3px solid transparent; }
+        .row-main { display: flex; justify-content: space-between; align-items: center; padding: 4px; }
+        .row-details { background: #0c0c0c; padding: 5px; text-align: left; display: none; border-top: 1px solid #222; color: #bbb; }
+        .row-details.show { display: block; }
 
         .hidden { display: none; }
         .selection-item { background: #1a1a1a; padding: 10px; margin-bottom: 5px; border-radius: 5px; display: flex; justify-content: space-between; grid-column: span 2; font-size: 12px; align-items: center; }
@@ -160,7 +161,7 @@
             const n = document.getElementById('reg-name').value;
             const p = document.getElementById('reg-pass').value;
             if(p !== document.getElementById('reg-confirm').value) return alert("Senhas não batem!");
-            db.ref('usuarios/' + n.toUpperCase()).set({ nome: n, senha: p, lista: "", ouvindo: "Nada" }).then(() => {
+            db.ref('usuarios/' + n.toUpperCase()).set({ nome: n, senha: p, lista: "", ouvindo: "Nada", inicio: 0, totalTempo: 0 }).then(() => {
                 alert("Cadastrado!");
                 showScreen('login-screen');
             });
@@ -203,9 +204,7 @@
                         currentList = savedList.split(',');
                         renderPlayer(currentList);
                         document.getElementById('edit-list-btn').classList.remove('hidden');
-                    } else {
-                        renderSelection();
-                    }
+                    } else { renderSelection(); }
                 }
             });
         }
@@ -226,8 +225,8 @@
             const selected = Array.from(document.querySelectorAll('.r-check:checked')).map(c => c.value);
             currentList = selected;
             db.ref('usuarios/' + currentUser).update({ lista: selected.join(',') }).then(() => {
-                document.getElementById('selection-zone').classList.remove('active-edit');
-                document.getElementById('selection-zone').classList.add('hidden');
+                const sz = document.getElementById('selection-zone');
+                sz.classList.remove('active-edit'); sz.classList.add('hidden');
                 document.getElementById('edit-list-btn').classList.remove('hidden');
                 renderPlayer(selected);
             });
@@ -241,21 +240,16 @@
                 const r = allRadios.find(rad => rad.id === id);
                 if(r) {
                     const card = document.createElement('div');
-                    card.className = "radio-card";
-                    card.id = "card-" + r.id;
-                    card.setAttribute('data-id', r.id);
-                    card.style.backgroundColor = r.color;
-                    card.innerHTML = `
-                        <div class="admin-btns">
-                            ${isAdmin ? `<button class="btn-tool" onclick="editR('${r.id}')">✎</button>` : ''}
-                            ${isAdmin ? `<button class="btn-tool" onclick="deleteR('${r.id}')">X</button>` : ''}
-                        </div>
-                        <div class="radio-name">📻 ${r.name}</div>`;
+                    card.className = "radio-card"; card.id = "card-" + r.id;
+                    card.setAttribute('data-id', r.id); card.style.backgroundColor = r.color;
+                    card.innerHTML = `<div class="admin-btns">
+                        ${isAdmin ? `<button class="btn-tool" onclick="editR('${r.id}')">✎</button>` : ''}
+                        ${isAdmin ? `<button class="btn-tool" onclick="deleteR('${r.id}')">X</button>` : ''}
+                    </div><div class="radio-name">📻 ${r.name}</div>`;
                     card.onclick = (e) => { if(e.target.tagName !== 'BUTTON') playRadio(r.id); };
                     container.appendChild(card);
                 }
             });
-
             new Sortable(container, {
                 animation: 150,
                 onEnd: function() {
@@ -266,6 +260,15 @@
             });
         }
 
+        function formatDuration(ms) {
+            if(!ms || ms < 0) return "0s";
+            const totalSeconds = Math.floor(ms / 1000);
+            const h = Math.floor(totalSeconds / 3600);
+            const m = Math.floor((totalSeconds % 3600) / 60);
+            const s = totalSeconds % 60;
+            return (h > 0 ? h + "h " : "") + (m > 0 ? m + "m " : "") + s + "s";
+        }
+
         function playRadio(id) {
             const radio = allRadios.find(r => r.id === id);
             if(!radio) return;
@@ -273,8 +276,10 @@
             player.src = radio.url;
             player.play();
             
-            // Avisa ao banco o que está ouvindo
-            if(currentUser) db.ref('usuarios/' + currentUser).update({ ouvindo: radio.name });
+            if(currentUser) {
+                const now = Date.now();
+                db.ref('usuarios/' + currentUser).update({ ouvindo: radio.name, inicio: now });
+            }
 
             document.querySelectorAll('.radio-card').forEach(c => {
                 c.classList.remove('active');
@@ -282,19 +287,22 @@
                 const rdata = allRadios.find(x => x.id === rid);
                 if(rdata) c.querySelector('.radio-name').innerHTML = "📻 " + rdata.name;
             });
-            
             const activeCard = document.getElementById('card-' + id);
-            if(activeCard) {
-                activeCard.classList.add('active');
-                activeCard.querySelector('.radio-name').innerHTML = "📡 " + radio.name;
-            }
+            if(activeCard) { activeCard.classList.add('active'); activeCard.querySelector('.radio-name').innerHTML = "📡 " + radio.name; }
             document.getElementById('player-bar').classList.remove('hidden');
         }
 
         function stopRadio() {
             player.pause();
             player.src = "";
-            if(currentUser) db.ref('usuarios/' + currentUser).update({ ouvindo: "Nada" });
+            if(currentUser) {
+                db.ref('usuarios/' + currentUser).once('value', (snap) => {
+                    const data = snap.val();
+                    const sessao = data.inicio > 0 ? (Date.now() - data.inicio) : 0;
+                    const novoTotal = (data.totalTempo || 0) + sessao;
+                    db.ref('usuarios/' + currentUser).update({ ouvindo: "Nada", inicio: 0, totalTempo: novoTotal });
+                });
+            }
             document.querySelectorAll('.radio-card').forEach(c => {
                 c.classList.remove('active');
                 const rid = c.getAttribute('data-id');
@@ -306,8 +314,7 @@
 
         function changeRadio(dir) {
             let next = currentIndex + dir;
-            if(next >= currentList.length) next = 0;
-            if(next < 0) next = currentList.length - 1;
+            if(next >= currentList.length) next = 0; if(next < 0) next = currentList.length - 1;
             playRadio(currentList[next]);
         }
 
@@ -316,14 +323,29 @@
                 const users = snap.val();
                 const display = document.getElementById('user-monitor');
                 if(users) {
-                    display.innerHTML = `<div style="font-size:8px; color:var(--primary); margin-bottom:5px; font-weight:bold">MONITORAMENTO EM TEMPO REAL</div>`;
+                    display.innerHTML = `<div style="font-size:8px; color:var(--primary); margin-bottom:5px; font-weight:bold">MONITORAMENTO</div>`;
                     Object.keys(users).forEach(u => {
                         const info = users[u];
-                        const statusColor = info.ouvindo !== "Nada" ? "#1DB954" : "#555";
+                        const isOnline = info.ouvindo !== "Nada";
+                        const currentColor = isOnline ? "var(--primary)" : "var(--offline)";
+                        const currentStatus = isOnline ? "🎧 " + info.ouvindo : "OFF LINE";
+                        
+                        // Cálculo do tempo em tempo real se estiver online
+                        let tempoSessao = info.totalTempo || 0;
+                        if(isOnline && info.inicio > 0) {
+                            tempoSessao += (Date.now() - info.inicio);
+                        }
+
                         display.innerHTML += `
-                            <div class="monitor-row" style="border-left-color: ${statusColor}">
-                                <div><span class="user-tag">${info.nome}</span></div>
-                                <div class="status-tag">${info.ouvindo !== "Nada" ? "🎧 " + info.ouvindo : "Offline"}</div>
+                            <div class="monitor-row" style="border-left-color: ${currentColor}" onclick="this.querySelector('.row-details').classList.toggle('show')">
+                                <div class="row-main">
+                                    <span style="color:${currentColor}; font-weight:bold">${info.nome}</span>
+                                    <span style="color:${currentColor}">${currentStatus}</span>
+                                </div>
+                                <div class="row-details">
+                                    ⏱️ Tempo total conectado: <b>${formatDuration(tempoSessao)}</b><br>
+                                    👤 Usuário ID: ${u}
+                                </div>
                             </div>`;
                     });
                 }
