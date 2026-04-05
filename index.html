@@ -24,8 +24,8 @@
         .tablet-header { background: var(--primary); padding: 8px 15px; font-size: 11px; color: #000; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
         
         .stations-grid { flex: 1; overflow-y: auto; padding: 15px; background: #0a0a0a; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-content: start; }
-        .radio-card { padding: 15px 5px; border-radius: 8px; text-align: center; color: #000; font-weight: bold; cursor: grab; font-size: 12px; position: relative; border: 2px solid transparent; transition: 0.2s; display: flex; align-items: center; justify-content: center; min-height: 50px; user-select: none; }
-        .radio-card.active { border: 2px solid #fff; box-shadow: 0 0 15px var(--primary); color: var(--primary) !important; background: #000 !important; transform: scale(1.02); }
+        .radio-card { padding: 15px 5px; border-radius: 8px; text-align: center; color: #000; font-weight: bold; cursor: grab; font-size: 12px; position: relative; border: 2px solid transparent; transition: 0.2s; display: flex; align-items: center; justify-content: center; min-height: 50px; user-select: none; touch-action: none; }
+        .radio-card:active { cursor: grabbing; }
 
         .btn-edit-small { position: absolute; top: 2px; left: 2px; font-size: 9px; background: rgba(0,0,0,0.4); border: none; cursor: pointer; padding: 2px 5px; border-radius: 3px; color: white; }
         .btn-del-small { position: absolute; top: 2px; right: 2px; font-size: 9px; background: rgba(255,0,0,0.4); border: none; cursor: pointer; padding: 2px 5px; border-radius: 3px; color: white; }
@@ -40,9 +40,9 @@
         .info-item-side { font-size: 10px; }
         
         #user-monitor { background: #000; padding: 8px; border-top: 1px solid #222; max-height: 130px; overflow-y: auto; text-align: center; }
-        .monitor-row { background: #1a1a1a; margin: 4px 0; border-radius: 4px; font-size: 9px; display: flex; flex-direction: column; cursor: pointer; border-left: 3px solid transparent; transition: 0.2s; }
+        .monitor-row { background: #1a1a1a; margin: 4px 0; border-radius: 4px; font-size: 9px; display: flex; flex-direction: column; cursor: pointer; border-left: 3px solid transparent; }
         .row-main { display: flex; justify-content: space-between; align-items: center; padding: 6px; }
-        .row-details { background: #0c0c0c; padding: 8px; text-align: left; display: none; border-top: 1px solid #222; color: #bbb; line-height: 1.4; }
+        .row-details { background: #0c0c0c; padding: 8px; text-align: left; display: none; border-top: 1px solid #222; color: #bbb; }
         .row-details.show { display: block; }
         .hidden { display: none; }
         .selection-item { background: #1a1a1a; padding: 10px; margin-bottom: 5px; border-radius: 5px; display: flex; justify-content: space-between; grid-column: span 2; font-size: 12px; align-items: center; }
@@ -71,12 +71,12 @@
     <div id="forgot-screen" class="auth-card hidden">
         <h1>RECUPERAR ACESSO</h1>
         <div id="forgot-step1">
-            <div class="input-group"><label>Nome de Usuário</label><input type="text" id="forgot-name" onkeydown="if(event.key==='Enter') verifyRecovery()"></div>
-            <div class="input-group"><label>Email Cadastrado</label><input type="email" id="forgot-email" onkeydown="if(event.key==='Enter') verifyRecovery()"></div>
+            <div class="input-group"><label>Usuário</label><input type="text" id="forgot-name"></div>
+            <div class="input-group"><label>Email</label><input type="email" id="forgot-email"></div>
             <button class="btn-main" onclick="verifyRecovery()">VERIFICAR</button>
         </div>
         <div id="forgot-step2" class="hidden">
-            <div class="input-group"><label>Nova Senha</label><input type="password" id="forgot-new-pass" onkeydown="if(event.key==='Enter') updatePassword()"></div>
+            <div class="input-group"><label>Nova Senha</label><input type="password" id="forgot-new-pass"></div>
             <button class="btn-main" style="background:orange" onclick="updatePassword()">ALTERAR SENHA</button>
         </div>
         <span class="link-auth" onclick="showScreen('login-screen')">Cancelar</span>
@@ -89,15 +89,14 @@
                 
                 <div id="adm-zone" class="admin-only hidden">
                     <input type="text" id="new-name" placeholder="Nome da Rádio" style="width:60%; padding:5px">
-                    <button onclick="nextStep()" style="padding:5px">Editar/Add</button>
+                    <button onclick="nextStep()" style="padding:5px">Próximo</button>
                     <div id="step-2" class="hidden" style="margin-top:5px">
                         <input type="text" id="new-url" placeholder="Link Stream" style="width:60%; padding:5px">
-                        <button onclick="saveRadio()" id="btn-save-adm" style="background:orange; color:black;">SALVAR</button>
+                        <button onclick="saveRadio()" style="background:orange; color:black;">SALVAR</button>
                     </div>
                 </div>
 
                 <div id="selection-zone" class="stations-grid hidden">
-                    <p style="grid-column:span 2; font-size:10px; text-align:center">Selecione suas rádios favoritas:</p>
                     <div id="list-to-select" style="grid-column:span 2"></div>
                     <button class="btn-main" onclick="saveUserList()">SALVAR MINHA LISTA</button>
                 </div>
@@ -145,8 +144,7 @@
         
         let allRadios = []; let currentList = []; let currentIndex = -1;
         let currentUser = ""; let isAdmin = false; let editingKey = null;
-        let timerRealtime = null;
-        let openUserDetail = null;
+        let timerRealtime = null; let openUserDetail = null;
 
         function showScreen(id) {
             document.querySelectorAll('.auth-card').forEach(s => s.classList.add('hidden'));
@@ -173,13 +171,13 @@
             db.ref('usuarios/' + n).once('value', snap => {
                 const d = snap.val();
                 if(d && d.email === e) { document.getElementById('forgot-step1').classList.add('hidden'); document.getElementById('forgot-step2').classList.remove('hidden'); currentUser = n; }
-                else alert("Erro!");
+                else alert("Dados não conferem!");
             });
         }
 
         function updatePassword() {
             const p = document.getElementById('forgot-new-pass').value;
-            db.ref('usuarios/' + currentUser).update({ senha: p }).then(() => { alert("Ok!"); location.reload(); });
+            db.ref('usuarios/' + currentUser).update({ senha: p }).then(() => { alert("Alterada!"); location.reload(); });
         }
 
         function handleLogin() {
@@ -190,7 +188,7 @@
                 const data = snap.val();
                 if(data && data.senha === p) { currentUser = u; enterDashboard(data.nome, data.lista); 
                 setInterval(() => db.ref('usuarios/'+currentUser).update({lastSeen: Date.now()}), 10000);
-                } else alert("Negado!");
+                } else alert("Erro!");
             });
         }
 
@@ -200,20 +198,25 @@
             document.getElementById('user-display').innerText = name.toUpperCase();
             startWeather();
             
-            // Reativar Movimentação (Drag and Drop)
+            // Ativar ARRASTAR (Sortable)
             new Sortable(document.getElementById('my-final-list'), {
-                animation: 150,
+                animation: 200,
                 onEnd: () => {
-                    const ids = Array.from(document.querySelectorAll('.radio-card')).map(c => c.id.replace('card-', ''));
+                    const ids = Array.from(document.querySelectorAll('.radio-card')).map(c => c.getAttribute('data-id'));
                     currentList = ids;
                     if(!isAdmin && currentUser) db.ref('usuarios/'+currentUser).update({ lista: ids.join(',') });
+                    // Se for ADM, opcionalmente você pode salvar a ordem global aqui
                 }
             });
 
             db.ref('radios').on('value', snap => {
                 const data = snap.val(); allRadios = data ? Object.keys(data).map(k => ({id:k, ...data[k]})) : [];
-                if(isAdmin) { currentList = allRadios.map(r=>r.id); renderPlayer(currentList); document.getElementById('adm-zone').classList.remove('hidden'); document.getElementById('user-monitor').classList.remove('hidden'); }
-                else {
+                if(isAdmin) { 
+                    currentList = allRadios.map(r=>r.id); 
+                    renderPlayer(currentList); 
+                    document.getElementById('adm-zone').classList.remove('hidden'); 
+                    document.getElementById('user-monitor').classList.remove('hidden'); 
+                } else {
                     if(savedList) { currentList = savedList.split(','); renderPlayer(currentList); document.getElementById('btn-edit-list').classList.remove('hidden'); }
                     else { renderSelection(); }
                 }
@@ -234,7 +237,7 @@
 
         function saveUserList() {
             const selected = Array.from(document.querySelectorAll('.radio-sel:checked')).map(cb => cb.value);
-            if(selected.length === 0) return alert("Selecione ao menos uma!");
+            if(selected.length === 0) return alert("Selecione uma!");
             currentList = selected;
             db.ref('usuarios/' + currentUser).update({ lista: selected.join(',') }).then(() => {
                 document.getElementById('selection-zone').classList.add('hidden');
@@ -249,7 +252,9 @@
             ids.forEach(id => {
                 const r = allRadios.find(rad => rad.id === id);
                 if(r) {
-                    const card = document.createElement('div'); card.className = "radio-card"; card.id = "card-"+r.id; card.style.backgroundColor = r.color;
+                    const card = document.createElement('div'); card.className = "radio-card"; card.id = "card-"+r.id; 
+                    card.setAttribute('data-id', r.id);
+                    card.style.backgroundColor = r.color;
                     card.innerHTML = `${isAdmin ? `<button class="btn-edit-small" onclick="editR('${r.id}')">✎</button><button class="btn-del-small" onclick="deleteR('${r.id}')">X</button>` : ''}<b>${r.name}</b>`;
                     card.onclick = (e) => { if(e.target.tagName !== 'BUTTON') playRadio(r.id); }; container.appendChild(card);
                 }
@@ -277,24 +282,17 @@
             db.ref('usuarios').on('value', snap => {
                 const users = snap.val(); const display = document.getElementById('user-monitor');
                 if(users) {
-                    display.innerHTML = `<p style='font-size:9px; color:#555'>CONTROLE DE OUVINTES</p>`;
+                    display.innerHTML = `<p style='font-size:9px; color:#555'>MONITORAMENTO</p>`;
                     Object.keys(users).forEach(u => {
                         const info = users[u]; 
                         const isOnline = (info.ouvindo !== "Nada") && (Date.now() - (info.lastSeen || 0) < 30000);
                         const color = isOnline ? "var(--primary)" : "var(--offline)";
                         const detailClass = (openUserDetail === u) ? "show" : "";
-                        
                         display.innerHTML += `
                         <div class="monitor-row" style="border-left-color: ${color}" onclick="toggleDetail('${u}')">
-                            <div class="row-main">
-                                <span style="color:${color}">${info.nome}</span>
-                                <span style="color:${color}">${isOnline ? '🎧 '+info.ouvindo : 'OFF'}</span>
-                            </div>
+                            <div class="row-main"><span style="color:${color}">${info.nome}</span><span style="color:${color}">${isOnline ? '🎧 '+info.ouvindo : 'OFF'}</span></div>
                             <div id="detail-${u}" class="row-details ${detailClass}">
-                                📻 <b>Rádio Atual:</b> ${isOnline ? info.ouvindo : 'Nenhuma'}<br>
-                                ⏱️ <b>Acumulado:</b> ${formatDuration(info.totalTempo)}<br>
-                                ⏳ <b>Sessão:</b> ${formatDuration(info.ultimoTempo)}<br>
-                                📅 <b>Última Rádio:</b> ${info.ultimaRadio || '-'}
+                                Rádio: ${isOnline ? info.ouvindo : '---'}<br>Total: ${formatDuration(info.totalTempo)}<br>Sessão: ${formatDuration(info.ultimoTempo)}
                             </div>
                         </div>`;
                     });
@@ -302,13 +300,9 @@
             });
         }
 
-        function toggleDetail(u) {
-            if(openUserDetail === u) openUserDetail = null;
-            else openUserDetail = u;
-            // A atualização do monitorUsers() pelo Firebase cuidará de renderizar a classe 'show'
-        }
+        function toggleDetail(u) { openUserDetail = (openUserDetail === u) ? null : u; }
 
-        function formatDuration(ms) { if(!ms) return "0s"; const s = Math.floor(ms/1000); const m = Math.floor(s/60); const h = Math.floor(m/60); return (h>0?h+"h ":"")+(m%60>0?m%60+"m ":"")+s%60+"s"; }
+        function formatDuration(ms) { if(!ms) return "0s"; const s = Math.floor(ms/1000); const m = Math.floor(s/60); return (m>0?m+"m ":"")+s%60+"s"; }
         function changeRadio(dir) { let n = currentIndex + dir; if(n >= currentList.length) n = 0; if(n < 0) n = currentList.length - 1; playRadio(currentList[n]); }
         function nextStep() { document.getElementById('step-2').classList.remove('hidden'); }
         function saveRadio() {
