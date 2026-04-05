@@ -17,6 +17,10 @@
         input { width: 100%; padding: 12px; margin-top: 5px; border-radius: 6px; border: 1px solid #333; background: #2a2a2a; color: white; box-sizing: border-box; outline: none; transition: 0.3s; }
         input:focus { border-color: var(--primary); }
         .btn-main { width: 100%; padding: 14px; border: none; border-radius: 25px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        
+        .login-footer { margin-top: 20px; display: flex; justify-content: space-between; font-size: 12px; }
+        .login-footer a { color: #b3b3b3; text-decoration: none; cursor: pointer; }
+        .login-footer a:hover { color: var(--primary); }
 
         /* PAINEL PRINCIPAL */
         #main-panel { display: none; flex-direction: column; align-items: center; width: 100%; }
@@ -31,23 +35,14 @@
         
         .stations-grid { flex: 1; overflow-y: auto; padding: 20px 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: #0a0a0a; align-content: start; }
         
-        .radio-card { 
-            padding: 15px 10px; border-radius: 8px; position: relative; text-align: center; 
-            border: 2px solid transparent; cursor: grab; 
-            transition: transform 0.3s ease, border 0.3s ease;
-            color: #000; 
-            transform: scale(1.0);
-        }
+        .radio-card { padding: 15px 10px; border-radius: 8px; position: relative; text-align: center; border: 2px solid transparent; cursor: grab; transition: 0.3s; color: #000; }
+        .radio-card.active { transform: scale(1.05); border: 2px solid var(--primary); z-index: 5; }
         
-        .radio-card.active { 
-            transform: scale(1.1); 
-            border: 2px solid var(--primary); 
-            z-index: 5; 
-        }
+        .card-actions { position: absolute; top: 5px; right: 5px; display: flex; gap: 5px; }
+        .btn-card { background: rgba(255,255,255,0.7); border: none; border-radius: 4px; cursor: pointer; font-size: 12px; padding: 2px 5px; }
 
-        /* BARRA DE CLIMA E DATA */
         .info-bar { background: #111; border-top: 1px solid #333; padding: 10px; display: flex; justify-content: space-around; align-items: center; font-size: 12px; color: #eee; }
-        .info-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        .info-item { display: flex; flex-direction: column; align-items: center; }
         .info-val { font-weight: bold; color: var(--primary); }
 
         .controls-bar { background: #181818; padding: 12px; display: flex; justify-content: center; gap: 20px; border-top: 1px solid #333; }
@@ -63,13 +58,18 @@
         <div class="logo-area"><h1>📻 OUVINDO RÁDIO</h1></div>
         <div class="input-group">
             <label>Usuário</label>
-            <input type="text" id="user-input" onkeydown="checkEnter(event)">
+            <input type="text" id="user-input" placeholder="Digite seu usuário">
         </div>
         <div class="input-group">
             <label>Senha</label>
-            <input type="password" id="pass-input" onkeydown="checkEnter(event)">
+            <input type="password" id="pass-input" placeholder="••••••••">
         </div>
         <button class="btn-main" onclick="handleLogin()">ENTRAR NO SISTEMA</button>
+        
+        <div class="login-footer">
+            <a onclick="alert('Sistema de recuperação em manutenção. Contate o ADM.')">Esqueci a senha</a>
+            <a onclick="alert('Novos cadastros estão suspensos temporariamente.')">Cadastrar</a>
+        </div>
     </div>
 
     <div id="main-panel">
@@ -83,7 +83,7 @@
                         <button class="btn-step" style="background:var(--primary); color:white" onclick="nextStep()">PRÓXIMO ➔</button>
                     </div>
                     <div id="step-2" class="hidden">
-                        <input type="text" id="new-url" placeholder="Link da rádio">
+                        <input type="text" id="new-url" placeholder="Link da rádio (streaming)">
                         <button id="btn-save" class="btn-step" style="background:#ff9800; color:white" onclick="addNewRadio()">SALVAR RÁDIO 📻</button>
                     </div>
                 </div>
@@ -130,15 +130,16 @@
             return `rgb(${r}, ${g}, ${b})`;
         }
 
-        let radioList = JSON.parse(localStorage.getItem('luigy_radios_v2')) || [
+        // --- RÁDIOS PADRÃO (Aparecem em qualquer lugar) ---
+        let defaultRadios = [
             { id: 1, name: "Antena 1", url: "https://stream.antena1.com.br/stream/1;", color: "#d1ffd6" },
             { id: 2, name: "Ouro Verde FM", url: "https://25533.live.streamtheworld.com/OUROVERDEFM_SC", color: "#ffd1d1" }
         ];
 
+        let radioList = JSON.parse(localStorage.getItem('luigy_radios_v2')) || defaultRadios;
         let currentIndex = -1;
         let editingIndex = -1;
 
-        // --- RELÓGIO E CLIMA ---
         function updateDateTime() {
             const now = new Date();
             document.getElementById('display-time').innerText = now.toLocaleTimeString('pt-BR');
@@ -151,25 +152,12 @@
                 const locRes = await fetch('https://ipapi.co/json/');
                 const locData = await locRes.json();
                 document.getElementById('display-city').innerText = locData.city.toUpperCase();
-
-                const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${locData.latitude}&longitude=${locData.longitude}&current_weather=true&minutely_15=precipitation`);
+                const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${locData.latitude}&longitude=${locData.longitude}&current_weather=true`);
                 const weatherData = await weatherRes.json();
-                
                 document.getElementById('display-temp').innerText = Math.round(weatherData.current_weather.temperature);
-                
-                let rain = weatherData.minutely_15 ? weatherData.minutely_15.precipitation[0] : 0;
-                let code = weatherData.current_weather.weathercode;
-
-                let icon = "☀️";
-                if (rain > 0) icon = "🌧️";
-                else if (code >= 1 && code <= 3) icon = "⛅";
-                else if (code > 3) icon = "☁️";
-                
-                document.getElementById('display-icon').innerText = icon;
             } catch (e) { console.log("Erro clima"); }
         }
 
-        // --- LÓGICA RÁDIOS ---
         new Sortable(grid, {
             animation: 150,
             onEnd: function() {
@@ -177,15 +165,12 @@
                 const newList = [];
                 cards.forEach(card => {
                     const id = card.getAttribute('data-id');
-                    const radio = radioList.find(r => r.id == id);
-                    newList.push(radio);
+                    newList.push(radioList.find(r => r.id == id));
                 });
                 radioList = newList;
                 localStorage.setItem('luigy_radios_v2', JSON.stringify(radioList));
             }
         });
-
-        function checkEnter(event) { if (event.key === "Enter") handleLogin(); }
 
         function handleLogin() {
             const user = document.getElementById('user-input').value.toUpperCase();
@@ -198,11 +183,7 @@
             } else { alert("Senha Incorreta!"); }
         }
 
-        function logout() {
-            stopRadio();
-            document.getElementById('main-panel').style.display = 'none';
-            document.getElementById('login-screen').style.display = 'block';
-        }
+        function logout() { location.reload(); }
 
         function nextStep() {
             if(!document.getElementById('new-name').value) return alert("Digite o nome!");
@@ -213,15 +194,39 @@
         function addNewRadio() {
             let name = document.getElementById('new-name').value;
             let url = document.getElementById('new-url').value;
+            
             if(editingIndex > -1) {
-                radioList[editingIndex] = { ...radioList[editingIndex], name, url };
+                radioList[editingIndex].name = name;
+                radioList[editingIndex].url = url;
                 editingIndex = -1;
+                document.getElementById('btn-save').innerText = "SALVAR RÁDIO 📻";
             } else {
                 radioList.push({ id: Date.now(), name, url, color: generateLightColor() });
             }
+            
             localStorage.setItem('luigy_radios_v2', JSON.stringify(radioList));
             renderGrid();
             resetForm();
+        }
+
+        // --- FUNÇÃO DO LÁPIS CONSERTADA ---
+        function editRadio(index) {
+            editingIndex = index;
+            const radio = radioList[index];
+            
+            // Preenche os campos
+            document.getElementById('new-name').value = radio.name;
+            document.getElementById('new-url').value = radio.url;
+            
+            // Muda o texto do botão
+            document.getElementById('btn-save').innerText = "ATUALIZAR RÁDIO 🔄";
+            
+            // Volta para o primeiro passo para o usuário ver
+            document.getElementById('step-1').classList.remove('hidden');
+            document.getElementById('step-2').classList.add('hidden');
+            
+            status.innerText = "Editando: " + radio.name;
+            window.scrollTo(0,0); // Sobe a tela no celular
         }
 
         function resetForm() {
