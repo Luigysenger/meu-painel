@@ -3,43 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OUVINDO RÁDIO - Painel Pro Luigy</title>
+    <title>OUVINDO RÁDIO - Painel ADM</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
         :root { --primary: #1DB954; --dark: #121212; --panel: #1e1e1e; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
         
-        /* TELA DE LOGIN PROFISSIONAL */
-        #login-screen { background: var(--panel); padding: 40px; border-radius: 16px; text-align: center; width: 350px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .logo-area h1 { color: var(--primary); margin-bottom: 20px; font-size: 28px; }
+        /* TELA DE LOGIN LIMPA */
+        #login-screen { background: var(--panel); padding: 40px; border-radius: 16px; text-align: center; width: 320px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .logo-area h1 { color: var(--primary); margin-bottom: 25px; font-size: 26px; letter-spacing: 1px; }
         .input-group { text-align: left; margin-bottom: 15px; }
-        label { font-size: 12px; color: #b3b3b3; text-transform: uppercase; }
-        input { width: 100%; padding: 12px; margin-top: 5px; border-radius: 6px; border: 1px solid #333; background: #2a2a2a; color: white; box-sizing: border-box; outline: none; }
-        .btn-main { width: 100%; padding: 14px; border: none; border-radius: 25px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
-        .btn-main:hover { background: #1ed760; }
+        label { font-size: 11px; color: #b3b3b3; text-transform: uppercase; font-weight: bold; }
+        input { width: 100%; padding: 12px; margin-top: 5px; border-radius: 6px; border: 1px solid #333; background: #2a2a2a; color: white; box-sizing: border-box; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--primary); }
+        .btn-main { width: 100%; padding: 14px; border: none; border-radius: 25px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 15px; font-size: 14px; }
+        .btn-main:hover { background: #1ed760; transform: scale(1.02); }
 
         /* PAINEL PRINCIPAL */
         #main-panel { display: none; flex-direction: column; align-items: center; width: 100%; }
         .radio-container { position: relative; width: 850px; height: 550px; background: #333; border: 10px solid #444; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
-        
         .tablet-screen { position: absolute; top: 10%; left: 25%; width: 50%; height: 75%; background: #000; border-radius: 10px; display: flex; flex-direction: column; overflow: hidden; border: 4px solid #111; }
-        .tablet-header { background: var(--primary); padding: 8px; font-size: 11px; color: #000; font-weight: bold; display: flex; justify-content: space-between; align-items: center; padding: 5px 15px; }
-        
-        .creation-zone { background: #151515; padding: 10px; border-bottom: 1px solid #333; }
-        .stations-grid { flex: 1; overflow-y: auto; padding: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #0a0a0a; align-content: start; }
-        
-        .radio-card { padding: 15px 10px; border-radius: 8px; position: relative; text-align: center; cursor: pointer; color: #000; font-weight: bold; transition: 0.2s; }
-        .radio-card:active { transform: scale(0.95); }
-        .card-actions { position: absolute; top: 2px; right: 2px; }
-        .btn-del { background: rgba(0,0,0,0.2); border: none; cursor: pointer; font-size: 14px; border-radius: 50%; }
+        .tablet-header { background: var(--primary); padding: 8px 15px; font-size: 11px; color: #000; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        .btn-exit { background: #000; color: #fff; border: none; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 10px; }
 
-        .info-bar { background: #111; padding: 10px; display: flex; justify-content: space-around; font-size: 12px; border-top: 1px solid #333; }
-        .controls-bar { background: #181818; padding: 12px; display: flex; justify-content: center; gap: 20px; }
-        .ctrl-btn { background: none; border: none; color: white; font-size: 20px; cursor: pointer; }
+        .creation-zone { background: #151515; padding: 12px; border-bottom: 1px solid #333; }
+        .stations-grid { flex: 1; overflow-y: auto; padding: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #0a0a0a; align-content: start; }
+        .radio-card { padding: 15px 10px; border-radius: 8px; position: relative; text-align: center; cursor: pointer; color: #000; font-weight: bold; transition: 0.2s; font-size: 13px; }
+        .radio-card:hover { opacity: 0.9; }
+        .card-actions { position: absolute; top: 2px; right: 2px; }
+        .btn-del { background: rgba(0,0,0,0.15); border: none; cursor: pointer; font-size: 14px; color: #000; }
+
+        .info-bar { background: #111; padding: 10px; display: flex; justify-content: space-around; font-size: 11px; border-top: 1px solid #333; color: #888; }
+        .controls-bar { background: #181818; padding: 12px; display: flex; justify-content: center; gap: 20px; border-top: 1px solid #333; }
+        .ctrl-btn { background: none; border: none; color: white; font-size: 22px; cursor: pointer; opacity: 0.8; }
+        .ctrl-btn:hover { opacity: 1; }
         
         .hidden { display: none; }
-        #status-display { font-size: 11px; color: var(--primary); text-align: center; background: #000; padding: 4px; }
+        #status-display { font-size: 11px; color: var(--primary); text-align: center; background: #000; padding: 5px; min-height: 15px; }
     </style>
 </head>
 <body>
@@ -48,38 +49,41 @@
         <div class="logo-area"><h1>📻 LUIGY ADM</h1></div>
         <div class="input-group">
             <label>Usuário</label>
-            <input type="text" id="user-input" placeholder="Seu usuário">
+            <input type="text" id="user-input" spellcheck="false" autocomplete="off">
         </div>
         <div class="input-group">
             <label>Senha</label>
-            <input type="password" id="pass-input" placeholder="••••">
+            <input type="password" id="pass-input">
         </div>
-        <button class="btn-main" onclick="handleLogin()">ENTRAR NO PAINEL</button>
+        <button class="btn-main" onclick="handleLogin()">ACESSAR SISTEMA</button>
     </div>
 
     <div id="main-panel">
         <div class="radio-container">
             <div class="tablet-screen">
-                <div class="tablet-header"><span>SISTEMA CLOUD</span><button onclick="location.reload()" style="cursor:pointer">SAIR</button></div>
+                <div class="tablet-header">
+                    <span>PAINEL EM NUVEM</span>
+                    <button class="btn-exit" onclick="location.reload()">SAIR</button>
+                </div>
                 
                 <div class="creation-zone">
                     <div id="step-1">
                         <input type="text" id="new-name" placeholder="Nome da Rádio">
-                        <button onclick="nextStep()" style="width:100%; margin-top:5px; background:var(--primary); border:none; padding:8px; font-weight:bold; cursor:pointer">PRÓXIMO ➔</button>
+                        <button onclick="nextStep()" style="width:100%; margin-top:8px; background:var(--primary); border:none; padding:10px; font-weight:bold; cursor:pointer; border-radius:4px">PRÓXIMO ➔</button>
                     </div>
                     <div id="step-2" class="hidden">
-                        <input type="text" id="new-url" placeholder="Link de Streaming">
-                        <button onclick="saveToFirebase()" style="width:100%; margin-top:5px; background:orange; border:none; padding:8px; font-weight:bold; cursor:pointer">SALVAR NA NUVEM ☁️</button>
+                        <input type="text" id="new-url" placeholder="Link .mp3 ou Stream">
+                        <button onclick="saveToFirebase()" style="width:100%; margin-top:8px; background:orange; border:none; padding:10px; font-weight:bold; cursor:pointer; border-radius:4px">ADICIONAR RÁDIO ☁️</button>
                     </div>
                 </div>
 
                 <div class="stations-grid" id="stations-grid"></div>
 
-                <div id="status-display">Conectado ao Banco de Dados</div>
+                <div id="status-display">Sincronizado com Firebase</div>
                 
                 <div class="info-bar">
                     <div id="display-time">00:00:00</div>
-                    <div>ONLINE 🟢</div>
+                    <div style="color: var(--primary)">● SISTEMA ATIVO</div>
                 </div>
 
                 <div class="controls-bar">
@@ -94,7 +98,7 @@
     <audio id="audio-player"></audio>
 
     <script>
-        // CONFIGURAÇÃO DO SEU FIREBASE
+        // Suas chaves do Firebase (projeto: meu-painel-f2efe)
         const firebaseConfig = {
             apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
             authDomain: "meu-painel-f2efe.firebaseapp.com",
@@ -111,26 +115,24 @@
         let radioList = [];
         let currentIndex = -1;
 
-        // LOGIN
         function handleLogin() {
             const u = document.getElementById('user-input').value.toUpperCase();
             const p = document.getElementById('pass-input').value;
             if(u === "LUIGY" && p === "1045") {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-panel').style.display = 'flex';
-                startApp();
-            } else { alert("Acesso Negado!"); }
+                initApp();
+            } else { alert("Usuário ou Senha incorretos!"); }
         }
 
-        function startApp() {
-            loadRadios();
+        function initApp() {
+            loadFromCloud();
             setInterval(() => { 
                 document.getElementById('display-time').innerText = new Date().toLocaleTimeString(); 
             }, 1000);
         }
 
-        // BUSCAR RÁDIOS DA NUVEM (PARA TODOS OS APARELHOS)
-        function loadRadios() {
+        function loadFromCloud() {
             db.ref('radios').on('value', (snapshot) => {
                 const data = snapshot.val();
                 radioList = data ? Object.keys(data).map(key => ({key, ...data[key]})) : [];
@@ -138,7 +140,6 @@
             });
         }
 
-        // SALVAR NA NUVEM
         function saveToFirebase() {
             const name = document.getElementById('new-name').value;
             const url = document.getElementById('new-url').value;
@@ -147,7 +148,7 @@
             db.ref('radios').push({
                 name: name,
                 url: url,
-                color: `rgb(${Math.floor(Math.random()*56+200)},${Math.floor(Math.random()*56+200)},${Math.floor(Math.random()*56+200)})`
+                color: `rgb(${Math.floor(Math.random()*40+210)},${Math.floor(Math.random()*40+210)},${Math.floor(Math.random()*40+210)})`
             });
 
             document.getElementById('new-name').value = "";
@@ -168,26 +169,24 @@
                         <button class="btn-del" onclick="event.stopPropagation(); deleteRadio('${radio.key}')">×</button>
                     </div>
                     <div onclick="playRadio(${index})">
-                        <div style="font-size:12px">${radio.name}</div>
+                        ${radio.name}
                     </div>
                 `;
                 grid.appendChild(card);
             });
         }
 
-        function deleteRadio(key) { if(confirm("Excluir rádio?")) db.ref('radios/' + key).remove(); }
-
+        function deleteRadio(key) { if(confirm("Excluir esta rádio da nuvem?")) db.ref('radios/' + key).remove(); }
         function playRadio(index) {
             currentIndex = index;
             player.src = radioList[index].url;
             player.play();
-            document.getElementById('status-display').innerText = "Tocando: " + radioList[index].name;
+            document.getElementById('status-display').innerText = "Ouvindo: " + radioList[index].name;
         }
-
-        function stopRadio() { player.pause(); document.getElementById('status-display').innerText = "Parado"; }
+        function stopRadio() { player.pause(); document.getElementById('status-display').innerText = "Sinal Interrompido"; }
         function nextRadio() { if(radioList.length) playRadio((currentIndex+1)%radioList.length); }
         function prevRadio() { if(radioList.length) playRadio((currentIndex-1+radioList.length)%radioList.length); }
-        function nextStep() { document.getElementById('step-1').classList.add('hidden'); document.getElementById('step-2').classList.remove('hidden'); }
+        function nextStep() { if(document.getElementById('new-name').value) { document.getElementById('step-1').classList.add('hidden'); document.getElementById('step-2').classList.remove('hidden'); } }
     </script>
 </body>
 </html>
