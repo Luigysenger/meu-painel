@@ -25,17 +25,21 @@
         .radio-card { padding: 15px 5px; border-radius: 8px; text-align: center; color: #000; font-weight: bold; cursor: pointer; font-size: 12px; position: relative; border: 2px solid transparent; }
         .radio-card.active { border: 2px solid #fff; box-shadow: 0 0 10px var(--primary); transform: scale(1.05); }
 
-        /* BOTÕES ADM NO CARD */
         .admin-btns { position: absolute; top: 2px; right: 2px; display: flex; gap: 2px; }
         .btn-tool { font-size: 9px; background: rgba(0,0,0,0.3); border: none; cursor: pointer; padding: 2px 4px; border-radius: 3px; color: white; }
 
         .admin-only { background: #151515; padding: 10px; border-bottom: 1px solid #333; }
-        .info-bar { background: #111; padding: 8px; display: flex; flex-direction: column; font-size: 10px; border-top: 1px solid #333; }
-        .info-row { display: flex; justify-content: space-around; width: 100%; padding-bottom: 5px; align-items: center; }
-        .info-val { color: var(--primary); font-weight: bold; }
         
-        #user-monitor { background: #000; padding: 8px; border-top: 1px solid #222; max-height: 50px; overflow-y: auto; text-align: center; }
-        .user-tag { display: inline-block; background: #222; padding: 2px 8px; border-radius: 10px; margin: 2px; color: var(--primary); font-size: 9px; border: 1px solid #333; }
+        /* BARRA INFERIOR REORGANIZADA */
+        .info-bar { background: #111; padding: 8px; border-top: 1px solid #333; }
+        .info-row { display: grid; grid-template-columns: 1fr 1fr 1fr; width: 100%; align-items: center; text-align: center; }
+        .info-item-side { font-size: 10px; }
+        .info-item-center { display: flex; flex-direction: column; align-items: center; justify-content: center; border-left: 1px solid #222; border-right: 1px solid #222; }
+        .weather-icon { font-size: 20px; margin-bottom: -2px; }
+        .info-val { color: var(--primary); font-weight: bold; font-size: 11px; }
+        
+        #user-monitor { background: #000; padding: 5px; border-top: 1px solid #222; max-height: 45px; overflow-y: auto; text-align: center; }
+        .user-tag { display: inline-block; background: #222; padding: 1px 6px; border-radius: 10px; margin: 2px; color: var(--primary); font-size: 8px; border: 1px solid #333; }
 
         .hidden { display: none; }
         .selection-item { background: #1a1a1a; padding: 10px; margin-bottom: 5px; border-radius: 5px; display: flex; justify-content: space-between; grid-column: span 2; font-size: 12px; align-items: center; }
@@ -66,10 +70,10 @@
                 <div class="tablet-header"><span id="user-display">PAINEL</span> <button onclick="location.reload()">SAIR</button></div>
                 
                 <div id="adm-zone" class="admin-only hidden">
-                    <input type="text" id="new-name" placeholder="Nome da Rádio" style="width:70%; padding:5px">
+                    <input type="text" id="new-name" placeholder="Nome da Rádio" style="width:65%; padding:5px">
                     <button onclick="nextStep()" style="padding:5px">Editar/Add</button>
                     <div id="step-2" class="hidden" style="margin-top:5px">
-                        <input type="text" id="new-url" placeholder="Link Stream" style="width:70%; padding:5px">
+                        <input type="text" id="new-url" placeholder="Link Stream" style="width:65%; padding:5px">
                         <button onclick="saveRadio()" id="btn-save-adm" style="background:orange; color:black; font-weight:bold">SALVAR</button>
                     </div>
                 </div>
@@ -86,20 +90,26 @@
 
                 <div class="info-bar">
                     <div class="info-row">
-                        <div style="text-align:left">
-                            <span id="display-city" style="display:block">Buscando...</span>
-                            <span class="info-val" id="display-temp">--°C</span>
-                            <span id="display-rain" style="font-size:9px; margin-left:5px; color:#aaa">--</span>
+                        <div class="info-item-side">
+                            <span id="display-city" style="display:block; color:#888">BUSCANDO...</span>
+                            <div id="edit-list-btn" class="hidden" onclick="toggleEdit()" style="cursor:pointer;text-decoration:underline; color:var(--primary); font-size:9px">ALTERAR RÁDIOS</div>
                         </div>
-                        <div class="info-item">
-                            <span>Horário</span><br>
+
+                        <div class="info-item-center">
+                            <span id="weather-img" class="weather-icon">☀️</span>
+                            <div>
+                                <span class="info-val" id="display-temp">--°C</span>
+                                <span id="display-rain" style="font-size:8px; display:block; color:#aaa">Carregando...</span>
+                            </div>
+                        </div>
+
+                        <div class="info-item-side">
+                            <span style="color:#888">HORÁRIO</span><br>
                             <span class="info-val" id="display-time">00:00</span>
                         </div>
-                        <div id="edit-list-btn" class="hidden" onclick="toggleEdit()" style="cursor:pointer;text-decoration:underline">Editar Lista</div>
                     </div>
                     
                     <div id="user-monitor" class="hidden">
-                        <div style="font-size: 8px; color: #888;">USUÁRIOS: <span id="user-count" style="color:var(--primary)">0</span></div>
                         <div id="user-list-display"></div>
                     </div>
                 </div>
@@ -238,14 +248,12 @@
             });
         }
 
-        // --- FUNÇÕES EXCLUSIVAS ADM ---
         function nextStep() { document.getElementById('step-2').classList.remove('hidden'); }
         
         function saveRadio() {
             const n = document.getElementById('new-name').value;
             const u = document.getElementById('new-url').value;
-            if(!n || !u) return alert("Preencha nome e link!");
-            
+            if(!n || !u) return alert("Preencha tudo!");
             if(editingKey) {
                 db.ref('radios/' + editingKey).update({ name: n, url: u });
                 editingKey = null;
@@ -254,9 +262,7 @@
                 const c = `rgb(${Math.random()*50+200},${Math.random()*50+200},${Math.random()*50+200})`;
                 db.ref('radios').push({ name: n, url: u, color: c });
             }
-            
-            document.getElementById('new-name').value=""; 
-            document.getElementById('new-url').value="";
+            document.getElementById('new-name').value=""; document.getElementById('new-url').value="";
             document.getElementById('step-2').classList.add('hidden');
         }
 
@@ -267,12 +273,9 @@
             editingKey = id;
             document.getElementById('btn-save-adm').innerText = "ATUALIZAR";
             document.getElementById('step-2').classList.remove('hidden');
-            window.scrollTo(0,0);
         }
 
-        function deleteR(id) { if(confirm("Excluir esta rádio?")) db.ref('radios/'+id).remove(); }
-        // ------------------------------
-
+        function deleteR(id) { if(confirm("Excluir?")) db.ref('radios/'+id).remove(); }
         function toggleEdit() { renderSelection(); }
 
         function monitorUsers() {
@@ -280,16 +283,14 @@
                 const users = snap.val();
                 const display = document.getElementById('user-list-display');
                 if(users) {
-                    const list = Object.keys(users);
-                    document.getElementById('user-count').innerText = list.length;
-                    display.innerHTML = "";
-                    list.forEach(u => { display.innerHTML += `<span class="user-tag">${u}</span>`; });
+                    display.innerHTML = `<div style="font-size:7px; color:#555">USUÁRIOS CADASTRADOS</div>`;
+                    Object.keys(users).forEach(u => { display.innerHTML += `<span class="user-tag">${u}</span>`; });
                 }
             });
         }
 
         function startWeather() {
-            setInterval(() => { document.getElementById('display-time').innerText = new Date().toLocaleTimeString(); }, 1000);
+            setInterval(() => { document.getElementById('display-time').innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}); }, 1000);
             fetch('https://ipapi.co/json/').then(r=>r.json()).then(l => {
                 document.getElementById('display-city').innerText = l.city.toUpperCase();
                 fetch(`https://api.open-meteo.com/v1/forecast?latitude=${l.latitude}&longitude=${l.longitude}&current_weather=true`)
@@ -298,13 +299,16 @@
                     const code = w.current_weather.weathercode;
                     document.getElementById('display-temp').innerText = temp + "°C";
                     
-                    // Lógica de Chuva
-                    let rainStatus = "Céu Limpo";
-                    if(code > 0 && code <= 3) rainStatus = "Parcial. Nublado";
-                    if(code >= 45 && code <= 48) rainStatus = "Nevoeiro";
-                    if(code >= 51 && code <= 67) rainStatus = "Vai Chover (Garoa)";
-                    if(code >= 71 && code <= 99) rainStatus = "Cuidado: Chuva Forte";
-                    document.getElementById('display-rain').innerText = rainStatus;
+                    let icon = "☀️";
+                    let desc = "Céu Limpo";
+
+                    if(code >= 1 && code <= 3) { icon = "⛅"; desc = "Parcial. Nublado"; }
+                    else if(code >= 45 && code <= 48) { icon = "☁️"; desc = "Nevoeiro"; }
+                    else if(code >= 51 && code <= 67) { icon = "🌧️"; desc = "Garoa / Chuva"; }
+                    else if(code >= 71 && code <= 99) { icon = "⛈️"; desc = "Chuva Forte / Raio"; }
+
+                    document.getElementById('weather-img').innerText = icon;
+                    document.getElementById('display-rain').innerText = desc;
                 });
             });
         }
