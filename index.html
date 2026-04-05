@@ -16,6 +16,7 @@
         label { font-size: 11px; color: #b3b3b3; text-transform: uppercase; font-weight: bold; }
         input { width: 100%; padding: 12px; margin-top: 5px; border-radius: 6px; border: 1px solid #333; background: #2a2a2a; color: white; box-sizing: border-box; outline: none; }
         .btn-main { width: 100%; padding: 14px; border: none; border-radius: 25px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        .link-auth { font-size: 12px; color: var(--primary); cursor: pointer; display: block; margin-top: 10px; text-decoration: underline; }
         
         #main-panel { display: none; flex-direction: column; align-items: center; width: 100%; }
         .radio-container { position: relative; width: 850px; height: 620px; background: #333; border: 10px solid #444; border-radius: 20px; }
@@ -26,7 +27,6 @@
         .radio-card { padding: 15px 5px; border-radius: 8px; text-align: center; color: #000; font-weight: bold; cursor: grab; font-size: 12px; position: relative; border: 2px solid transparent; transition: 0.2s; display: flex; align-items: center; justify-content: center; min-height: 50px; }
         .radio-card.active { border: 2px solid #fff; box-shadow: 0 0 15px var(--primary); color: var(--primary) !important; background: #000 !important; transform: scale(1.02); }
 
-        /* AJUSTE DOS BOTÕES ADM NOS CANTOS */
         .btn-edit-small { position: absolute; top: 2px; left: 2px; font-size: 9px; background: rgba(0,0,0,0.4); border: none; cursor: pointer; padding: 2px 5px; border-radius: 3px; color: white; }
         .btn-del-small { position: absolute; top: 2px; right: 2px; font-size: 9px; background: rgba(255,0,0,0.4); border: none; cursor: pointer; padding: 2px 5px; border-radius: 3px; color: white; }
 
@@ -38,17 +38,13 @@
         .info-bar { background: #111; padding: 8px; border-top: 1px solid #333; }
         .info-row { display: grid; grid-template-columns: 1fr 1fr 1fr; width: 100%; align-items: center; text-align: center; }
         .info-item-side { font-size: 10px; }
-        .info-val { color: var(--primary); font-weight: bold; font-size: 11px; }
         
         #user-monitor { background: #000; padding: 8px; border-top: 1px solid #222; max-height: 100px; overflow-y: auto; text-align: center; }
         .monitor-row { background: #1a1a1a; margin: 4px 0; border-radius: 4px; font-size: 9px; display: flex; flex-direction: column; cursor: pointer; border-left: 3px solid transparent; }
         .row-main { display: flex; justify-content: space-between; align-items: center; padding: 4px; }
         .row-details { background: #0c0c0c; padding: 5px; text-align: left; display: none; border-top: 1px solid #222; color: #bbb; }
         .row-details.show { display: block; }
-        .btn-refresh { background: #333; color: #fff; border: 1px solid #555; padding: 2px 8px; font-size: 8px; cursor: pointer; border-radius: 4px; margin-bottom: 5px; }
-
         .hidden { display: none; }
-        .selection-item { background: #1a1a1a; padding: 10px; margin-bottom: 5px; border-radius: 5px; display: flex; justify-content: space-between; grid-column: span 2; font-size: 12px; align-items: center; }
     </style>
 </head>
 <body>
@@ -58,13 +54,37 @@
         <div class="input-group"><label>Usuário</label><input type="text" id="login-user"></div>
         <div class="input-group"><label>Senha</label><input type="password" id="login-pass"></div>
         <button class="btn-main" onclick="handleLogin()">ENTRAR</button>
+        <span class="link-auth" onclick="showScreen('register-screen')">Cadastrar Novo Usuário</span>
+        <span class="link-auth" onclick="showScreen('forgot-screen')">Esqueci minha Senha</span>
+    </div>
+
+    <div id="register-screen" class="auth-card hidden">
+        <h1>NOVO ACESSO</h1>
+        <div class="input-group"><label>Nome</label><input type="text" id="reg-name"></div>
+        <div class="input-group"><label>Email</label><input type="email" id="reg-email"></div>
+        <div class="input-group"><label>Senha</label><input type="password" id="reg-pass"></div>
+        <button class="btn-main" onclick="handleRegister()">CRIAR CONTA</button>
+        <span class="link-auth" onclick="showScreen('login-screen')">Voltar ao Login</span>
+    </div>
+
+    <div id="forgot-screen" class="auth-card hidden">
+        <h1>RECUPERAR ACESSO</h1>
+        <div id="forgot-step1">
+            <div class="input-group"><label>Nome de Usuário</label><input type="text" id="forgot-name"></div>
+            <div class="input-group"><label>Email Cadastrado</label><input type="email" id="forgot-email"></div>
+            <button class="btn-main" onclick="verifyRecovery()">VERIFICAR</button>
+        </div>
+        <div id="forgot-step2" class="hidden">
+            <div class="input-group"><label>Nova Senha</label><input type="password" id="forgot-new-pass"></div>
+            <button class="btn-main" style="background:orange" onclick="updatePassword()">ALTERAR SENHA</button>
+        </div>
+        <span class="link-auth" onclick="showScreen('login-screen')">Cancelar</span>
     </div>
 
     <div id="main-panel">
         <div class="radio-container">
             <div class="tablet-screen">
                 <div class="tablet-header"><span id="user-display">PAINEL</span> <button onclick="location.reload()">SAIR</button></div>
-                
                 <div id="adm-zone" class="admin-only hidden">
                     <input type="text" id="new-name" placeholder="Nome da Rádio" style="width:60%; padding:5px">
                     <button onclick="nextStep()" style="padding:5px">Editar/Add</button>
@@ -73,22 +93,12 @@
                         <button onclick="saveRadio()" id="btn-save-adm" style="background:orange; color:black;">SALVAR</button>
                     </div>
                 </div>
-
-                <div id="selection-zone" class="stations-grid hidden">
-                    <div id="list-to-select" style="grid-column:span 2"></div>
-                    <button class="btn-main" onclick="saveUserList()">CRIAR MINHA LISTA</button>
-                </div>
-
-                <div id="player-zone" class="stations-grid">
-                    <div id="my-final-list" style="display:contents"></div>
-                </div>
-
+                <div id="player-zone" class="stations-grid"><div id="my-final-list" style="display:contents"></div></div>
                 <div id="player-bar" class="player-controls hidden">
                     <button class="ctrl-btn" onclick="changeRadio(-1)">◀◀</button>
                     <button class="ctrl-btn stop-btn" onclick="stopRadio()">■</button>
                     <button class="ctrl-btn" onclick="changeRadio(1)">▶▶</button>
                 </div>
-
                 <div class="info-bar">
                     <div class="info-row">
                         <div class="info-item-side"><span id="display-city">...</span></div>
@@ -121,6 +131,52 @@
         let currentUser = ""; let isAdmin = false; let editingKey = null;
         let timerRealtime = null;
 
+        function showScreen(id) {
+            document.querySelectorAll('.auth-card').forEach(s => s.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function handleRegister() {
+            const n = document.getElementById('reg-name').value.toUpperCase();
+            const e = document.getElementById('reg-email').value;
+            const p = document.getElementById('reg-pass').value;
+            if(!n || !e || !p) return alert("Preencha tudo!");
+
+            // Verifica se o email já existe
+            db.ref('usuarios').once('value', snap => {
+                const users = snap.val();
+                let emailExiste = false;
+                if(users) {
+                    Object.values(users).forEach(u => { if(u.email === e) emailExiste = true; });
+                }
+                if(emailExiste) return alert("Este e-mail já está em uso por outro usuário!");
+
+                db.ref('usuarios/' + n).set({ nome: n, email: e, senha: p, lista: "", ouvindo: "Nada", totalTempo: 0 }).then(() => {
+                    alert("Conta criada!"); showScreen('login-screen');
+                });
+            });
+        }
+
+        function verifyRecovery() {
+            const n = document.getElementById('forgot-name').value.toUpperCase();
+            const e = document.getElementById('forgot-email').value;
+            db.ref('usuarios/' + n).once('value', snap => {
+                const d = snap.val();
+                if(d && d.email === e) {
+                    document.getElementById('forgot-step1').classList.add('hidden');
+                    document.getElementById('forgot-step2').classList.remove('hidden');
+                    currentUser = n;
+                } else alert("Dados não conferem!");
+            });
+        }
+
+        function updatePassword() {
+            const p = document.getElementById('forgot-new-pass').value;
+            db.ref('usuarios/' + currentUser).update({ senha: p }).then(() => {
+                alert("Senha alterada!"); location.reload();
+            });
+        }
+
         function handleLogin() {
             const u = document.getElementById('login-user').value.toUpperCase();
             const p = document.getElementById('login-pass').value;
@@ -129,19 +185,19 @@
                 const data = snap.val();
                 if(data && data.senha === p) { currentUser = u; enterDashboard(data.nome, data.lista); 
                 setInterval(() => db.ref('usuarios/'+currentUser).update({lastSeen: Date.now()}), 10000);
-                } else alert("Erro!");
+                } else alert("Acesso Negado!");
             });
         }
 
         function enterDashboard(name, savedList) {
-            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('main-panel').style.display = 'flex';
             document.getElementById('user-display').innerText = name.toUpperCase();
             startWeather();
             db.ref('radios').on('value', snap => {
                 const data = snap.val(); allRadios = data ? Object.keys(data).map(k => ({id:k, ...data[k]})) : [];
-                if(isAdmin) { currentList = allRadios.map(r=>r.id); renderPlayer(currentList); document.getElementById('adm-zone').classList.remove('hidden'); document.getElementById('user-monitor').classList.remove('hidden'); }
-                else { if(savedList) { currentList = savedList.split(','); renderPlayer(currentList); } else renderSelection(); }
+                currentList = allRadios.map(r=>r.id); renderPlayer(currentList);
+                if(isAdmin) { document.getElementById('adm-zone').classList.remove('hidden'); document.getElementById('user-monitor').classList.remove('hidden'); }
             });
         }
 
@@ -151,10 +207,7 @@
                 const r = allRadios.find(rad => rad.id === id);
                 if(r) {
                     const card = document.createElement('div'); card.className = "radio-card"; card.id = "card-"+r.id; card.style.backgroundColor = r.color;
-                    card.innerHTML = `
-                        ${isAdmin ? `<button class="btn-edit-small" onclick="editR('${r.id}')">✎</button>` : ''}
-                        ${isAdmin ? `<button class="btn-del-small" onclick="deleteR('${r.id}')">X</button>` : ''}
-                        <b>${r.name}</b>`;
+                    card.innerHTML = `${isAdmin ? `<button class="btn-edit-small" onclick="editR('${r.id}')">✎</button><button class="btn-del-small" onclick="deleteR('${r.id}')">X</button>` : ''}<b>${r.name}</b>`;
                     card.onclick = (e) => { if(e.target.tagName !== 'BUTTON') playRadio(r.id); }; container.appendChild(card);
                 }
             });
@@ -165,62 +218,34 @@
             if(timerRealtime) clearInterval(timerRealtime);
             player.src = radio.url; player.play(); currentIndex = currentList.indexOf(id);
             document.getElementById('player-bar').classList.remove('hidden');
-            
             if(currentUser) {
-                const inicio = Date.now();
-                db.ref('usuarios/'+currentUser).update({ ouvindo: radio.name, inicio: inicio, ultimaRadio: radio.name });
+                db.ref('usuarios/'+currentUser).update({ ouvindo: radio.name, inicio: Date.now(), ultimaRadio: radio.name });
                 timerRealtime = setInterval(() => {
                     db.ref('usuarios/'+currentUser).once('value', s => {
-                        const d = s.val();
-                        const novoTotal = (d.totalTempo || 0) + 1000;
-                        db.ref('usuarios/'+currentUser).update({ totalTempo: novoTotal, ultimoTempo: (Date.now() - d.inicio) });
+                        const d = s.val(); db.ref('usuarios/'+currentUser).update({ totalTempo: (d.totalTempo || 0) + 1000, ultimoTempo: (Date.now() - d.inicio) });
                     });
                 }, 1000);
             }
         }
 
-        function stopRadio() {
-            player.pause(); if(timerRealtime) clearInterval(timerRealtime);
-            if(currentUser) db.ref('usuarios/'+currentUser).update({ ouvindo: "Nada", inicio: 0 });
-            document.getElementById('player-bar').classList.add('hidden');
-        }
-
+        function stopRadio() { player.pause(); if(timerRealtime) clearInterval(timerRealtime); if(currentUser) db.ref('usuarios/'+currentUser).update({ ouvindo: "Nada", inicio: 0 }); document.getElementById('player-bar').classList.add('hidden'); }
         function monitorUsers() {
             db.ref('usuarios').on('value', snap => {
                 const users = snap.val(); const display = document.getElementById('user-monitor');
                 if(users) {
-                    display.innerHTML = `<button class="btn-refresh" onclick="forceCleanup()">🔄 ATUALIZAR STATUS</button>`;
+                    display.innerHTML = `<p style='font-size:9px'>MONITORAMENTO</p>`;
                     Object.keys(users).forEach(u => {
-                        const info = users[u];
-                        const isOnline = (info.ouvindo !== "Nada") && (Date.now() - (info.lastSeen || 0) < 30000);
+                        const info = users[u]; const isOnline = (info.ouvindo !== "Nada") && (Date.now() - (info.lastSeen || 0) < 30000);
                         const color = isOnline ? "var(--primary)" : "var(--offline)";
-                        display.innerHTML += `
-                            <div class="monitor-row" style="border-left-color: ${color}" onclick="this.querySelector('.row-details').classList.toggle('show')">
-                                <div class="row-main"><span style="color:${color}">${info.nome}</span><span style="color:${color}">${isOnline ? '🎧 '+info.ouvindo : 'OFF'}</span></div>
-                                <div class="row-details">
-                                    ⏱️ Tempo Acumulado: <b>${formatDuration(info.totalTempo)}</b><br>
-                                    📻 Última Rádio: ${info.ultimaRadio || 'Nenhuma'}<br>
-                                    ⏳ Duração da Última Sessão: ${formatDuration(info.ultimoTempo)}
-                                </div>
-                            </div>`;
+                        display.innerHTML += `<div class="monitor-row" style="border-left-color: ${color}" onclick="this.querySelector('.row-details').classList.toggle('show')">
+                            <div class="row-main"><span style="color:${color}">${info.nome}</span><span style="color:${color}">${isOnline ? '🎧 '+info.ouvindo : 'OFF'}</span></div>
+                            <div class="row-details">Acumulado: ${formatDuration(info.totalTempo)}<br>Última: ${info.ultimaRadio || '-'}<br>Sessão: ${formatDuration(info.ultimoTempo)}</div>
+                        </div>`;
                     });
                 }
             });
         }
-
-        function formatDuration(ms) {
-            if(!ms) return "0s"; const s = Math.floor(ms/1000);
-            const m = Math.floor(s/60); const h = Math.floor(m/60);
-            return (h>0?h+"h ":"")+(m%60>0?m%60+"m ":"")+(s%60)+"s";
-        }
-
-        function forceCleanup() {
-            db.ref('usuarios').once('value', snap => {
-                const users = snap.val();
-                Object.keys(users).forEach(u => { if(Date.now() - (users[u].lastSeen || 0) > 40000) db.ref('usuarios/'+u).update({ouvindo:"Nada", inicio:0}); });
-            });
-        }
-
+        function formatDuration(ms) { if(!ms) return "0s"; const s = Math.floor(ms/1000); const m = Math.floor(s/60); return (m>0?m+"m ":"")+s%60+"s"; }
         function changeRadio(dir) { let n = currentIndex + dir; if(n >= currentList.length) n = 0; if(n < 0) n = currentList.length - 1; playRadio(currentList[n]); }
         function nextStep() { document.getElementById('step-2').classList.remove('hidden'); }
         function saveRadio() {
@@ -235,9 +260,7 @@
             setInterval(() => { document.getElementById('display-time').innerText = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }, 1000);
             fetch('https://ipapi.co/json/').then(r=>r.json()).then(l => {
                 document.getElementById('display-city').innerText = l.city.toUpperCase();
-                fetch(`https://api.open-meteo.com/v1/forecast?latitude=${l.latitude}&longitude=${l.longitude}&current_weather=true`).then(r=>r.json()).then(w => { 
-                    document.getElementById('display-temp').innerText = Math.round(w.current_weather.temperature) + "°C";
-                });
+                fetch(`https://api.open-meteo.com/v1/forecast?latitude=${l.latitude}&longitude=${l.longitude}&current_weather=true`).then(r=>r.json()).then(w => { document.getElementById('display-temp').innerText = Math.round(w.current_weather.temperature) + "°C"; });
             });
         }
     </script>
