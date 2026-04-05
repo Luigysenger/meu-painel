@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OUVINDO RÁDIO - PRO CLOUD</title>
+    <title>OUVINDO RÁDIO - CLOUD PRO</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
@@ -32,11 +32,11 @@
         
         /* CARD DA RÁDIO */
         .radio-card { padding: 15px 5px; border-radius: 8px; position: relative; text-align: center; cursor: grab; color: #111; font-weight: bold; font-size: 13px; transition: all 0.3s ease; border: 2px solid transparent; }
-        .radio-card:active { cursor: grabbing; }
         .radio-card.active { transform: scale(1.08); border: 2px solid var(--primary); box-shadow: 0 0 15px rgba(29, 185, 84, 0.4); z-index: 5; }
         
-        .btn-del { position: absolute; top: 2px; right: 4px; background: none; border: none; cursor: pointer; font-size: 16px; color: rgba(0,0,0,0.4); font-weight: bold; }
-        .btn-del:hover { color: red; }
+        .card-tools { position: absolute; top: 2px; right: 4px; display: flex; gap: 5px; }
+        .btn-tool { background: none; border: none; cursor: pointer; font-size: 14px; color: rgba(0,0,0,0.4); font-weight: bold; padding: 2px; }
+        .btn-tool:hover { color: #000; }
 
         .info-bar { background: #111; padding: 10px; display: flex; justify-content: space-around; font-size: 11px; border-top: 1px solid #333; }
         .info-item { display: flex; flex-direction: column; align-items: center; }
@@ -73,17 +73,17 @@
                     </div>
                     <div id="step-2" class="hidden">
                         <input type="text" id="new-url" placeholder="Link de Áudio">
-                        <button onclick="saveToFirebase()" style="width:100%;margin-top:5px;background:orange;border:none;padding:8px;font-weight:bold;cursor:pointer">SALVAR NA NUVEM ☁️</button>
+                        <button id="btn-save-cloud" onclick="saveToFirebase()" style="width:100%;margin-top:5px;background:orange;border:none;padding:8px;font-weight:bold;cursor:pointer">SALVAR NA NUVEM ☁️</button>
                     </div>
                 </div>
 
                 <div class="stations-grid" id="stations-grid"></div>
-                <div id="status-display">Sistema Online - Nuvem Ativa</div>
+                <div id="status-display">Sistema Online</div>
 
                 <div class="info-bar">
                     <div class="info-item"><span id="display-date">--/--/--</span><span class="info-val" id="display-time">00:00</span></div>
                     <div class="info-item"><span id="display-city">Buscando...</span><span class="info-val"><span id="display-temp">--</span>°C</span></div>
-                    <div class="info-item"><span>Previsão</span><span style="font-size:16px" id="weather-icon">☀️</span></div>
+                    <div class="info-item"><span>Previsão</span><span style="font-size:16px">☀️</span></div>
                 </div>
 
                 <div class="controls-bar">
@@ -113,8 +113,8 @@
         const player = document.getElementById('audio-player');
         let radioList = [];
         let currentIndex = -1;
+        let editingKey = null; // Controla se estamos editando ou criando nova
 
-        // Login
         function handleLogin() {
             if(document.getElementById('user-input').value.toUpperCase()==="LUIGY" && document.getElementById('pass-input').value==="1045") {
                 document.getElementById('login-screen').style.display='none';
@@ -123,7 +123,6 @@
             } else { alert("Acesso Negado!"); }
         }
 
-        // Inicialização
         function initApp() {
             loadRadios();
             getWeather();
@@ -132,66 +131,57 @@
                 document.getElementById('display-time').innerText = now.toLocaleTimeString('pt-BR');
                 document.getElementById('display-date').innerText = now.toLocaleDateString('pt-BR');
             }, 1000);
-
-            // Ativar Arrastar e Mover
-            const grid = document.getElementById('stations-grid');
-            new Sortable(grid, {
-                animation: 150,
-                onEnd: saveOrder
-            });
+            new Sortable(document.getElementById('stations-grid'), { animation: 150, onEnd: saveOrder });
         }
 
-        // Clima Real
         async function getWeather() {
             try {
                 const loc = await fetch('https://ipapi.co/json/').then(r => r.json());
                 document.getElementById('display-city').innerText = loc.city.toUpperCase();
                 const w = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${loc.latitude}&longitude=${loc.longitude}&current_weather=true`).then(r => r.json());
                 document.getElementById('display-temp').innerText = Math.round(w.current_weather.temperature);
-            } catch (e) { console.log("Clima off"); }
+            } catch (e) {}
         }
 
-        // Carregar da Nuvem
         function loadRadios() {
             db.ref('radios').on('value', (snap) => {
                 const data = snap.val();
-                if(data) {
-                    // Ordenar pelo campo "order"
-                    radioList = Object.keys(data).map(k => ({key: k, ...data[k]}));
-                    radioList.sort((a, b) => (a.order || 0) - (b.order || 0));
-                } else {
-                    radioList = [];
-                }
+                radioList = data ? Object.keys(data).map(k => ({key: k, ...data[k]})).sort((a,b) => (a.order||0)-(b.order||0)) : [];
                 renderGrid();
             });
         }
 
-        // Salvar Rádio com Cor Fraca Aleatória
         function saveToFirebase() {
             const name = document.getElementById('new-name').value;
             const url = document.getElementById('new-url').value;
             if(!name || !url) return;
 
-            const r = Math.floor(Math.random() * 56) + 200; 
-            const g = Math.floor(Math.random() * 56) + 200;
-            const b = Math.floor(Math.random() * 56) + 200;
-
-            db.ref('radios').push({
-                name: name, url: url,
-                color: `rgb(${r}, ${g}, ${b})`,
-                order: radioList.length
-            });
+            if(editingKey) {
+                // ATUALIZAR EXISTENTE
+                db.ref('radios/' + editingKey).update({ name: name, url: url });
+                editingKey = null;
+                document.getElementById('btn-save-cloud').innerText = "SALVAR NA NUVEM ☁️";
+                document.getElementById('btn-save-cloud').style.background = "orange";
+            } else {
+                // CRIAR NOVA
+                const r = Math.floor(Math.random()*40+210), g = Math.floor(Math.random()*40+210), b = Math.floor(Math.random()*40+210);
+                db.ref('radios').push({ name: name, url: url, color: `rgb(${r},${g},${b})`, order: radioList.length });
+            }
 
             document.getElementById('new-name').value=""; document.getElementById('new-url').value="";
             document.getElementById('step-2').classList.add('hidden'); document.getElementById('step-1').classList.remove('hidden');
         }
 
-        function saveOrder() {
-            const cards = document.querySelectorAll('.radio-card');
-            cards.forEach((card, index) => {
-                const key = card.getAttribute('data-key');
-                db.ref('radios/' + key).update({ order: index });
-            });
+        function editRadio(index) {
+            const r = radioList[index];
+            editingKey = r.key;
+            document.getElementById('new-name').value = r.name;
+            document.getElementById('new-url').value = r.url;
+            document.getElementById('btn-save-cloud').innerText = "ATUALIZAR RÁDIO ✅";
+            document.getElementById('btn-save-cloud').style.background = "#1DB954";
+            document.getElementById('step-1').classList.remove('hidden');
+            document.getElementById('step-2').classList.add('hidden');
+            alert("Altere o nome e clique em Próximo para salvar as mudanças.");
         }
 
         function renderGrid() {
@@ -203,7 +193,10 @@
                 card.style.backgroundColor = r.color;
                 card.setAttribute('data-key', r.key);
                 card.innerHTML = `
-                    <button class="btn-del" onclick="event.stopPropagation(); deleteRadio('${r.key}')">×</button>
+                    <div class="card-tools">
+                        <button class="btn-tool" onclick="event.stopPropagation(); editRadio(${i})">✎</button>
+                        <button class="btn-tool" onclick="event.stopPropagation(); deleteRadio('${r.key}')">×</button>
+                    </div>
                     <div onclick="playRadio(${i})">
                         <div style="font-size:18px">${currentIndex === i ? '🔊' : '📻'}</div>
                         <div>${r.name}</div>
@@ -212,24 +205,22 @@
             });
         }
 
-        function deleteRadio(key) { 
-            if(confirm("Deseja mesmo excluir esta rádio definitivamente da nuvem?")) {
-                db.ref('radios/'+key).remove(); 
-            }
+        function saveOrder() {
+            document.querySelectorAll('.radio-card').forEach((card, idx) => {
+                db.ref('radios/' + card.getAttribute('data-key')).update({ order: idx });
+            });
         }
 
+        function deleteRadio(key) { if(confirm("Excluir definitivamente?")) db.ref('radios/'+key).remove(); }
         function playRadio(i) {
-            currentIndex = i; 
-            player.src = radioList[i].url; 
-            player.play().catch(e => alert("Link offline ou inválido!"));
+            currentIndex = i; player.src = radioList[i].url; player.play();
             document.getElementById('status-display').innerText = "🔊 " + radioList[i].name;
             renderGrid();
         }
-
-        function stopRadio() { player.pause(); currentIndex = -1; renderGrid(); document.getElementById('status-display').innerText = "Parado"; }
+        function stopRadio() { player.pause(); currentIndex = -1; renderGrid(); }
         function nextRadio() { if(radioList.length) playRadio((currentIndex+1)%radioList.length); }
         function prevRadio() { if(radioList.length) playRadio((currentIndex-1+radioList.length)%radioList.length); }
-        function nextStep() { if(document.getElementById('new-name').value) { document.getElementById('step-1').classList.add('hidden'); document.getElementById('step-2').classList.remove('hidden'); } }
+        function nextStep() { document.getElementById('step-1').classList.add('hidden'); document.getElementById('step-2').classList.remove('hidden'); }
     </script>
 </body>
 </html>
