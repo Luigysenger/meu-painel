@@ -1,49 +1,371 @@
-function renderPlayer(ids) {
-    document.getElementById('player-zone').classList.remove('hidden');
-    const container = document.getElementById('my-final-list');
-    container.innerHTML = "";
-    
-    // Criamos a lista baseada na ordem dos IDs recebidos
-    ids.forEach(id => {
-        const r = allRadios.find(rad => rad.id === id);
-        if(r) {
-            const card = document.createElement('div');
-            card.className = "radio-card";
-            card.id = "card-" + r.id;
-            card.setAttribute('data-id', r.id); // Necessário para o Sortable
-            card.style.backgroundColor = r.color;
-            card.innerHTML = `
-                <div class="admin-btns">
-                    ${isAdmin ? `<button class="btn-tool" onclick="editR('${r.id}')">✎</button>` : ''}
-                    ${isAdmin ? `<button class="btn-tool" onclick="deleteR('${r.id}')">X</button>` : ''}
-                </div>
-                <div class="radio-name">📻 ${r.name}</div>`;
-            
-            card.onclick = (e) => { 
-                if(e.target.tagName !== 'BUTTON') playRadio(r.id); 
-            };
-            container.appendChild(card);
-        }
-    });
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SISTEMA OUVINDO RÁDIO PRO</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <style>
+        :root { --primary: #1DB954; --dark: #121212; --panel: #1e1e1e; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
+        
+        .auth-card { background: var(--panel); padding: 30px; border-radius: 16px; text-align: center; width: 350px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .input-group { text-align: left; margin-bottom: 12px; }
+        label { font-size: 11px; color: #b3b3b3; text-transform: uppercase; font-weight: bold; }
+        input { width: 100%; padding: 12px; margin-top: 5px; border-radius: 6px; border: 1px solid #333; background: #2a2a2a; color: white; box-sizing: border-box; outline: none; }
+        .btn-main { width: 100%; padding: 14px; border: none; border-radius: 25px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        
+        #main-panel { display: none; flex-direction: column; align-items: center; width: 100%; }
+        .radio-container { position: relative; width: 850px; height: 620px; background: #333; border: 10px solid #444; border-radius: 20px; }
+        .tablet-screen { position: absolute; top: 10%; left: 25%; width: 50%; height: 75%; background: #000; border-radius: 10px; display: flex; flex-direction: column; overflow: hidden; border: 4px solid #111; }
+        .tablet-header { background: var(--primary); padding: 8px 15px; font-size: 11px; color: #000; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        
+        .stations-grid { flex: 1; overflow-y: auto; padding: 15px; background: #0a0a0a; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-content: start; }
+        
+        /* ESTILO DOS CARDS COM CURSOR DE ARRASTAR */
+        .radio-card { padding: 15px 5px; border-radius: 8px; text-align: center; color: #000; font-weight: bold; cursor: grab; font-size: 12px; position: relative; border: 2px solid transparent; transition: 0.2s; }
+        .radio-card:active { cursor: grabbing; }
+        .radio-card.active { border: 2px solid #fff; box-shadow: 0 0 15px var(--primary); color: var(--primary) !important; background: #000 !important; transform: scale(1.02); }
+        .sortable-ghost { opacity: 0.3; border: 2px dashed #fff !important; }
 
-    // ATIVA O ARRASTAR E SOLTAR (SortableJS)
-    new Sortable(container, {
-        animation: 150,
-        ghostClass: 'sortable-ghost',
-        onEnd: function() {
-            // Quando terminar de arrastar, pega a nova ordem dos IDs
-            const newOrder = Array.from(container.querySelectorAll('.radio-card'))
-                                .map(card => card.getAttribute('data-id'));
-            
-            currentList = newOrder; // Atualiza a lista na memória
-            
-            // Salva a nova ordem no Firebase automaticamente
-            if(isAdmin) {
-                // Se for ADM, a ordem das rádios no banco global não muda (é por push), 
-                // mas você pode salvar uma ordem preferencial se desejar.
-            } else {
-                db.ref('usuarios/' + currentUser).update({ lista: newOrder.join(',') });
-            }
+        .admin-btns { position: absolute; top: 2px; right: 2px; display: flex; gap: 2px; }
+        .btn-tool { font-size: 9px; background: rgba(0,0,0,0.3); border: none; cursor: pointer; padding: 2px 4px; border-radius: 3px; color: white; }
+
+        .admin-only { background: #151515; padding: 10px; border-bottom: 1px solid #333; }
+        
+        .player-controls { background: #181818; padding: 10px; display: flex; justify-content: center; gap: 20px; border-top: 1px solid #333; }
+        .ctrl-btn { background: none; border: 1px solid #444; color: white; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; font-weight: bold; }
+        .ctrl-btn:hover { background: var(--primary); color: black; }
+        .stop-btn { border-color: #ff4444; color: #ff4444; }
+
+        .info-bar { background: #111; padding: 8px; border-top: 1px solid #333; }
+        .info-row { display: grid; grid-template-columns: 1fr 1fr 1fr; width: 100%; align-items: center; text-align: center; }
+        .info-item-side { font-size: 10px; }
+        .info-item-center { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .weather-icon { font-size: 18px; }
+        .info-val { color: var(--primary); font-weight: bold; font-size: 11px; }
+        
+        #user-monitor { background: #000; padding: 5px; border-top: 1px solid #222; max-height: 40px; overflow-y: auto; text-align: center; }
+        .user-tag { display: inline-block; background: #222; padding: 1px 6px; border-radius: 10px; margin: 2px; color: var(--primary); font-size: 8px; border: 1px solid #333; }
+
+        .hidden { display: none; }
+        .selection-item { background: #1a1a1a; padding: 10px; margin-bottom: 5px; border-radius: 5px; display: flex; justify-content: space-between; grid-column: span 2; font-size: 12px; align-items: center; }
+    </style>
+</head>
+<body>
+
+    <div id="login-screen" class="auth-card">
+        <h1 style="color:var(--primary)">📻 OUVINDO RÁDIO</h1>
+        <div class="input-group"><label>Usuário</label><input type="text" id="login-user" onkeydown="if(event.key==='Enter') handleLogin()"></div>
+        <div class="input-group"><label>Senha</label><input type="password" id="login-pass" onkeydown="if(event.key==='Enter') handleLogin()"></div>
+        <button class="btn-main" onclick="handleLogin()">ENTRAR</button>
+        <p style="font-size:12px">Não tem conta? <span style="color:var(--primary);cursor:pointer" onclick="showScreen('register-screen')">Cadastre-se</span></p>
+    </div>
+
+    <div id="register-screen" class="auth-card hidden">
+        <h1>CRIAR CONTA</h1>
+        <div class="input-group"><label>Nome</label><input type="text" id="reg-name" onkeydown="if(event.key==='Enter') handleRegister()"></div>
+        <div class="input-group"><label>Senha (4 números)</label><input type="password" id="reg-pass" maxlength="4" onkeydown="if(event.key==='Enter') handleRegister()"></div>
+        <div class="input-group"><label>Confirmar Senha</label><input type="password" id="reg-confirm" maxlength="4" onkeydown="if(event.key==='Enter') handleRegister()"></div>
+        <button class="btn-main" onclick="handleRegister()">FINALIZAR</button>
+        <button class="btn-main" style="background:#444" onclick="showScreen('login-screen')">VOLTAR</button>
+    </div>
+
+    <div id="main-panel">
+        <div class="radio-container">
+            <div class="tablet-screen">
+                <div class="tablet-header"><span id="user-display">PAINEL</span> <button onclick="location.reload()">SAIR</button></div>
+                
+                <div id="adm-zone" class="admin-only hidden">
+                    <input type="text" id="new-name" placeholder="Nome da Rádio" style="width:60%; padding:5px">
+                    <button onclick="nextStep()" style="padding:5px">Editar/Add</button>
+                    <div id="step-2" class="hidden" style="margin-top:5px">
+                        <input type="text" id="new-url" placeholder="Link Stream" style="width:60%; padding:5px">
+                        <button onclick="saveRadio()" id="btn-save-adm" style="background:orange; color:black; font-weight:bold">SALVAR</button>
+                    </div>
+                </div>
+
+                <div id="selection-zone" class="stations-grid hidden">
+                    <p style="grid-column:span 2; font-size:10px; text-align:center">Escolha suas rádios:</p>
+                    <div id="list-to-select" style="grid-column:span 2"></div>
+                    <button class="btn-main" onclick="saveUserList()">CRIAR MINHA LISTA</button>
+                </div>
+
+                <div id="player-zone" class="stations-grid">
+                    <div id="my-final-list" style="display:contents"></div>
+                </div>
+
+                <div id="player-bar" class="player-controls hidden">
+                    <button class="ctrl-btn" onclick="changeRadio(-1)">◀◀</button>
+                    <button class="ctrl-btn stop-btn" onclick="stopRadio()">■</button>
+                    <button class="ctrl-btn" onclick="changeRadio(1)">▶▶</button>
+                </div>
+
+                <div class="info-bar">
+                    <div class="info-row">
+                        <div class="info-item-side">
+                            <span id="display-city" style="display:block; color:#888">BUSCANDO...</span>
+                            <div id="edit-list-btn" class="hidden" onclick="toggleEdit()" style="cursor:pointer;text-decoration:underline; color:var(--primary); font-size:9px">EDITAR LISTA</div>
+                        </div>
+                        <div class="info-item-center">
+                            <span id="weather-img" class="weather-icon">☀️</span>
+                            <div>
+                                <span class="info-val" id="display-temp">--°C</span>
+                                <span id="display-rain" style="font-size:8px; display:block; color:#aaa">--</span>
+                            </div>
+                        </div>
+                        <div class="info-item-side">
+                            <span style="color:#888">HORÁRIO</span><br>
+                            <span class="info-val" id="display-time">00:00</span>
+                        </div>
+                    </div>
+                    <div id="user-monitor" class="hidden"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <audio id="audio-player"></audio>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
+            authDomain: "meu-painel-f2efe.firebaseapp.com",
+            databaseURL: "https://meu-painel-f2efe-default-rtdb.firebaseio.com/",
+            projectId: "meu-painel-f2efe",
+            storageBucket: "meu-painel-f2efe.firebasestorage.app",
+            messagingSenderId: "785606199615",
+            appId: "1:785606199615:web:75042853c86726f3942b8a"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const player = document.getElementById('audio-player');
+        
+        let allRadios = [];
+        let currentList = [];
+        let currentIndex = -1;
+        let currentUser = "";
+        let isAdmin = false;
+        let editingKey = null;
+
+        function showScreen(id) {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('register-screen').classList.add('hidden');
+            document.getElementById(id).classList.remove('hidden');
         }
-    });
-}
+
+        function handleRegister() {
+            const n = document.getElementById('reg-name').value;
+            const p = document.getElementById('reg-pass').value;
+            if(p !== document.getElementById('reg-confirm').value) return alert("Senhas não batem!");
+            db.ref('usuarios/' + n.toUpperCase()).set({ nome: n, senha: p, lista: "" }).then(() => {
+                alert("Cadastrado! Faça login.");
+                showScreen('login-screen');
+            });
+        }
+
+        function handleLogin() {
+            const u = document.getElementById('login-user').value.toUpperCase();
+            const p = document.getElementById('login-pass').value;
+            if(u === "LUIGY" && p === "1045") {
+                isAdmin = true;
+                enterDashboard("LUIGY ADM", "");
+                monitorUsers();
+                return;
+            }
+            db.ref('usuarios/' + u).once('value', (snap) => {
+                const data = snap.val();
+                if(data && data.senha === p) {
+                    currentUser = u;
+                    enterDashboard(data.nome, data.lista);
+                } else { alert("Acesso negado!"); }
+            });
+        }
+
+        function enterDashboard(name, savedList) {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-panel').style.display = 'flex';
+            document.getElementById('user-display').innerText = name.toUpperCase();
+            startWeather();
+            
+            db.ref('radios').on('value', (snap) => {
+                const data = snap.val();
+                allRadios = data ? Object.keys(data).map(k => ({id: k, ...data[k]})) : [];
+                
+                if(isAdmin) {
+                    currentList = allRadios.map(r => r.id);
+                    renderPlayer(currentList);
+                    document.getElementById('adm-zone').classList.remove('hidden');
+                    document.getElementById('user-monitor').classList.remove('hidden');
+                } else {
+                    if(savedList && !document.getElementById('selection-zone').classList.contains('active-edit')) {
+                        currentList = savedList.split(',');
+                        renderPlayer(currentList);
+                        document.getElementById('edit-list-btn').classList.remove('hidden');
+                    } else {
+                        renderSelection();
+                    }
+                }
+            });
+        }
+
+        function renderSelection() {
+            document.getElementById('player-zone').classList.add('hidden');
+            document.getElementById('player-bar').classList.add('hidden');
+            document.getElementById('selection-zone').classList.remove('hidden');
+            document.getElementById('selection-zone').classList.add('active-edit');
+            const container = document.getElementById('list-to-select');
+            container.innerHTML = "";
+            allRadios.forEach(r => {
+                const isChecked = currentList.includes(r.id) ? 'checked' : '';
+                container.innerHTML += `<div class="selection-item"><span>${r.name}</span> <input type="checkbox" class="r-check" value="${r.id}" ${isChecked}></div>`;
+            });
+        }
+
+        function saveUserList() {
+            const selected = Array.from(document.querySelectorAll('.r-check:checked')).map(c => c.value);
+            currentList = selected;
+            db.ref('usuarios/' + currentUser).update({ lista: selected.join(',') }).then(() => {
+                document.getElementById('selection-zone').classList.remove('active-edit').classList.add('hidden');
+                document.getElementById('edit-list-btn').classList.remove('hidden');
+                renderPlayer(selected);
+            });
+        }
+
+        function renderPlayer(ids) {
+            const container = document.getElementById('my-final-list');
+            container.innerHTML = "";
+            document.getElementById('player-zone').classList.remove('hidden');
+            
+            ids.forEach(id => {
+                const r = allRadios.find(rad => rad.id === id);
+                if(r) {
+                    const card = document.createElement('div');
+                    card.className = "radio-card";
+                    card.id = "card-" + r.id;
+                    card.setAttribute('data-id', r.id);
+                    card.style.backgroundColor = r.color;
+                    card.innerHTML = `
+                        <div class="admin-btns">
+                            ${isAdmin ? `<button class="btn-tool" onclick="editR('${r.id}')">✎</button>` : ''}
+                            ${isAdmin ? `<button class="btn-tool" onclick="deleteR('${r.id}')">X</button>` : ''}
+                        </div>
+                        <div class="radio-name">📻 ${r.name}</div>`;
+                    card.onclick = (e) => { if(e.target.tagName !== 'BUTTON') playRadio(r.id); };
+                    container.appendChild(card);
+                }
+            });
+
+            // ATIVA O MOVER COM O MOUSE
+            new Sortable(container, {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                onEnd: function() {
+                    const newOrder = Array.from(container.querySelectorAll('.radio-card')).map(c => c.getAttribute('data-id'));
+                    currentList = newOrder;
+                    if(!isAdmin && currentUser) {
+                        db.ref('usuarios/' + currentUser).update({ lista: newOrder.join(',') });
+                    }
+                }
+            });
+        }
+
+        function playRadio(id) {
+            const radio = allRadios.find(r => r.id === id);
+            if(!radio) return;
+            currentIndex = currentList.indexOf(id);
+            player.src = radio.url;
+            player.play();
+            
+            document.querySelectorAll('.radio-card').forEach(c => {
+                c.classList.remove('active');
+                const rid = c.getAttribute('data-id');
+                const rdata = allRadios.find(x => x.id === rid);
+                c.querySelector('.radio-name').innerHTML = "📻 " + rdata.name;
+            });
+            
+            const activeCard = document.getElementById('card-' + id);
+            if(activeCard) {
+                activeCard.classList.add('active');
+                activeCard.querySelector('.radio-name').innerHTML = "📡 " + radio.name;
+            }
+            document.getElementById('player-bar').classList.remove('hidden');
+        }
+
+        function changeRadio(dir) {
+            let next = currentIndex + dir;
+            if(next >= currentList.length) next = 0;
+            if(next < 0) next = currentList.length - 1;
+            playRadio(currentList[next]);
+        }
+
+        function stopRadio() {
+            player.pause();
+            player.src = "";
+            document.querySelectorAll('.radio-card').forEach(c => {
+                c.classList.remove('active');
+                const rid = c.getAttribute('data-id');
+                const rdata = allRadios.find(x => x.id === rid);
+                c.querySelector('.radio-name').innerHTML = "📻 " + rdata.name;
+            });
+            document.getElementById('player-bar').classList.add('hidden');
+        }
+
+        function nextStep() { document.getElementById('step-2').classList.remove('hidden'); }
+        function saveRadio() {
+            const n = document.getElementById('new-name').value;
+            const u = document.getElementById('new-url').value;
+            if(editingKey) {
+                db.ref('radios/' + editingKey).update({ name: n, url: u });
+                editingKey = null;
+            } else {
+                const c = `rgb(${Math.random()*50+200},${Math.random()*50+200},${Math.random()*50+200})`;
+                db.ref('radios').push({ name: n, url: u, color: c });
+            }
+            document.getElementById('new-name').value=""; document.getElementById('new-url').value="";
+            document.getElementById('step-2').classList.add('hidden');
+        }
+
+        function editR(id) {
+            const radio = allRadios.find(r => r.id === id);
+            document.getElementById('new-name').value = radio.name;
+            document.getElementById('new-url').value = radio.url;
+            editingKey = id;
+            document.getElementById('step-2').classList.remove('hidden');
+        }
+
+        function deleteR(id) { if(confirm("Excluir?")) db.ref('radios/'+id).remove(); }
+        function toggleEdit() { renderSelection(); }
+
+        function monitorUsers() {
+            db.ref('usuarios').on('value', (snap) => {
+                const users = snap.val();
+                const display = document.getElementById('user-monitor');
+                if(users) {
+                    display.innerHTML = `<div style="font-size:7px; color:#555">USUÁRIOS CADASTRADOS</div>`;
+                    Object.keys(users).forEach(u => { display.innerHTML += `<span class="user-tag">${u}</span>`; });
+                }
+            });
+        }
+
+        function startWeather() {
+            setInterval(() => { document.getElementById('display-time').innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}); }, 1000);
+            fetch('https://ipapi.co/json/').then(r=>r.json()).then(l => {
+                document.getElementById('display-city').innerText = l.city.toUpperCase();
+                fetch(`https://api.open-meteo.com/v1/forecast?latitude=${l.latitude}&longitude=${l.longitude}&current_weather=true`)
+                .then(r=>r.json()).then(w => { 
+                    const code = w.current_weather.weathercode;
+                    document.getElementById('display-temp').innerText = Math.round(w.current_weather.temperature) + "°C";
+                    let icon = "☀️"; let desc = "Céu Limpo";
+                    if(code >= 1 && code <= 3) { icon = "⛅"; desc = "Nublado"; }
+                    else if(code >= 51) { icon = "🌧️"; desc = "Chuva"; }
+                    document.getElementById('weather-img').innerText = icon;
+                    document.getElementById('display-rain').innerText = desc;
+                });
+            });
+        }
+    </script>
+</body>
+</html>
