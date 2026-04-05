@@ -23,8 +23,6 @@
         .tablet-header { background: var(--primary); padding: 8px 15px; font-size: 11px; color: #000; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
         
         .stations-grid { flex: 1; overflow-y: auto; padding: 15px; background: #0a0a0a; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-content: start; }
-        
-        /* ESTILO DOS CARDS COM CURSOR DE ARRASTAR */
         .radio-card { padding: 15px 5px; border-radius: 8px; text-align: center; color: #000; font-weight: bold; cursor: grab; font-size: 12px; position: relative; border: 2px solid transparent; transition: 0.2s; }
         .radio-card:active { cursor: grabbing; }
         .radio-card.active { border: 2px solid #fff; box-shadow: 0 0 15px var(--primary); color: var(--primary) !important; background: #000 !important; transform: scale(1.02); }
@@ -34,7 +32,6 @@
         .btn-tool { font-size: 9px; background: rgba(0,0,0,0.3); border: none; cursor: pointer; padding: 2px 4px; border-radius: 3px; color: white; }
 
         .admin-only { background: #151515; padding: 10px; border-bottom: 1px solid #333; }
-        
         .player-controls { background: #181818; padding: 10px; display: flex; justify-content: center; gap: 20px; border-top: 1px solid #333; }
         .ctrl-btn { background: none; border: 1px solid #444; color: white; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; font-weight: bold; }
         .ctrl-btn:hover { background: var(--primary); color: black; }
@@ -228,7 +225,9 @@
             const selected = Array.from(document.querySelectorAll('.r-check:checked')).map(c => c.value);
             currentList = selected;
             db.ref('usuarios/' + currentUser).update({ lista: selected.join(',') }).then(() => {
-                document.getElementById('selection-zone').classList.remove('active-edit').classList.add('hidden');
+                const sz = document.getElementById('selection-zone');
+                sz.classList.remove('active-edit');
+                sz.classList.add('hidden');
                 document.getElementById('edit-list-btn').classList.remove('hidden');
                 renderPlayer(selected);
             });
@@ -258,7 +257,6 @@
                 }
             });
 
-            // ATIVA O MOVER COM O MOUSE
             new Sortable(container, {
                 animation: 150,
                 ghostClass: 'sortable-ghost',
@@ -283,7 +281,7 @@
                 c.classList.remove('active');
                 const rid = c.getAttribute('data-id');
                 const rdata = allRadios.find(x => x.id === rid);
-                c.querySelector('.radio-name').innerHTML = "📻 " + rdata.name;
+                if(rdata) c.querySelector('.radio-name').innerHTML = "📻 " + rdata.name;
             });
             
             const activeCard = document.getElementById('card-' + id);
@@ -308,7 +306,7 @@
                 c.classList.remove('active');
                 const rid = c.getAttribute('data-id');
                 const rdata = allRadios.find(x => x.id === rid);
-                c.querySelector('.radio-name').innerHTML = "📻 " + rdata.name;
+                if(rdata) c.querySelector('.radio-name').innerHTML = "📻 " + rdata.name;
             });
             document.getElementById('player-bar').classList.add('hidden');
         }
