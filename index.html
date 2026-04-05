@@ -1,0 +1,324 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="1561.61">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+    span.s1 {font: 12.0px 'Apple Color Emoji'}
+    span.s2 {font: 12.0px 'Zapf Dingbats'}
+  </style>
+</head>
+<body>
+<p class="p1">&lt;!DOCTYPE html&gt;</p>
+<p class="p1">&lt;html lang="pt-br"&gt;</p>
+<p class="p1">&lt;head&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;title&gt;OUVINDO RÁDIO - Painel Pro Luigy&lt;/title&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"&gt;&lt;/script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;style&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>:root { --primary: #1DB954; --dark: #121212; --panel: #1e1e1e; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/* LOGIN */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>#login-screen { background: var(--panel); padding: 40px; border-radius: 16px; text-align: center; width: 350px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.logo-area h1 { color: var(--primary); margin-bottom: 20px; font-size: 28px; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.input-group { text-align: left; margin-bottom: 15px; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>label { font-size: 12px; color: #b3b3b3; text-transform: uppercase; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>input { width: 100%; padding: 12px; margin-top: 5px; border-radius: 6px; border: 1px solid #333; background: #2a2a2a; color: white; box-sizing: border-box; outline: none; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.btn-main { width: 100%; padding: 14px; border: none; border-radius: 25px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; }</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/* PAINEL PRINCIPAL */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>#main-panel { display: none; flex-direction: column; align-items: center; width: 100%; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.radio-container { position: relative; width: 850px; height: 550px; background: #333; border: 10px solid #444; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.tablet-screen { position: absolute; top: 10%; left: 25%; width: 50%; height: 75%; background: #000; border-radius: 10px; display: flex; flex-direction: column; overflow: hidden; border: 4px solid #111; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.tablet-header { background: var(--primary); padding: 8px; font-size: 11px; color: #000; font-weight: bold; display: flex; justify-content: space-between; align-items: center; padding: 5px 15px; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.btn-exit { background: #000; color: white; border: none; padding: 2px 8px; border-radius: 4px; cursor: pointer; font-size: 10px; }</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.creation-zone { background: #151515; padding: 10px; border-bottom: 1px solid #333; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.btn-step { width: 100%; padding: 8px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.stations-grid { flex: 1; overflow-y: auto; padding: 20px 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: #0a0a0a; align-content: start; }</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.radio-card {<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 15px 10px; border-radius: 8px; position: relative; text-align: center;<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>border: 2px solid transparent; cursor: grab;<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>transition: transform 0.3s ease, border 0.3s ease;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #000;<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.radio-card.active {<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>transform: scale(1.1);<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>border: 2px solid var(--primary);<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>z-index: 5;<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/* BARRA DE CLIMA E DATA (NOVIDADE) */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.info-bar {<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: #111;<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-top: 1px solid #333;<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 10px;<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>display: flex;<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>justify-content: space-around;<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>align-items: center;<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 12px;<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #eee;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.info-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.info-val { font-weight: bold; color: var(--primary); }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.weather-icon { font-size: 18px; }</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.controls-bar { background: #181818; padding: 12px; display: flex; justify-content: center; gap: 20px; border-top: 1px solid #333; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.ctrl-btn { background: none; border: none; color: white; font-size: 20px; cursor: pointer; }</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.hidden { display: none; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>#status-display { font-size: 10px; color: var(--primary); text-align: center; background: #000; padding: 2px; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="login-screen"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="logo-area"&gt;&lt;h1&gt;<span class="s1">📻</span> OUVINDO RÁDIO&lt;/h1&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="input-group"&gt;&lt;label&gt;Usuário&lt;/label&gt;&lt;input type="text" id="user-input" onkeydown="checkEnter(event)"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="input-group"&gt;&lt;label&gt;Senha&lt;/label&gt;&lt;input type="password" id="pass-input" onkeydown="checkEnter(event)"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;button class="btn-main" onclick="handleLogin()"&gt;ENTRAR NO SISTEMA&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="main-panel"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="radio-container"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="tablet-screen"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="tablet-header"&gt;&lt;span&gt;ADM: LUIGY&lt;/span&gt;&lt;button class="btn-exit" onclick="logout()"&gt;SAIR <span class="s1">🚪</span>&lt;/button&gt;&lt;/div&gt;</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="creation-zone"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div id="step-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;input type="text" id="new-name" placeholder="Nome da Rádio"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;button class="btn-step" style="background:var(--primary); color:white" onclick="nextStep()"&gt;PRÓXIMO <span class="s2">➔</span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div id="step-2" class="hidden"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;input type="text" id="new-url" placeholder="Link da rádio"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;button id="btn-save" class="btn-step" style="background:#ff9800; color:white" onclick="addNewRadio()"&gt;SALVAR RÁDIO <span class="s1">📻</span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="stations-grid" id="stations-grid"&gt;&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="info-bar"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="info-item"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;span id="display-date"&gt;--/--/--&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;span class="info-val" id="display-time"&gt;00:00:00&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="info-item"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;span id="display-city"&gt;Buscando...&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;span class="info-val"&gt;&lt;span id="display-temp"&gt;--&lt;/span&gt;°C&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="info-item"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;span&gt;Previsão&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;span class="weather-icon" id="display-icon"&gt;<span class="s1">☀️</span>&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div id="status-display"&gt;Sistema pronto.&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="controls-bar"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;button class="ctrl-btn" onclick="prevRadio()"&gt;Anterior <span class="s1">⏮️</span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;button class="ctrl-btn" onclick="stopRadio()"&gt;Parar <span class="s1">⏹️</span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;button class="ctrl-btn" onclick="nextRadio()"&gt;Próximo <span class="s1">⏭️</span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;audio id="audio-player"&gt;&lt;/audio&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const player = document.getElementById('audio-player');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const grid = document.getElementById('stations-grid');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const status = document.getElementById('status-display');</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function generateLightColor() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const r = Math.floor(Math.random() * 56) + 200;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const g = Math.floor(Math.random() * 56) + 200;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const b = Math.floor(Math.random() * 56) + 200;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>return `rgb(${r}, ${g}, ${b})`;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>let radioList = JSON.parse(localStorage.getItem('luigy_radios_v2')) || [];</p>
+<p class="p1"><span class="Apple-converted-space">        </span>let currentIndex = -1;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>let editingIndex = -1;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// --- SISTEMA DE CLIMA E DATA ---</p>
+<p class="p1"><span class="Apple-converted-space">        </span>function updateDateTime() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const now = new Date();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('display-time').innerText = now.toLocaleTimeString('pt-BR');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('display-date').innerText = now.toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit', year:'2-digit'});</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>setInterval(updateDateTime, 1000);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>async function getClima() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>// Busca localização pelo IP</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const locRes = await fetch('https://ipapi.co/json/');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const locData = await locRes.json();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const city = locData.city;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('display-city').innerText = city.toUpperCase();</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>// Busca clima (Open-Meteo é grátis e não precisa de chave)</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${locData.latitude}&amp;longitude=${locData.longitude}&amp;current_weather=true&amp;minutely_15=precipitation`);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const weatherData = await weatherRes.json();</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const temp = Math.round(weatherData.current_weather.temperature);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const code = weatherData.current_weather.weathercode; // Código do tempo</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const rain = weatherData.minutely_15 ? weatherData.minutely_15.precipitation[0] : 0;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('display-temp').innerText = temp;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>// Lógica dos Ícones conforme seu pedido</p>
+<p class="p1"><span class="Apple-converted-space">                </span>let icon = "<span class="s1">☀️</span>";</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (rain &gt; 0) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>icon = "<span class="s1">🌧️</span>"; // Chuva em 15-30 min</p>
+<p class="p1"><span class="Apple-converted-space">                </span>} else if (code &gt;= 1 &amp;&amp; code &lt;= 3) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>icon = "<span class="s1">⛅</span>"; // Nublado</p>
+<p class="p1"><span class="Apple-converted-space">                </span>} else if (code &gt; 3) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>icon = "<span class="s1">☁️</span>"; // Muito nublado</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('display-icon').innerText = icon;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>} catch (e) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('display-city').innerText = "ERRO CLIMA";</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Atualiza clima a cada 15 minutos</p>
+<p class="p1"><span class="Apple-converted-space">        </span>getClima();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>setInterval(getClima, 900000);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// --- LÓGICA DAS RÁDIOS (MANTIDA CONFORME COMBINADO) ---</p>
+<p class="p1"><span class="Apple-converted-space">        </span>new Sortable(grid, {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>animation: 150,</p>
+<p class="p1"><span class="Apple-converted-space">            </span>ghostClass: 'sortable-ghost',</p>
+<p class="p1"><span class="Apple-converted-space">            </span>onEnd: function() {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const cards = grid.querySelectorAll('.radio-card');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const newList = [];</p>
+<p class="p1"><span class="Apple-converted-space">                </span>cards.forEach(card =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const id = card.getAttribute('data-id');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const radio = radioList.find(r =&gt; r.id == id);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>newList.push(radio);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>});</p>
+<p class="p1"><span class="Apple-converted-space">                </span>radioList = newList;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>saveToStorage();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function checkEnter(event) { if (event.key === "Enter") handleLogin(); }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>function saveToStorage() { localStorage.setItem('luigy_radios_v2', JSON.stringify(radioList)); }</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function handleLogin() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const user = document.getElementById('user-input').value.toUpperCase();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const pass = document.getElementById('pass-input').value;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (user === "LUIGY" &amp;&amp; pass === "1045") {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('login-screen').style.display = 'none';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('main-panel').style.display = 'flex';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>getClima(); // Atualiza ao entrar</p>
+<p class="p1"><span class="Apple-converted-space">                </span>renderGrid();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>} else { alert("Acesso Negado!"); }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function logout() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>stopRadio();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('main-panel').style.display = 'none';</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('login-screen').style.display = 'block';</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function nextStep() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if(!document.getElementById('new-name').value) return alert("Digite o nome!");</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('step-1').classList.add('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('step-2').classList.remove('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function addNewRadio() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>let name = document.getElementById('new-name').value;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>let url = document.getElementById('new-url').value;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if(editingIndex &gt; -1) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>radioList[editingIndex] = { ...radioList[editingIndex], name, url };</p>
+<p class="p1"><span class="Apple-converted-space">                </span>editingIndex = -1;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>radioList.push({ id: Date.now(), name, url, color: generateLightColor() });</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>saveToStorage();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>renderGrid();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>resetForm();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function resetForm() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('new-name').value = "";</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('new-url').value = "";</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('step-2').classList.add('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('step-1').classList.remove('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function renderGrid() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>grid.innerHTML = "";</p>
+<p class="p1"><span class="Apple-converted-space">            </span>radioList.forEach((radio, index) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const card = document.createElement('div');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>card.className = `radio-card ${currentIndex === index ? 'active' : ''}`;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>card.setAttribute('data-id', radio.id);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>card.style.backgroundColor = radio.color;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>card.innerHTML = `</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="card-actions"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;button class="btn-card" onclick="event.stopPropagation(); editRadio(${index})"&gt;<span class="s1">✏️</span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;button class="btn-card" style="color:red" onclick="event.stopPropagation(); removeRadio(${index})"&gt;×&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div onclick="playByIndex(${index})"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div style="font-size:22px; margin-bottom:5px"&gt;${currentIndex === index ? '<span class="s1">🔊</span>' : '<span class="s1">▶️</span>'}&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div style="font-size:13px; font-weight:bold;"&gt;${radio.name}&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>`;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>grid.appendChild(card);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function playByIndex(index) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>currentIndex = index;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>renderGrid();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const radio = radioList[currentIndex];</p>
+<p class="p1"><span class="Apple-converted-space">            </span>status.innerText = "Tocando: " + radio.name;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>player.src = radio.url;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>player.play().catch(() =&gt; status.innerText = "Erro no sinal!");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function stopRadio() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>player.pause();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>currentIndex = -1;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>renderGrid();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>status.innerText = "Parado.";</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function nextRadio() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (radioList.length === 0) return;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>let next = (currentIndex + 1) &gt;= radioList.length ? 0 : currentIndex + 1;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>playByIndex(next);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function prevRadio() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (radioList.length === 0) return;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>let prev = (currentIndex - 1) &lt; 0 ? radioList.length - 1 : currentIndex - 1;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>playByIndex(prev);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function removeRadio(index) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if(confirm("Remover?")) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>radioList.splice(index, 1);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>saveToStorage();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>renderGrid();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</p>
+<p class="p1">&lt;/body&gt;</p>
+<p class="p1">&lt;/html&gt;</p>
+</body>
+</html>
