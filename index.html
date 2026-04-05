@@ -45,6 +45,7 @@
         .row-details { background: #0c0c0c; padding: 5px; text-align: left; display: none; border-top: 1px solid #222; color: #bbb; }
         .row-details.show { display: block; }
         .hidden { display: none; }
+        .selection-item { background: #1a1a1a; padding: 10px; margin-bottom: 5px; border-radius: 5px; display: flex; justify-content: space-between; grid-column: span 2; font-size: 12px; align-items: center; }
     </style>
 </head>
 <body>
@@ -85,6 +86,7 @@
         <div class="radio-container">
             <div class="tablet-screen">
                 <div class="tablet-header"><span id="user-display">PAINEL</span> <button onclick="location.reload()">SAIR</button></div>
+                
                 <div id="adm-zone" class="admin-only hidden">
                     <input type="text" id="new-name" placeholder="Nome da Rádio" style="width:60%; padding:5px">
                     <button onclick="nextStep()" style="padding:5px">Editar/Add</button>
@@ -93,15 +95,29 @@
                         <button onclick="saveRadio()" id="btn-save-adm" style="background:orange; color:black;">SALVAR</button>
                     </div>
                 </div>
-                <div id="player-zone" class="stations-grid"><div id="my-final-list" style="display:contents"></div></div>
+
+                <div id="selection-zone" class="stations-grid hidden">
+                    <p style="grid-column:span 2; font-size:10px; text-align:center">Selecione suas rádios favoritas:</p>
+                    <div id="list-to-select" style="grid-column:span 2"></div>
+                    <button class="btn-main" onclick="saveUserList()">SALVAR MINHA LISTA</button>
+                </div>
+
+                <div id="player-zone" class="stations-grid">
+                    <div id="my-final-list" style="display:contents"></div>
+                </div>
+
                 <div id="player-bar" class="player-controls hidden">
                     <button class="ctrl-btn" onclick="changeRadio(-1)">◀◀</button>
                     <button class="ctrl-btn stop-btn" onclick="stopRadio()">■</button>
                     <button class="ctrl-btn" onclick="changeRadio(1)">▶▶</button>
                 </div>
+
                 <div class="info-bar">
                     <div class="info-row">
-                        <div class="info-item-side"><span id="display-city">...</span></div>
+                        <div class="info-item-side">
+                            <span id="display-city">...</span><br>
+                            <span id="btn-edit-list" class="hidden" onclick="renderSelection()" style="color:var(--primary); cursor:pointer; text-decoration:underline; font-size:9px">EDITAR LISTA</span>
+                        </div>
                         <div class="info-item-center" style="text-align:center"><span id="weather-img">☀️</span><br><span id="display-temp">--°C</span></div>
                         <div class="info-item-side"><span id="display-time">00:00</span></div>
                     </div>
@@ -141,18 +157,12 @@
             const e = document.getElementById('reg-email').value;
             const p = document.getElementById('reg-pass').value;
             if(!n || !e || !p) return alert("Preencha tudo!");
-
             db.ref('usuarios').once('value', snap => {
                 const users = snap.val();
                 let emailExiste = false;
-                if(users) {
-                    Object.values(users).forEach(u => { if(u.email === e) emailExiste = true; });
-                }
-                if(emailExiste) return alert("Este e-mail já está em uso por outro usuário!");
-
-                db.ref('usuarios/' + n).set({ nome: n, email: e, senha: p, lista: "", ouvindo: "Nada", totalTempo: 0 }).then(() => {
-                    alert("Conta criada!"); showScreen('login-screen');
-                });
+                if(users) Object.values(users).forEach(u => { if(u.email === e) emailExiste = true; });
+                if(emailExiste) return alert("E-mail em uso!");
+                db.ref('usuarios/' + n).set({ nome: n, email: e, senha: p, lista: "", ouvindo: "Nada", totalTempo: 0 }).then(() => { alert("Criada!"); showScreen('login-screen'); });
             });
         }
 
@@ -161,19 +171,14 @@
             const e = document.getElementById('forgot-email').value;
             db.ref('usuarios/' + n).once('value', snap => {
                 const d = snap.val();
-                if(d && d.email === e) {
-                    document.getElementById('forgot-step1').classList.add('hidden');
-                    document.getElementById('forgot-step2').classList.remove('hidden');
-                    currentUser = n;
-                } else alert("Dados não conferem!");
+                if(d && d.email === e) { document.getElementById('forgot-step1').classList.add('hidden'); document.getElementById('forgot-step2').classList.remove('hidden'); currentUser = n; }
+                else alert("Erro!");
             });
         }
 
         function updatePassword() {
             const p = document.getElementById('forgot-new-pass').value;
-            db.ref('usuarios/' + currentUser).update({ senha: p }).then(() => {
-                alert("Senha alterada!"); location.reload();
-            });
+            db.ref('usuarios/' + currentUser).update({ senha: p }).then(() => { alert("Ok!"); location.reload(); });
         }
 
         function handleLogin() {
@@ -184,7 +189,7 @@
                 const data = snap.val();
                 if(data && data.senha === p) { currentUser = u; enterDashboard(data.nome, data.lista); 
                 setInterval(() => db.ref('usuarios/'+currentUser).update({lastSeen: Date.now()}), 10000);
-                } else alert("Acesso Negado!");
+                } else alert("Negado!");
             });
         }
 
@@ -195,13 +200,40 @@
             startWeather();
             db.ref('radios').on('value', snap => {
                 const data = snap.val(); allRadios = data ? Object.keys(data).map(k => ({id:k, ...data[k]})) : [];
-                currentList = allRadios.map(r=>r.id); renderPlayer(currentList);
-                if(isAdmin) { document.getElementById('adm-zone').classList.remove('hidden'); document.getElementById('user-monitor').classList.remove('hidden'); }
+                if(isAdmin) { currentList = allRadios.map(r=>r.id); renderPlayer(currentList); document.getElementById('adm-zone').classList.remove('hidden'); document.getElementById('user-monitor').classList.remove('hidden'); }
+                else {
+                    if(savedList) { currentList = savedList.split(','); renderPlayer(currentList); document.getElementById('btn-edit-list').classList.remove('hidden'); }
+                    else { renderSelection(); }
+                }
+            });
+        }
+
+        function renderSelection() {
+            document.getElementById('player-zone').classList.add('hidden');
+            document.getElementById('player-bar').classList.add('hidden');
+            document.getElementById('selection-zone').classList.remove('hidden');
+            const container = document.getElementById('list-to-select');
+            container.innerHTML = "";
+            allRadios.forEach(r => {
+                const isChecked = currentList.includes(r.id) ? 'checked' : '';
+                container.innerHTML += `<div class="selection-item"><span>${r.name}</span> <input type="checkbox" class="radio-sel" value="${r.id}" ${isChecked}></div>`;
+            });
+        }
+
+        function saveUserList() {
+            const selected = Array.from(document.querySelectorAll('.radio-sel:checked')).map(cb => cb.value);
+            if(selected.length === 0) return alert("Selecione ao menos uma!");
+            currentList = selected;
+            db.ref('usuarios/' + currentUser).update({ lista: selected.join(',') }).then(() => {
+                document.getElementById('selection-zone').classList.add('hidden');
+                document.getElementById('btn-edit-list').classList.remove('hidden');
+                renderPlayer(currentList);
             });
         }
 
         function renderPlayer(ids) {
             const container = document.getElementById('my-final-list'); container.innerHTML = "";
+            document.getElementById('player-zone').classList.remove('hidden');
             ids.forEach(id => {
                 const r = allRadios.find(rad => rad.id === id);
                 if(r) {
@@ -228,6 +260,7 @@
         }
 
         function stopRadio() { player.pause(); if(timerRealtime) clearInterval(timerRealtime); if(currentUser) db.ref('usuarios/'+currentUser).update({ ouvindo: "Nada", inicio: 0 }); document.getElementById('player-bar').classList.add('hidden'); }
+        
         function monitorUsers() {
             db.ref('usuarios').on('value', snap => {
                 const users = snap.val(); const display = document.getElementById('user-monitor');
@@ -238,7 +271,7 @@
                         const color = isOnline ? "var(--primary)" : "var(--offline)";
                         display.innerHTML += `<div class="monitor-row" style="border-left-color: ${color}" onclick="this.querySelector('.row-details').classList.toggle('show')">
                             <div class="row-main"><span style="color:${color}">${info.nome}</span><span style="color:${color}">${isOnline ? '🎧 '+info.ouvindo : 'OFF'}</span></div>
-                            <div class="row-details">Acumulado: ${formatDuration(info.totalTempo)}<br>Última: ${info.ultimaRadio || '-'}<br>Sessão: ${formatDuration(info.ultimoTempo)}</div>
+                            <div class="row-details">Acumulado: ${formatDuration(info.totalTempo)}<br>Sessão: ${formatDuration(info.ultimoTempo)}</div>
                         </div>`;
                     });
                 }
