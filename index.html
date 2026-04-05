@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OUVINDO RÁDIO - Painel Pro Luigy</title>
+    <title>OUVINDO RÁDIO - PRO CLOUD</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <style>
         :root { --primary: #1DB954; --dark: #121212; --panel: #1e1e1e; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
         
         /* LOGIN */
-        #login-screen { background: var(--panel); padding: 40px; border-radius: 16px; text-align: center; width: 350px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        #login-screen { background: var(--panel); padding: 40px; border-radius: 16px; text-align: center; width: 350px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 100; }
         .logo-area h1 { color: var(--primary); margin-bottom: 20px; font-size: 28px; }
         .input-group { text-align: left; margin-bottom: 15px; }
         label { font-size: 12px; color: #b3b3b3; text-transform: uppercase; }
@@ -22,14 +23,20 @@
 
         /* PAINEL */
         #main-panel { display: none; flex-direction: column; align-items: center; width: 100%; }
-        .radio-container { position: relative; width: 850px; height: 550px; background: #333; border: 10px solid #444; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+        .radio-container { position: relative; width: 850px; height: 580px; background: #333; border: 10px solid #444; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
         .tablet-screen { position: absolute; top: 10%; left: 25%; width: 50%; height: 75%; background: #000; border-radius: 10px; display: flex; flex-direction: column; overflow: hidden; border: 4px solid #111; }
         .tablet-header { background: var(--primary); padding: 8px 15px; font-size: 11px; color: #000; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
         
         .creation-zone { background: #151515; padding: 10px; border-bottom: 1px solid #333; }
-        .stations-grid { flex: 1; overflow-y: auto; padding: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #0a0a0a; align-content: start; }
-        .radio-card { padding: 15px 10px; border-radius: 8px; position: relative; text-align: center; cursor: pointer; color: #000; font-weight: bold; font-size: 13px; }
-        .btn-del { background: rgba(0,0,0,0.2); border: none; cursor: pointer; position: absolute; top: 2px; right: 2px; }
+        .stations-grid { flex: 1; overflow-y: auto; padding: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: #0a0a0a; align-content: start; }
+        
+        /* CARD DA RÁDIO */
+        .radio-card { padding: 15px 5px; border-radius: 8px; position: relative; text-align: center; cursor: grab; color: #111; font-weight: bold; font-size: 13px; transition: all 0.3s ease; border: 2px solid transparent; }
+        .radio-card:active { cursor: grabbing; }
+        .radio-card.active { transform: scale(1.08); border: 2px solid var(--primary); box-shadow: 0 0 15px rgba(29, 185, 84, 0.4); z-index: 5; }
+        
+        .btn-del { position: absolute; top: 2px; right: 4px; background: none; border: none; cursor: pointer; font-size: 16px; color: rgba(0,0,0,0.4); font-weight: bold; }
+        .btn-del:hover { color: red; }
 
         .info-bar { background: #111; padding: 10px; display: flex; justify-content: space-around; font-size: 11px; border-top: 1px solid #333; }
         .info-item { display: flex; flex-direction: column; align-items: center; }
@@ -45,18 +52,12 @@
 
     <div id="login-screen">
         <div class="logo-area"><h1>📻 OUVINDO RÁDIO</h1></div>
-        <div class="input-group">
-            <label>Usuário</label>
-            <input type="text" id="user-input" value="LUIGY">
-        </div>
-        <div class="input-group">
-            <label>Senha</label>
-            <input type="password" id="pass-input" value="1045">
-        </div>
+        <div class="input-group"><label>Usuário</label><input type="text" id="user-input" value="LUIGY"></div>
+        <div class="input-group"><label>Senha</label><input type="password" id="pass-input" value="1045"></div>
         <button class="btn-main" onclick="handleLogin()">ENTRAR NO SISTEMA</button>
         <div class="login-footer">
-            <a onclick="alert('Sistema de recuperação em manutenção.')">Esqueci a senha</a>
-            <a onclick="alert('Cadastros suspensos.')">Cadastrar</a>
+            <a onclick="alert('Recuperação via ADM Luigy.')">Esqueci a senha</a>
+            <a onclick="alert('Novos usuários bloqueados.')">Cadastrar</a>
         </div>
     </div>
 
@@ -71,18 +72,18 @@
                         <button onclick="nextStep()" style="width:100%;margin-top:5px;background:var(--primary);border:none;padding:8px;font-weight:bold;cursor:pointer">PRÓXIMO ➔</button>
                     </div>
                     <div id="step-2" class="hidden">
-                        <input type="text" id="new-url" placeholder="Link da Rádio">
+                        <input type="text" id="new-url" placeholder="Link de Áudio">
                         <button onclick="saveToFirebase()" style="width:100%;margin-top:5px;background:orange;border:none;padding:8px;font-weight:bold;cursor:pointer">SALVAR NA NUVEM ☁️</button>
                     </div>
                 </div>
 
                 <div class="stations-grid" id="stations-grid"></div>
-                <div id="status-display">Conectado.</div>
+                <div id="status-display">Sistema Online - Nuvem Ativa</div>
 
                 <div class="info-bar">
                     <div class="info-item"><span id="display-date">--/--/--</span><span class="info-val" id="display-time">00:00</span></div>
                     <div class="info-item"><span id="display-city">Buscando...</span><span class="info-val"><span id="display-temp">--</span>°C</span></div>
-                    <div class="info-item"><span>Previsão</span><span style="font-size:16px">☀️</span></div>
+                    <div class="info-item"><span>Previsão</span><span style="font-size:16px" id="weather-icon">☀️</span></div>
                 </div>
 
                 <div class="controls-bar">
@@ -113,14 +114,16 @@
         let radioList = [];
         let currentIndex = -1;
 
+        // Login
         function handleLogin() {
             if(document.getElementById('user-input').value.toUpperCase()==="LUIGY" && document.getElementById('pass-input').value==="1045") {
                 document.getElementById('login-screen').style.display='none';
                 document.getElementById('main-panel').style.display='flex';
                 initApp();
-            } else { alert("Senha incorreta!"); }
+            } else { alert("Acesso Negado!"); }
         }
 
+        // Inicialização
         function initApp() {
             loadRadios();
             getWeather();
@@ -129,35 +132,66 @@
                 document.getElementById('display-time').innerText = now.toLocaleTimeString('pt-BR');
                 document.getElementById('display-date').innerText = now.toLocaleDateString('pt-BR');
             }, 1000);
+
+            // Ativar Arrastar e Mover
+            const grid = document.getElementById('stations-grid');
+            new Sortable(grid, {
+                animation: 150,
+                onEnd: saveOrder
+            });
         }
 
+        // Clima Real
         async function getWeather() {
             try {
                 const loc = await fetch('https://ipapi.co/json/').then(r => r.json());
                 document.getElementById('display-city').innerText = loc.city.toUpperCase();
-                const weather = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${loc.latitude}&longitude=${loc.longitude}&current_weather=true`).then(r => r.json());
-                document.getElementById('display-temp').innerText = Math.round(weather.current_weather.temperature);
-            } catch (e) { document.getElementById('display-city').innerText = "ERRO GPS"; }
+                const w = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${loc.latitude}&longitude=${loc.longitude}&current_weather=true`).then(r => r.json());
+                document.getElementById('display-temp').innerText = Math.round(w.current_weather.temperature);
+            } catch (e) { console.log("Clima off"); }
         }
 
+        // Carregar da Nuvem
         function loadRadios() {
             db.ref('radios').on('value', (snap) => {
                 const data = snap.val();
-                radioList = data ? Object.keys(data).map(k => ({key: k, ...data[k]})) : [];
+                if(data) {
+                    // Ordenar pelo campo "order"
+                    radioList = Object.keys(data).map(k => ({key: k, ...data[k]}));
+                    radioList.sort((a, b) => (a.order || 0) - (b.order || 0));
+                } else {
+                    radioList = [];
+                }
                 renderGrid();
             });
         }
 
+        // Salvar Rádio com Cor Fraca Aleatória
         function saveToFirebase() {
             const name = document.getElementById('new-name').value;
             const url = document.getElementById('new-url').value;
             if(!name || !url) return;
+
+            const r = Math.floor(Math.random() * 56) + 200; 
+            const g = Math.floor(Math.random() * 56) + 200;
+            const b = Math.floor(Math.random() * 56) + 200;
+
             db.ref('radios').push({
                 name: name, url: url,
-                color: `rgb(${Math.floor(Math.random()*40+210)},${Math.floor(Math.random()*40+210)},${Math.floor(Math.random()*40+210)})`
+                color: `rgb(${r}, ${g}, ${b})`,
+                order: radioList.length
             });
+
             document.getElementById('new-name').value=""; document.getElementById('new-url').value="";
             document.getElementById('step-2').classList.add('hidden'); document.getElementById('step-1').classList.remove('hidden');
+        }
+
+        function saveOrder() {
+            const cards = document.querySelectorAll('.radio-card');
+            cards.forEach((card, index) => {
+                const key = card.getAttribute('data-key');
+                db.ref('radios/' + key).update({ order: index });
+            });
         }
 
         function renderGrid() {
@@ -165,20 +199,34 @@
             grid.innerHTML = "";
             radioList.forEach((r, i) => {
                 const card = document.createElement('div');
-                card.className = 'radio-card';
+                card.className = `radio-card ${currentIndex === i ? 'active' : ''}`;
                 card.style.backgroundColor = r.color;
-                card.innerHTML = `<button class="btn-del" onclick="event.stopPropagation(); deleteRadio('${r.key}')">×</button>
-                                  <div onclick="playRadio(${i})">${r.name}</div>`;
+                card.setAttribute('data-key', r.key);
+                card.innerHTML = `
+                    <button class="btn-del" onclick="event.stopPropagation(); deleteRadio('${r.key}')">×</button>
+                    <div onclick="playRadio(${i})">
+                        <div style="font-size:18px">${currentIndex === i ? '🔊' : '📻'}</div>
+                        <div>${r.name}</div>
+                    </div>`;
                 grid.appendChild(card);
             });
         }
 
-        function deleteRadio(key) { if(confirm("Excluir rádio?")) db.ref('radios/'+key).remove(); }
-        function playRadio(i) {
-            currentIndex = i; player.src = radioList[i].url; player.play();
-            document.getElementById('status-display').innerText = "Ouvindo: " + radioList[i].name;
+        function deleteRadio(key) { 
+            if(confirm("Deseja mesmo excluir esta rádio definitivamente da nuvem?")) {
+                db.ref('radios/'+key).remove(); 
+            }
         }
-        function stopRadio() { player.pause(); document.getElementById('status-display').innerText = "Parado"; }
+
+        function playRadio(i) {
+            currentIndex = i; 
+            player.src = radioList[i].url; 
+            player.play().catch(e => alert("Link offline ou inválido!"));
+            document.getElementById('status-display').innerText = "🔊 " + radioList[i].name;
+            renderGrid();
+        }
+
+        function stopRadio() { player.pause(); currentIndex = -1; renderGrid(); document.getElementById('status-display').innerText = "Parado"; }
         function nextRadio() { if(radioList.length) playRadio((currentIndex+1)%radioList.length); }
         function prevRadio() { if(radioList.length) playRadio((currentIndex-1+radioList.length)%radioList.length); }
         function nextStep() { if(document.getElementById('new-name').value) { document.getElementById('step-1').classList.add('hidden'); document.getElementById('step-2').classList.remove('hidden'); } }
