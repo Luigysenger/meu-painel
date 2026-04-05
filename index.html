@@ -24,8 +24,6 @@
         .tablet-header { background: var(--primary); padding: 8px 15px; font-size: 11px; color: #000; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
         
         .stations-grid { flex: 1; overflow-y: auto; padding: 15px; background: #0a0a0a; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-content: start; }
-        
-        /* ESTILO DAS RÁDIOS E EFEITO ESCURO */
         .radio-card { padding: 15px 5px; border-radius: 8px; text-align: center; color: #000; font-weight: bold; cursor: grab; font-size: 12px; position: relative; border: 2px solid transparent; transition: 0.3s; display: flex; align-items: center; justify-content: center; min-height: 50px; user-select: none; }
         .radio-card.active { background-color: #000 !important; color: var(--primary) !important; border: 2px solid var(--primary); box-shadow: inset 0 0 10px rgba(29, 185, 84, 0.5); }
         .antena-icon { margin-right: 5px; animation: blink 1.5s infinite; }
@@ -191,15 +189,8 @@
 
             db.ref('radios').on('value', snap => {
                 const data = snap.val(); allRadios = data ? Object.keys(data).map(k => ({id:k, ...data[k]})) : [];
-                if(isAdmin) { 
-                    currentList = allRadios.map(r=>r.id); 
-                    renderPlayer(currentList); 
-                    document.getElementById('adm-zone').classList.remove('hidden'); 
-                    document.getElementById('user-monitor').classList.remove('hidden'); 
-                } else {
-                    if(savedList) { currentList = savedList.split(','); renderPlayer(currentList); document.getElementById('btn-edit-list').classList.remove('hidden'); }
-                    else { renderSelection(); }
-                }
+                if(isAdmin) { currentList = allRadios.map(r=>r.id); renderPlayer(currentList); document.getElementById('adm-zone').classList.remove('hidden'); document.getElementById('user-monitor').classList.remove('hidden'); }
+                else { if(savedList) { currentList = savedList.split(','); renderPlayer(currentList); document.getElementById('btn-edit-list').classList.remove('hidden'); } else { renderSelection(); } }
             });
         }
 
@@ -232,15 +223,9 @@
                     const card = document.createElement('div'); card.className = "radio-card"; card.id = "card-"+r.id; 
                     card.setAttribute('data-id', r.id);
                     card.style.backgroundColor = r.color;
-                    // Verifica se esta rádio é a que está tocando agora
                     const isPlaying = (currentIndex !== -1 && currentList[currentIndex] === r.id);
                     if(isPlaying) card.classList.add('active');
-                    
-                    card.innerHTML = `
-                        ${isAdmin ? `<button class="btn-edit-small" onclick="editR('${r.id}')">✎</button><button class="btn-del-small" onclick="deleteR('${r.id}')">X</button>` : ''}
-                        ${isPlaying ? '<span class="antena-icon">📡</span>' : ''}
-                        <b>${r.name}</b>
-                    `;
+                    card.innerHTML = `${isAdmin ? `<button class="btn-edit-small" onclick="editR('${r.id}')">✎</button><button class="btn-del-small" onclick="deleteR('${r.id}')">X</button>` : ''}${isPlaying ? '<span class="antena-icon">📡</span>' : ''}<b>${r.name}</b>`;
                     card.onclick = (e) => { if(e.target.tagName !== 'BUTTON') playRadio(r.id); }; container.appendChild(card);
                 }
             });
@@ -249,12 +234,8 @@
         function playRadio(id) {
             const radio = allRadios.find(r => r.id === id); if(!radio) return;
             if(timerRealtime) clearInterval(timerRealtime);
-            player.src = radio.url; player.play(); 
-            currentIndex = currentList.indexOf(id);
-            
-            // Atualiza a visualização para escurecer a rádio ativa
+            player.src = radio.url; player.play(); currentIndex = currentList.indexOf(id);
             renderPlayer(currentList);
-
             if(currentUser) {
                 db.ref('usuarios/'+currentUser).update({ ouvindo: radio.name, inicio: Date.now(), ultimaRadio: radio.name });
                 timerRealtime = setInterval(() => {
@@ -265,21 +246,8 @@
             }
         }
 
-        function stopRadio() { 
-            player.pause(); 
-            currentIndex = -1;
-            if(timerRealtime) clearInterval(timerRealtime); 
-            if(currentUser) db.ref('usuarios/'+currentUser).update({ ouvindo: "Nada", inicio: 0 }); 
-            renderPlayer(currentList);
-        }
-
-        function changeRadio(dir) { 
-            if(currentList.length === 0) return;
-            let n = currentIndex + dir; 
-            if(n >= currentList.length) n = 0; 
-            if(n < 0) n = currentList.length - 1; 
-            playRadio(currentList[n]); 
-        }
+        function stopRadio() { player.pause(); currentIndex = -1; if(timerRealtime) clearInterval(timerRealtime); if(currentUser) db.ref('usuarios/'+currentUser).update({ ouvindo: "Nada", inicio: 0 }); renderPlayer(currentList); }
+        function changeRadio(dir) { if(currentList.length === 0) return; let n = currentIndex + dir; if(n >= currentList.length) n = 0; if(n < 0) n = currentList.length - 1; playRadio(currentList[n]); }
 
         function monitorUsers() {
             db.ref('usuarios').on('value', snap => {
@@ -316,7 +284,16 @@
             setInterval(() => { document.getElementById('display-time').innerText = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }, 1000);
             fetch('https://ipapi.co/json/').then(r=>r.json()).then(l => {
                 document.getElementById('display-city').innerText = l.city.toUpperCase();
-                fetch(`https://api.open-meteo.com/v1/forecast?latitude=${l.latitude}&longitude=${l.longitude}&current_weather=true`).then(r=>r.json()).then(w => { document.getElementById('display-temp').innerText = Math.round(w.current_weather.temperature) + "°C"; });
+                fetch(`https://api.open-meteo.com/v1/forecast?latitude=${l.latitude}&longitude=${l.longitude}&current_weather=true&hourly=precipitation_probability`).then(r=>r.json()).then(w => { 
+                    const temp = Math.round(w.current_weather.temperature);
+                    document.getElementById('display-temp').innerText = temp + "°C";
+                    const rainProb = w.hourly.precipitation_probability[new Date().getHours()];
+                    const hour = new Date().getHours();
+                    const isNight = hour >= 18 || hour < 6;
+                    let icon = isNight ? "🌙" : "☀️";
+                    if(rainProb > 30) icon = isNight ? "🌧️🌙" : "🌧️";
+                    document.getElementById('weather-img').innerText = icon;
+                });
             });
         }
     </script>
