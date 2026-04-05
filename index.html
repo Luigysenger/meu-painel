@@ -51,8 +51,8 @@
 
     <div id="login-screen" class="auth-card">
         <h1 style="color:var(--primary)">📻 OUVINDO RÁDIO</h1>
-        <div class="input-group"><label>Usuário</label><input type="text" id="login-user"></div>
-        <div class="input-group"><label>Senha</label><input type="password" id="login-pass"></div>
+        <div class="input-group"><label>Usuário</label><input type="text" id="login-user" onkeydown="if(event.key==='Enter') handleLogin()"></div>
+        <div class="input-group"><label>Senha</label><input type="password" id="login-pass" onkeydown="if(event.key==='Enter') handleLogin()"></div>
         <button class="btn-main" onclick="handleLogin()">ENTRAR</button>
         <span class="link-auth" onclick="showScreen('register-screen')">Cadastrar Novo Usuário</span>
         <span class="link-auth" onclick="showScreen('forgot-screen')">Esqueci minha Senha</span>
@@ -60,9 +60,9 @@
 
     <div id="register-screen" class="auth-card hidden">
         <h1>NOVO ACESSO</h1>
-        <div class="input-group"><label>Nome</label><input type="text" id="reg-name"></div>
-        <div class="input-group"><label>Email</label><input type="email" id="reg-email"></div>
-        <div class="input-group"><label>Senha</label><input type="password" id="reg-pass"></div>
+        <div class="input-group"><label>Nome</label><input type="text" id="reg-name" onkeydown="if(event.key==='Enter') handleRegister()"></div>
+        <div class="input-group"><label>Email</label><input type="email" id="reg-email" onkeydown="if(event.key==='Enter') handleRegister()"></div>
+        <div class="input-group"><label>Senha</label><input type="password" id="reg-pass" onkeydown="if(event.key==='Enter') handleRegister()"></div>
         <button class="btn-main" onclick="handleRegister()">CRIAR CONTA</button>
         <span class="link-auth" onclick="showScreen('login-screen')">Voltar ao Login</span>
     </div>
@@ -70,12 +70,12 @@
     <div id="forgot-screen" class="auth-card hidden">
         <h1>RECUPERAR ACESSO</h1>
         <div id="forgot-step1">
-            <div class="input-group"><label>Nome de Usuário</label><input type="text" id="forgot-name"></div>
-            <div class="input-group"><label>Email Cadastrado</label><input type="email" id="forgot-email"></div>
+            <div class="input-group"><label>Nome de Usuário</label><input type="text" id="forgot-name" onkeydown="if(event.key==='Enter') verifyRecovery()"></div>
+            <div class="input-group"><label>Email Cadastrado</label><input type="email" id="forgot-email" onkeydown="if(event.key==='Enter') verifyRecovery()"></div>
             <button class="btn-main" onclick="verifyRecovery()">VERIFICAR</button>
         </div>
         <div id="forgot-step2" class="hidden">
-            <div class="input-group"><label>Nova Senha</label><input type="password" id="forgot-new-pass"></div>
+            <div class="input-group"><label>Nova Senha</label><input type="password" id="forgot-new-pass" onkeydown="if(event.key==='Enter') updatePassword()"></div>
             <button class="btn-main" style="background:orange" onclick="updatePassword()">ALTERAR SENHA</button>
         </div>
         <span class="link-auth" onclick="showScreen('login-screen')">Cancelar</span>
@@ -142,7 +142,6 @@
             const p = document.getElementById('reg-pass').value;
             if(!n || !e || !p) return alert("Preencha tudo!");
 
-            // Verifica se o email já existe
             db.ref('usuarios').once('value', snap => {
                 const users = snap.val();
                 let emailExiste = false;
