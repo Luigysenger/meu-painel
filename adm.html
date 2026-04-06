@@ -13,17 +13,15 @@
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; user-select: none; }
 
         /* HEADER */
-        .info-header { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 15px 25px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #333; }
+        .info-header { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 10px 25px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #333; height: 100px; }
         
-        .temp-display { display: flex; align-items: center; gap: 15px; }
-        .temp-display img { width: 55px; height: 55px; filter: drop-shadow(0 0 8px var(--primary)); }
-        #temp-atual { font-size: 28px; color: var(--primary); font-weight: 800; line-height: 1; }
-        #cidade-info { font-size: 13px; color: white; text-transform: uppercase; font-weight: bold; display: block; }
+        /* NOVO CLIMA VIA WIDGET (IMUNE A ERROS) */
+        .clima-container { width: 250px; overflow: hidden; height: 90px; display: flex; align-items: center; }
 
-        /* DATA E HORA VERDE */
+        /* DATA E HORA VERDE SPOTIFY */
         .date-display { text-align: right; color: var(--primary); }
         #hora-atual { font-size: 30px; font-weight: 900; display: block; line-height: 1; margin-bottom: 5px; }
-        #data-extenso { font-size: 14px; text-transform: capitalize; font-weight: 600; }
+        #data-extenso { font-size: 14px; text-transform: capitalize; font-weight: 600; opacity: 0.9; }
 
         .main-container { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; max-width: 1300px; margin: 0 auto; }
         .card { background: var(--card); border-radius: 15px; padding: 20px; border: 1px solid #222; }
@@ -36,8 +34,7 @@
 
         /* MONITOR */
         .user-card { background: #222; padding: 12px; border-radius: 10px; margin-bottom: 10px; border-left: 5px solid #444; }
-        .user-card.online { border-left-color: var(--primary); }
-        .user-details { background: #111; margin-top: 10px; padding: 10px; border-radius: 8px; font-size: 12px; display: none; color: #ccc; border: 1px dashed #444; }
+        .user-card.online { border-left-color: var(--primary); background: rgba(29, 185, 84, 0.05); }
 
         .player-footer { margin-top: 20px; background: #111; padding: 15px; border-radius: 12px; border: 1px solid var(--primary); text-align: center; }
         .btn-ctrl { background: none; border: none; color: white; font-size: 24px; cursor: pointer; margin: 0 15px; }
@@ -51,13 +48,13 @@
 <body>
 
     <div class="info-header">
-        <div class="temp-display">
-            <div id="clima-icon"><i class="fas fa-sun" style="font-size:30px; color:#444"></i></div>
-            <div class="temp-info">
-                <span id="cidade-info">CARREGANDO...</span>
-                <span id="temp-atual">--°C</span>
+        <div class="clima-container">
+            <div id="ww_6615b6727284f" v='1.3' loc='auto' a='{"t":"horizontal","lang":"pt","sl_lform":"c","sl_nofb":"a","sl_id":"gw1","font":"Arial","el_phow":"3","el_pnum":"3","el_picon":"1","el_cwt":"#FFFFFF00","el_cbi":"#FFFFFF00","el_cb7":"#FFFFFF00","el_cb2":"#FFFFFF00","el_cb5":"#FFFFFF00","el_cb4":"#FFFFFF00","el_cb3":"#FFFFFF00","el_cb1":"#FFFFFF00"}'>
+                <a href="https://worldweather.online/pt/" id="ww_6615b6727284f_u" target="_blank">Clima</a>
             </div>
+            <script async src="https://app2.weatherwidget.org/js/?id=ww_6615b6727284f"></script>
         </div>
+
         <div class="date-display">
             <span id="hora-atual">00:00:00</span>
             <span id="data-extenso">...</span>
@@ -68,8 +65,8 @@
         <div class="side-left">
             <div class="card" style="margin-bottom: 20px;">
                 <input type="text" id="r-nome" placeholder="Nome da Rádio">
-                <input type="text" id="r-url" placeholder="URL .mp3">
-                <button class="btn-salvar" onclick="saveRadio()">SALVAR</button>
+                <input type="text" id="r-url" placeholder="URL Streaming">
+                <button class="btn-salvar" onclick="saveRadio()">CADASTRAR</button>
             </div>
 
             <div class="card">
@@ -89,7 +86,7 @@
 
         <div class="side-right">
             <div class="card">
-                <h3>👥 MONITOR DE OUVINTES (Clique p/ detalhes)</h3>
+                <h3>👥 MONITOR DE OUVINTES</h3>
                 <div id="user-monitor"></div>
             </div>
         </div>
@@ -105,35 +102,14 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // --- HORA ---
+        // --- RELÓGIO VERDE ---
         setInterval(() => {
             const agora = new Date();
             document.getElementById('hora-atual').innerText = agora.toLocaleTimeString('pt-BR');
             document.getElementById('data-extenso').innerText = agora.toLocaleDateString('pt-BR', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
         }, 1000);
 
-        // --- CLIMA NATIVO (MUITO MAIS RÁPIDO) ---
-        async function fetchWeather(lat, lon, label) {
-            try {
-                const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=895284fb2d2c1d877c724822b7485303&lang=pt_br`);
-                const data = await res.json();
-                document.getElementById('cidade-info').innerText = label || data.name.toUpperCase();
-                document.getElementById('temp-atual').innerText = Math.round(data.main.temp) + "°C";
-                document.getElementById('clima-icon').innerHTML = `<img src="https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png">`;
-            } catch(e) { document.getElementById('cidade-info').innerText = "ERRO AO CARREGAR"; }
-        }
-
-        // Tenta pegar localização real
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (pos) => fetchWeather(pos.coords.latitude, pos.coords.longitude),
-                () => fetchWeather(-23.55, -46.63, "SÃO PAULO (AUTO)") // Fallback rápido se negar
-            );
-        } else {
-            fetchWeather(-23.55, -46.63, "SÃO PAULO");
-        }
-
-        // --- RADIOS ---
+        // --- RÁDIOS ---
         let radioArray = [];
         let currentIndex = -1;
         const player = document.getElementById('main-player');
@@ -175,23 +151,11 @@
         function nextRadio() { if(radioArray.length) playRadio((currentIndex + 1) % radioArray.length); }
         function prevRadio() { if(radioArray.length) playRadio((currentIndex - 1 + radioArray.length) % radioArray.length); }
 
-        // --- MONITOR OUVINTES (COM DETALHES AO CLICAR) ---
         db.ref('usuarios').on('value', snap => {
             const mon = document.getElementById('user-monitor'); mon.innerHTML = "";
             snap.forEach(c => {
-                const u = c.val();
-                const on = (Date.now() - (u.lastSeen || 0) < 30000);
-                mon.innerHTML += `
-                    <div class="user-card ${on?'online':''}" onclick="const d=this.querySelector('.user-details'); d.style.display=d.style.display==='block'?'none':'block'">
-                        <div style="display:flex; justify-content:space-between">
-                            <b>${u.nome}</b>
-                            <span style="font-size:10px; color:${on?'var(--primary)':'#ff4444'}">${on?'ONLINE':'OFFLINE'}</span>
-                        </div>
-                        <div class="user-details">
-                            📻 Rádio: <b>${u.ouvindo || 'Nenhuma'}</b><br>
-                            ⏱️ Status: <b>${on ? 'Ativo agora' : 'Inativo'}</b>
-                        </div>
-                    </div>`;
+                const u = c.val(); const on = (Date.now() - (u.lastSeen || 0) < 30000);
+                mon.innerHTML += `<div class="user-card ${on?'online':''}"><b>${u.nome}</b><br><small>Ouvindo: ${u.ouvindo || '---'}</small></div>`;
             });
         });
 
