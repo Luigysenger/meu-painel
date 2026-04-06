@@ -3,53 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PAINEL DE CONTROLE - ADM</title>
+    <title>PAINEL ADM - SISTEMA PRO</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f0f0f; color: #e0e0e0; margin: 0; padding: 20px; }
-        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #1DB954; padding-bottom: 10px; }
-        .container { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; }
-        .card { background: #1a1a1a; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 1px solid #333; }
-        h2 { color: #1DB954; font-size: 18px; margin-top: 0; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
-        input { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #333; background: #000; color: #fff; box-sizing: border-box; }
-        .btn-save { width: 100%; padding: 12px; background: #1DB954; color: #000; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .btn-save:hover { background: #179443; }
-        .btn-logout { background: transparent; border: 1px solid #555; color: #aaa; padding: 5px 15px; border-radius: 20px; cursor: pointer; }
+        :root { --primary: #1DB954; --bg: #121212; --card: #181818; --input: #282828; }
         
-        .list-item { background: #252525; padding: 10px; margin-top: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
-        .btn-del { background: #cc3333; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+        body { font-family: 'Montserrat', sans-serif; background-color: var(--bg); color: white; margin: 0; padding: 20px; }
         
-        .user-row { background: #222; padding: 12px; margin-bottom: 10px; border-radius: 8px; border-left: 4px solid #444; }
-        .status-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; float: right; }
-        .online { background: rgba(29, 185, 84, 0.2); color: #1DB954; }
-        .offline { background: rgba(255, 68, 68, 0.2); color: #ff4444; }
+        .header { text-align: center; padding: 20px 0; margin-bottom: 30px; }
+        .header h1 { color: var(--primary); margin: 0; font-size: 28px; text-transform: uppercase; letter-spacing: 2px; }
+        .btn-sair { background: none; border: 1px solid #444; color: #888; padding: 8px 25px; border-radius: 20px; cursor: pointer; margin-top: 10px; transition: 0.3s; }
+        .btn-sair:hover { border-color: white; color: white; }
+
+        .main-layout { display: flex; gap: 30px; max-width: 1200px; margin: 0 auto; align-items: flex-start; }
+
+        /* COLUNA DA ESQUERDA - CADASTRO E LISTA */
+        .col-left { flex: 1.2; display: flex; flex-direction: column; gap: 20px; }
         
-        .scroll-area { max-height: 400px; overflow-y: auto; padding-right: 5px; }
-        ::-webkit-scrollbar { width: 6px; }
+        /* COLUNA DA DIREITA - MONITOR */
+        .col-right { flex: 0.8; }
+
+        .card { background: var(--card); border-radius: 12px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .card h3 { margin-top: 0; color: var(--primary); font-size: 14px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
+
+        /* FORMULÁRIO */
+        input { width: 100%; padding: 15px; margin-bottom: 15px; border-radius: 8px; border: none; background: var(--input); color: white; box-sizing: border-box; font-size: 14px; }
+        input:focus { outline: 2px solid var(--primary); }
+        .btn-salvar { width: 100%; padding: 15px; background: var(--primary); color: black; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; text-transform: uppercase; }
+
+        /* LISTA DE RÁDIOS (ESTILO ONTEM) */
+        .radio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .radio-item { background: #222; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--primary); }
+        .radio-item span { font-weight: bold; font-size: 13px; }
+        .btn-excluir { background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; }
+
+        /* MONITOR DE USUÁRIOS (ESTILO ONTEM) */
+        .monitor-list { display: flex; flex-direction: column; gap: 12px; max-height: 600px; overflow-y: auto; }
+        .user-card { background: #222; padding: 15px; border-radius: 10px; position: relative; border-left: 5px solid #444; }
+        .user-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .user-name { font-weight: bold; font-size: 15px; }
+        .status-dot { font-size: 10px; font-weight: bold; text-transform: uppercase; }
+        .listening { font-size: 12px; color: #aaa; background: #111; padding: 5px 10px; border-radius: 5px; display: inline-block; }
+
+        ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>🛡️ SISTEMA ADMINISTRATIVO</h1>
-        <button class="btn-logout" onclick="location.href='index.html'">SAIR DO SISTEMA</button>
+        <h1>🛡️ PAINEL ADMINISTRATIVO</h1>
+        <button class="btn-sair" onclick="location.href='index.html'">SAIR DO PAINEL</button>
     </div>
 
-    <div class="container">
-        <div class="card">
-            <h2>📻 GERENCIAR RÁDIOS</h2>
-            <input type="text" id="r-nome" placeholder="Nome da Emissora">
-            <input type="text" id="r-url" placeholder="Link do Streaming (.mp3 / .aac)">
-            <button class="btn-save" onclick="saveRadio()">ADICIONAR NA LISTA</button>
-            
-            <div class="scroll-area" id="radios-list" style="margin-top: 15px;"></div>
+    <div class="main-layout">
+        <div class="col-left">
+            <div class="card">
+                <h3>ADICIONAR NOVA RÁDIO</h3>
+                <input type="text" id="r-nome" placeholder="Nome da Rádio">
+                <input type="text" id="r-url" placeholder="Link do Streaming (URL)">
+                <button class="btn-salvar" onclick="saveRadio()">CADASTRAR EMISSORA</button>
+            </div>
+
+            <div class="card">
+                <h3>RÁDIOS CADASTRADAS</h3>
+                <div class="radio-grid" id="radios-list"></div>
+            </div>
         </div>
 
-        <div class="card">
-            <h2>👥 OUVINTES CONECTADOS</h2>
-            <div class="scroll-area" id="user-monitor">Carregando monitor...</div>
+        <div class="col-right">
+            <div class="card">
+                <h3>MONITOR DE OUVINTES (AO VIVO)</h3>
+                <div class="monitor-list" id="user-monitor">
+                    </div>
+            </div>
         </div>
     </div>
 
@@ -66,7 +94,7 @@
         function saveRadio() {
             const n = document.getElementById('r-nome').value;
             const u = document.getElementById('r-url').value;
-            if(!n || !u) return alert("Preencha tudo!");
+            if(!n || !u) return alert("Preencha todos os campos!");
             db.ref('radios').push({ name: n, url: u, color: '#1DB954' });
             document.getElementById('r-nome').value = ""; document.getElementById('r-url').value = "";
         }
@@ -75,7 +103,11 @@
             const list = document.getElementById('radios-list'); list.innerHTML = "";
             snap.forEach(child => {
                 const r = child.val();
-                list.innerHTML += `<div class="list-item"><span>${r.name}</span><button class="btn-del" onclick="db.ref('radios/${child.key}').remove()">Excluir</button></div>`;
+                list.innerHTML += `
+                    <div class="radio-item">
+                        <span>${r.name}</span>
+                        <button class="btn-excluir" onclick="db.ref('radios/${child.key}').remove()">X</button>
+                    </div>`;
             });
         });
 
@@ -84,12 +116,14 @@
             snap.forEach(child => {
                 const u = child.val();
                 const isOnline = (Date.now() - (u.lastSeen || 0) < 30000);
-                const statusClass = isOnline ? 'online' : 'offline';
+                const color = isOnline ? "#1DB954" : "#ff4444";
                 monitor.innerHTML += `
-                    <div class="user-row" style="border-left-color: ${isOnline ? '#1DB954' : '#ff4444'}">
-                        <span class="status-badge ${statusClass}">${isOnline ? '● ONLINE' : '● OFFLINE'}</span>
-                        <div style="font-weight: bold; margin-bottom: 5px;">${u.nome}</div>
-                        <div style="font-size: 12px; color: #888;">Escutando: <span style="color:#bbb">${u.ouvindo || '---'}</span></div>
+                    <div class="user-card" style="border-left-color: ${color}">
+                        <div class="user-info">
+                            <span class="user-name">${u.nome}</span>
+                            <span class="status-dot" style="color:${color}">${isOnline ? '● ONLINE' : '● OFFLINE'}</span>
+                        </div>
+                        <div class="listening">📻 Ouvindo: ${u.ouvindo || '---'}</div>
                     </div>`;
             });
         });
