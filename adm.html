@@ -3,47 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADM - CONTROLE TOTAL</title>
+    <title>PAINEL DE CONTROLE - ADM</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
-        :root { --primary: #1DB954; --dark: #121212; --panel: #1e1e1e; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        .adm-container { width: 100%; max-width: 500px; }
-        .section-card { background: var(--panel); padding: 25px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #333; }
-        h3 { margin-top: 0; color: var(--primary); border-bottom: 1px solid #333; padding-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
-        input { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: 1px solid #444; background: #111; color: white; box-sizing: border-box; }
-        .btn-add { width: 100%; padding: 15px; border: none; border-radius: 8px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.3s; }
-        .btn-add:hover { background: #179443; }
-        .radio-list-item { background: #252525; padding: 10px; margin-bottom: 8px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--primary); }
-        .btn-del { background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
-        .monitor-row { background: #1a1a1a; margin: 10px 0; border-radius: 8px; border-left: 5px solid #444; overflow: hidden; }
-        .row-main { display: flex; justify-content: space-between; align-items: center; padding: 15px; font-weight: bold; }
-        .btn-sair { background: none; border: 1px solid #444; color: #888; padding: 8px 20px; border-radius: 20px; cursor: pointer; margin-bottom: 20px; transition: 0.3s; }
-        .btn-sair:hover { border-color: white; color: white; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f0f0f; color: #e0e0e0; margin: 0; padding: 20px; }
+        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #1DB954; padding-bottom: 10px; }
+        .container { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; }
+        .card { background: #1a1a1a; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 1px solid #333; }
+        h2 { color: #1DB954; font-size: 18px; margin-top: 0; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
+        input { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #333; background: #000; color: #fff; box-sizing: border-box; }
+        .btn-save { width: 100%; padding: 12px; background: #1DB954; color: #000; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-save:hover { background: #179443; }
+        .btn-logout { background: transparent; border: 1px solid #555; color: #aaa; padding: 5px 15px; border-radius: 20px; cursor: pointer; }
+        
+        .list-item { background: #252525; padding: 10px; margin-top: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
+        .btn-del { background: #cc3333; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+        
+        .user-row { background: #222; padding: 12px; margin-bottom: 10px; border-radius: 8px; border-left: 4px solid #444; }
+        .status-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; float: right; }
+        .online { background: rgba(29, 185, 84, 0.2); color: #1DB954; }
+        .offline { background: rgba(255, 68, 68, 0.2); color: #ff4444; }
+        
+        .scroll-area { max-height: 400px; overflow-y: auto; padding-right: 5px; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="adm-container">
-        <div style="text-align: center;">
-            <h1 style="color:var(--primary); margin-bottom: 5px;">🛡️ PAINEL ADM</h1>
-            <p style="color: #666; font-size: 12px; margin-bottom: 15px;">CONTROLE DE RÁDIOS E OUVINTES</p>
-            <button class="btn-sair" onclick="location.href='index.html'">SAIR DO PAINEL</button>
-        </div>
+    <div class="header">
+        <h1>🛡️ SISTEMA ADMINISTRATIVO</h1>
+        <button class="btn-logout" onclick="location.href='index.html'">SAIR DO SISTEMA</button>
+    </div>
 
-        <div class="section-card">
-            <h3>CADASTRAR NOVA RÁDIO</h3>
-            <input type="text" id="r-nome" placeholder="Nome da Rádio">
-            <input type="text" id="r-url" placeholder="URL do Stream (link)">
-            <button class="btn-add" onclick="saveRadio()">SALVAR RÁDIO</button>
+    <div class="container">
+        <div class="card">
+            <h2>📻 GERENCIAR RÁDIOS</h2>
+            <input type="text" id="r-nome" placeholder="Nome da Emissora">
+            <input type="text" id="r-url" placeholder="Link do Streaming (.mp3 / .aac)">
+            <button class="btn-save" onclick="saveRadio()">ADICIONAR NA LISTA</button>
             
-            <div id="radios-list" style="margin-top: 20px; max-height: 200px; overflow-y: auto;"></div>
+            <div class="scroll-area" id="radios-list" style="margin-top: 15px;"></div>
         </div>
 
-        <div class="section-card">
-            <h3>MONITOR DE ACESSOS (AO VIVO)</h3>
-            <div id="user-monitor">Conectando ao banco de dados...</div>
+        <div class="card">
+            <h2>👥 OUVINTES CONECTADOS</h2>
+            <div class="scroll-area" id="user-monitor">Carregando monitor...</div>
         </div>
     </div>
 
@@ -57,41 +63,33 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // SALVAR RÁDIO
         function saveRadio() {
             const n = document.getElementById('r-nome').value;
             const u = document.getElementById('r-url').value;
-            if(!n || !u) return alert("Preencha o nome e o link!");
+            if(!n || !u) return alert("Preencha tudo!");
             db.ref('radios').push({ name: n, url: u, color: '#1DB954' });
             document.getElementById('r-nome').value = ""; document.getElementById('r-url').value = "";
         }
 
-        // LISTAR RÁDIOS
         db.ref('radios').on('value', snap => {
             const list = document.getElementById('radios-list'); list.innerHTML = "";
             snap.forEach(child => {
                 const r = child.val();
-                list.innerHTML += `<div class="radio-list-item"><span>${r.name}</span><button class="btn-del" onclick="db.ref('radios/${child.key}').remove()">X</button></div>`;
+                list.innerHTML += `<div class="list-item"><span>${r.name}</span><button class="btn-del" onclick="db.ref('radios/${child.key}').remove()">Excluir</button></div>`;
             });
         });
 
-        // MONITOR DE USUÁRIOS
         db.ref('usuarios').on('value', snap => {
             const monitor = document.getElementById('user-monitor'); monitor.innerHTML = "";
-            if(!snap.exists()) monitor.innerHTML = "<small style='color:#666'>Nenhum ouvinte ativo.</small>";
             snap.forEach(child => {
                 const u = child.val();
                 const isOnline = (Date.now() - (u.lastSeen || 0) < 30000);
-                const color = isOnline ? "#1DB954" : "#ff4444";
+                const statusClass = isOnline ? 'online' : 'offline';
                 monitor.innerHTML += `
-                    <div class="monitor-row" style="border-left-color:${color}">
-                        <div class="row-main">
-                            <span>${u.nome}</span>
-                            <span style="font-size:10px; color:${color}">${isOnline ? 'ONLINE' : 'OFFLINE'}</span>
-                        </div>
-                        <div style="padding: 0 15px 15px 15px; font-size: 12px; color: #aaa;">
-                            Ouvindo: <b>${u.ouvindo || 'Nenhuma rádio'}</b>
-                        </div>
+                    <div class="user-row" style="border-left-color: ${isOnline ? '#1DB954' : '#ff4444'}">
+                        <span class="status-badge ${statusClass}">${isOnline ? '● ONLINE' : '● OFFLINE'}</span>
+                        <div style="font-weight: bold; margin-bottom: 5px;">${u.nome}</div>
+                        <div style="font-size: 12px; color: #888;">Escutando: <span style="color:#bbb">${u.ouvindo || '---'}</span></div>
                     </div>`;
             });
         });
