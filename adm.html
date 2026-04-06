@@ -12,17 +12,13 @@
         :root { --primary: #1DB954; --bg: #0b0b0b; --card: #181818; --danger: #e91e63; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; user-select: none; }
 
-        /* HEADER - BARRA SUPERIOR */
+        /* HEADER */
         .info-header { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 10px 25px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #333; height: 85px; }
-        
-        /* CLIMA */
         .clima-container { display: flex; align-items: center; gap: 12px; }
         .clima-info { display: flex; flex-direction: column; }
         #cidade-nome { font-size: 11px; color: #888; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
         #temp-valor { font-size: 32px; color: var(--primary); font-weight: 900; line-height: 1; }
         #clima-icon-wrapper img { width: 45px; height: 45px; filter: drop-shadow(0 0 5px var(--primary)); }
-
-        /* DATA E HORA */
         .date-display { text-align: right; color: var(--primary); }
         #hora-atual { font-size: 30px; font-weight: 900; display: block; line-height: 1; }
         #data-extenso { font-size: 13px; font-weight: 600; opacity: 0.8; text-transform: capitalize; }
@@ -32,42 +28,44 @@
         h3 { margin-top: 0; color: var(--primary); font-size: 11px; text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px; }
 
         /* RADIOS */
-        .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; }
+        .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; }
         .radio-square { aspect-ratio: 1/1; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s; color: #000; text-align: center; font-weight: bold; font-size: 13px; position: relative; }
         .radio-square.playing { background: #000 !important; color: var(--primary) !important; border: 2px solid var(--primary); box-shadow: 0 0 15px var(--primary); }
 
-        /* CONTROLES */
+        /* MONITOR DE OUVINTES MELHORADO */
+        .user-card { background: #222; padding: 12px; border-radius: 10px; margin-bottom: 5px; border-left: 4px solid #444; cursor: pointer; transition: 0.3s; position: relative; display: flex; justify-content: space-between; align-items: center; }
+        .user-card:hover { background: #2a2a2a; }
+        .user-card.online { border-left-color: var(--primary); }
+        .status-badge { font-size: 10px; font-weight: 900; padding: 2px 8px; border-radius: 20px; text-transform: uppercase; }
+        .status-on { background: rgba(29, 185, 84, 0.2); color: var(--primary); border: 1px solid var(--primary); }
+        .status-off { background: #333; color: #888; border: 1px solid #444; }
+
+        /* GAVETA DE DETALHES */
+        .user-details { background: #111; margin-top: -5px; margin-bottom: 10px; border-radius: 0 0 10px 10px; padding: 12px; border: 1px solid #333; border-top: none; font-size: 12px; display: none; animation: slideDown 0.3s ease-out; }
+        .user-details b { color: var(--primary); }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* INPUTS E BOTÕES */
+        .input-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+        input { padding: 10px; border-radius: 6px; border: 1px solid #333; background: #222; color: white; outline: none; }
+        .btn-salvar { padding: 10px 20px; background: var(--primary); border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: #000; }
+        .btn-logout { padding: 10px 15px; background: var(--danger); border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: white; }
+        .btn-refresh { padding: 10px 12px; background: #333; border: none; border-radius: 6px; cursor: pointer; color: white; }
+
         .player-footer { margin-top: 20px; background: #111; padding: 15px; border-radius: 12px; border: 1px solid #333; text-align: center; }
-        .btn-ctrl { background: none; border: none; color: white; font-size: 24px; cursor: pointer; margin: 0 15px; transition: 0.2s; }
-        .btn-ctrl:hover { color: var(--primary); transform: scale(1.1); }
-        .antena-piscando { animation: blink 1s infinite; color: var(--primary); margin-bottom: 5px; font-size: 18px; }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.2; } }
-
-        /* MONITOR */
-        .user-card { background: #222; padding: 12px; border-radius: 10px; margin-bottom: 8px; border-left: 4px solid #444; }
-        .user-card.online { border-left-color: var(--primary); background: rgba(29, 185, 84, 0.05); }
-
-        /* INPUTS E NOVOS BOTÕES */
-        input { padding: 10px; border-radius: 6px; border: 1px solid #333; background: #222; color: white; margin-right: 5px; outline: none; }
-        .btn-salvar { padding: 10px 20px; background: var(--primary); border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: #000; margin-right: 5px; }
-        .btn-logout { padding: 10px 15px; background: var(--danger); border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: white; margin-right: 5px; font-size: 12px; }
-        .btn-refresh { padding: 10px 12px; background: #333; border: none; border-radius: 6px; cursor: pointer; color: white; transition: 0.3s; }
-        .btn-refresh:hover { background: #444; color: var(--primary); }
+        .btn-ctrl { background: none; border: none; color: white; font-size: 24px; cursor: pointer; margin: 0 15px; }
     </style>
 </head>
 <body>
 
     <div class="info-header">
         <div class="clima-container">
-            <div id="clima-icon-wrapper">
-                <svg id="fallback-icon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#1DB954" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="4.22" x2="19.78" y2="5.64"/></svg>
-            </div>
+            <div id="clima-icon-wrapper"><i class="fas fa-sun" style="color:var(--primary); font-size:30px"></i></div>
             <div class="clima-info">
                 <span id="cidade-nome">BUSCANDO...</span>
                 <span id="temp-valor">--°</span>
             </div>
         </div>
-
         <div class="date-display">
             <span id="hora-atual">00:00:00</span>
             <span id="data-extenso">...</span>
@@ -76,25 +74,22 @@
 
     <div class="main-container">
         <div class="side-left">
-            <div class="card" style="margin-bottom: 20px; display: flex; align-items: center; flex-wrap: wrap; gap: 5px;">
+            <div class="card input-bar">
                 <input type="text" id="r-nome" placeholder="Nome da Rádio">
                 <input type="text" id="r-url" placeholder="URL .mp3">
                 <button class="btn-salvar" onclick="saveRadio()">SALVAR</button>
-                <button class="btn-logout" onclick="window.location.href='index.html'">ENCERRAR SEÇÃO</button>
-                <button class="btn-refresh" onclick="location.reload()" title="Atualizar Painel"><i class="fas fa-sync-alt"></i></button>
+                <button class="btn-logout" onclick="window.location.href='index.html'">SAIR</button>
+                <button class="btn-refresh" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
             </div>
 
             <div class="card">
-                <h3>📻 EMISSORAS CADASTRADAS</h3>
+                <h3>📻 EMISSORAS</h3>
                 <div class="radio-grid" id="radios-list"></div>
-                
                 <div class="player-footer">
-                    <div id="txt-ouvindo" style="font-size: 13px; margin-bottom: 10px; color: #aaa;">PAUSADO</div>
-                    <div class="controls">
-                        <button class="btn-ctrl" onclick="prevRadio()"><i class="fas fa-backward-step"></i></button>
-                        <button class="btn-ctrl" onclick="togglePlay()" style="font-size:35px"><i class="fas fa-circle-play" id="play-icon"></i></button>
-                        <button class="btn-ctrl" onclick="nextRadio()"><i class="fas fa-forward-step"></i></button>
-                    </div>
+                    <div id="txt-ouvindo" style="font-size: 13px; color: #aaa; margin-bottom:10px">PAUSADO</div>
+                    <button class="btn-ctrl" onclick="prevRadio()"><i class="fas fa-backward-step"></i></button>
+                    <button class="btn-ctrl" onclick="togglePlay()" style="font-size:35px"><i class="fas fa-circle-play" id="play-icon"></i></button>
+                    <button class="btn-ctrl" onclick="nextRadio()"><i class="fas fa-forward-step"></i></button>
                     <audio id="main-player"></audio>
                 </div>
             </div>
@@ -118,12 +113,14 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        // RELÓGIO
         setInterval(() => {
             const agora = new Date();
             document.getElementById('hora-atual').textContent = agora.toLocaleTimeString('pt-BR');
             document.getElementById('data-extenso').textContent = agora.toLocaleDateString('pt-BR', {weekday:'long', day:'numeric', month:'long'});
         }, 1000);
 
+        // CLIMA
         async function getClima() {
             try {
                 const res = await fetch(`https://api.weatherapi.com/v1/current.json?key=7662c16260844781a79133649241505&q=Cascavel&lang=pt`);
@@ -131,8 +128,7 @@
                 if (data && data.current) {
                     document.getElementById('cidade-nome').textContent = data.location.name.toUpperCase();
                     document.getElementById('temp-valor').textContent = Math.round(data.current.temp_c) + "°";
-                    const iconUrl = "https:" + data.current.condition.icon;
-                    document.getElementById('clima-icon-wrapper').innerHTML = `<img src="${iconUrl}" alt="clima">`;
+                    document.getElementById('clima-icon-wrapper').innerHTML = `<img src="https:${data.current.condition.icon}" width="45">`;
                 }
             } catch (e) {
                 document.getElementById('cidade-nome').textContent = "CASCAVEL";
@@ -141,6 +137,7 @@
         }
         getClima();
 
+        // RÁDIOS
         let radioArray = [];
         let currentIndex = -1;
         const player = document.getElementById('main-player');
@@ -158,7 +155,6 @@
             snap.forEach(c => {
                 const r = c.val(); r.key = c.key; radioArray.push(r);
                 list.innerHTML += `<div class="radio-square" id="sq-${r.key}" style="background:${r.color}" onclick="playRadio(${radioArray.length-1})">
-                    <i class="fas fa-tower-broadcast antena-piscando" id="ant-${r.key}" style="display:none"></i>
                     <span>${r.name}</span>
                 </div>`;
             });
@@ -167,9 +163,7 @@
         function playRadio(index) {
             currentIndex = index; const r = radioArray[index]; player.src = r.url; player.play();
             document.querySelectorAll('.radio-square').forEach(el => el.classList.remove('playing'));
-            document.querySelectorAll('.antena-piscando').forEach(el => el.style.display = 'none');
             document.getElementById('sq-'+r.key).classList.add('playing');
-            document.getElementById('ant-'+r.key).style.display = 'block';
             document.getElementById('txt-ouvindo').innerHTML = `OUVINDO: <b style="color:var(--primary)">${r.name}</b>`;
             document.getElementById('play-icon').className = 'fas fa-circle-pause';
         }
@@ -183,11 +177,30 @@
         function nextRadio() { if(radioArray.length) playRadio((currentIndex + 1) % radioArray.length); }
         function prevRadio() { if(radioArray.length) playRadio((currentIndex - 1 + radioArray.length) % radioArray.length); }
 
+        // MONITOR DE OUVINTES (COM GAVETA DE DETALHES)
+        function toggleUser(id) {
+            const el = document.getElementById('det-'+id);
+            el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+        }
+
         db.ref('usuarios').on('value', snap => {
             const mon = document.getElementById('user-monitor'); mon.innerHTML = "";
             snap.forEach(c => {
-                const u = c.val(); const on = (Date.now() - (u.lastSeen || 0) < 30000);
-                mon.innerHTML += `<div class="user-card ${on?'online':''}"><b>${u.nome}</b><br><small>Status: ${on ? 'Ativo' : 'Offline'}</small></div>`;
+                const u = c.val(); 
+                const on = (Date.now() - (u.lastSeen || 0) < 30000);
+                const tempoTotal = Math.floor((Date.now() - (u.loginTime || Date.now())) / 60000);
+                const tempoRadio = Math.floor((Date.now() - (u.radioStartTime || Date.now())) / 60000);
+
+                mon.innerHTML += `
+                    <div class="user-card ${on?'online':''}" onclick="toggleUser('${c.key}')">
+                        <b>${u.nome}</b>
+                        <span class="status-badge ${on?'status-on':'status-off'}">${on?'on':'off'}</span>
+                    </div>
+                    <div class="user-details" id="det-${c.key}">
+                        <p>🕒 Sessão Total: <b>${tempoTotal} min</b></p>
+                        <p>📻 Ouvindo: <b>${u.radioAtual || 'Nenhuma'}</b></p>
+                        <p>🎵 Tempo na Rádio: <b>${tempoRadio} min</b></p>
+                    </div>`;
             });
         });
 
