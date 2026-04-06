@@ -12,52 +12,49 @@
         :root { --primary: #1DB954; --bg: #0b0b0b; --card: #181818; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; user-select: none; }
 
-        /* HEADER INFO */
+        /* HEADER */
         .info-header { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 15px 25px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #333; }
         
-        /* CLIMA VIA IP */
         .temp-display { display: flex; align-items: center; gap: 15px; }
         .temp-display img { width: 55px; height: 55px; filter: drop-shadow(0 0 8px var(--primary)); }
-        .temp-info { display: flex; flex-direction: column; }
-        #cidade-info { font-size: 13px; color: white; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
         #temp-atual { font-size: 28px; color: var(--primary); font-weight: 800; line-height: 1; }
+        #cidade-info { font-size: 13px; color: white; text-transform: uppercase; font-weight: bold; display: block; }
 
-        /* DATA E HORA VERDE SPOTIFY */
+        /* DATA E HORA VERDE */
         .date-display { text-align: right; color: var(--primary); }
         #hora-atual { font-size: 30px; font-weight: 900; display: block; line-height: 1; margin-bottom: 5px; }
-        #data-extenso { font-size: 14px; text-transform: capitalize; font-weight: 600; opacity: 0.9; }
+        #data-extenso { font-size: 14px; text-transform: capitalize; font-weight: 600; }
 
         .main-container { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; max-width: 1300px; margin: 0 auto; }
         .card { background: var(--card); border-radius: 15px; padding: 20px; border: 1px solid #222; }
         h3 { margin-top: 0; color: var(--primary); font-size: 12px; text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px; }
 
-        /* FORMULÁRIO */
-        .form-row { display: flex; gap: 10px; margin-bottom: 20px; }
-        input { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #333; background: #222; color: white; outline: none; }
-        input:focus { border-color: var(--primary); }
-        .btn-salvar { padding: 12px 25px; background: var(--primary); border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: black; }
-
-        /* GRADE */
+        /* RADIOS */
         .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; }
-        .radio-square { aspect-ratio: 1/1; border-radius: 12px; position: relative; padding: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: grab; transition: 0.2s; color: #000; text-align: center; font-weight: bold; font-size: 14px; }
+        .radio-square { aspect-ratio: 1/1; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: grab; transition: 0.2s; color: #000; text-align: center; font-weight: bold; font-size: 14px; }
         .radio-square.playing { background: #000 !important; color: var(--primary) !important; border: 2px solid var(--primary); box-shadow: 0 0 20px var(--primary); }
 
+        /* MONITOR */
         .user-card { background: #222; padding: 12px; border-radius: 10px; margin-bottom: 10px; border-left: 5px solid #444; }
         .user-card.online { border-left-color: var(--primary); }
+        .user-details { background: #111; margin-top: 10px; padding: 10px; border-radius: 8px; font-size: 12px; display: none; color: #ccc; border: 1px dashed #444; }
 
         .player-footer { margin-top: 20px; background: #111; padding: 15px; border-radius: 12px; border: 1px solid var(--primary); text-align: center; }
         .btn-ctrl { background: none; border: none; color: white; font-size: 24px; cursor: pointer; margin: 0 15px; }
-        .antena-piscando { animation: blink 1s infinite; color: var(--primary); font-size: 20px; margin-bottom: 5px; }
+        .antena-piscando { animation: blink 1s infinite; color: var(--primary); }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.1; } }
+
+        input { padding: 12px; border-radius: 8px; border: 1px solid #333; background: #222; color: white; margin-right: 10px; }
+        .btn-salvar { padding: 12px 25px; background: var(--primary); border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div class="info-header">
         <div class="temp-display">
-            <div id="clima-icon"></div>
+            <div id="clima-icon"><i class="fas fa-sun" style="font-size:30px; color:#444"></i></div>
             <div class="temp-info">
-                <span id="cidade-info">Sincronizando...</span>
+                <span id="cidade-info">CARREGANDO...</span>
                 <span id="temp-atual">--°C</span>
             </div>
         </div>
@@ -70,18 +67,16 @@
     <div class="main-container">
         <div class="side-left">
             <div class="card" style="margin-bottom: 20px;">
-                <div class="form-row">
-                    <input type="text" id="r-nome" placeholder="Nome da Rádio">
-                    <input type="text" id="r-url" placeholder="URL do Streaming">
-                    <button class="btn-salvar" onclick="saveRadio()">CADASTRAR</button>
-                </div>
+                <input type="text" id="r-nome" placeholder="Nome da Rádio">
+                <input type="text" id="r-url" placeholder="URL .mp3">
+                <button class="btn-salvar" onclick="saveRadio()">SALVAR</button>
             </div>
 
             <div class="card">
                 <h3>📻 GRADE DE EMISSORAS</h3>
                 <div class="radio-grid" id="radios-list"></div>
                 <div class="player-footer">
-                    <div id="txt-ouvindo">OUVINDO AGORA: <b style="color:var(--primary)">NENHUMA</b></div>
+                    <div id="txt-ouvindo">OUVINDO: <b style="color:var(--primary)">NENHUMA</b></div>
                     <div style="margin-top:15px">
                         <button class="btn-ctrl" onclick="prevRadio()"><i class="fas fa-backward-step"></i></button>
                         <button class="btn-ctrl" onclick="togglePlay()" style="font-size:38px"><i class="fas fa-circle-play" id="play-icon"></i></button>
@@ -94,7 +89,7 @@
 
         <div class="side-right">
             <div class="card">
-                <h3>👥 MONITOR DE OUVINTES</h3>
+                <h3>👥 MONITOR DE OUVINTES (Clique p/ detalhes)</h3>
                 <div id="user-monitor"></div>
             </div>
         </div>
@@ -110,55 +105,45 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        // --- HORA ---
         setInterval(() => {
             const agora = new Date();
             document.getElementById('hora-atual').innerText = agora.toLocaleTimeString('pt-BR');
             document.getElementById('data-extenso').innerText = agora.toLocaleDateString('pt-BR', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
         }, 1000);
 
-        // --- NOVO CLIMA VIA IPWHO.IS (SEM ERRO DE CORS) ---
-        async function getClima() {
-            const cidadeTxt = document.getElementById('cidade-info');
-            const tempTxt = document.getElementById('temp-atual');
-            const iconDiv = document.getElementById('clima-icon');
-
+        // --- CLIMA NATIVO (MUITO MAIS RÁPIDO) ---
+        async function fetchWeather(lat, lon, label) {
             try {
-                // Pega localização (muito mais estável)
-                const res = await fetch('https://ipwho.is/');
+                const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=895284fb2d2c1d877c724822b7485303&lang=pt_br`);
                 const data = await res.json();
-                
-                if(data.success) {
-                    const city = data.city;
-                    const apiKey = "895284fb2d2c1d877c724822b7485303";
-                    
-                    const wRes = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}&lang=pt_br`);
-                    const wData = await wRes.json();
-
-                    cidadeTxt.innerText = city.toUpperCase();
-                    tempTxt.innerText = Math.round(wData.main.temp) + "°C";
-                    const icon = wData.weather[0].icon;
-                    iconDiv.innerHTML = `<img src="https://openweathermap.org/img/wn/${icon}@2x.png">`;
-                }
-            } catch (e) {
-                cidadeTxt.innerText = "IP PROTEGIDO";
-                tempTxt.innerText = "22°C";
-                iconDiv.innerHTML = `<i class="fas fa-sun" style="font-size:30px; color:orange"></i>`;
-            }
+                document.getElementById('cidade-info').innerText = label || data.name.toUpperCase();
+                document.getElementById('temp-atual').innerText = Math.round(data.main.temp) + "°C";
+                document.getElementById('clima-icon').innerHTML = `<img src="https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png">`;
+            } catch(e) { document.getElementById('cidade-info').innerText = "ERRO AO CARREGAR"; }
         }
-        getClima();
 
-        // --- LOGICA RADIOS ---
+        // Tenta pegar localização real
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => fetchWeather(pos.coords.latitude, pos.coords.longitude),
+                () => fetchWeather(-23.55, -46.63, "SÃO PAULO (AUTO)") // Fallback rápido se negar
+            );
+        } else {
+            fetchWeather(-23.55, -46.63, "SÃO PAULO");
+        }
+
+        // --- RADIOS ---
         let radioArray = [];
         let currentIndex = -1;
         const player = document.getElementById('main-player');
 
-        function getLightColor() { return `hsl(${Math.floor(Math.random() * 360)}, 75%, 82%)`; }
-
         function saveRadio() {
             const n = document.getElementById('r-nome').value, u = document.getElementById('r-url').value;
             if(!n || !u) return;
-            db.ref('radios').push({ name: n, url: u, color: getLightColor() });
-            document.getElementById('r-nome').value = ""; document.getElementById('r-url').value = "";
+            const color = `hsl(${Math.floor(Math.random() * 360)}, 70%, 80%)`;
+            db.ref('radios').push({ name: n, url: u, color: color });
+            document.getElementById('r-nome').value=""; document.getElementById('r-url').value="";
         }
 
         db.ref('radios').on('value', snap => {
@@ -190,11 +175,23 @@
         function nextRadio() { if(radioArray.length) playRadio((currentIndex + 1) % radioArray.length); }
         function prevRadio() { if(radioArray.length) playRadio((currentIndex - 1 + radioArray.length) % radioArray.length); }
 
+        // --- MONITOR OUVINTES (COM DETALHES AO CLICAR) ---
         db.ref('usuarios').on('value', snap => {
             const mon = document.getElementById('user-monitor'); mon.innerHTML = "";
             snap.forEach(c => {
-                const u = c.val(); const on = (Date.now() - (u.lastSeen || 0) < 30000);
-                mon.innerHTML += `<div class="user-card ${on?'online':''}"><b>${u.nome}</b><br><small>Ouvindo: ${u.ouvindo || '---'}</small></div>`;
+                const u = c.val();
+                const on = (Date.now() - (u.lastSeen || 0) < 30000);
+                mon.innerHTML += `
+                    <div class="user-card ${on?'online':''}" onclick="const d=this.querySelector('.user-details'); d.style.display=d.style.display==='block'?'none':'block'">
+                        <div style="display:flex; justify-content:space-between">
+                            <b>${u.nome}</b>
+                            <span style="font-size:10px; color:${on?'var(--primary)':'#ff4444'}">${on?'ONLINE':'OFFLINE'}</span>
+                        </div>
+                        <div class="user-details">
+                            📻 Rádio: <b>${u.ouvindo || 'Nenhuma'}</b><br>
+                            ⏱️ Status: <b>${on ? 'Ativo agora' : 'Inativo'}</b>
+                        </div>
+                    </div>`;
             });
         });
 
