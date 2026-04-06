@@ -8,7 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #BF40BF; --bg: #0b0b0b; --card: #181818; } /* Roxo Claro */
+        :root { --primary: #BF40BF; --bg: #0b0b0b; --card: #181818; } 
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; user-select: none; }
 
         /* HEADER */
@@ -28,7 +28,7 @@
         .radio-square { aspect-ratio: 1/1; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; color: #000; text-align: center; font-weight: bold; font-size: 13px; position: relative; overflow: hidden; }
         .radio-square.playing { background: #000 !important; color: var(--primary) !important; border: 2px solid var(--primary); box-shadow: 0 0 15px var(--primary); transform: scale(1.05); }
 
-        /* ANTENA PISCANDO (ESTILO ADM - ROXO) */
+        /* ANTENA PISCANDO (ROXA) */
         .antena-piscando { position: absolute; top: 10px; font-size: 16px; color: var(--primary); display: none; animation: blink 1.2s infinite; }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.1; } 100% { opacity: 1; } }
 
@@ -39,7 +39,6 @@
         .btn-ctrl { background: none; border: none; color: #888; font-size: 24px; cursor: pointer; transition: 0.3s; }
         .btn-ctrl:hover { color: white; }
         
-        /* CIRCULO ROXO LENTO */
         .btn-main { width: 65px; height: 65px; font-size: 28px; color: white; position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .btn-main.playing::before { 
             content: ''; position: absolute; inset: -5px; 
@@ -166,7 +165,8 @@
             document.getElementById('icon-play').className = "fas fa-stop";
             document.getElementById('btn-play-pause').classList.add('playing');
             document.querySelectorAll('.radio-square').forEach(el => el.classList.remove('playing'));
-            document.getElementById('card-'+r.key).classList.add('playing');
+            const card = document.getElementById('card-'+r.key);
+            if(card) card.classList.add('playing');
             updateAntenaUI();
         }
 
