@@ -13,14 +13,10 @@
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; user-select: none; }
 
         /* HEADER */
-        .info-header { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 15px 25px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #333; }
+        .info-header { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 15px 25px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #333; height: 90px; overflow: hidden; }
         
-        /* CLIMA - ESTILO SPOTIFY */
-        .temp-display { display: flex; align-items: center; gap: 12px; }
-        .temp-display img { width: 50px; height: 50px; filter: drop-shadow(0 0 5px var(--primary)); }
-        .temp-info { display: flex; flex-direction: column; }
-        #cidade-info { font-size: 11px; color: #888; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
-        #temp-atual { font-size: 28px; color: #1DB954 !important; font-weight: 900; line-height: 1; }
+        /* BOX DO CLIMA (IFRAME) */
+        .clima-box { width: 180px; height: 100%; display: flex; align-items: center; justify-content: center; transform: scale(0.9); }
 
         /* DATA E HORA VERDE */
         .date-display { text-align: right; color: var(--primary); }
@@ -38,8 +34,9 @@
 
         /* MONITOR */
         .user-card { background: #222; padding: 12px; border-radius: 10px; margin-bottom: 8px; border-left: 4px solid #444; }
-        .user-card.online { border-left-color: var(--primary); background: rgba(29, 185, 84, 0.05); }
+        .user-card.online { border-left-color: var(--primary); }
 
+        /* PLAYER FOOTER */
         .player-footer { margin-top: 20px; background: #111; padding: 15px; border-radius: 12px; border: 1px solid #333; text-align: center; }
         .btn-ctrl { background: none; border: none; color: white; font-size: 22px; cursor: pointer; margin: 0 12px; }
         .antena-piscando { animation: blink 1s infinite; color: var(--primary); margin-bottom: 5px; }
@@ -52,13 +49,10 @@
 <body>
 
     <div class="info-header">
-        <div class="temp-display">
-            <img id="clima-img" src="https://cdn.weatherapi.com/weather/64x64/day/113.png" style="display:none">
-            <div class="temp-info">
-                <span id="cidade-info">CARREGANDO...</span>
-                <span id="temp-atual">--°C</span>
-            </div>
+        <div class="clima-box">
+            <iframe src="https://www.meteoblue.com/pt/tempo/widget/three?geoloc=detect&nocurrent=0&noforecast=1&days=4&tempunit=CELSIUS&windunit=KILOMETER_PER_HOUR&layout=dark"  frameborder="0" scrolling="NO" allowtransparency="true" style="width: 250px; height: 100px;"></iframe>
         </div>
+
         <div class="date-display">
             <span id="hora-atual">00:00:00</span>
             <span id="data-extenso">...</span>
@@ -110,37 +104,6 @@
             document.getElementById('hora-atual').textContent = agora.toLocaleTimeString('pt-BR');
             document.getElementById('data-extenso').textContent = agora.toLocaleDateString('pt-BR', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
         }, 1000);
-
-        // --- SISTEMA DE CLIMA À PROVA DE FALHAS ---
-        async function getClima() {
-            const cityEl = document.getElementById('cidade-info');
-            const tempEl = document.getElementById('temp-atual');
-            const imgEl = document.getElementById('clima-img');
-
-            // Timeout de 4 segundos: Se a internet não responder, ele carrega o plano B
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 4000);
-
-            try {
-                // Tenta buscar clima e cidade direto pelo IP em uma só chamada
-                const res = await fetch(`https://api.weatherapi.com/v1/current.json?key=7662c16260844781a79133649241505&q=auto:ip&lang=pt`, { signal: controller.signal });
-                const data = await res.json();
-
-                if (data && data.current) {
-                    cityEl.textContent = data.location.name.toUpperCase();
-                    tempEl.textContent = Math.round(data.current.temp_c) + "°C";
-                    imgEl.src = "https:" + data.current.condition.icon;
-                    imgEl.style.display = "block";
-                    clearTimeout(timeoutId);
-                }
-            } catch (e) {
-                // PLANO B: Se der erro ou demorar, mostra um valor fixo para não travar
-                cityEl.textContent = "SÃO PAULO";
-                tempEl.textContent = "22°C";
-                imgEl.style.display = "block";
-            }
-        }
-        getClima();
 
         // --- RÁDIOS ---
         let radioArray = []; let currentIndex = -1;
