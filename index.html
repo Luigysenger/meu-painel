@@ -34,12 +34,12 @@
     <div class="login-container" id="box-login">
         <h2>Ouvinte Login</h2>
         <div class="input-group">
-            <label>Nome</label>
+            <label>Nome / Login</label>
             <input type="text" id="login-nome" placeholder="Digite seu nome">
         </div>
         <div class="input-group">
-            <label>Senha (4 dígitos)</label>
-            <input type="password" id="login-senha" maxlength="4" placeholder="****">
+            <label>Senha</label>
+            <input type="password" id="login-senha" placeholder="****">
         </div>
         <button class="btn-acao" onclick="fazerLogin()">ENTRAR NO PAINEL</button>
         <div id="msg-erro"></div>
@@ -90,19 +90,27 @@
         }
 
         function fazerLogin() {
-            const nome = document.getElementById('login-nome').value.trim();
-            const senha = document.getElementById('login-senha').value;
+            const nomeInput = document.getElementById('login-nome').value.trim();
+            const senhaInput = document.getElementById('login-senha').value;
             const erro = document.getElementById('msg-erro');
 
-            db.ref('usuarios').orderByChild('nome').equalTo(nome).once('value', snap => {
+            // VERIFICAÇÃO DE ADM (LUIGY)
+            if(nomeInput === "luigy" && senhaInput === "1045") {
+                localStorage.setItem('usuarioNome', 'LUIGY (ADM)');
+                window.location.href = 'adm.html';
+                return;
+            }
+
+            // VERIFICAÇÃO DE OUVINTE NO FIREBASE
+            db.ref('usuarios').orderByChild('nome').equalTo(nomeInput).once('value', snap => {
                 let userFound = false;
                 snap.forEach(child => {
                     const u = child.val();
-                    if(u.senha === senha) {
+                    if(u.senha === senhaInput) {
                         userFound = true;
                         localStorage.setItem('usuarioNome', u.nome);
                         localStorage.setItem('usuarioCidade', u.cidade);
-                        window.location.href = 'ouvinte.html'; // Aqui abre o painel das rádios
+                        window.location.href = 'ouvinte.html'; 
                     }
                 });
                 if(!userFound) erro.innerText = "Nome ou Senha incorretos!";
