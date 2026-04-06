@@ -14,7 +14,8 @@
 
         /* BARRA DE INFO SUPERIOR */
         .info-header { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 15px 25px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #333; }
-        .temp-display { color: #fff; font-weight: bold; font-size: 18px; display: flex; align-items: center; gap: 8px; }
+        .temp-display { color: #fff; font-weight: bold; font-size: 18px; display: flex; align-items: center; gap: 10px; }
+        .temp-display img { filter: drop-shadow(0 0 5px #fff); }
         .date-display { text-align: right; font-size: 13px; color: #888; }
 
         .main-container { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; max-width: 1300px; margin: 0 auto; }
@@ -26,32 +27,30 @@
         input { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #333; background: #222; color: white; }
         .btn-salvar { padding: 12px 25px; background: var(--primary); border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
 
-        /* GRID DE RÁDIOS (QUADRADOS) */
+        /* GRID DE RÁDIOS (QUADRADOS COLORIDOS) */
         .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; min-height: 150px; }
         .radio-square { 
             aspect-ratio: 1/1; border-radius: 12px; position: relative; padding: 10px;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             cursor: grab; transition: all 0.2s; color: #000; text-align: center; font-weight: bold;
         }
-        .radio-square:active { cursor: grabbing; }
-        .radio-square:hover { filter: brightness(1.1); transform: translateY(-3px); }
         .radio-square.playing { background: #000 !important; color: var(--primary) !important; border: 2px solid var(--primary); box-shadow: 0 0 15px var(--primary); }
 
-        .btn-edit-sq { position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.1); border: none; border-radius: 4px; cursor: pointer; padding: 3px 6px; }
-        .btn-del-sq { position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.1); border: none; border-radius: 4px; cursor: pointer; padding: 3px 6px; color: #800; }
+        /* MONITOR DE OUVINTES */
+        .user-card { background: #222; padding: 12px; border-radius: 10px; margin-bottom: 10px; cursor: pointer; border: 1px solid transparent; transition: 0.3s; }
+        .user-card.online { border-left: 5px solid var(--primary); background: rgba(29, 185, 84, 0.05); }
+        .user-card.offline { border-left: 5px solid #ff4444; opacity: 0.6; }
+        
+        .user-details { background: #111; margin-top: 10px; padding: 10px; border-radius: 8px; font-size: 11px; display: none; color: #aaa; border: 1px dashed #444; }
+        .user-details b { color: var(--primary); }
 
-        /* PLAYER DE CONTROLE INFERIOR */
-        .player-footer { margin-top: 20px; background: #111; padding: 15px; border-radius: 12px; border: 1px solid var(--primary); }
-        .controls { display: flex; justify-content: center; align-items: center; gap: 20px; margin-top: 10px; }
-        .btn-ctrl { background: none; border: none; color: white; font-size: 20px; cursor: pointer; transition: 0.2s; }
-        .btn-ctrl:hover { color: var(--primary); transform: scale(1.2); }
-        .btn-play-main { font-size: 35px; color: var(--primary); }
-
-        .antena-piscando { animation: blink 1s infinite; margin-bottom: 5px; }
+        /* PLAYER FOOTER */
+        .player-footer { margin-top: 20px; background: #111; padding: 15px; border-radius: 12px; border: 1px solid var(--primary); text-align: center; }
+        .antena-piscando { animation: blink 1s infinite; color: var(--primary); }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.2; } }
 
-        /* MONITOR */
-        .user-card { background: #222; padding: 10px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #444; }
+        .btn-ctrl { background: none; border: none; color: white; font-size: 20px; cursor: pointer; margin: 0 10px; }
+        .btn-ctrl:hover { color: var(--primary); scale: 1.2; }
     </style>
 </head>
 <body>
@@ -59,11 +58,11 @@
     <div class="info-header">
         <div class="temp-display">
             <span id="clima-icon"></span>
-            <span id="cidade-nome">Carregando local...</span>
-            <span id="temp-atual">--°C</span>
+            <span id="cidade-info">Localizando...</span>
+            <span id="temp-atual" style="color:var(--primary)">--°C</span>
         </div>
         <div class="date-display">
-            <div id="hora-atual" style="font-size: 18px; color: white; font-weight: bold;">00:00:00</div>
+            <div id="hora-atual" style="font-size: 20px; color: white; font-weight: bold;">00:00:00</div>
             <div id="data-extenso">...</div>
         </div>
     </div>
@@ -75,23 +74,19 @@
                     <input type="hidden" id="edit-id">
                     <input type="text" id="r-nome" placeholder="Nome da Rádio">
                     <input type="text" id="r-url" placeholder="Link do Streaming">
-                    <button class="btn-salvar" id="btn-submit" onclick="saveRadio()">SALVAR</button>
+                    <button class="btn-salvar" onclick="saveRadio()">SALVAR</button>
                 </div>
             </div>
 
             <div class="card">
-                <h3>📻 GRADE DE EMISSORAS (Arraste para ordenar)</h3>
+                <h3>📻 GRADE DE EMISSORAS</h3>
                 <div class="radio-grid" id="radios-list"></div>
 
                 <div class="player-footer">
-                    <div style="text-align: center; font-size: 12px; color: #888;">
-                        <i class="fas fa-tower-broadcast antena-piscando" id="antena-footer" style="display:none"></i>
-                        OUVINDO AGORA: <b id="txt-ouvindo" style="color:var(--primary)">NENHUMA</b>
-                    </div>
-                    <div class="controls">
+                    <div id="txt-ouvindo">OUVINDO AGORA: <b style="color:var(--primary)">NENHUMA</b></div>
+                    <div style="margin-top:10px">
                         <button class="btn-ctrl" onclick="prevRadio()"><i class="fas fa-backward-step"></i></button>
-                        <button class="btn-ctrl btn-play-main" id="play-pause" onclick="togglePlay()"><i class="fas fa-circle-play"></i></button>
-                        <button class="btn-ctrl" onclick="stopRadio()"><i class="fas fa-circle-stop"></i></button>
+                        <button class="btn-ctrl" onclick="togglePlay()" style="font-size:30px"><i class="fas fa-circle-play" id="play-icon"></i></button>
                         <button class="btn-ctrl" onclick="nextRadio()"><i class="fas fa-forward-step"></i></button>
                     </div>
                     <audio id="main-player"></audio>
@@ -101,7 +96,7 @@
 
         <div class="side-right">
             <div class="card">
-                <h3>👥 MONITOR DE OUVINTES</h3>
+                <h3>👥 MONITOR DE OUVINTES (Clique para detalhes)</h3>
                 <div id="user-monitor"></div>
             </div>
         </div>
@@ -117,119 +112,99 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let currentRadioIndex = -1;
-        let radioListArray = [];
-        const player = document.getElementById('main-player');
-
         // --- RELÓGIO E CLIMA ---
-        function updateClock() {
+        setInterval(() => {
             const agora = new Date();
             document.getElementById('hora-atual').innerText = agora.toLocaleTimeString('pt-BR');
             document.getElementById('data-extenso').innerText = agora.toLocaleDateString('pt-BR', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
-        }
-        setInterval(updateClock, 1000);
+        }, 1000);
 
         async function getClima() {
             try {
-                const ipRes = await fetch('https://ipapi.co/json/');
-                const ipData = await ipRes.json();
-                const city = ipData.city;
-                document.getElementById('cidade-nome').innerText = city + " | ";
-                const weather = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=895284fb2d2c1d877c724822b7485303&lang=pt_br`);
-                const wData = await weather.json();
-                document.getElementById('temp-atual').innerText = Math.round(wData.main.temp) + "°C";
-                document.getElementById('clima-icon').innerHTML = `<img src="https://openweathermap.org/img/wn/${wData.weather[0].icon}.png" width="30">`;
-            } catch (e) {}
+                const ip = await fetch('https://ipapi.co/json/').then(r => r.json());
+                const w = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${ip.city}&units=metric&appid=895284fb2d2c1d877c724822b7485303&lang=pt_br`).then(r => r.json());
+                document.getElementById('cidade-info').innerText = ip.city + " | " + w.weather[0].description;
+                document.getElementById('temp-atual').innerText = Math.round(w.main.temp) + "°C";
+                document.getElementById('clima-icon').innerHTML = `<img src="https://openweathermap.org/img/wn/${w.weather[0].icon}@2x.png" width="45">`;
+            } catch (e) { document.getElementById('cidade-info').innerText = "Erro ao carregar clima"; }
         }
         getClima();
 
-        // --- DRAG AND DROP (ARRASTAR) ---
-        const grid = document.getElementById('radios-list');
-        Sortable.create(grid, { animation: 150, ghostClass: 'blue-background-class' });
+        // --- CORES CLARAS ALEATÓRIAS ---
+        function getLightColor() {
+            const h = Math.floor(Math.random() * 360);
+            return `hsl(${h}, 70%, 80%)`;
+        }
 
-        // --- FIREBASE RÁDIOS ---
+        // --- RÁDIOS ---
+        let radioArray = [];
+        let currentIndex = -1;
+        const player = document.getElementById('main-player');
+
         function saveRadio() {
             const n = document.getElementById('r-nome').value, u = document.getElementById('r-url').value, id = document.getElementById('edit-id').value;
             if(!n || !u) return;
             if(id) db.ref('radios/'+id).update({name:n, url:u});
-            else db.ref('radios').push({name:n, url:u, bgColor: '#' + Math.floor(Math.random()*16777215).toString(16)});
+            else db.ref('radios').push({name:n, url:u, color: getLightColor()});
             document.getElementById('r-nome').value=""; document.getElementById('r-url').value=""; document.getElementById('edit-id').value="";
         }
 
         db.ref('radios').on('value', snap => {
-            grid.innerHTML = "";
-            radioListArray = [];
-            snap.forEach(child => {
-                const r = child.val();
-                r.key = child.key;
-                radioListArray.push(r);
-                grid.innerHTML += `
-                    <div class="radio-square" id="sq-${r.key}" style="background:${r.bgColor || '#999'}" onclick="selectRadio('${radioListArray.length-1}')">
-                        <button class="btn-edit-sq" onclick="event.stopPropagation(); editRadio('${r.key}','${r.name}','${r.url}')"><i class="fas fa-pencil"></i></button>
-                        <button class="btn-del-sq" onclick="event.stopPropagation(); deleteRadio('${r.key}')"><i class="fas fa-x"></i></button>
+            const list = document.getElementById('radios-list'); list.innerHTML = ""; radioArray = [];
+            snap.forEach(c => {
+                const r = c.val(); r.key = c.key; radioArray.push(r);
+                list.innerHTML += `
+                    <div class="radio-square" id="sq-${r.key}" style="background:${r.color || '#fff'}" onclick="playRadio(${radioArray.length-1})">
                         <i class="fas fa-tower-broadcast antena-piscando" id="ant-${r.key}" style="display:none"></i>
                         <span>${r.name}</span>
                     </div>`;
             });
         });
 
-        // --- CONTROLES DO PLAYER ---
-        function selectRadio(index) {
-            currentRadioIndex = parseInt(index);
-            const radio = radioListArray[currentRadioIndex];
-            player.src = radio.url;
-            playRadio();
-        }
-
-        function playRadio() {
-            player.play();
-            const radio = radioListArray[currentRadioIndex];
+        function playRadio(index) {
+            currentIndex = index;
+            const r = radioArray[index];
+            player.src = r.url; player.play();
             document.querySelectorAll('.radio-square').forEach(el => el.classList.remove('playing'));
             document.querySelectorAll('.antena-piscando').forEach(el => el.style.display = 'none');
-            
-            document.getElementById('sq-'+radio.key).classList.add('playing');
-            document.getElementById('ant-'+radio.key).style.display = 'block';
-            document.getElementById('antena-footer').style.display = 'inline-block';
-            document.getElementById('txt-ouvindo').innerText = radio.name;
-            document.getElementById('play-pause').innerHTML = '<i class="fas fa-circle-pause"></i>';
+            document.getElementById('sq-'+r.key).classList.add('playing');
+            document.getElementById('ant-'+r.key).style.display = 'block';
+            document.getElementById('txt-ouvindo').innerHTML = `OUVINDO AGORA: <b style="color:var(--primary)">${r.name}</b>`;
+            document.getElementById('play-icon').className = 'fas fa-circle-pause';
         }
 
         function togglePlay() {
-            if(player.paused) player.play(), document.getElementById('play-pause').innerHTML = '<i class="fas fa-circle-pause"></i>';
-            else player.pause(), document.getElementById('play-pause').innerHTML = '<i class="fas fa-circle-play"></i>';
+            if(player.paused) { player.play(); document.getElementById('play-icon').className = 'fas fa-circle-pause'; }
+            else { player.pause(); document.getElementById('play-icon').className = 'fas fa-circle-play'; }
         }
 
-        function stopRadio() {
-            player.pause(); player.src = "";
-            document.getElementById('play-pause').innerHTML = '<i class="fas fa-circle-play"></i>';
-            document.getElementById('txt-ouvindo').innerText = "PARADO";
-        }
+        function nextRadio() { currentIndex = (currentIndex + 1) % radioArray.length; playRadio(currentIndex); }
+        function prevRadio() { currentIndex = (currentIndex - 1 + radioArray.length) % radioArray.length; playRadio(currentIndex); }
 
-        function nextRadio() {
-            currentRadioIndex = (currentRadioIndex + 1) % radioListArray.length;
-            selectRadio(currentRadioIndex);
-        }
-
-        function prevRadio() {
-            currentRadioIndex = (currentRadioIndex - 1 + radioListArray.length) % radioListArray.length;
-            selectRadio(currentRadioIndex);
-        }
-
-        function deleteRadio(id) { if(confirm("Deletar rádio?")) db.ref('radios/'+id).remove(); }
-        function editRadio(id,n,u) { 
-            document.getElementById('edit-id').value=id; document.getElementById('r-nome').value=n; 
-            document.getElementById('r-url').value=u; document.getElementById('btn-submit').innerText="EDITAR";
-        }
-
+        // --- MONITOR DE OUVINTES ---
         db.ref('usuarios').on('value', snap => {
             const mon = document.getElementById('user-monitor'); mon.innerHTML = "";
             snap.forEach(c => {
-                const u = c.val(); const on = (Date.now() - (u.lastSeen || 0) < 30000);
-                mon.innerHTML += `<div class="user-card" style="border-left-color:${on?'#1DB954':'red'}">
-                    <b>${u.nome}</b> <small style="float:right;color:${on?'#1DB954':'red'}">${on?'ON':'OFF'}</small><br>
-                    <small style="color:#666">Ouvindo: ${u.ouvindo || '---'}</small></div>`;
+                const u = c.val();
+                const on = (Date.now() - (u.lastSeen || 0) < 30000);
+                const logadoHa = Math.floor((Date.now() - (u.loginTime || Date.now())) / 60000);
+                
+                mon.innerHTML += `
+                    <div class="user-card ${on?'online':'offline'}" onclick="this.querySelector('.user-details').style.display = this.querySelector('.user-details').style.display === 'block' ? 'none' : 'block'">
+                        <div style="display:flex; justify-content:space-between">
+                            <b>${u.nome}</b>
+                            <span style="font-size:10px">${on?'ONLINE':'OFFLINE'}</span>
+                        </div>
+                        <div class="user-details">
+                            Ouvindo: <b>${u.ouvindo || 'Nada'}</b><br>
+                            Logado há: <b>${logadoHa} minutos</b><br>
+                            Status: <b>${on ? 'Ativo agora' : 'Inativo'}</b>
+                        </div>
+                    </div>`;
             });
         });
+
+        Sortable.create(document.getElementById('radios-list'), { animation: 150 });
     </script>
 </body>
 </html>
