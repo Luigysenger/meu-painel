@@ -12,14 +12,17 @@
         :root { --primary: #1DB954; --bg: #0b0b0b; --card: #181818; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; user-select: none; }
 
-        /* HEADER */
-        .info-header { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 10px 25px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #333; height: 80px; }
+        /* HEADER - BARRA SUPERIOR */
+        .info-header { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 10px 25px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #333; height: 85px; }
         
-        .clima-container { display: flex; align-items: center; gap: 10px; }
+        /* CLIMA - ESTILO SPOTIFY */
+        .clima-container { display: flex; align-items: center; gap: 12px; }
         .clima-info { display: flex; flex-direction: column; }
         #cidade-nome { font-size: 11px; color: #888; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
-        #temp-valor { font-size: 28px; color: var(--primary); font-weight: 900; line-height: 1; }
+        #temp-valor { font-size: 32px; color: var(--primary); font-weight: 900; line-height: 1; }
+        #clima-icon-wrapper img { width: 45px; height: 45px; filter: drop-shadow(0 0 5px var(--primary)); }
 
+        /* DATA E HORA VERDE */
         .date-display { text-align: right; color: var(--primary); }
         #hora-atual { font-size: 30px; font-weight: 900; display: block; line-height: 1; }
         #data-extenso { font-size: 13px; font-weight: 600; opacity: 0.8; text-transform: capitalize; }
@@ -33,18 +36,18 @@
         .radio-square { aspect-ratio: 1/1; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s; color: #000; text-align: center; font-weight: bold; font-size: 13px; position: relative; }
         .radio-square.playing { background: #000 !important; color: var(--primary) !important; border: 2px solid var(--primary); box-shadow: 0 0 15px var(--primary); }
 
-        /* CONTROLES */
+        /* CONTROLES DO PLAYER */
         .player-footer { margin-top: 20px; background: #111; padding: 15px; border-radius: 12px; border: 1px solid #333; text-align: center; }
         .btn-ctrl { background: none; border: none; color: white; font-size: 24px; cursor: pointer; margin: 0 15px; transition: 0.2s; }
         .btn-ctrl:hover { color: var(--primary); transform: scale(1.1); }
-        
         .antena-piscando { animation: blink 1s infinite; color: var(--primary); margin-bottom: 5px; font-size: 18px; }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.2; } }
 
-        /* MONITOR */
+        /* MONITOR DE OUVINTES */
         .user-card { background: #222; padding: 12px; border-radius: 10px; margin-bottom: 8px; border-left: 4px solid #444; }
         .user-card.online { border-left-color: var(--primary); background: rgba(29, 185, 84, 0.05); }
 
+        /* INPUTS */
         input { padding: 10px; border-radius: 6px; border: 1px solid #333; background: #222; color: white; margin-right: 5px; outline: none; }
         .btn-salvar { padding: 10px 20px; background: var(--primary); border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: #000; }
     </style>
@@ -53,7 +56,9 @@
 
     <div class="info-header">
         <div class="clima-container">
-            <i class="fas fa-location-dot" style="color: var(--primary); font-size: 20px;"></i>
+            <div id="clima-icon-wrapper">
+                <svg id="fallback-icon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#1DB954" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="4.22" x2="19.78" y2="5.64"/></svg>
+            </div>
             <div class="clima-info">
                 <span id="cidade-nome">BUSCANDO...</span>
                 <span id="temp-valor">--°</span>
@@ -69,13 +74,13 @@
     <div class="main-container">
         <div class="side-left">
             <div class="card" style="margin-bottom: 20px;">
-                <input type="text" id="r-nome" placeholder="Nome">
+                <input type="text" id="r-nome" placeholder="Nome da Rádio">
                 <input type="text" id="r-url" placeholder="URL .mp3">
                 <button class="btn-salvar" onclick="saveRadio()">SALVAR</button>
             </div>
 
             <div class="card">
-                <h3>📻 EMISSORAS</h3>
+                <h3>📻 EMISSORAS CADASTRADAS</h3>
                 <div class="radio-grid" id="radios-list"></div>
                 
                 <div class="player-footer">
@@ -99,6 +104,7 @@
     </div>
 
     <script>
+        // CONFIGURAÇÃO FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
             authDomain: "meu-painel-f2efe.firebaseapp.com",
@@ -108,21 +114,25 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // --- HORA ---
+        // RELÓGIO EM TEMPO REAL
         setInterval(() => {
             const agora = new Date();
             document.getElementById('hora-atual').textContent = agora.toLocaleTimeString('pt-BR');
             document.getElementById('data-extenso').textContent = agora.toLocaleDateString('pt-BR', {weekday:'long', day:'numeric', month:'long'});
         }, 1000);
 
-        // --- CLIMA (FOCO EM CASCAVEL) ---
+        // FUNÇÃO DE CLIMA (ESPECÍFICA PARA CASCAVEL)
         async function getClima() {
             try {
-                const res = await fetch(`https://api.weatherapi.com/v1/current.json?key=7662c16260844781a79133649241505&q=auto:ip&lang=pt`);
+                const res = await fetch(`https://api.weatherapi.com/v1/current.json?key=7662c16260844781a79133649241505&q=Cascavel&lang=pt`);
                 const data = await res.json();
                 if (data && data.current) {
                     document.getElementById('cidade-nome').textContent = data.location.name.toUpperCase();
                     document.getElementById('temp-valor').textContent = Math.round(data.current.temp_c) + "°";
+                    
+                    // Troca o SVG pela imagem da previsão
+                    const iconUrl = "https:" + data.current.condition.icon;
+                    document.getElementById('clima-icon-wrapper').innerHTML = `<img src="${iconUrl}" alt="clima">`;
                 }
             } catch (e) {
                 document.getElementById('cidade-nome').textContent = "CASCAVEL";
@@ -131,7 +141,7 @@
         }
         getClima();
 
-        // --- RÁDIOS (RESTAURADO) ---
+        // GESTÃO DE RÁDIOS
         let radioArray = [];
         let currentIndex = -1;
         const player = document.getElementById('main-player');
@@ -174,7 +184,7 @@
         function nextRadio() { if(radioArray.length) playRadio((currentIndex + 1) % radioArray.length); }
         function prevRadio() { if(radioArray.length) playRadio((currentIndex - 1 + radioArray.length) % radioArray.length); }
 
-        // --- MONITOR ---
+        // MONITOR DE USUÁRIOS
         db.ref('usuarios').on('value', snap => {
             const mon = document.getElementById('user-monitor'); mon.innerHTML = "";
             snap.forEach(c => {
