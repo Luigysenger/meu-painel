@@ -6,6 +6,7 @@
     <title>OUVINTE - MEU PAINEL</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --primary: #BF40BF; --bg: #0b0b0b; --card: #181818; --danger: #e91e63; } 
@@ -19,7 +20,6 @@
         #hora-atual { font-size: 24px; font-weight: 900; color: var(--primary); display: block; line-height: 1; }
         #data-extenso { font-size: 12px; color: #888; text-transform: capitalize; }
         
-        /* AVISO DE NOVAS RADIOS */
         #aviso-novidades { display: none; background: var(--primary); color: white; text-align: center; padding: 8px; border-radius: 8px; margin-bottom: 15px; font-size: 13px; font-weight: bold; animation: slideDown 0.5s ease; }
         @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
@@ -29,8 +29,10 @@
         .btn-config { background: #222; border: 1px solid #444; color: white; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-bottom: 20px; width: 100%; transition: 0.3s; }
         .btn-config:hover { border-color: var(--primary); color: var(--primary); }
 
+        /* GRADE DE RADIOS COM CURSOR DE MOVIMENTO */
         .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 15px; margin-bottom: 120px; }
-        .radio-square { aspect-ratio: 1/1; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; color: #000; text-align: center; font-weight: bold; font-size: 13px; position: relative; overflow: hidden; }
+        .radio-square { aspect-ratio: 1/1; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: grab; transition: 0.3s; color: #000; text-align: center; font-weight: bold; font-size: 13px; position: relative; overflow: hidden; }
+        .radio-square:active { cursor: grabbing; }
         .radio-square.playing { background: #000 !important; color: var(--primary) !important; border: 2px solid var(--primary); box-shadow: 0 0 15px var(--primary); transform: scale(1.05); }
 
         .antena-piscando { position: absolute; top: 10px; font-size: 16px; color: var(--primary); display: none; animation: blink 1.2s infinite; }
@@ -40,7 +42,6 @@
         #txt-status { font-size: 12px; color: #888; margin-bottom: 10px; }
         .controls { display: flex; align-items: center; gap: 30px; }
         .btn-ctrl { background: none; border: none; color: #888; font-size: 24px; cursor: pointer; transition: 0.3s; }
-        .btn-ctrl:hover { color: white; }
         
         .btn-main { width: 65px; height: 65px; font-size: 28px; color: white; position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .btn-main.playing::before { content: ''; position: absolute; inset: -5px; border: 2px solid var(--primary); border-radius: 50%; border-top-color: transparent; animation: spin 2.5s linear infinite; }
@@ -124,11 +125,30 @@
         let currentIdx = -1;
         const audio = document.getElementById('player');
 
+        // INICIALIZA O SORTABLE NA GRADE
+        const gridElement = document.getElementById('minhas-radios');
+        Sortable.create(gridElement, {
+            animation: 150,
+            onEnd: function() {
+                // Ao terminar de arrastar, atualiza a ordem no localStorage
+                const novaOrdem = [];
+                document.querySelectorAll('.radio-square').forEach(el => {
+                    novaOrdem.push(el.getAttribute('data-key'));
+                });
+                minhasSelecoes = novaOrdem;
+                localStorage.setItem('minhasRadios', JSON.stringify(minhasSelecoes));
+                
+                // Recalcula r_selecionadas e o currentIdx para os botões de passar rádio não bugarem
+                const rAtual = r_selecionadas[currentIdx];
+                r_selecionadas = todasRadios.filter(r => minhasSelecoes.includes(r.key))
+                    .sort((a, b) => minhasSelecoes.indexOf(a.key) - minhasSelecoes.indexOf(b.key));
+                if(rAtual) currentIdx = r_selecionadas.findIndex(r => r.key === rAtual.key);
+            }
+        });
+
         db.ref('radios').on('value', snap => {
             const totalNovas = snap.numChildren();
             const ultimoCheck = parseInt(localStorage.getItem('totalRadiosCheck')) || totalNovas;
-            
-            // Verifica se ADM adicionou novas rádios
             if (totalNovas > ultimoCheck) {
                 const diff = totalNovas - ultimoCheck;
                 const aviso = document.getElementById('aviso-novidades');
@@ -152,10 +172,14 @@
         function renderMinhasRadios() {
             const grid = document.getElementById('minhas-radios');
             grid.innerHTML = "";
-            r_selecionadas = todasRadios.filter(r => minhasSelecoes.includes(r.key));
+            
+            // Filtra e ordena conforme a lista de IDs salva
+            r_selecionadas = todasRadios.filter(r => minhasSelecoes.includes(r.key))
+                .sort((a, b) => minhasSelecoes.indexOf(a.key) - minhasSelecoes.indexOf(b.key));
+
             r_selecionadas.forEach((r, index) => {
                 grid.innerHTML += `
-                    <div class="radio-square" id="card-${r.key}" style="background:${r.color}" onclick="playByIndex(${index})">
+                    <div class="radio-square" id="card-${r.key}" data-key="${r.key}" style="background:${r.color}" onclick="playByIndex(${index})">
                         <i class="fas fa-tower-broadcast antena-piscando" id="ant-${r.key}"></i>
                         ${r.name}
                     </div>`;
@@ -223,7 +247,7 @@
 
         function openModal() { 
             document.getElementById('modal-radios').style.display = 'flex';
-            document.getElementById('aviso-novidades').style.display = 'none'; // Esconde aviso ao abrir seleção
+            document.getElementById('aviso-novidades').style.display = 'none'; 
         }
         function closeModal() { document.getElementById('modal-radios').style.display = 'none'; }
     </script>
