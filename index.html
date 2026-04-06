@@ -3,33 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LOGIN - OUVINDO RÁDIO PRO</title>
+    <title>LOGIN - SISTEMA DE RÁDIO</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
         :root { --primary: #1DB954; --dark: #121212; --panel: #1e1e1e; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .auth-card { background: var(--panel); padding: 30px; border-radius: 16px; text-align: center; width: 350px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .input-group { text-align: left; margin-bottom: 12px; }
-        label { font-size: 11px; color: #b3b3b3; text-transform: uppercase; font-weight: bold; }
-        input { width: 100%; padding: 12px; margin-top: 5px; border-radius: 6px; border: 1px solid #333; background: #2a2a2a; color: white; box-sizing: border-box; outline: none; }
-        .btn-main { width: 100%; padding: 14px; border: none; border-radius: 25px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
-        .link-auth { font-size: 12px; color: var(--primary); cursor: pointer; display: block; margin-top: 10px; text-decoration: underline; }
+        .auth-card { background: var(--panel); padding: 40px; border-radius: 15px; text-align: center; width: 320px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #333; }
+        h2 { color: var(--primary); margin-bottom: 25px; text-transform: uppercase; letter-spacing: 2px; }
+        input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #444; background: #111; color: white; box-sizing: border-box; outline: none; }
+        input:focus { border-color: var(--primary); }
+        .btn-login { width: 100%; padding: 15px; border: none; border-radius: 8px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.3s; }
+        .btn-login:hover { background: #179443; transform: scale(1.02); }
+        #error-msg { color: #ff4444; font-size: 12px; margin-top: 10px; display: none; }
     </style>
 </head>
 <body>
 
     <div class="auth-card">
-        <h1 style="color:var(--primary)">📻 OUVINDO RÁDIO</h1>
-        <div class="input-group">
-            <label>Usuário</label>
-            <input type="text" id="login-user" onkeydown="if(event.key==='Enter') handleLogin()">
-        </div>
-        <div class="input-group">
-            <label>Senha</label>
-            <input type="password" id="login-pass" onkeydown="if(event.key==='Enter') handleLogin()">
-        </div>
-        <button class="btn-main" onclick="handleLogin()">ENTRAR NO SISTEMA</button>
+        <h2>ENTRAR</h2>
+        <input type="text" id="user" placeholder="Usuário">
+        <input type="password" id="pass" placeholder="Senha">
+        <button class="btn-login" onclick="handleLogin()">ACESSAR SISTEMA</button>
+        <div id="error-msg">Usuário ou senha incorretos!</div>
     </div>
 
     <script>
@@ -37,34 +33,37 @@
             apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
             authDomain: "meu-painel-f2efe.firebaseapp.com",
             databaseURL: "https://meu-painel-f2efe-default-rtdb.firebaseio.com/",
-            projectId: "meu-painel-f2efe",
-            storageBucket: "meu-painel-f2efe.firebasestorage.app",
-            messagingSenderId: "785606199615",
-            appId: "1:785606199615:web:75042853c86726f3942b8a"
+            projectId: "meu-painel-f2efe"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
         function handleLogin() {
-            const u = document.getElementById('login-user').value.toUpperCase();
-            const p = document.getElementById('login-pass').value;
+            const u = document.getElementById('user').value.toUpperCase();
+            const p = document.getElementById('pass').value;
+            const error = document.getElementById('error-msg');
 
-            // LOGIN DO ADM (LUIGY)
-            if(u === "LUIGY" && p === "1045") {
-                localStorage.setItem("radioUser", "LUIGY ADM");
-                window.location.href = "adm.html"; // Manda para a página do ADM
+            // 1. VERIFICA SE É O ADM (VOCÊ)
+            if (u === 'LUIGY' && p === '1045') {
+                localStorage.setItem('userId', 'ADMIN');
+                localStorage.setItem('userNome', 'LUIGY (ADM)');
+                location.href = 'adm.html';
                 return;
             }
 
-            // LOGIN DOS OUVINTES
-            db.ref('usuarios/' + u).once('value', (snap) => {
-                const data = snap.val();
-                if(data && data.senha === p) {
-                    localStorage.setItem("radioUser", u);
-                    window.location.href = "ouvinte.html"; // Manda para a página do Ouvinte
-                } else {
-                    alert("Usuário ou Senha incorretos!");
-                }
+            // 2. VERIFICA SE É UM OUVINTE NO FIREBASE
+            db.ref('usuarios').orderByChild('nome').equalTo(u).once('value', snap => {
+                let found = false;
+                snap.forEach(child => {
+                    const userData = child.val();
+                    if (userData.senha === p) {
+                        found = true;
+                        localStorage.setItem('userId', child.key);
+                        localStorage.setItem('userNome', userData.nome);
+                        location.href = 'ouvinte.html';
+                    }
+                });
+                if (!found) error.style.display = 'block';
             });
         }
     </script>

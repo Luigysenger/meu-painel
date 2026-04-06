@@ -7,35 +7,29 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
-        :root { --primary: #1DB954; --dark: #121212; --panel: #1e1e1e; --offline: #a333ff; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        
+        :root { --primary: #1DB954; --dark: #121212; --panel: #1e1e1e; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         .adm-container { width: 100%; max-width: 500px; }
-        .section-card { background: var(--panel); padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        
-        h3 { margin-top: 0; color: var(--primary); border-bottom: 1px solid #333; padding-bottom: 10px; }
-        input { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #333; background: #2a2a2a; color: white; box-sizing: border-box; }
-        
-        .btn-add { width: 100%; padding: 12px; border: none; border-radius: 5px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; }
-        
-        .radio-list-item { background: #252525; padding: 10px; margin-bottom: 5px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
-        .btn-del { background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; }
-
-        #user-monitor { margin-top: 10px; }
-        .monitor-row { background: #1a1a1a; margin: 8px 0; border-radius: 8px; cursor: pointer; border-left: 5px solid #333; transition: 0.3s; overflow: hidden; }
-        .row-main { display: flex; justify-content: space-between; align-items: center; padding: 12px; font-weight: bold; }
-        .row-details { background: #050505; padding: 12px; display: none; border-top: 1px solid #222; font-size: 12px; color: #ccc; line-height: 1.6; }
-        .row-details.show { display: block; }
-
-        .btn-voltar { background: none; border: 1px solid #444; color: #888; padding: 10px 20px; border-radius: 20px; cursor: pointer; margin-top: 10px; }
+        .section-card { background: var(--panel); padding: 25px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #333; }
+        h3 { margin-top: 0; color: var(--primary); border-bottom: 1px solid #333; padding-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+        input { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: 1px solid #444; background: #111; color: white; box-sizing: border-box; }
+        .btn-add { width: 100%; padding: 15px; border: none; border-radius: 8px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.3s; }
+        .btn-add:hover { background: #179443; }
+        .radio-list-item { background: #252525; padding: 10px; margin-bottom: 8px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--primary); }
+        .btn-del { background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .monitor-row { background: #1a1a1a; margin: 10px 0; border-radius: 8px; border-left: 5px solid #444; overflow: hidden; }
+        .row-main { display: flex; justify-content: space-between; align-items: center; padding: 15px; font-weight: bold; }
+        .btn-sair { background: none; border: 1px solid #444; color: #888; padding: 8px 20px; border-radius: 20px; cursor: pointer; margin-bottom: 20px; transition: 0.3s; }
+        .btn-sair:hover { border-color: white; color: white; }
     </style>
 </head>
 <body>
 
     <div class="adm-container">
-        <div style="text-align: center; margin-bottom: 20px;">
+        <div style="text-align: center;">
             <h1 style="color:var(--primary); margin-bottom: 5px;">🛡️ PAINEL ADM</h1>
-            <button class="btn-voltar" onclick="location.href='index.html'">SAIR DO PAINEL</button>
+            <p style="color: #666; font-size: 12px; margin-bottom: 15px;">CONTROLE DE RÁDIOS E OUVINTES</p>
+            <button class="btn-sair" onclick="location.href='index.html'">SAIR DO PAINEL</button>
         </div>
 
         <div class="section-card">
@@ -44,4 +38,63 @@
             <input type="text" id="r-url" placeholder="URL do Stream (link)">
             <button class="btn-add" onclick="saveRadio()">SALVAR RÁDIO</button>
             
-            <div id="radios-list" style="margin-top: 1
+            <div id="radios-list" style="margin-top: 20px; max-height: 200px; overflow-y: auto;"></div>
+        </div>
+
+        <div class="section-card">
+            <h3>MONITOR DE ACESSOS (AO VIVO)</h3>
+            <div id="user-monitor">Conectando ao banco de dados...</div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
+            authDomain: "meu-painel-f2efe.firebaseapp.com",
+            databaseURL: "https://meu-painel-f2efe-default-rtdb.firebaseio.com/",
+            projectId: "meu-painel-f2efe"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // SALVAR RÁDIO
+        function saveRadio() {
+            const n = document.getElementById('r-nome').value;
+            const u = document.getElementById('r-url').value;
+            if(!n || !u) return alert("Preencha o nome e o link!");
+            db.ref('radios').push({ name: n, url: u, color: '#1DB954' });
+            document.getElementById('r-nome').value = ""; document.getElementById('r-url').value = "";
+        }
+
+        // LISTAR RÁDIOS
+        db.ref('radios').on('value', snap => {
+            const list = document.getElementById('radios-list'); list.innerHTML = "";
+            snap.forEach(child => {
+                const r = child.val();
+                list.innerHTML += `<div class="radio-list-item"><span>${r.name}</span><button class="btn-del" onclick="db.ref('radios/${child.key}').remove()">X</button></div>`;
+            });
+        });
+
+        // MONITOR DE USUÁRIOS
+        db.ref('usuarios').on('value', snap => {
+            const monitor = document.getElementById('user-monitor'); monitor.innerHTML = "";
+            if(!snap.exists()) monitor.innerHTML = "<small style='color:#666'>Nenhum ouvinte ativo.</small>";
+            snap.forEach(child => {
+                const u = child.val();
+                const isOnline = (Date.now() - (u.lastSeen || 0) < 30000);
+                const color = isOnline ? "#1DB954" : "#ff4444";
+                monitor.innerHTML += `
+                    <div class="monitor-row" style="border-left-color:${color}">
+                        <div class="row-main">
+                            <span>${u.nome}</span>
+                            <span style="font-size:10px; color:${color}">${isOnline ? 'ONLINE' : 'OFFLINE'}</span>
+                        </div>
+                        <div style="padding: 0 15px 15px 15px; font-size: 12px; color: #aaa;">
+                            Ouvindo: <b>${u.ouvindo || 'Nenhuma rádio'}</b>
+                        </div>
+                    </div>`;
+            });
+        });
+    </script>
+</body>
+</html>
