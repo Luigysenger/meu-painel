@@ -3,29 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LOGIN - SISTEMA DE RÁDIO</title>
+    <title>LOGIN - MEU PAINEL</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #1DB954; --dark: #121212; --panel: #1e1e1e; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .auth-card { background: var(--panel); padding: 40px; border-radius: 15px; text-align: center; width: 320px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #333; }
+        :root { --primary: #BF40BF; --bg: #0b0b0b; --card: #181818; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        
+        .login-container { background: var(--card); padding: 30px; border-radius: 20px; border: 1px solid #333; width: 90%; max-width: 350px; text-align: center; }
         h2 { color: var(--primary); margin-bottom: 25px; text-transform: uppercase; letter-spacing: 2px; }
-        input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #444; background: #111; color: white; box-sizing: border-box; outline: none; }
+        
+        .input-group { margin-bottom: 15px; text-align: left; }
+        label { display: block; font-size: 12px; color: #888; margin-bottom: 5px; margin-left: 5px; }
+        input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #333; background: #0b0b0b; color: white; outline: none; box-sizing: border-box; }
         input:focus { border-color: var(--primary); }
-        .btn-login { width: 100%; padding: 15px; border: none; border-radius: 8px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.3s; }
-        .btn-login:hover { background: #179443; transform: scale(1.02); }
-        #error-msg { color: #ff4444; font-size: 12px; margin-top: 10px; display: none; }
+
+        .btn-acao { width: 100%; padding: 12px; border-radius: 10px; border: none; background: var(--primary); color: white; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
+        .btn-acao:hover { opacity: 0.8; }
+
+        .links { margin-top: 20px; font-size: 13px; }
+        .links a { color: var(--primary); text-decoration: none; cursor: pointer; display: block; margin-bottom: 8px; }
+        
+        .hidden { display: none; }
+        #msg-erro { color: #ff4444; font-size: 12px; margin-top: 10px; min-height: 15px; }
     </style>
 </head>
 <body>
 
-    <div class="auth-card">
-        <h2>ENTRAR</h2>
-        <input type="text" id="user" placeholder="Usuário">
-        <input type="password" id="pass" placeholder="Senha">
-        <button class="btn-login" onclick="handleLogin()">ACESSAR SISTEMA</button>
-        <div id="error-msg">Usuário ou senha incorretos!</div>
+    <div class="login-container" id="box-login">
+        <h2>Ouvinte Login</h2>
+        <div class="input-group">
+            <label>Nome</label>
+            <input type="text" id="login-nome" placeholder="Digite seu nome">
+        </div>
+        <div class="input-group">
+            <label>Senha (4 dígitos)</label>
+            <input type="password" id="login-senha" maxlength="4" placeholder="****">
+        </div>
+        <button class="btn-acao" onclick="fazerLogin()">ENTRAR NO PAINEL</button>
+        <div id="msg-erro"></div>
+        <div class="links">
+            <a onclick="mostrarTela('cadastro')">Não tenho cadastro (Cadastrar)</a>
+            <a onclick="mostrarTela('esqueci')">Esqueci minha senha</a>
+        </div>
+    </div>
+
+    <div class="login-container hidden" id="box-cadastro">
+        <h2>Novo Cadastro</h2>
+        <input type="text" id="cad-nome" placeholder="Nome" style="margin-bottom:10px">
+        <input type="text" id="cad-sobrenome" placeholder="Sobrenome" style="margin-bottom:10px">
+        <input type="text" id="cad-cidade" placeholder="Cidade" style="margin-bottom:10px">
+        <input type="password" id="cad-senha" maxlength="4" placeholder="Senha (4 dígitos)" style="margin-bottom:10px">
+        <input type="password" id="cad-confirma" maxlength="4" placeholder="Confirmar Senha" style="margin-bottom:15px">
+        <button class="btn-acao" onclick="salvarCadastro()">CRIAR MINHA CONTA</button>
+        <div class="links"><a onclick="mostrarTela('login')">Voltar para Login</a></div>
+    </div>
+
+    <div class="login-container hidden" id="box-esqueci">
+        <h2>Recuperar Senha</h2>
+        <p style="font-size:12px; color:#888">Valide seu nome e sobrenome para criar nova senha.</p>
+        <input type="text" id="rec-nome" placeholder="Seu Nome" style="margin-bottom:10px">
+        <input type="text" id="rec-sobrenome" placeholder="Seu Sobrenome" style="margin-bottom:10px">
+        <input type="password" id="rec-nova-senha" maxlength="4" placeholder="Nova Senha (4 dígitos)" style="margin-bottom:15px">
+        <button class="btn-acao" onclick="recuperarSenha()">REDEFINIR SENHA</button>
+        <div class="links"><a onclick="mostrarTela('login')">Voltar para Login</a></div>
     </div>
 
     <script>
@@ -38,32 +80,73 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        function handleLogin() {
-            const u = document.getElementById('user').value.toUpperCase();
-            const p = document.getElementById('pass').value;
-            const error = document.getElementById('error-msg');
+        function mostrarTela(tela) {
+            document.getElementById('box-login').classList.add('hidden');
+            document.getElementById('box-cadastro').classList.add('hidden');
+            document.getElementById('box-esqueci').classList.add('hidden');
+            if(tela === 'login') document.getElementById('box-login').classList.remove('hidden');
+            if(tela === 'cadastro') document.getElementById('box-cadastro').classList.remove('hidden');
+            if(tela === 'esqueci') document.getElementById('box-esqueci').classList.remove('hidden');
+        }
 
-            // 1. VERIFICA SE É O ADM (VOCÊ)
-            if (u === 'LUIGY' && p === '1045') {
-                localStorage.setItem('userId', 'ADMIN');
-                localStorage.setItem('userNome', 'LUIGY (ADM)');
-                location.href = 'adm.html';
-                return;
-            }
+        function fazerLogin() {
+            const nome = document.getElementById('login-nome').value.trim();
+            const senha = document.getElementById('login-senha').value;
+            const erro = document.getElementById('msg-erro');
 
-            // 2. VERIFICA SE É UM OUVINTE NO FIREBASE
-            db.ref('usuarios').orderByChild('nome').equalTo(u).once('value', snap => {
-                let found = false;
+            db.ref('usuarios').orderByChild('nome').equalTo(nome).once('value', snap => {
+                let userFound = false;
                 snap.forEach(child => {
-                    const userData = child.val();
-                    if (userData.senha === p) {
-                        found = true;
-                        localStorage.setItem('userId', child.key);
-                        localStorage.setItem('userNome', userData.nome);
-                        location.href = 'ouvinte.html';
+                    const u = child.val();
+                    if(u.senha === senha) {
+                        userFound = true;
+                        localStorage.setItem('usuarioNome', u.nome);
+                        localStorage.setItem('usuarioCidade', u.cidade);
+                        window.location.href = 'ouvinte.html'; // Aqui abre o painel das rádios
                     }
                 });
-                if (!found) error.style.display = 'block';
+                if(!userFound) erro.innerText = "Nome ou Senha incorretos!";
+            });
+        }
+
+        function salvarCadastro() {
+            const n = document.getElementById('cad-nome').value.trim();
+            const sbr = document.getElementById('cad-sobrenome').value.trim();
+            const cid = document.getElementById('cad-cidade').value.trim();
+            const s1 = document.getElementById('cad-senha').value;
+            const s2 = document.getElementById('cad-confirma').value;
+
+            if(!n || !sbr || !cid || s1.length < 4) { alert("Preencha tudo corretamente (Senha 4 dígitos)"); return; }
+            if(s1 !== s2) { alert("As senhas não conferem!"); return; }
+
+            db.ref('usuarios').push({
+                nome: n, sobrenome: sbr, cidade: cid, senha: s1, 
+                lastSeen: Date.now(), loginTime: Date.now()
+            }).then(() => {
+                alert("Cadastro realizado! Faça login.");
+                mostrarTela('login');
+            });
+        }
+
+        function recuperarSenha() {
+            const n = document.getElementById('rec-nome').value.trim();
+            const sbr = document.getElementById('rec-sobrenome').value.trim();
+            const nova = document.getElementById('rec-nova-senha').value;
+
+            if(nova.length < 4) { alert("Nova senha deve ter 4 dígitos"); return; }
+
+            db.ref('usuarios').once('value', snap => {
+                let achou = false;
+                snap.forEach(child => {
+                    const u = child.val();
+                    if(u.nome === n && u.sobrenome === sbr) {
+                        achou = true;
+                        db.ref('usuarios/' + child.key).update({ senha: nova });
+                        alert("Senha alterada com sucesso!");
+                        mostrarTela('login');
+                    }
+                });
+                if(!achou) alert("Usuário não encontrado com esses dados!");
             });
         }
     </script>
