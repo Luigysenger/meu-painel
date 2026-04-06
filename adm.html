@@ -9,20 +9,20 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #1DB954; --bg: #0b0b0b; --card: #181818; }
+        :root { --primary: #1DB954; --bg: #0b0b0b; --card: #181818; --danger: #e91e63; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; user-select: none; }
 
         /* HEADER - BARRA SUPERIOR */
         .info-header { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 10px 25px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #333; height: 85px; }
         
-        /* CLIMA - ESTILO SPOTIFY */
+        /* CLIMA */
         .clima-container { display: flex; align-items: center; gap: 12px; }
         .clima-info { display: flex; flex-direction: column; }
         #cidade-nome { font-size: 11px; color: #888; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
         #temp-valor { font-size: 32px; color: var(--primary); font-weight: 900; line-height: 1; }
         #clima-icon-wrapper img { width: 45px; height: 45px; filter: drop-shadow(0 0 5px var(--primary)); }
 
-        /* DATA E HORA VERDE */
+        /* DATA E HORA */
         .date-display { text-align: right; color: var(--primary); }
         #hora-atual { font-size: 30px; font-weight: 900; display: block; line-height: 1; }
         #data-extenso { font-size: 13px; font-weight: 600; opacity: 0.8; text-transform: capitalize; }
@@ -36,20 +36,23 @@
         .radio-square { aspect-ratio: 1/1; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s; color: #000; text-align: center; font-weight: bold; font-size: 13px; position: relative; }
         .radio-square.playing { background: #000 !important; color: var(--primary) !important; border: 2px solid var(--primary); box-shadow: 0 0 15px var(--primary); }
 
-        /* CONTROLES DO PLAYER */
+        /* CONTROLES */
         .player-footer { margin-top: 20px; background: #111; padding: 15px; border-radius: 12px; border: 1px solid #333; text-align: center; }
         .btn-ctrl { background: none; border: none; color: white; font-size: 24px; cursor: pointer; margin: 0 15px; transition: 0.2s; }
         .btn-ctrl:hover { color: var(--primary); transform: scale(1.1); }
         .antena-piscando { animation: blink 1s infinite; color: var(--primary); margin-bottom: 5px; font-size: 18px; }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.2; } }
 
-        /* MONITOR DE OUVINTES */
+        /* MONITOR */
         .user-card { background: #222; padding: 12px; border-radius: 10px; margin-bottom: 8px; border-left: 4px solid #444; }
         .user-card.online { border-left-color: var(--primary); background: rgba(29, 185, 84, 0.05); }
 
-        /* INPUTS */
+        /* INPUTS E NOVOS BOTÕES */
         input { padding: 10px; border-radius: 6px; border: 1px solid #333; background: #222; color: white; margin-right: 5px; outline: none; }
-        .btn-salvar { padding: 10px 20px; background: var(--primary); border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: #000; }
+        .btn-salvar { padding: 10px 20px; background: var(--primary); border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: #000; margin-right: 5px; }
+        .btn-logout { padding: 10px 15px; background: var(--danger); border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: white; margin-right: 5px; font-size: 12px; }
+        .btn-refresh { padding: 10px 12px; background: #333; border: none; border-radius: 6px; cursor: pointer; color: white; transition: 0.3s; }
+        .btn-refresh:hover { background: #444; color: var(--primary); }
     </style>
 </head>
 <body>
@@ -73,10 +76,12 @@
 
     <div class="main-container">
         <div class="side-left">
-            <div class="card" style="margin-bottom: 20px;">
+            <div class="card" style="margin-bottom: 20px; display: flex; align-items: center; flex-wrap: wrap; gap: 5px;">
                 <input type="text" id="r-nome" placeholder="Nome da Rádio">
                 <input type="text" id="r-url" placeholder="URL .mp3">
                 <button class="btn-salvar" onclick="saveRadio()">SALVAR</button>
+                <button class="btn-logout" onclick="window.location.href='index.html'">ENCERRAR SEÇÃO</button>
+                <button class="btn-refresh" onclick="location.reload()" title="Atualizar Painel"><i class="fas fa-sync-alt"></i></button>
             </div>
 
             <div class="card">
@@ -104,7 +109,6 @@
     </div>
 
     <script>
-        // CONFIGURAÇÃO FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
             authDomain: "meu-painel-f2efe.firebaseapp.com",
@@ -114,14 +118,12 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // RELÓGIO EM TEMPO REAL
         setInterval(() => {
             const agora = new Date();
             document.getElementById('hora-atual').textContent = agora.toLocaleTimeString('pt-BR');
             document.getElementById('data-extenso').textContent = agora.toLocaleDateString('pt-BR', {weekday:'long', day:'numeric', month:'long'});
         }, 1000);
 
-        // FUNÇÃO DE CLIMA (ESPECÍFICA PARA CASCAVEL)
         async function getClima() {
             try {
                 const res = await fetch(`https://api.weatherapi.com/v1/current.json?key=7662c16260844781a79133649241505&q=Cascavel&lang=pt`);
@@ -129,8 +131,6 @@
                 if (data && data.current) {
                     document.getElementById('cidade-nome').textContent = data.location.name.toUpperCase();
                     document.getElementById('temp-valor').textContent = Math.round(data.current.temp_c) + "°";
-                    
-                    // Troca o SVG pela imagem da previsão
                     const iconUrl = "https:" + data.current.condition.icon;
                     document.getElementById('clima-icon-wrapper').innerHTML = `<img src="${iconUrl}" alt="clima">`;
                 }
@@ -141,7 +141,6 @@
         }
         getClima();
 
-        // GESTÃO DE RÁDIOS
         let radioArray = [];
         let currentIndex = -1;
         const player = document.getElementById('main-player');
@@ -184,7 +183,6 @@
         function nextRadio() { if(radioArray.length) playRadio((currentIndex + 1) % radioArray.length); }
         function prevRadio() { if(radioArray.length) playRadio((currentIndex - 1 + radioArray.length) % radioArray.length); }
 
-        // MONITOR DE USUÁRIOS
         db.ref('usuarios').on('value', snap => {
             const mon = document.getElementById('user-monitor'); mon.innerHTML = "";
             snap.forEach(c => {
