@@ -6,12 +6,12 @@
     <title>OUVINTE - MEU PAINEL</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --primary: #A020F0; --bg: #0b0b0b; --card: #181818; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; user-select: none; }
 
-        /* HEADER COM HORA E DATA */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: var(--card); padding: 15px 25px; border-radius: 15px; border: 1px solid #333; }
         .user-info { display: flex; flex-direction: column; }
         #nome-ouvinte { font-size: 18px; font-weight: bold; color: var(--primary); }
@@ -19,16 +19,13 @@
         #hora-atual { font-size: 24px; font-weight: 900; color: var(--primary); display: block; line-height: 1; }
         #data-extenso { font-size: 12px; color: #888; text-transform: capitalize; }
 
-        /* BOTÃO SELECIONAR */
         .btn-config { background: #222; border: 1px solid #444; color: white; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-bottom: 20px; width: 100%; transition: 0.3s; }
         .btn-config:hover { border-color: var(--primary); color: var(--primary); }
 
-        /* GRADE */
         .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 15px; margin-bottom: 120px; }
         .radio-square { aspect-ratio: 1/1; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; color: #000; text-align: center; font-weight: bold; font-size: 13px; }
         .radio-square.playing { border: 3px solid var(--primary); box-shadow: 0 0 15px var(--primary); transform: scale(1.05); }
 
-        /* PLAYER BAR */
         .player-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #121212; border-top: 1px solid #333; padding: 20px; display: flex; flex-direction: column; align-items: center; z-index: 999; }
         #txt-status { font-size: 12px; color: #888; margin-bottom: 10px; }
         .controls { display: flex; align-items: center; gap: 30px; }
@@ -44,7 +41,6 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* MODAL */
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 1000; align-items: center; justify-content: center; }
         .modal-content { background: var(--card); width: 90%; max-width: 450px; border-radius: 20px; padding: 25px; border: 1px solid #444; }
         .radio-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #222; }
@@ -100,11 +96,9 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // NOME DO USUÁRIO
         const nomeCadastrado = localStorage.getItem('usuarioNome') || 'OUVINTE';
         document.getElementById('nome-ouvinte').innerText = "OLÁ, " + nomeCadastrado.toUpperCase();
 
-        // RELÓGIO
         setInterval(() => {
             const agora = new Date();
             document.getElementById('hora-atual').textContent = agora.toLocaleTimeString('pt-BR');
@@ -112,18 +106,17 @@
         }, 1000);
 
         let todasRadios = [];
-        let minhasSelecoes = [];
+        let minhasSelecoes = []; 
         let r_selecionadas = [];
         let currentIdx = -1;
         const audio = document.getElementById('player');
 
-        // BUSCAR SELEÇÕES DO FIREBASE (PARA FUNCIONAR EM QUALQUER PC)
+        // BUSCAR PREFERÊNCIAS DO FIREBASE (ORDEM SALVA)
         db.ref('usuarios/' + nomeCadastrado + '/preferencias').on('value', snap => {
             minhasSelecoes = snap.val() || [];
             renderMinhasRadios();
         });
 
-        // BUSCAR TODAS AS RÁDIOS DO ADM
         db.ref('radios').on('value', snap => {
             todasRadios = [];
             const containerGeral = document.getElementById('lista-geral-radios');
@@ -131,7 +124,6 @@
             snap.forEach(child => {
                 const r = child.val(); r.key = child.key;
                 todasRadios.push(r);
-                
                 const isChecked = minhasSelecoes.includes(r.key) ? 'checked' : '';
                 containerGeral.innerHTML += `
                     <div class="radio-item">
@@ -148,21 +140,40 @@
             } else {
                 minhasSelecoes.push(key);
             }
-            // SALVA NO FIREBASE EM VEZ DO LOCALSTORAGE
             db.ref('usuarios/' + nomeCadastrado + '/preferencias').set(minhasSelecoes);
         }
 
         function renderMinhasRadios() {
             const grid = document.getElementById('minhas-radios');
             grid.innerHTML = "";
-            r_selecionadas = todasRadios.filter(r => minhasSelecoes.includes(r.key));
+            
+            // Filtra e ordena conforme o array 'minhasSelecoes' vindo do Firebase
+            r_selecionadas = [];
+            minhasSelecoes.forEach(key => {
+                const radio = todasRadios.find(r => r.key === key);
+                if(radio) r_selecionadas.push(radio);
+            });
+
             r_selecionadas.forEach((r, index) => {
                 grid.innerHTML += `
-                    <div class="radio-square" id="card-${r.key}" style="background:${r.color}" onclick="playByIndex(${index})">
+                    <div class="radio-square" data-id="${r.key}" id="card-${r.key}" style="background:${r.color}" onclick="playByIndex(${index})">
                         ${r.name}
                     </div>`;
             });
         }
+
+        // CONFIGURAR O "ARRASTAR" E SALVAR ORDEM NO FIREBASE
+        Sortable.create(document.getElementById('minhas-radios'), {
+            animation: 150,
+            onEnd: function () {
+                let novaOrdem = [];
+                document.querySelectorAll('.radio-square').forEach(el => {
+                    novaOrdem.push(el.getAttribute('data-id'));
+                });
+                minhasSelecoes = novaOrdem;
+                db.ref('usuarios/' + nomeCadastrado + '/preferencias').set(novaOrdem);
+            }
+        });
 
         function playByIndex(index) {
             if (index < 0 || index >= r_selecionadas.length) return;
