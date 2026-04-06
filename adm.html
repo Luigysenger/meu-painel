@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADM - CONTROLE TOTAL</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <style>
+        :root { --primary: #1DB954; --dark: #121212; --panel: #1e1e1e; --offline: #a333ff; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        
+        .adm-container { width: 100%; max-width: 500px; }
+        .section-card { background: var(--panel); padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        
+        h3 { margin-top: 0; color: var(--primary); border-bottom: 1px solid #333; padding-bottom: 10px; }
+        input { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #333; background: #2a2a2a; color: white; box-sizing: border-box; }
+        
+        .btn-add { width: 100%; padding: 12px; border: none; border-radius: 5px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; }
+        
+        .radio-list-item { background: #252525; padding: 10px; margin-bottom: 5px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
+        .btn-del { background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; }
+
+        #user-monitor { margin-top: 10px; }
+        .monitor-row { background: #1a1a1a; margin: 8px 0; border-radius: 8px; cursor: pointer; border-left: 5px solid #333; transition: 0.3s; overflow: hidden; }
+        .row-main { display: flex; justify-content: space-between; align-items: center; padding: 12px; font-weight: bold; }
+        .row-details { background: #050505; padding: 12px; display: none; border-top: 1px solid #222; font-size: 12px; color: #ccc; line-height: 1.6; }
+        .row-details.show { display: block; }
+
+        .btn-voltar { background: none; border: 1px solid #444; color: #888; padding: 10px 20px; border-radius: 20px; cursor: pointer; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="adm-container">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <h1 style="color:var(--primary); margin-bottom: 5px;">🛡️ PAINEL ADM</h1>
+            <button class="btn-voltar" onclick="location.href='index.html'">SAIR DO PAINEL</button>
+        </div>
+
+        <div class="section-card">
+            <h3>CADASTRAR NOVA RÁDIO</h3>
+            <input type="text" id="r-nome" placeholder="Nome da Rádio">
+            <input type="text" id="r-url" placeholder="URL do Stream (link)">
+            <button class="btn-add" onclick="saveRadio()">SALVAR RÁDIO</button>
+            
+            <div id="radios-list" style="margin-top: 1
