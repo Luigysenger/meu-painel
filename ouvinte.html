@@ -3,50 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SISTEMA OUVINDO RÁDIO PRO</title>
+    <title>MEU PAINEL - OUVINTE</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #1DB954; --dark: #121212; --panel: #1e1e1e; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; overflow: hidden; }
+        :root { --primary: #1DB954; --bg: #0b0b0b; --card: #181818; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; user-select: none; }
+
+        /* HEADER */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; background: var(--card); padding: 15px 25px; border-radius: 15px; border: 1px solid #333; }
+        .user-info { display: flex; align-items: center; gap: 10px; }
+        .btn-config { background: #333; border: none; color: white; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-config:hover { background: var(--primary); color: black; }
+
+        /* GRADE DE RÁDIOS */
+        .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; margin-bottom: 100px; }
+        .radio-square { aspect-ratio: 1/1; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; color: #000; text-align: center; font-weight: bold; font-size: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .radio-square:hover { transform: scale(1.05); }
+        .radio-square.playing { border: 3px solid var(--primary); box-shadow: 0 0 20px var(--primary); }
+
+        /* PLAYER FIXO EMBAIXO */
+        .player-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #121212; border-top: 1px solid #333; padding: 15px; display: flex; flex-direction: column; align-items: center; }
+        .controls { display: flex; align-items: center; gap: 25px; }
+        .btn-ctrl { background: none; border: none; color: #b3b3b3; font-size: 20px; cursor: pointer; transition: 0.3s; }
+        .btn-ctrl:hover { color: white; }
         
-        #main-panel { display: flex; flex-direction: column; align-items: center; width: 100%; }
-        .radio-container { position: relative; width: 850px; height: 620px; background: #333; border: 10px solid #444; border-radius: 20px; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
-        .tablet-screen { position: absolute; top: 10%; left: 25%; width: 50%; height: 75%; background: #000; border-radius: 10px; display: flex; flex-direction: column; overflow: hidden; border: 4px solid #111; }
-        .tablet-header { background: var(--primary); padding: 8px 15px; font-size: 11px; color: #000; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
-        
-        .stations-grid { flex: 1; overflow-y: auto; padding: 15px; background: #0a0a0a; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-content: start; }
-        .radio-card { padding: 15px 5px; border-radius: 8px; text-align: center; color: #000; font-weight: bold; cursor: pointer; font-size: 12px; position: relative; border: 2px solid transparent; transition: 0.3s; display: flex; justify-content: center; align-items: center; }
-        .radio-card.active { background-color: #000 !important; color: var(--primary) !important; border: 2px solid var(--primary) !important; box-shadow: inset 0 0 10px rgba(29, 185, 84, 0.5); }
-        .antena-icon { margin-right: 5px; animation: blink 1.5s infinite; }
-        
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-        
-        .controls { background: #111; padding: 15px; border-top: 1px solid #222; text-align: center; }
-        .btn-logout { position: absolute; bottom: -60px; background: none; border: 1px solid #444; color: #888; padding: 8px 20px; border-radius: 20px; cursor: pointer; }
+        .btn-main { width: 55px; height: 55px; font-size: 25px; color: white; position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .btn-main.playing::before { content: ''; position: absolute; inset: -4px; border: 2px solid var(--primary); border-radius: 50%; border-top-color: transparent; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* MODAL DE SELEÇÃO */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; align-items: center; justify-content: center; }
+        .modal-content { background: var(--card); width: 90%; max-width: 500px; border-radius: 20px; padding: 25px; border: 1px solid #444; max-height: 80vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .radio-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #222; }
+        .checkbox-custom { width: 22px; height: 22px; cursor: pointer; accent-color: var(--primary); }
+
+        #txt-status { font-size: 12px; color: #888; margin-bottom: 5px; }
     </style>
 </head>
 <body>
 
-    <div id="main-panel">
-        <div class="radio-container">
-            <div class="tablet-screen">
-                <div class="tablet-header">
-                    <span>RADIO PRO</span>
-                    <span id="status-user">ONLINE</span>
-                </div>
-                
-                <div class="stations-grid" id="stations-grid">
-                    </div>
+    <div class="header">
+        <div class="user-info">
+            <i class="fas fa-user-circle" style="font-size: 30px; color: var(--primary);"></i>
+            <span id="nome-ouvinte">Ouvinte</span>
+        </div>
+        <button class="btn-config" onclick="openModal()">
+            <i class="fas fa-list-ul"></i> SELECIONAR MINHAS RÁDIOS
+        </button>
+    </div>
 
-                <div class="controls">
-                    <div id="current-playing" style="font-size: 11px; color: var(--primary); margin-bottom: 10px; font-weight: bold;">SELECIONE UMA ESTAÇÃO</div>
-                    <audio id="player" controls style="width: 100%; height: 30px; filter: invert(1);"></audio>
-                </div>
+    <div class="radio-grid" id="minhas-radios">
+        </div>
+
+    <div class="player-bar">
+        <div id="txt-status">SELECIONE UMA RÁDIO</div>
+        <div class="controls">
+            <button class="btn-ctrl" onclick="changeRadio(-1)"><i class="fas fa-step-backward"></i></button>
+            <div class="btn-main" id="btn-play-pause" onclick="togglePlay()">
+                <i class="fas fa-play" id="icon-play"></i>
             </div>
-            <button class="btn-logout" onclick="logout()">SAIR DO SISTEMA</button>
+            <button class="btn-ctrl" onclick="changeRadio(1)"><i class="fas fa-step-forward"></i></button>
         </div>
     </div>
+
+    <div class="modal" id="modal-radios">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 style="margin:0; font-size:18px; color:var(--primary)">TODAS AS EMISSORAS</h2>
+                <button class="btn-config" onclick="closeModal()">FECHAR</button>
+            </div>
+            <div id="lista-geral-radios">
+                </div>
+        </div>
+    </div>
+
+    <audio id="player"></audio>
 
     <script>
         const firebaseConfig = {
@@ -58,54 +92,90 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        const userId = localStorage.getItem('userId');
-        const userNome = localStorage.getItem('userNome');
+        let todasRadios = [];
+        let minhasSelecoes = JSON.parse(localStorage.getItem('minhasRadios')) || [];
+        const audio = document.getElementById('player');
+        let currentIdx = -1;
 
-        if (!userId) { location.href = 'index.html'; }
+        // Pegar nome do usuário (simulação ou via login)
+        const usuarioAtual = localStorage.getItem('usuarioNome') || 'Convidado';
+        document.getElementById('nome-ouvinte').innerText = usuarioAtual;
 
-        // Atualizar presença
-        function updatePresence(radioName = 'Nenhuma rádio') {
-            db.ref('usuarios/' + userId).update({
-                nome: userNome,
-                lastSeen: Date.now(),
-                ouvindo: radioName
-            });
-        }
-        setInterval(() => updatePresence(window.currentRadioName), 10000);
-
-        // Carregar Rádios
+        // Buscar TODAS as rádios que o ADM cadastrou
         db.ref('radios').on('value', snap => {
-            const grid = document.getElementById('stations-grid');
-            grid.innerHTML = "";
+            todasRadios = [];
+            const containerGeral = document.getElementById('lista-geral-radios');
+            containerGeral.innerHTML = "";
+            
             snap.forEach(child => {
                 const r = child.val();
-                const card = document.createElement('div');
-                card.className = 'radio-card';
-                card.style.backgroundColor = r.color || '#1DB954';
-                card.innerHTML = `<span>${r.name}</span>`;
-                card.onclick = () => playRadio(r.url, r.name, card);
-                grid.appendChild(card);
+                r.key = child.key;
+                todasRadios.push(r);
+
+                // Criar item no modal
+                const isChecked = minhasSelecoes.includes(r.key) ? 'checked' : '';
+                containerGeral.innerHTML += `
+                    <div class="radio-item">
+                        <span>${r.name}</span>
+                        <input type="checkbox" class="checkbox-custom" ${isChecked} onchange="toggleSelectRadio('${r.key}')">
+                    </div>
+                `;
             });
+            renderMinhasRadios();
         });
 
-        function playRadio(url, name, element) {
-            const player = document.getElementById('player');
-            const info = document.getElementById('current-playing');
-            
-            document.querySelectorAll('.radio-card').forEach(c => c.classList.remove('active'));
-            element.classList.add('active');
-            
-            player.src = url;
-            player.play();
-            info.innerHTML = "📡 OUVINDO AGORA: " + name;
-            window.currentRadioName = name;
-            updatePresence(name);
+        function toggleSelectRadio(key) {
+            if (minhasSelecoes.includes(key)) {
+                minhasSelecoes = minhasSelecoes.filter(k => k !== key);
+            } else {
+                minhasSelecoes.push(key);
+            }
+            localStorage.setItem('minhasRadios', JSON.stringify(minhasSelecoes));
+            renderMinhasRadios();
         }
 
-        function logout() {
-            localStorage.clear();
-            location.href = 'index.html';
+        function renderMinhasRadios() {
+            const grid = document.getElementById('minhas-radios');
+            grid.innerHTML = "";
+            
+            const selecionadas = todasRadios.filter(r => minhasSelecoes.includes(r.key));
+            
+            selecionadas.forEach((r, index) => {
+                grid.innerHTML += `
+                    <div class="radio-square" id="card-${r.key}" style="background:${r.color}" onclick="playNow('${r.url}', '${r.name}', '${r.key}')">
+                        <i class="fas fa-broadcast-tower" style="margin-bottom:10px; font-size:20px"></i>
+                        ${r.name}
+                    </div>
+                `;
+            });
         }
+
+        function playNow(url, nome, key) {
+            audio.src = url;
+            audio.play();
+            document.getElementById('txt-status').innerHTML = `OUVINDO: <b style="color:var(--primary)">${nome.toUpperCase()}</b>`;
+            document.getElementById('icon-play').className = "fas fa-stop";
+            document.getElementById('btn-play-pause').classList.add('playing');
+            
+            document.querySelectorAll('.radio-square').forEach(el => el.classList.remove('playing'));
+            document.getElementById('card-'+key).classList.add('playing');
+        }
+
+        function togglePlay() {
+            if(!audio.src) return;
+            if(audio.paused) {
+                audio.play();
+                document.getElementById('icon-play').className = "fas fa-stop";
+                document.getElementById('btn-play-pause').classList.add('playing');
+            } else {
+                audio.pause();
+                document.getElementById('icon-play').className = "fas fa-play";
+                document.getElementById('btn-play-pause').classList.remove('playing');
+            }
+        }
+
+        function openModal() { document.getElementById('modal-radios').style.display = 'flex'; }
+        function closeModal() { document.getElementById('modal-radios').style.display = 'none'; }
     </script>
 </body>
 </html>
