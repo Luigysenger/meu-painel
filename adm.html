@@ -9,56 +9,47 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #1DB954; --bg: #0b0b0b; --card: #181818; --danger: #e91e63; }
+        :root { --primary: #1DB954; --bg: #0b0b0b; --card: #181818; --danger: #ff4444; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; user-select: none; }
 
-        /* HEADER */
+        /* HEADER CLIMA */
         .info-header { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 10px 25px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #333; height: 85px; }
         .clima-container { display: flex; align-items: center; gap: 12px; }
-        .clima-info { display: flex; flex-direction: column; }
         #cidade-nome { font-size: 11px; color: #888; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
         #temp-valor { font-size: 32px; color: var(--primary); font-weight: 900; line-height: 1; }
-        #clima-icon-wrapper img { width: 45px; height: 45px; filter: drop-shadow(0 0 5px var(--primary)); }
         .date-display { text-align: right; color: var(--primary); }
         #hora-atual { font-size: 30px; font-weight: 900; display: block; line-height: 1; }
-        #data-extenso { font-size: 13px; font-weight: 600; opacity: 0.8; text-transform: capitalize; }
 
+        /* LAYOUT */
         .main-container { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; max-width: 1300px; margin: 0 auto; }
         .card { background: var(--card); border-radius: 15px; padding: 20px; border: 1px solid #222; }
         h3 { margin-top: 0; color: var(--primary); font-size: 11px; text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px; }
 
-        /* INPUTS E BOTÕES */
-        .input-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
-        input { padding: 10px; border-radius: 6px; border: 1px solid #333; background: #222; color: white; outline: none; }
+        /* FORMULÁRIO RÁDIO */
+        .input-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
+        input { padding: 10px; border-radius: 6px; border: 1px solid #333; background: #222; color: white; outline: none; flex: 1; }
         .btn-salvar { padding: 10px 20px; background: var(--primary); border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: #000; }
-        .btn-logout { padding: 10px 15px; background: var(--danger); border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: white; }
-        .btn-refresh { padding: 10px 12px; background: #333; border: none; border-radius: 6px; cursor: pointer; color: white; }
-
+        
         /* RADIOS */
-        .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; }
-        .radio-square { aspect-ratio: 1/1; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s; color: #000; text-align: center; font-weight: bold; font-size: 13px; position: relative; overflow: hidden; }
+        .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; min-height: 100px; }
+        .radio-square { aspect-ratio: 1/1; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s; color: #000; text-align: center; font-weight: bold; font-size: 12px; position: relative; }
         .radio-square.playing { background: #000 !important; color: var(--primary) !important; border: 2px solid var(--primary); box-shadow: 0 0 15px var(--primary); }
-
-        /* ANTENA PISCANDO */
         .antena-piscando { position: absolute; top: 10px; font-size: 16px; color: var(--primary); display: none; animation: blink 1s infinite; }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.1; } 100% { opacity: 1; } }
 
-        /* PLAYER FOOTER */
-        .player-footer { margin-top: 20px; background: #111; padding: 20px; border-radius: 15px; border: 1px solid #333; text-align: center; }
-        .player-controls { display: flex; align-items: center; justify-content: center; gap: 20px; }
-        .btn-ctrl { background: none; border: none; color: #b3b3b3; font-size: 22px; cursor: pointer; transition: 0.3s; padding: 10px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .btn-ctrl:hover { color: white; transform: scale(1.05); }
-        .btn-play-stop { font-size: 30px; color: white; position: relative; width: 60px; height: 60px; border: 2px solid transparent; transition: 0.3s; }
-        .btn-play-stop.playing::before { content: ''; position: absolute; inset: -5px; border: 2px solid var(--primary); border-radius: 50%; border-top-color: transparent; animation: spin 1s linear infinite; }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-        /* MONITOR */
-        .user-card { background: #222; padding: 12px; border-radius: 10px; margin-bottom: 5px; border-left: 4px solid #444; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        /* MONITOR DE OUVINTES COM DELETE */
+        .user-card { background: #222; padding: 12px; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #444; }
         .user-card.online { border-left-color: var(--primary); }
-        .status-badge { font-size: 10px; font-weight: 900; padding: 2px 8px; border-radius: 20px; text-transform: uppercase; }
-        .status-on { background: rgba(29, 185, 84, 0.2); color: var(--primary); border: 1px solid var(--primary); }
-        .status-off { background: #333; color: #888; border: 1px solid #444; }
-        .user-details { background: #111; margin-top: -5px; margin-bottom: 10px; border-radius: 0 0 10px 10px; padding: 12px; border: 1px solid #333; border-top: none; font-size: 12px; display: none; }
+        .user-info-text { display: flex; flex-direction: column; }
+        .user-name { font-weight: bold; font-size: 14px; }
+        .user-city { font-size: 11px; color: #888; }
+        
+        .btn-delete-user { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 18px; padding: 5px; transition: 0.3s; }
+        .btn-delete-user:hover { transform: scale(1.2); filter: drop-shadow(0 0 5px var(--danger)); }
+
+        /* PLAYER BAR */
+        .player-footer { margin-top: 20px; background: #111; padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #333; }
+        .btn-play-main { width: 50px; height: 50px; border-radius: 50%; border: none; background: var(--primary); color: black; font-size: 20px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -79,36 +70,31 @@
 
     <div class="main-container">
         <div class="side-left">
-            <div class="card input-bar">
-                <input type="text" id="r-nome" placeholder="Nome da Rádio">
-                <input type="text" id="r-url" placeholder="URL .mp3">
-                <button class="btn-salvar" onclick="saveRadio()">SALVAR</button>
-                <button class="btn-logout" onclick="window.location.href='index.html'">SAIR</button>
-                <button class="btn-refresh" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
+            <div class="card">
+                <h3>Gerenciar Rádios</h3>
+                <div class="input-bar">
+                    <input type="text" id="r-nome" placeholder="Nome da Rádio">
+                    <input type="text" id="r-url" placeholder="URL .mp3">
+                    <button class="btn-salvar" onclick="saveRadio()">ADICIONAR</button>
+                </div>
+                <div class="radio-grid" id="radios-list"></div>
             </div>
 
-            <div class="card">
-                <h3>📻 EMISSORAS</h3>
-                <div class="radio-grid" id="radios-list"></div>
-                <div class="player-footer">
-                    <div id="txt-ouvindo" style="font-size: 13px; color: #aaa; margin-bottom: 15px">PAUSADO</div>
-                    <div class="player-controls">
-                        <button class="btn-ctrl" onclick="prevRadio()"><i class="fas fa-step-backward"></i></button>
-                        <button class="btn-ctrl btn-play-stop" id="btn-main-play" onclick="togglePlayStop()"><i class="fas fa-play" id="play-stop-icon"></i></button>
-                        <button class="btn-ctrl" onclick="nextRadio()"><i class="fas fa-step-forward"></i></button>
-                    </div>
-                    <audio id="main-player"></audio>
-                </div>
+            <div class="player-footer">
+                <div id="status-play" style="font-size: 12px; color: #888; margin-bottom: 10px;">SELECIONE UMA RÁDIO</div>
+                <button class="btn-play-main" onclick="togglePlay()"><i class="fas fa-play" id="icon-p"></i></button>
             </div>
         </div>
 
         <div class="side-right">
             <div class="card">
-                <h3>👥 MONITOR DE OUVINTES</h3>
+                <h3>Monitor de Ouvintes (Remover para recadastro)</h3>
                 <div id="user-monitor"></div>
             </div>
         </div>
     </div>
+
+    <audio id="audio-adm"></audio>
 
     <script>
         const firebaseConfig = {
@@ -120,106 +106,86 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        // Relógio e Data
         setInterval(() => {
             const agora = new Date();
             document.getElementById('hora-atual').textContent = agora.toLocaleTimeString('pt-BR');
             document.getElementById('data-extenso').textContent = agora.toLocaleDateString('pt-BR', {weekday:'long', day:'numeric', month:'long'});
         }, 1000);
 
+        // Clima (Cascavel)
         async function getClima() {
             try {
                 const res = await fetch(`https://api.weatherapi.com/v1/current.json?key=7662c16260844781a79133649241505&q=Cascavel&lang=pt`);
                 const data = await res.json();
-                if (data && data.current) {
-                    document.getElementById('cidade-nome').textContent = data.location.name.toUpperCase();
-                    document.getElementById('temp-valor').textContent = Math.round(data.current.temp_c) + "°";
-                    document.getElementById('clima-icon-wrapper').innerHTML = `<img src="https:${data.current.condition.icon}" width="45">`;
-                }
+                document.getElementById('cidade-nome').textContent = data.location.name;
+                document.getElementById('temp-valor').textContent = Math.round(data.current.temp_c) + "°";
             } catch (e) {}
         }
         getClima();
 
-        let radioArray = [];
-        let currentIndex = -1;
-        const player = document.getElementById('main-player');
-        const btnPlayStop = document.getElementById('btn-main-play');
-        const iconPlayStop = document.getElementById('play-stop-icon');
-
+        // Gerenciar Rádios
         function saveRadio() {
             const n = document.getElementById('r-nome').value, u = document.getElementById('r-url').value;
             if(!n || !u) return;
             const color = `hsl(${Math.floor(Math.random() * 360)}, 70%, 80%)`;
             db.ref('radios').push({ name: n, url: u, color: color });
-            document.getElementById('r-nome').value=""; document.getElementById('r-url').value="";
+            document.getElementById('r-nome').value = ""; document.getElementById('r-url').value = "";
         }
 
+        let radiosAtuais = [];
         db.ref('radios').on('value', snap => {
-            const list = document.getElementById('radios-list'); list.innerHTML = ""; radioArray = [];
+            const list = document.getElementById('radios-list'); list.innerHTML = ""; radiosAtuais = [];
             snap.forEach(c => {
-                const r = c.val(); r.key = c.key; radioArray.push(r);
-                list.innerHTML += `<div class="radio-square" id="sq-${r.key}" style="background:${r.color}" onclick="playRadio(${radioArray.length-1})">
+                const r = c.val(); r.key = c.key; radiosAtuais.push(r);
+                list.innerHTML += `<div class="radio-square" id="sq-${r.key}" style="background:${r.color}" onclick="playRadio('${r.key}', '${r.url}', '${r.name}')">
                     <i class="fas fa-tower-broadcast antena-piscando" id="ant-${r.key}"></i>
-                    <span>${r.name}</span>
+                    ${r.name}
                 </div>`;
             });
-            if(currentIndex !== -1) updateAntenaUI();
         });
 
-        function updateAntenaUI() {
-            document.querySelectorAll('.antena-piscando').forEach(el => el.style.display = 'none');
-            if(currentIndex !== -1 && !player.paused) {
-                const r = radioArray[currentIndex];
-                const ant = document.getElementById('ant-'+r.key);
-                if(ant) ant.style.display = 'block';
-            }
+        // Player ADM
+        const player = document.getElementById('audio-adm');
+        function playRadio(key, url, nome) {
+            player.src = url; player.play();
+            document.getElementById('status-play').innerText = "OUVINDO: " + nome.toUpperCase();
+            document.getElementById('icon-p').className = "fas fa-stop";
+            document.querySelectorAll('.antena-piscando').forEach(a => a.style.display = 'none');
+            document.getElementById('ant-'+key).style.display = 'block';
+            document.querySelectorAll('.radio-square').forEach(s => s.classList.remove('playing'));
+            document.getElementById('sq-'+key).classList.add('playing');
         }
 
-        function playRadio(index) {
-            currentIndex = index; const r = radioArray[index]; player.src = r.url; player.play();
-            document.querySelectorAll('.radio-square').forEach(el => el.classList.remove('playing'));
-            document.getElementById('sq-'+r.key).classList.add('playing');
-            document.getElementById('txt-ouvindo').innerHTML = `OUVINDO: <b style="color:var(--primary)">${r.name}</b>`;
-            updatePlayerUI(true);
+        function togglePlay() {
+            if(player.paused) { player.play(); document.getElementById('icon-p').className = "fas fa-stop"; }
+            else { player.pause(); document.getElementById('icon-p').className = "fas fa-play"; }
         }
 
-        function togglePlayStop() {
-            if(!player.src) return;
-            if(player.paused) { player.play(); updatePlayerUI(true); }
-            else { player.pause(); updatePlayerUI(false); }
-        }
-
-        function updatePlayerUI(isPlaying) {
-            iconPlayStop.className = isPlaying ? 'fas fa-stop' : 'fas fa-play';
-            isPlaying ? btnPlayStop.classList.add('playing') : btnPlayStop.classList.remove('playing');
-            updateAntenaUI();
-        }
-
-        player.onplay = () => updatePlayerUI(true);
-        player.onpause = () => updatePlayerUI(false);
-
-        function nextRadio() { if(radioArray.length) playRadio((currentIndex + 1) % radioArray.length); }
-        function prevRadio() { if(radioArray.length) playRadio((currentIndex - 1 + radioArray.length) % radioArray.length); }
-
-        function toggleUser(id) {
-            const el = document.getElementById('det-'+id);
-            el.style.display = (el.style.display === 'block') ? 'none' : 'block';
-        }
-
+        // MONITOR DE OUVINTES COM OPÇÃO DE REMOVER
         db.ref('usuarios').on('value', snap => {
             const mon = document.getElementById('user-monitor'); mon.innerHTML = "";
             snap.forEach(c => {
-                const u = c.val(); const on = (Date.now() - (u.lastSeen || 0) < 30000);
+                const u = c.val();
+                const isOnline = (Date.now() - (u.lastSeen || 0) < 10000);
                 mon.innerHTML += `
-                    <div class="user-card ${on?'online':''}" onclick="toggleUser('${c.key}')">
-                        <b>${u.nome}</b>
-                        <span class="status-badge ${on?'status-on':'status-off'}">${on?'on':'off'}</span>
-                    </div>
-                    <div class="user-details" id="det-${c.key}">
-                        <p>🕒 Sessão: <b>${Math.floor((Date.now() - (u.loginTime || Date.now())) / 60000)} min</b></p>
-                        <p>📻 Ouvindo: <b>${u.radioAtual || 'Nenhuma'}</b></p>
+                    <div class="user-card ${isOnline ? 'online' : ''}">
+                        <div class="user-info-text">
+                            <span class="user-name">${u.nome} ${u.sobrenome || ''}</span>
+                            <span class="user-city">${u.cidade || 'S/ Cidade'}</span>
+                        </div>
+                        <button class="btn-delete-user" onclick="removerOuvinte('${c.key}', '${u.nome}')" title="Excluir para recadastro">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
                     </div>`;
             });
         });
+
+        function removerOuvinte(key, nome) {
+            if(confirm(`Deseja remover o ouvinte ${nome}? Ele será desconectado e precisará cadastrar novamente com as novas regras.`)) {
+                db.ref('usuarios/' + key).remove();
+            }
+        }
 
         Sortable.create(document.getElementById('radios-list'), { animation: 150 });
     </script>
