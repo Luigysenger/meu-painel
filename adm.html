@@ -15,12 +15,12 @@
         /* HEADER */
         .info-header { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 15px 25px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #333; }
         
-        /* CLIMA - ESTILO SPOTIFY */
+        /* CLIMA - CORREÇÃO DE EXIBIÇÃO */
         .temp-display { display: flex; align-items: center; gap: 12px; }
         .temp-display img { width: 50px; height: 50px; filter: drop-shadow(0 0 5px var(--primary)); }
-        .temp-info { display: flex; flex-direction: column; }
-        #cidade-info { font-size: 12px; color: #aaa; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
-        #temp-atual { font-size: 24px; color: var(--primary); font-weight: 800; line-height: 1.1; }
+        .temp-info { display: flex; flex-direction: column; min-width: 100px; }
+        #cidade-info { font-size: 11px; color: #888; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
+        #temp-atual { font-size: 28px; color: #1DB954 !important; font-weight: 900; line-height: 1; display: block; }
 
         /* DATA E HORA VERDE */
         .date-display { text-align: right; color: var(--primary); }
@@ -43,7 +43,6 @@
         /* PLAYER FOOTER */
         .player-footer { margin-top: 20px; background: #111; padding: 15px; border-radius: 12px; border: 1px solid #333; text-align: center; }
         .btn-ctrl { background: none; border: none; color: white; font-size: 22px; cursor: pointer; margin: 0 12px; }
-        .btn-ctrl:hover { color: var(--primary); }
         .antena-piscando { animation: blink 1s infinite; color: var(--primary); margin-bottom: 5px; }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.2; } }
 
@@ -54,11 +53,11 @@
 <body>
 
     <div class="info-header">
-        <div class="temp-display" id="clima-box">
-            <img id="clima-img" src="https://cdn.weatherapi.com/weather/64x64/day/116.png" alt="clima">
+        <div class="temp-display">
+            <img id="clima-img" src="https://cdn.weatherapi.com/weather/64x64/day/113.png" style="display: none;">
             <div class="temp-info">
-                <span id="cidade-info">CARREGANDO...</span>
-                <span id="temp-atual">--°C</span>
+                <span id="cidade-info">LOCALIZANDO...</span>
+                <span id="temp-atual">...</span>
             </div>
         </div>
         <div class="date-display">
@@ -76,7 +75,7 @@
             </div>
 
             <div class="card">
-                <h3>📻 EMISSORAS DISPONÍVEIS</h3>
+                <h3>📻 EMISSORAS</h3>
                 <div class="radio-grid" id="radios-list"></div>
                 <div class="player-footer">
                     <div id="txt-ouvindo" style="font-size: 13px;">PAUSADO</div>
@@ -111,30 +110,36 @@
         // --- RELÓGIO ---
         setInterval(() => {
             const agora = new Date();
-            document.getElementById('hora-atual').innerText = agora.toLocaleTimeString('pt-BR');
-            document.getElementById('data-extenso').innerText = agora.toLocaleDateString('pt-BR', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+            document.getElementById('hora-atual').textContent = agora.toLocaleTimeString('pt-BR');
+            document.getElementById('data-extenso').textContent = agora.toLocaleDateString('pt-BR', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
         }, 1000);
 
-        // --- NOVO SISTEMA DE CLIMA (WEATHER API) ---
+        // --- CLIMA REFEITO (FOCO NO TEXTO) ---
         async function getClima() {
+            const cityEl = document.getElementById('cidade-info');
+            const tempEl = document.getElementById('temp-atual');
+            const imgEl = document.getElementById('clima-img');
+
             try {
-                // Busca a cidade pelo IP de forma simples
+                // Pega o IP primeiro
                 const ipRes = await fetch('https://api.ipify.org?format=json');
                 const ipData = await ipRes.json();
                 
-                // Busca clima usando o IP (A WeatherAPI aceita IP como parâmetro direto!)
-                const weatherRes = await fetch(`https://api.weatherapi.com/v1/current.json?key=7662c16260844781a79133649241505&q=${ipData.ip}&lang=pt`);
-                const data = await weatherRes.json();
+                // Busca Clima usando o IP (WeatherAPI)
+                const res = await fetch(`https://api.weatherapi.com/v1/current.json?key=7662c16260844781a79133649241505&q=${ipData.ip}&lang=pt`);
+                const data = await res.json();
 
-                if (data.current) {
-                    document.getElementById('cidade-info').innerText = data.location.name.toUpperCase();
-                    document.getElementById('temp-atual').innerText = Math.round(data.current.temp_c) + "°C";
-                    document.getElementById('clima-img').src = "https:" + data.current.condition.icon;
+                if (data && data.current) {
+                    cityEl.textContent = data.location.name.toUpperCase();
+                    // Garante que o número vire texto e concatena com °C
+                    tempEl.textContent = Math.round(data.current.temp_c) + "°C";
+                    imgEl.src = "https:" + data.current.condition.icon;
+                    imgEl.style.display = "block";
                 }
             } catch (e) {
-                // Fallback caso o IP falhe
-                document.getElementById('cidade-info').innerText = "SÃO PAULO";
-                document.getElementById('temp-atual').innerText = "24°C";
+                console.error("Erro no clima:", e);
+                cityEl.textContent = "BRASIL";
+                tempEl.textContent = "22°C";
             }
         }
         getClima();
