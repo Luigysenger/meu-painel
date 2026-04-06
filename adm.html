@@ -27,13 +27,37 @@
         .card { background: var(--card); border-radius: 15px; padding: 20px; border: 1px solid #222; }
         h3 { margin-top: 0; color: var(--primary); font-size: 11px; text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px; }
 
+        /* INPUTS E BOTÕES */
+        .input-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+        input { padding: 10px; border-radius: 6px; border: 1px solid #333; background: #222; color: white; outline: none; }
+        .btn-salvar { padding: 10px 20px; background: var(--primary); border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: #000; }
+        .btn-logout { padding: 10px 15px; background: var(--danger); border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: white; }
+        .btn-refresh { padding: 10px 12px; background: #333; border: none; border-radius: 6px; cursor: pointer; color: white; }
+
         /* RADIOS */
         .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; }
         .radio-square { aspect-ratio: 1/1; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s; color: #000; text-align: center; font-weight: bold; font-size: 13px; position: relative; }
         .radio-square.playing { background: #000 !important; color: var(--primary) !important; border: 2px solid var(--primary); box-shadow: 0 0 15px var(--primary); }
 
-        /* MONITOR DE OUVINTES MELHORADO */
-        .user-card { background: #222; padding: 12px; border-radius: 10px; margin-bottom: 5px; border-left: 4px solid #444; cursor: pointer; transition: 0.3s; position: relative; display: flex; justify-content: space-between; align-items: center; }
+        /* PLAYER FOOTER MODERNO */
+        .player-footer { margin-top: 20px; background: #111; padding: 20px; border-radius: 15px; border: 1px solid #333; text-align: center; }
+        .player-controls { display: flex; align-items: center; justify-content: center; gap: 20px; }
+        
+        /* BOTÕES DE CONTROLE ESTILO MINIMALISTA */
+        .btn-ctrl { background: none; border: none; color: #b3b3b3; font-size: 22px; cursor: pointer; transition: 0.3s; padding: 10px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .btn-ctrl:hover { color: white; transform: scale(1.05); }
+
+        /* BOTÃO CENTRAL PLAY/STOP COM ANEL */
+        .btn-play-stop { font-size: 30px; color: white; position: relative; width: 60px; height: 60px; border: 2px solid transparent; transition: 0.3s; }
+        .btn-play-stop:hover { color: var(--primary); transform: scale(1.1); }
+        
+        /* ANEL VERDE FININHO GIRANDO */
+        .btn-play-stop.playing::before { content: ''; position: absolute; top: -5px; left: -5px; right: -5px; bottom: -5px; border: 2px solid var(--primary); border-radius: 50%; border-top-color: transparent; animation: spin 1s linear infinite; }
+
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* MONITOR DE OUVINTES */
+        .user-card { background: #222; padding: 12px; border-radius: 10px; margin-bottom: 5px; border-left: 4px solid #444; cursor: pointer; transition: 0.3s; display: flex; justify-content: space-between; align-items: center; }
         .user-card:hover { background: #2a2a2a; }
         .user-card.online { border-left-color: var(--primary); }
         .status-badge { font-size: 10px; font-weight: 900; padding: 2px 8px; border-radius: 20px; text-transform: uppercase; }
@@ -44,16 +68,6 @@
         .user-details { background: #111; margin-top: -5px; margin-bottom: 10px; border-radius: 0 0 10px 10px; padding: 12px; border: 1px solid #333; border-top: none; font-size: 12px; display: none; animation: slideDown 0.3s ease-out; }
         .user-details b { color: var(--primary); }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* INPUTS E BOTÕES */
-        .input-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
-        input { padding: 10px; border-radius: 6px; border: 1px solid #333; background: #222; color: white; outline: none; }
-        .btn-salvar { padding: 10px 20px; background: var(--primary); border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: #000; }
-        .btn-logout { padding: 10px 15px; background: var(--danger); border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: white; }
-        .btn-refresh { padding: 10px 12px; background: #333; border: none; border-radius: 6px; cursor: pointer; color: white; }
-
-        .player-footer { margin-top: 20px; background: #111; padding: 15px; border-radius: 12px; border: 1px solid #333; text-align: center; }
-        .btn-ctrl { background: none; border: none; color: white; font-size: 24px; cursor: pointer; margin: 0 15px; }
     </style>
 </head>
 <body>
@@ -86,10 +100,12 @@
                 <h3>📻 EMISSORAS</h3>
                 <div class="radio-grid" id="radios-list"></div>
                 <div class="player-footer">
-                    <div id="txt-ouvindo" style="font-size: 13px; color: #aaa; margin-bottom:10px">PAUSADO</div>
-                    <button class="btn-ctrl" onclick="prevRadio()"><i class="fas fa-backward-step"></i></button>
-                    <button class="btn-ctrl" onclick="togglePlay()" style="font-size:35px"><i class="fas fa-circle-play" id="play-icon"></i></button>
-                    <button class="btn-ctrl" onclick="nextRadio()"><i class="fas fa-forward-step"></i></button>
+                    <div id="txt-ouvindo" style="font-size: 13px; color: #aaa; margin-bottom: 15px">PAUSADO</div>
+                    <div class="player-controls">
+                        <button class="btn-ctrl" onclick="prevRadio()" title="Anterior"><i class="fas fa-step-backward"></i></button>
+                        <button class="btn-ctrl btn-play-stop" id="btn-main-play" onclick="togglePlayStop()" title="Play/Stop"><i class="fas fa-play" id="play-stop-icon"></i></button>
+                        <button class="btn-ctrl" onclick="nextRadio()" title="Próxima"><i class="fas fa-step-forward"></i></button>
+                    </div>
                     <audio id="main-player"></audio>
                 </div>
             </div>
@@ -141,6 +157,8 @@
         let radioArray = [];
         let currentIndex = -1;
         const player = document.getElementById('main-player');
+        const btnPlayStop = document.getElementById('btn-main-play');
+        const iconPlayStop = document.getElementById('play-stop-icon');
 
         function saveRadio() {
             const n = document.getElementById('r-nome').value, u = document.getElementById('r-url').value;
@@ -160,19 +178,33 @@
             });
         });
 
+        // LÓGICA DE PLAY/STOP E ANEL VERDE
+        function updatePlayerUI(isPlaying) {
+            if (isPlaying) {
+                iconPlayStop.className = 'fas fa-stop';
+                btnPlayStop.classList.add('playing'); // Ativa o anel verde girando
+            } else {
+                iconPlayStop.className = 'fas fa-play';
+                btnPlayStop.classList.remove('playing'); // Desativa o anel
+            }
+        }
+
         function playRadio(index) {
             currentIndex = index; const r = radioArray[index]; player.src = r.url; player.play();
             document.querySelectorAll('.radio-square').forEach(el => el.classList.remove('playing'));
             document.getElementById('sq-'+r.key).classList.add('playing');
             document.getElementById('txt-ouvindo').innerHTML = `OUVINDO: <b style="color:var(--primary)">${r.name}</b>`;
-            document.getElementById('play-icon').className = 'fas fa-circle-pause';
+            updatePlayerUI(true);
         }
 
-        function togglePlay() {
+        function togglePlayStop() {
             if(!player.src) return;
-            if(player.paused) { player.play(); document.getElementById('play-icon').className = 'fas fa-circle-pause'; }
-            else { player.pause(); document.getElementById('play-icon').className = 'fas fa-circle-play'; }
+            if(player.paused) { player.play(); updatePlayerUI(true); }
+            else { player.pause(); updatePlayerUI(false); }
         }
+
+        player.onplay = () => updatePlayerUI(true);
+        player.onpause = () => updatePlayerUI(false);
 
         function nextRadio() { if(radioArray.length) playRadio((currentIndex + 1) % radioArray.length); }
         function prevRadio() { if(radioArray.length) playRadio((currentIndex - 1 + radioArray.length) % radioArray.length); }
