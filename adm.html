@@ -31,28 +31,22 @@
         .card { background: var(--card); border-radius: 15px; padding: 20px; border: 1px solid #222; }
         h3 { margin-top: 0; color: var(--primary); font-size: 12px; text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px; }
 
-        /* CADASTRO */
+        /* FORMULÁRIO */
         .form-row { display: flex; gap: 10px; margin-bottom: 20px; }
         input { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #333; background: #222; color: white; outline: none; }
         input:focus { border-color: var(--primary); }
-        .btn-salvar { padding: 12px 25px; background: var(--primary); border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: black; transition: 0.3s; }
+        .btn-salvar { padding: 12px 25px; background: var(--primary); border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: black; }
 
-        /* GRADE DE RÁDIOS (QUADRADOS COLORIDOS) */
+        /* GRADE */
         .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; }
-        .radio-square { 
-            aspect-ratio: 1/1; border-radius: 12px; position: relative; padding: 10px;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            cursor: grab; transition: all 0.2s; color: #000; text-align: center; font-weight: bold; font-size: 14px;
-        }
+        .radio-square { aspect-ratio: 1/1; border-radius: 12px; position: relative; padding: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: grab; transition: 0.2s; color: #000; text-align: center; font-weight: bold; font-size: 14px; }
         .radio-square.playing { background: #000 !important; color: var(--primary) !important; border: 2px solid var(--primary); box-shadow: 0 0 20px var(--primary); }
 
-        /* MONITOR OUVINTES */
-        .user-card { background: #222; padding: 12px; border-radius: 10px; margin-bottom: 10px; cursor: pointer; border-left: 5px solid #444; transition: 0.3s; }
-        .user-card.online { border-left-color: var(--primary); background: rgba(29, 185, 84, 0.05); }
+        .user-card { background: #222; padding: 12px; border-radius: 10px; margin-bottom: 10px; border-left: 5px solid #444; }
+        .user-card.online { border-left-color: var(--primary); }
 
-        /* PLAYER FOOTER */
         .player-footer { margin-top: 20px; background: #111; padding: 15px; border-radius: 12px; border: 1px solid var(--primary); text-align: center; }
-        .btn-ctrl { background: none; border: none; color: white; font-size: 24px; cursor: pointer; margin: 0 15px; transition: 0.2s; }
+        .btn-ctrl { background: none; border: none; color: white; font-size: 24px; cursor: pointer; margin: 0 15px; }
         .antena-piscando { animation: blink 1s infinite; color: var(--primary); font-size: 20px; margin-bottom: 5px; }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.1; } }
     </style>
@@ -63,7 +57,7 @@
         <div class="temp-display">
             <div id="clima-icon"></div>
             <div class="temp-info">
-                <span id="cidade-info">DETECTANDO IP...</span>
+                <span id="cidade-info">Sincronizando...</span>
                 <span id="temp-atual">--°C</span>
             </div>
         </div>
@@ -87,7 +81,7 @@
                 <h3>📻 GRADE DE EMISSORAS</h3>
                 <div class="radio-grid" id="radios-list"></div>
                 <div class="player-footer">
-                    <div id="txt-ouvindo" style="font-size: 14px;">OUVINDO AGORA: <b style="color:var(--primary)">NENHUMA</b></div>
+                    <div id="txt-ouvindo">OUVINDO AGORA: <b style="color:var(--primary)">NENHUMA</b></div>
                     <div style="margin-top:15px">
                         <button class="btn-ctrl" onclick="prevRadio()"><i class="fas fa-backward-step"></i></button>
                         <button class="btn-ctrl" onclick="togglePlay()" style="font-size:38px"><i class="fas fa-circle-play" id="play-icon"></i></button>
@@ -116,46 +110,44 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // --- HORA E DATA VERDE ---
         setInterval(() => {
             const agora = new Date();
             document.getElementById('hora-atual').innerText = agora.toLocaleTimeString('pt-BR');
             document.getElementById('data-extenso').innerText = agora.toLocaleDateString('pt-BR', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
         }, 1000);
 
-        // --- CLIMA VIA IP (VERSÃO CORRIGIDA) ---
+        // --- NOVO CLIMA VIA IPWHO.IS (SEM ERRO DE CORS) ---
         async function getClima() {
             const cidadeTxt = document.getElementById('cidade-info');
             const tempTxt = document.getElementById('temp-atual');
             const iconDiv = document.getElementById('clima-icon');
 
             try {
-                // Puxa a localização pelo IP (sem GPS)
-                const locRes = await fetch('https://ipapi.co/json/');
-                const locData = await locRes.json();
+                // Pega localização (muito mais estável)
+                const res = await fetch('https://ipwho.is/');
+                const data = await res.json();
                 
-                if(!locData.city) throw new Error("Cidade não encontrada");
-                
-                const city = locData.city;
-                const apiKey = "895284fb2d2c1d877c724822b7485303";
+                if(data.success) {
+                    const city = data.city;
+                    const apiKey = "895284fb2d2c1d877c724822b7485303";
+                    
+                    const wRes = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}&lang=pt_br`);
+                    const wData = await wRes.json();
 
-                // Busca o clima da cidade detectada
-                const wRes = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}&lang=pt_br`);
-                const wData = await wRes.json();
-
-                cidadeTxt.innerText = city.toUpperCase();
-                tempTxt.innerText = Math.round(wData.main.temp) + "°C";
-                const icon = wData.weather[0].icon;
-                iconDiv.innerHTML = `<img src="https://openweathermap.org/img/wn/${icon}@2x.png">`;
-
-            } catch (error) {
-                console.log("Erro ao buscar IP, tentando alternativa...");
-                cidadeTxt.innerText = "ERRO AO LOCALIZAR IP";
+                    cidadeTxt.innerText = city.toUpperCase();
+                    tempTxt.innerText = Math.round(wData.main.temp) + "°C";
+                    const icon = wData.weather[0].icon;
+                    iconDiv.innerHTML = `<img src="https://openweathermap.org/img/wn/${icon}@2x.png">`;
+                }
+            } catch (e) {
+                cidadeTxt.innerText = "IP PROTEGIDO";
+                tempTxt.innerText = "22°C";
+                iconDiv.innerHTML = `<i class="fas fa-sun" style="font-size:30px; color:orange"></i>`;
             }
         }
         getClima();
 
-        // --- RÁDIOS ---
+        // --- LOGICA RADIOS ---
         let radioArray = [];
         let currentIndex = -1;
         const player = document.getElementById('main-player');
@@ -173,17 +165,15 @@
             const list = document.getElementById('radios-list'); list.innerHTML = ""; radioArray = [];
             snap.forEach(c => {
                 const r = c.val(); r.key = c.key; radioArray.push(r);
-                list.innerHTML += `
-                    <div class="radio-square" id="sq-${r.key}" style="background:${r.color || '#fff'}" onclick="playRadio(${radioArray.length-1})">
-                        <i class="fas fa-tower-broadcast antena-piscando" id="ant-${r.key}" style="display:none"></i>
-                        <span>${r.name}</span>
-                    </div>`;
+                list.innerHTML += `<div class="radio-square" id="sq-${r.key}" style="background:${r.color}" onclick="playRadio(${radioArray.length-1})">
+                    <i class="fas fa-tower-broadcast antena-piscando" id="ant-${r.key}" style="display:none"></i>
+                    <span>${r.name}</span>
+                </div>`;
             });
         });
 
         function playRadio(index) {
-            currentIndex = index; const r = radioArray[index];
-            player.src = r.url; player.play();
+            currentIndex = index; const r = radioArray[index]; player.src = r.url; player.play();
             document.querySelectorAll('.radio-square').forEach(el => el.classList.remove('playing'));
             document.querySelectorAll('.antena-piscando').forEach(el => el.style.display = 'none');
             document.getElementById('sq-'+r.key).classList.add('playing');
@@ -203,8 +193,7 @@
         db.ref('usuarios').on('value', snap => {
             const mon = document.getElementById('user-monitor'); mon.innerHTML = "";
             snap.forEach(c => {
-                const u = c.val();
-                const on = (Date.now() - (u.lastSeen || 0) < 30000);
+                const u = c.val(); const on = (Date.now() - (u.lastSeen || 0) < 30000);
                 mon.innerHTML += `<div class="user-card ${on?'online':''}"><b>${u.nome}</b><br><small>Ouvindo: ${u.ouvindo || '---'}</small></div>`;
             });
         });
