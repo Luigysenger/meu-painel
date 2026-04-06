@@ -8,7 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #A020F0; --bg: #0b0b0b; --card: #181818; } /* Roxo como cor principal */
+        :root { --primary: #A020F0; --bg: #0b0b0b; --card: #181818; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; user-select: none; }
 
         /* HEADER COM HORA E DATA */
@@ -41,7 +41,7 @@
             content: ''; position: absolute; inset: -5px; 
             border: 2px solid var(--primary); border-radius: 50%; 
             border-top-color: transparent; 
-            animation: spin 2.5s linear infinite; /* Rotação mais lenta */
+            animation: spin 2.5s linear infinite; 
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -101,9 +101,10 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // DADOS DO OUVINTE E DATA
-        const nomeUsuario = localStorage.getItem('usuarioNome') || 'OUVINTE';
-        document.getElementById('nome-ouvinte').innerText = "OLÁ, " + nomeUsuario.toUpperCase();
+        // PUXANDO NOME DO CADASTRO (LOCALSTORAGE)
+        // Se no seu cadastro o campo for apenas 'nome', mude abaixo para: localStorage.getItem('nome')
+        const nomeCadastrado = localStorage.getItem('usuarioNome') || 'OUVINTE';
+        document.getElementById('nome-ouvinte').innerText = "OLÁ, " + nomeCadastrado.toUpperCase();
 
         setInterval(() => {
             const agora = new Date();
@@ -111,7 +112,6 @@
             document.getElementById('data-extenso').textContent = agora.toLocaleDateString('pt-BR', {weekday:'long', day:'numeric', month:'long'});
         }, 1000);
 
-        // LÓGICA DE RÁDIOS
         let todasRadios = [];
         let minhasSelecoes = JSON.parse(localStorage.getItem('minhasRadios')) || [];
         let r_selecionadas = [];
