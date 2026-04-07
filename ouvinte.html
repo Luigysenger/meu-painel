@@ -90,7 +90,7 @@
         <div class="header-right">
             <div class="weather-box" id="weather">
                 <span class="city-name" id="city">LOCALIZANDO...</span>
-                <i class="fas fa-cloud-sun"></i><span id="temp">--°C</span>
+                <i id="weather-icon" class="fas fa-sync-alt fa-spin"></i><span id="temp">--°C</span>
             </div>
             <div id="hora">00:00:00</div>
         </div>
@@ -141,29 +141,66 @@
 
         setInterval(() => { document.getElementById('hora').innerText = new Date().toLocaleTimeString('pt-BR'); }, 1000);
 
+        // --- AJUSTE NA PREVISÃO DO TEMPO ---
         async function getWeather() {
             try {
-                const res = await fetch('https://wttr.in/?format=%20%7b%22temp%22:%22%25t%22,%22city%22:%22%25l%22%7d');
-                const data = await res.json();
-                document.getElementById('temp').innerText = data.temp.replace('+', '');
-                document.getElementById('city').innerText = data.city.split(',')[0].trim();
-            } catch (e) { document.getElementById('city').innerText = "CLIMA"; }
+                // Tenta pegar localização real do navegador para ser preciso por ouvinte
+                navigator.geolocation.getCurrentPosition(async (pos) => {
+                    const lat = pos.coords.latitude;
+                    const lon = pos.coords.longitude;
+                    
+                    // Busca clima exato e nome da cidade
+                    const resClima = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+                    const dataClima = await resClima.json();
+                    
+                    const resCidade = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
+                    const dataCidade = await resCidade.json();
+                    const cidade = dataCidade.address.city || dataCidade.address.town || "SUA CIDADE";
+
+                    updateWeatherUI(dataClima.current_weather.temperature, dataClima.current_weather.weathercode, cidade);
+                }, async () => {
+                    // Fallback caso o usuário negue GPS: usa IP
+                    const res = await fetch('https://ipapi.co/json/');
+                    const ipData = await res.json();
+                    const resClima = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${ipData.latitude}&longitude=${ipData.longitude}&current_weather=true`);
+                    const dataClima = await resClima.json();
+                    updateWeatherUI(dataClima.current_weather.temperature, dataClima.current_weather.weathercode, ipData.city);
+                });
+            } catch (e) { 
+                document.getElementById('city').innerText = "CLIMA INDISPONÍVEL"; 
+            }
+        }
+
+        function updateWeatherUI(temp, code, cidade) {
+            document.getElementById('temp').innerText = Math.round(temp) + "°C";
+            document.getElementById('city').innerText = cidade.toUpperCase();
+            
+            const iconEl = document.getElementById('weather-icon');
+            iconEl.className = "fas"; // limpa classes
+
+            // Mapeamento de Códigos Open-Meteo para Ícones FontAwesome
+            if (code <= 1) iconEl.classList.add("fa-sun"); // Céu limpo
+            else if (code <= 3) iconEl.classList.add("fa-cloud-sun"); // Parcialmente nublado
+            else if (code <= 48) iconEl.classList.add("fa-smog"); // Nevoeiro
+            else if (code <= 67) iconEl.classList.add("fa-cloud-showers-heavy"); // Chuva/Garoa
+            else if (code <= 77) iconEl.classList.add("fa-snowflake"); // Neve
+            else if (code <= 82) iconEl.classList.add("fa-cloud-rain"); // Pancadas de chuva
+            else iconEl.classList.add("fa-bolt"); // Tempestade
         }
         getWeather();
+        setInterval(getWeather, 600000); // Atualiza a cada 10 min
 
-        // 1. CARREGAR RADIOS E DEPOIS CARREGAR PREFERENCIA DO USUARIO NO FIREBASE
+        // --- RESTANTE DO CÓDIGO (SEM ALTERAÇÕES) ---
         db.ref('radios').on('value', snap => {
             allRadios = [];
             snap.forEach(c => { allRadios.push({ ...c.val(), key: c.key }); });
             allRadios.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
             
-            // Buscar ordem do usuário no banco de dados
             db.ref('usuarios/' + nomeUsuario + '/grade').once('value', userSnap => {
                 const gradeSalva = userSnap.val();
                 if (gradeSalva) {
                     mySelectedIds = gradeSalva;
                 } else {
-                    // Se for novo, tenta pegar do LocalStorage ou começa vazio
                     mySelectedIds = JSON.parse(localStorage.getItem('myRadios_' + nomeUsuario)) || [];
                 }
                 renderAll();
@@ -185,7 +222,6 @@
             });
         }
 
-        // SALVAR NO FIREBASE SEMPRE QUE MUDAR A ORDEM OU ADICIONAR
         function salvarGrade() {
             db.ref('usuarios/' + nomeUsuario + '/grade').set(mySelectedIds);
             localStorage.setItem('myRadios_' + nomeUsuario, JSON.stringify(mySelectedIds));
@@ -233,7 +269,6 @@
 
         function logout() { if(confirm("Deseja sair?")) { localStorage.removeItem('usuarioNome'); window.location.href = 'index.html'; } }
 
-        // PUBLICIDADE
         let listaPubs = [], idxPub = 0;
         db.ref('publicidade').on('value', snap => {
             listaPubs = [];
