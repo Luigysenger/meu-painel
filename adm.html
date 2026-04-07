@@ -2,66 +2,236 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>PAINEL ADM - ACESSO DIRETO</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAINEL ADM SUPREMO - LUIGY</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #1DB954; --bg: #000; --card: #121212; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; }
-
-        /* HEADER */
-        .header { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 15px 25px; border-radius: 15px; border: 1px solid #333; margin-bottom: 20px; }
+        :root { --primary: #1DB954; --bg: #000; --card: #121212; --text-muted: #b3b3b3; }
         
-        .main-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; max-width: 1300px; margin: 0 auto; }
-        .card { background: var(--card); border-radius: 15px; padding: 20px; border: 1px solid #222; }
+        body { 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            background: var(--bg); 
+            color: white; 
+            margin: 0; 
+            padding: 20px; 
+            user-select: none;
+        }
 
-        /* RADIOS */
-        .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; }
-        .radio-box { aspect-ratio: 1/1; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #000; font-weight: bold; font-size: 13px; text-align: center; position: relative; }
+        /* HEADER ESTILO BARRA SUPERIOR */
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            background: linear-gradient(to bottom, #1f1f1f, #121212);
+            padding: 20px 30px; 
+            border-radius: 15px; 
+            border: 1px solid #333; 
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        .header h2 { margin: 0; font-size: 24px; letter-spacing: -1px; color: var(--primary); }
+        #hora { font-size: 28px; font-weight: 900; font-variant-numeric: tabular-nums; }
+
+        /* LAYOUT EM COLUNAS */
+        .main-grid { 
+            display: grid; 
+            grid-template-columns: 1.2fr 0.8fr; 
+            gap: 25px; 
+            max-width: 1400px; 
+            margin: 0 auto; 
+        }
+
+        .card { 
+            background: var(--card); 
+            border-radius: 20px; 
+            padding: 25px; 
+            border: 1px solid #282828;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        }
+
+        h3 { 
+            margin-top: 0; 
+            color: var(--primary); 
+            font-size: 14px; 
+            text-transform: uppercase; 
+            letter-spacing: 1.5px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #282828;
+            padding-bottom: 10px;
+        }
+
+        /* INPUTS ESTILO SPOTIFY */
+        .input-group { display: flex; gap: 12px; margin-bottom: 30px; }
+        input { 
+            flex: 1; 
+            padding: 14px; 
+            background: #2a2a2a; 
+            border: 1px solid transparent; 
+            color: white; 
+            border-radius: 8px; 
+            font-size: 14px;
+            transition: 0.3s;
+        }
+        input:focus { border-color: var(--primary); outline: none; background: #333; }
         
+        .btn-save { 
+            padding: 0 30px; 
+            background: var(--primary); 
+            border: none; 
+            border-radius: 50px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            color: black;
+            text-transform: uppercase;
+            transition: 0.2s;
+        }
+        .btn-save:hover { transform: scale(1.04); background: #1ed760; }
+
+        /* GRID DE RÁDIOS */
+        .radio-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); 
+            gap: 15px; 
+            margin-bottom: 30px;
+        }
+
+        .radio-item { 
+            aspect-ratio: 1/1; 
+            border-radius: 15px; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            color: #000; 
+            font-weight: 800; 
+            font-size: 14px; 
+            text-align: center; 
+            padding: 10px;
+            transition: 0.3s;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .radio-item:hover { transform: translateY(-5px); filter: brightness(1.1); }
+
         /* ANTENA PISCANDO */
-        .antena { font-size: 24px; margin-bottom: 8px; animation: pisca 1s infinite; color: #000; }
-        @keyframes pisca { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.2; transform: scale(0.9); } }
+        .antena { 
+            font-size: 30px; 
+            margin-bottom: 10px; 
+            animation: pulse-antena 1.5s infinite; 
+        }
+        @keyframes pulse-antena {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1); }
+        }
 
-        /* MONITOR OUVINTES */
-        .user-status { background: #1a1a1a; padding: 12px; border-radius: 10px; margin-bottom: 8px; border-left: 4px solid var(--primary); display: flex; justify-content: space-between; align-items: center; }
+        /* MONITOR DE USUÁRIOS */
+        .user-card { 
+            background: #181818; 
+            padding: 15px; 
+            border-radius: 12px; 
+            margin-bottom: 10px; 
+            border-left: 5px solid var(--primary); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            transition: 0.2s;
+        }
+        .user-card:hover { background: #282828; }
+        .user-info b { display: block; font-size: 16px; margin-bottom: 4px; }
+        .user-info span { color: var(--text-muted); font-size: 12px; }
+        .online-dot { width: 10px; height: 10px; background: var(--primary); border-radius: 50%; box-shadow: 0 0 10px var(--primary); }
 
-        /* PLAYER SPOTIFY STYLE */
-        .player-footer { margin-top: 20px; background: #111; padding: 25px; border-radius: 20px; border: 1px solid #333; text-align: center; }
-        .play-outer { position: relative; width: 75px; height: 75px; margin: 0 auto; display: flex; align-items: center; justify-content: center; }
-        
-        /* CÍRCULO VERDE RODANDO LENTO */
-        .ring { position: absolute; width: 100%; height: 100%; border: 2px solid rgba(29, 185, 84, 0.1); border-top: 2px solid var(--primary); border-radius: 50%; animation: gira 4s linear infinite; }
-        @keyframes gira { 100% { transform: rotate(360deg); } }
+        /* PLAYER RODAPÉ (O PONTO CENTRAL) */
+        .player-section { 
+            margin-top: 20px; 
+            background: #181818; 
+            padding: 30px; 
+            border-radius: 25px; 
+            border: 1px solid #333; 
+            text-align: center;
+        }
 
-        .btn-play { width: 58px; height: 58px; background: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; color: black; cursor: pointer; z-index: 5; }
+        .play-container { 
+            position: relative; 
+            width: 90px; 
+            height: 90px; 
+            margin: 0 auto; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+        }
+
+        /* CÍRCULO VERDE RODANDO BEM LENTO */
+        .spinning-ring { 
+            position: absolute; 
+            width: 100%; 
+            height: 100%; 
+            border: 3px solid rgba(29, 185, 84, 0.1); 
+            border-top: 3px solid var(--primary); 
+            border-radius: 50%; 
+            animation: rotate-slow 6s linear infinite; 
+        }
+        @keyframes rotate-slow { 100% { transform: rotate(360deg); } }
+
+        .btn-main-play { 
+            width: 65px; 
+            height: 65px; 
+            background: white; 
+            border: none; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 26px; 
+            color: black; 
+            cursor: pointer; 
+            z-index: 5; 
+            transition: 0.2s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+        }
+        .btn-main-play:hover { transform: scale(1.1); background: var(--primary); }
+
+        #playing-now { 
+            margin-top: 15px; 
+            font-size: 12px; 
+            color: var(--text-muted); 
+            text-transform: uppercase; 
+            letter-spacing: 2px;
+        }
+
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h2 style="color:var(--primary); margin:0;">PAINEL ADM - LUIGY SENGER</h2>
-        <div id="hora" style="font-size: 22px; font-weight: 900;">00:00:00</div>
+        <h2><i class="fab fa-spotify"></i> LUIGY ADM SUPREMO</h2>
+        <div id="hora">00:00:00</div>
     </div>
 
     <div class="main-grid">
         <div class="col-left">
-            <div class="card" style="margin-bottom:20px; display:flex; gap:10px;">
-                <input type="text" id="rn" placeholder="Nome da Rádio" style="flex:1; padding:12px; background:#222; border:1px solid #444; color:white; border-radius:8px;">
-                <input type="text" id="ru" placeholder="URL .mp3" style="flex:1; padding:12px; background:#222; border:1px solid #444; color:white; border-radius:8px;">
-                <button onclick="addRadio()" style="padding:0 25px; background:var(--primary); border:none; border-radius:8px; font-weight:bold; cursor:pointer; color:black">SALVAR</button>
-            </div>
-
             <div class="card">
-                <h3 style="margin-top:0; color:var(--primary); font-size:12px;">📻 EMISSORAS</h3>
-                <div class="radio-grid" id="lista-radios"></div>
+                <h3>Gerenciar Estações</h3>
+                <div class="input-group">
+                    <input type="text" id="nameInput" placeholder="Nome da Rádio">
+                    <input type="text" id="urlInput" placeholder="Link do Streaming (.mp3)">
+                    <button class="btn-save" onclick="addRadio()">Salvar</button>
+                </div>
+
+                <h3>Suas Rádios</h3>
+                <div class="radio-grid" id="radioContainer"></div>
                 
-                <div class="player-footer">
-                    <div id="ouvindo" style="font-size:11px; color:#888; margin-bottom:15px; letter-spacing:1px;">CLIQUE EM UMA RÁDIO PARA OUVIR</div>
-                    <div class="play-outer">
-                        <div class="ring"></div>
-                        <button class="btn-play" onclick="control()"><i class="fas fa-play" id="icon-play"></i></button>
+                <div class="player-section">
+                    <div id="playing-now">Selecione uma rádio</div>
+                    <div class="play-container">
+                        <div class="spinning-ring"></div>
+                        <button class="btn-main-play" onclick="togglePlay()">
+                            <i class="fas fa-play" id="playIcon" style="margin-left: 4px;"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -69,14 +239,14 @@
 
         <div class="col-right">
             <div class="card">
-                <h3 style="margin-top:0; color:var(--primary); font-size:12px;">👥 MONITOR EM TEMPO REAL</h3>
-                <div id="lista-usuarios"></div>
+                <h3>Ouvintes em Tempo Real</h3>
+                <div id="userContainer"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // CONFIGURAÇÃO FIREBASE
+        // FIREBASE CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
             authDomain: "meu-painel-f2efe.firebaseapp.com",
@@ -86,57 +256,66 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // RELÓGIO
+        // RELÓGIO ATUALIZADO
         setInterval(() => {
             document.getElementById('hora').innerText = new Date().toLocaleTimeString('pt-BR');
         }, 1000);
 
-        // CARREGAR RADIOS
+        // BUSCAR RÁDIOS
         db.ref('radios').on('value', snap => {
-            const list = document.getElementById('lista-radios');
-            list.innerHTML = "";
-            snap.forEach(c => {
-                const r = c.val();
-                list.innerHTML += `
-                    <div class="radio-box" style="background:${r.color || '#1DB954'}">
+            const container = document.getElementById('radioContainer');
+            container.innerHTML = "";
+            snap.forEach(child => {
+                const r = child.val();
+                container.innerHTML += `
+                    <div class="radio-item" style="background:${r.color || '#1DB954'}">
                         <i class="fas fa-tower-broadcast antena"></i>
                         ${r.name}
                     </div>`;
             });
         });
 
-        // MONITOR DE USUARIOS
+        // MONITOR DE USUÁRIOS
         db.ref('usuarios').on('value', snap => {
-            const mon = document.getElementById('lista-usuarios');
-            mon.innerHTML = "";
-            snap.forEach(c => {
-                const u = c.val();
-                const online = (Date.now() - (u.lastSeen || 0) < 30000);
-                if(online) {
-                    mon.innerHTML += `
-                        <div class="user-status">
-                            <div><b>${u.nome}</b><br><small style="color:#777">${u.radioAtual || 'Navegando'}</small></div>
-                            <div style="width:10px; height:10px; background:var(--primary); border-radius:50%; box-shadow:0 0 10px var(--primary)"></div>
+            const container = document.getElementById('userContainer');
+            container.innerHTML = "";
+            snap.forEach(child => {
+                const u = child.val();
+                const isOnline = (Date.now() - (u.lastSeen || 0) < 30000);
+                if(isOnline) {
+                    container.innerHTML += `
+                        <div class="user-card">
+                            <div class="user-info">
+                                <b>${u.nome}</b>
+                                <span>📻 Ouvindo: ${u.radioAtual || 'Navegando...'}</span>
+                            </div>
+                            <div class="online-dot"></div>
                         </div>`;
                 }
             });
         });
 
+        // ADICIONAR RÁDIO
         function addRadio() {
-            const n = document.getElementById('rn').value;
-            const u = document.getElementById('ru').value;
+            const n = document.getElementById('nameInput').value;
+            const u = document.getElementById('urlInput').value;
             if(n && u) {
-                db.ref('radios').push({ name: n, url: u, color: '#1DB954' });
-                document.getElementById('rn').value = ""; document.getElementById('ru').value = "";
+                const randomColor = `hsl(${Math.floor(Math.random() * 360)}, 70%, 75%)`;
+                db.ref('radios').push({ name: n, url: u, color: randomColor });
+                document.getElementById('nameInput').value = "";
+                document.getElementById('urlInput').value = "";
             }
         }
 
-        function control() {
-            const icon = document.getElementById('icon-play');
+        // FUNÇÃO DO BOTÃO PLAY (VISUAL)
+        function togglePlay() {
+            const icon = document.getElementById('playIcon');
             if(icon.classList.contains('fa-play')) {
                 icon.classList.replace('fa-play', 'fa-pause');
+                icon.style.marginLeft = "0px";
             } else {
                 icon.classList.replace('fa-pause', 'fa-play');
+                icon.style.marginLeft = "4px";
             }
         }
     </script>
