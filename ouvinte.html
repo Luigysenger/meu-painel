@@ -47,7 +47,11 @@
         .btn-toggle-radio.add { color: #444; }
         .btn-toggle-radio.remove { color: var(--primary); }
 
-        .player-footer { position: fixed; bottom: 0; left: 0; right: 0; background: #111; padding: 25px; border-top: 2px solid var(--primary); text-align: center; z-index: 100; }
+        /* PLAYER RODAPÉ E BARRA DE MENSAGEM */
+        .player-footer { position: fixed; bottom: 0; left: 0; right: 0; background: #111; padding: 15px 25px 25px 25px; border-top: 2px solid var(--primary); text-align: center; z-index: 100; }
+        .msg-barra { background: rgba(160, 32, 240, 0.1); color: var(--primary); font-size: 12px; font-weight: bold; padding: 8px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed var(--primary); display: none; width: auto; min-width: 300px; animation: bounce 2s infinite; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+
         .controls-row { display: flex; align-items: center; justify-content: center; gap: 35px; }
         .btn-nav { background: none; border: none; color: #b3b3b3; font-size: 24px; cursor: pointer; transition: 0.2s; }
         .btn-nav:hover { color: var(--primary); transform: scale(1.1); }
@@ -89,6 +93,10 @@
     </div>
 
     <div class="player-footer">
+        <div id="aviso-novidade" class="msg-barra">
+            <i class="fas fa-bullhorn" style="margin-right:8px;"></i> EI OUVINTE, TEM RADIO NOVA, CONFIRA SUA LISTA DE RADIOS E MERGULHE
+        </div>
+        
         <div id="now-title" style="font-size:11px; color:#888; margin-bottom:15px; letter-spacing: 1px; text-transform: uppercase;">SELECIONE UMA RÁDIO</div>
         <div class="controls-row">
             <button class="btn-nav" onclick="prevRadio()"><i class="fas fa-step-backward"></i></button>
@@ -122,7 +130,6 @@
 
         setInterval(() => { document.getElementById('hora').innerText = new Date().toLocaleTimeString('pt-BR'); }, 1000);
 
-        // FUNÇÃO CLIMA (API Aberta)
         async function getWeather() {
             try {
                 const res = await fetch('https://wttr.in/?format=%20%7b%22temp%22:%22%25t%22,%22desc%22:%22%25C%22%7d');
@@ -132,7 +139,6 @@
             } catch (e) { console.log("Erro clima"); }
         }
         getWeather();
-        setInterval(getWeather, 600000); // Atualiza a cada 10 min
 
         function logout() {
             if(confirm("Deseja encerrar a sessão?")) {
@@ -154,12 +160,23 @@
                 const isSelected = mySelectedIds.includes(r.key);
                 selector.innerHTML += `<div class="selector-item ${isSelected ? 'selected' : ''}"><span style="font-size:13px; font-weight:bold">${r.name}</span><button class="btn-toggle-radio ${isSelected ? 'remove' : 'add'}" onclick="toggleSelection('${r.key}')"><i class="fas ${isSelected ? 'fa-times-circle' : 'fa-plus-circle'}"></i></button></div>`;
             });
+
+            // LÓGICA DO AVISO: Se o total de rádios no DB for maior que o salvo no navegador, mostra a barra
+            const ultimaContagem = localStorage.getItem('contagemRadios_' + nomeUsuario) || 0;
+            if (allRadios.length > ultimaContagem) {
+                document.getElementById('aviso-novidade').style.display = 'inline-block';
+            }
         }
 
         function toggleSelection(id) {
             const index = mySelectedIds.indexOf(id);
             if (index > -1) mySelectedIds.splice(index, 1);
             else mySelectedIds.push(id);
+            
+            // Quando interage com a lista, entende-se que ele viu as novidades
+            localStorage.setItem('contagemRadios_' + nomeUsuario, allRadios.length);
+            document.getElementById('aviso-novidade').style.display = 'none';
+            
             saveAndRefresh();
         }
 
