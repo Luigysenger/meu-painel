@@ -3,93 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LOGIN - SISTEMA</title>
+    <title>LOGIN - MEU PAINEL</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #A020F0; --bg: #000; }
-        body { 
-            font-family: 'Segoe UI', sans-serif; 
-            background: var(--bg); 
-            color: white; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-            margin: 0; 
-        }
-        .login-card { 
-            background: #121212; 
-            padding: 40px; 
-            border-radius: 20px; 
-            border: 1px solid #333; 
-            text-align: center; 
-            width: 100%; 
-            max-width: 350px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-        h2 { color: var(--primary); margin-bottom: 30px; text-transform: uppercase; letter-spacing: 2px; }
-        input { 
-            width: 100%; 
-            padding: 15px; 
-            margin-bottom: 20px; 
-            background: #1a1a1a; 
-            border: 1px solid #333; 
-            border-radius: 10px; 
-            color: white; 
-            font-size: 16px; 
-            box-sizing: border-box;
-            outline: none;
-            transition: 0.3s;
-        }
+        :root { --primary: #BF40BF; --bg: #0b0b0b; --card: #181818; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .login-container { background: var(--card); padding: 30px; border-radius: 20px; border: 1px solid #333; width: 90%; max-width: 350px; text-align: center; }
+        h2 { color: var(--primary); margin-bottom: 25px; text-transform: uppercase; letter-spacing: 2px; }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        label { display: block; font-size: 12px; color: #888; margin-bottom: 5px; margin-left: 5px; }
+        input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #333; background: #0b0b0b; color: white; outline: none; box-sizing: border-box; }
         input:focus { border-color: var(--primary); }
-        button { 
-            width: 100%; 
-            padding: 15px; 
-            background: var(--primary); 
-            color: white; 
-            border: none; 
-            border-radius: 10px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            font-size: 16px; 
-            transition: 0.3s;
-        }
-        button:hover { filter: brightness(1.2); transform: scale(1.02); }
+        .btn-acao { width: 100%; padding: 12px; border-radius: 10px; border: none; background: var(--primary); color: white; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
+        .btn-acao:hover { opacity: 0.8; }
+        .links { margin-top: 20px; font-size: 13px; }
+        .links a { color: var(--primary); text-decoration: none; cursor: pointer; display: block; margin-bottom: 8px; }
+        .hidden { display: none; }
+        #msg-erro { color: #ff4444; font-size: 12px; margin-top: 10px; min-height: 15px; }
     </style>
 </head>
 <body>
 
-    <div class="login-card">
-        <h2>IDENTIFIQUE-SE</h2>
-        <input type="text" id="nome-usuario" placeholder="DIGITE SEU NOME..." autocomplete="off">
-        <button id="btn-entrar" onclick="fazerLogin()">ENTRAR NO SISTEMA</button>
+    <div class="login-container" id="box-login">
+        <h2>Ouvinte Login</h2>
+        <div class="input-group">
+            <label>Nome / Login</label>
+            <input type="text" id="login-nome" placeholder="Digite seu nome">
+        </div>
+        <div class="input-group">
+            <label>Senha</label>
+            <input type="password" id="login-senha" placeholder="****">
+        </div>
+        <button class="btn-acao" onclick="fazerLogin()">ENTRAR NO PAINEL</button>
+        <div id="msg-erro"></div>
+        <div class="links">
+            <a onclick="mostrarTela('cadastro')">Não tenho cadastro (Cadastrar)</a>
+            <a onclick="mostrarTela('esqueci')">Esqueci minha senha</a>
+        </div>
+    </div>
+
+    <div class="login-container hidden" id="box-cadastro">
+        <h2>Novo Cadastro</h2>
+        <input type="text" id="cad-nome" placeholder="Nome" style="margin-bottom:10px">
+        <input type="text" id="cad-sobrenome" placeholder="Sobrenome" style="margin-bottom:10px">
+        <input type="text" id="cad-cidade" placeholder="Cidade" style="margin-bottom:10px">
+        <input type="password" id="cad-senha" maxlength="4" placeholder="Senha (4 dígitos)" style="margin-bottom:10px">
+        <input type="password" id="cad-confirma" maxlength="4" placeholder="Confirmar Senha" style="margin-bottom:15px">
+        <button class="btn-acao" onclick="salvarCadastro()">CRIAR MINHA CONTA</button>
+        <div class="links"><a onclick="mostrarTela('login')">Voltar para Login</a></div>
+    </div>
+
+    <div class="login-container hidden" id="box-esqueci">
+        <h2>Recuperar Senha</h2>
+        <input type="text" id="rec-nome" placeholder="Seu Nome" style="margin-bottom:10px">
+        <input type="text" id="rec-sobrenome" placeholder="Seu Sobrenome" style="margin-bottom:10px">
+        <input type="password" id="rec-nova-senha" maxlength="4" placeholder="Nova Senha (4 dígitos)" style="margin-bottom:15px">
+        <button class="btn-acao" onclick="recuperarSenha()">REDEFINIR SENHA</button>
+        <div class="links"><a onclick="mostrarTela('login')">Voltar para Login</a></div>
     </div>
 
     <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
+            authDomain: "meu-painel-f2efe.firebaseapp.com",
+            databaseURL: "https://meu-painel-f2efe-default-rtdb.firebaseio.com/",
+            projectId: "meu-painel-f2efe"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // FUNÇÃO PARA DETECTAR O ENTER EM QUALQUER TELA
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const loginVisible = !document.getElementById('box-login').classList.contains('hidden');
+                const cadastroVisible = !document.getElementById('box-cadastro').classList.contains('hidden');
+                const esqueciVisible = !document.getElementById('box-esqueci').classList.contains('hidden');
+
+                if (loginVisible) fazerLogin();
+                else if (cadastroVisible) salvarCadastro();
+                else if (esqueciVisible) recuperarSenha();
+            }
+        });
+
+        function mostrarTela(tela) {
+            document.getElementById('box-login').classList.add('hidden');
+            document.getElementById('box-cadastro').classList.add('hidden');
+            document.getElementById('box-esqueci').classList.add('hidden');
+            if(tela === 'login') document.getElementById('box-login').classList.remove('hidden');
+            if(tela === 'cadastro') document.getElementById('box-cadastro').classList.remove('hidden');
+            if(tela === 'esqueci') document.getElementById('box-esqueci').classList.remove('hidden');
+        }
+
         function fazerLogin() {
-            const nomeInput = document.getElementById('nome-usuario').value.trim();
-            
-            if (!nomeInput) {
-                alert("Por favor, digite seu nome para entrar.");
+            const nomeDigitado = document.getElementById('login-nome').value.trim();
+            const nomeLimpo = nomeDigitado.toUpperCase();
+            const senhaInput = document.getElementById('login-senha').value;
+            const erro = document.getElementById('msg-erro');
+
+            if(nomeDigitado.toLowerCase() === "luigy" && senhaInput === "1045") {
+                localStorage.setItem('usuarioNome', 'LUIGY (ADM)');
+                window.location.href = 'adm.html';
                 return;
             }
 
-            localStorage.setItem('usuarioNome', nomeInput);
-
-            if (nomeInput.toUpperCase() === "LUIGY") {
-                window.location.href = 'adm.html';
-            } else {
-                window.location.href = 'ouvinte.html';
-            }
+            db.ref('usuarios/' + nomeLimpo).once('value', snap => {
+                const u = snap.val();
+                if(u && u.senha === senhaInput) {
+                    localStorage.setItem('usuarioNome', nomeLimpo);
+                    db.ref('usuarios/' + nomeLimpo).update({
+                        lastSeen: Date.now(),
+                        sessionStart: Date.now()
+                    });
+                    window.location.href = 'ouvinte.html';
+                } else {
+                    erro.innerText = "Nome ou Senha incorretos!";
+                }
+            });
         }
 
-        // --- UNICA ALTERAÇÃO: ESCUTAR A TECLA ENTER NO CAMPO DE TEXTO ---
-        document.getElementById('nome-usuario').addEventListener('keydown', function(event) {
-            if (event.key === 'Enter') {
-                fazerLogin();
-            }
-        });
-    </script>
+        function salvarCadastro() {
+            const n = document.getElementById('cad-nome').value.trim();
+            const nomeLimpo = n.toUpperCase();
+            const sbr = document.getElementById('cad-sobrenome').value.trim();
+            const cid = document.getElementById('cad-cidade').value.trim();
+            const s1 = document.getElementById('cad-senha').value;
+            const s2 = document.getElementById('cad-confirma').value;
 
+            if(!n || !sbr || !cid || s1.length < 4) { alert("Preencha tudo corretamente (Senha 4 dígitos)"); return; }
+            if(s1 !== s2) { alert("As senhas não conferem!"); return; }
+
+            db.ref('usuarios/' + nomeLimpo).set({
+                nome: nomeLimpo,
+                sobrenome: sbr.toUpperCase(),
+                cidade: cid,
+                senha: s1,
+                lastSeen: Date.now(),
+                sessionStart: Date.now(),
+                radioAtual: "Recém Chegado"
+            }).then(() => {
+                alert("Cadastro realizado! Faça login.");
+                mostrarTela('login');
+            });
+        }
+
+        function recuperarSenha() {
+            const n = document.getElementById('rec-nome').value.trim().toUpperCase();
+            const sbr = document.getElementById('rec-sobrenome').value.trim().toUpperCase();
+            const nova = document.getElementById('rec-nova-senha').value;
+
+            if(nova.length < 4) { alert("Nova senha deve ter 4 dígitos"); return; }
+
+            db.ref('usuarios/' + n).once('value', snap => {
+                const u = snap.val();
+                if(u && u.sobrenome === sbr) {
+                    db.ref('usuarios/' + n).update({ senha: nova });
+                    alert("Senha alterada com sucesso!");
+                    mostrarTela('login');
+                } else {
+                    alert("Usuário não encontrado!");
+                }
+            });
+        }
+    </script>
 </body>
 </html>
