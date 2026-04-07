@@ -46,7 +46,7 @@
         .active .antena { display: block; animation: pulse-antena 1s infinite; }
         @keyframes pulse-antena { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(1.1); } }
 
-        /* MONITOR OUVINTES */
+        /* MONITOR OUVINTES - AJUSTE DE ACORDEÃO */
         .user-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; overflow: hidden; transition: 0.3s; }
         .user-row { display: flex; align-items: center; width: 100%; }
         .user-name-btn { flex: 1; padding: 15px; background: none; border: none; color: white; text-align: left; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
@@ -54,6 +54,10 @@
         
         .status-on { color: #00ff00; font-weight: 900; font-size: 11px; }
         .status-off { color: #d1a3ff; font-weight: 900; font-size: 11px; }
+
+        /* BARRA DE DETALHES (ESCONDIDA POR PADRÃO) */
+        .user-details-bar { display: none; padding: 0 15px 15px 15px; font-size: 13px; color: #ccc; border-top: 1px solid #222; margin-top: -5px; }
+        .user-details-bar b { color: var(--primary); text-transform: uppercase; }
 
         /* PLAYER FOOTER COM EFEITO SPOTIFY */
         .player-footer { margin-top: 20px; background: #111; padding: 25px; border-radius: 20px; border: 1px solid #222; text-align: center; }
@@ -158,8 +162,6 @@
 
         setInterval(() => { document.getElementById('hora').innerText = new Date().toLocaleTimeString('pt-BR'); }, 1000);
 
-        document.getElementById('r-url').addEventListener('keypress', (e) => { if(e.key==='Enter') addRadio(); });
-
         function logout() {
             if(confirm("Deseja encerrar a sessão de ADM?")) {
                 localStorage.removeItem('usuarioNome');
@@ -250,34 +252,45 @@
         function nextRadio() { playRadio((activeIndex + 1) % radioData.length); }
         function prevRadio() { playRadio((activeIndex - 1 + radioData.length) % radioData.length); }
 
-        // --- MONITOR OUVINTES ---
+        // --- MONITOR OUVINTES (CORRIGIDO PARA SÓ ABRIR NO CLIQUE) ---
         db.ref('usuarios').on('value', snap => {
             const container = document.getElementById('user-list');
             container.innerHTML = "";
             snap.forEach(c => {
                 const u = c.val(), id = c.key;
                 const isOnline = (Date.now() - parseInt(u.lastSeen || 0) < 60000);
+                
+                // Calcula tempo de sessão
+                const minSessao = Math.floor((Date.now() - (u.sessionStart || Date.now())) / 60000);
+
                 container.innerHTML += `
                     <div class="user-item" style="border-left: 4px solid ${isOnline?'#00ff00':'#d1a3ff'}">
                         <div class="user-row">
-                            <button class="user-name-btn" onclick="toggleUserBar('${id}')">
-                                <span>${u.nome || 'Ouvinte'}</span> ${isOnline?'<span class="status-on">ON</span>':'<span class="status-off">OFF</span>'}
+                            <button class="user-name-btn" onclick="toggleUserDetails('${id}')">
+                                <span>${u.nome || 'Ouvinte'}</span> 
+                                ${isOnline ? '<span class="status-on">ON</span>' : '<span class="status-off">OFF</span>'}
                             </button>
                             <button class="btn-delete-user" onclick="if(confirm('Remover?')) db.ref('usuarios/${id}').remove()"><i class="fas fa-trash-alt"></i></button>
                         </div>
-                        <div class="user-details-bar" id="bar-${id}">
+                        <div class="user-details-bar" id="detalhes-${id}">
                             Ouvindo: <b>${u.radioAtual || "---"}</b><br>
-                            Sessão: <b>${Math.floor((Date.now()-(u.sessionStart||Date.now()))/60000)} min</b>
+                            Sessão: <b>${minSessao} min</b>
                         </div>
                     </div>`;
             });
         });
 
-        function toggleUserBar(id) {
-            const bar = document.getElementById('bar-' + id);
-            const isVisible = bar.style.display === 'block';
-            document.querySelectorAll('.user-details-bar').forEach(b => b.style.display = 'none');
-            if (!isVisible) bar.style.display = 'block';
+        function toggleUserDetails(id) {
+            const el = document.getElementById('detalhes-' + id);
+            const isVisible = el.style.display === 'block';
+            
+            // Fecha todos os outros antes de abrir o novo (opcional, se quiser um por vez)
+            document.querySelectorAll('.user-details-bar').forEach(bar => bar.style.display = 'none');
+            
+            // Se não estava visível, abre
+            if (!isVisible) {
+                el.style.display = 'block';
+            }
         }
     </script>
 </body>
