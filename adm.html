@@ -3,84 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PAINEL ADM - LUIGY SENGER</title>
+    <title>PAINEL SUPREMO - LUIGY SENGER</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #A020F0; --bg: #0b0b0b; --card: #181818; --text: #ffffff; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+        :root { --primary: #A020F0; --bg: #050505; --card: #121212; --text: #ffffff; --accent: #1DB954; }
         
-        /* TELA DE LOGIN */
-        #tela-login { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 9999; }
-        .login-box { background: var(--card); padding: 40px; border-radius: 20px; border: 1px solid #333; width: 320px; text-align: center; box-shadow: 0 0 20px rgba(160, 32, 240, 0.2); }
-        .login-box h2 { color: var(--primary); margin-bottom: 20px; font-weight: 900; }
-        .login-box input { width: 100%; margin-bottom: 15px; padding: 12px; background: #222; border: 1px solid #444; color: white; border-radius: 8px; box-sizing: border-box; }
-        .btn-entrar { width: 100%; padding: 12px; background: var(--primary); border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; }
+        body { font-family: 'Inter', 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; overflow-x: hidden; }
 
-        /* PAINEL OCULTO */
-        #painel-conteudo { display: none; }
+        /* TELA DE LOGIN ESTILIZADA */
+        #tela-login { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 10000; }
+        .login-box { background: var(--card); padding: 40px; border-radius: 24px; border: 1px solid #333; width: 350px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        .login-box h2 { color: var(--primary); margin-bottom: 25px; font-size: 24px; letter-spacing: 1px; }
+        .login-box input { width: 100%; margin-bottom: 12px; padding: 14px; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 12px; box-sizing: border-box; outline: none; transition: 0.3s; }
+        .login-box input:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(160,32,240,0.3); }
+        .btn-entrar { width: 100%; padding: 14px; background: var(--primary); border: none; border-radius: 12px; font-weight: bold; cursor: pointer; color: white; font-size: 16px; margin-top: 10px; }
 
-        /* HEADER E GRID */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid #333; }
-        .admin-name { font-size: 20px; font-weight: bold; color: var(--primary); }
+        /* PAINEL PRINCIPAL */
+        #painel-conteudo { display: none; max-width: 1400px; margin: 0 auto; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid #222; }
+        .admin-badge { display: flex; align-items: center; gap: 15px; }
+        .admin-badge i { font-size: 40px; color: var(--primary); }
+        .admin-name { font-size: 22px; font-weight: 800; background: linear-gradient(45deg, #fff, var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .main-grid { display: grid; grid-template-columns: 1fr 380px; gap: 25px; }
+
+        /* SEÇÃO ESQUERDA: CADASTRO E RÁDIOS */
+        .section-title { font-size: 14px; color: #666; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .card-cadastro { background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid #222; display: flex; gap: 15px; align-items: center; }
+        .card-cadastro input { background: #1a1a1a; border: 1px solid #333; color: white; padding: 12px; border-radius: 10px; flex: 1; outline: none; }
         
-        .main-grid { display: grid; grid-template-columns: 1fr 350px; gap: 20px; }
-        .card { background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid #333; }
-        
-        /* LISTA DE RÁDIOS */
-        .radio-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; margin-top: 20px; }
-        .radio-item { aspect-ratio: 1/1; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; font-weight: bold; text-align: center; padding: 10px; color: #000; cursor: grab; }
-        .btn-del { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.2); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; font-weight: bold; }
+        .radio-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; margin-top: 20px; }
+        .radio-item { aspect-ratio: 1/1; border-radius: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; font-weight: bold; transition: 0.3s; cursor: grab; border: 1px solid rgba(255,255,255,0.1); color: #000; padding: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .radio-item:hover { transform: translateY(-5px); }
+        .btn-del { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.1); border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; }
 
-        /* MONITOR OUVINTES */
-        .user-status { background: #222; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-left: 4px solid #444; }
-        .user-status.active { border-left-color: var(--primary); }
+        /* SEÇÃO DIREITA: MONITOR */
+        .monitor-card { background: var(--card); padding: 20px; border-radius: 20px; border: 1px solid #222; height: fit-content; }
+        .user-status { background: #1a1a1a; padding: 15px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-left: 4px solid #333; transition: 0.3s; }
+        .user-status.active { border-left-color: var(--accent); background: #1d1d1d; }
         .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #444; }
-        .active .status-dot { background: var(--primary); box-shadow: 0 0 10px var(--primary); }
+        .active .status-dot { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+        
+        .btn-sair { background: rgba(255,68,68,0.1); border: 1px solid #ff4444; color: #ff4444; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-sair:hover { background: #ff4444; color: white; }
     </style>
 </head>
 <body>
 
     <div id="tela-login">
         <div class="login-box">
-            <h2>ADM LOGIN</h2>
-            <input type="text" id="user-adm" placeholder="Usuário">
-            <input type="password" id="pass-adm" placeholder="Senha">
-            <button class="btn-entrar" onclick="validarAcesso()">ENTRAR NO SISTEMA</button>
+            <i class="fas fa-lock" style="font-size: 40px; color: var(--primary); margin-bottom: 15px;"></i>
+            <h2>ADM ACCESS</h2>
+            <input type="text" id="log-nome" placeholder="Nome">
+            <input type="text" id="log-sobrenome" placeholder="Sobrenome">
+            <input type="text" id="log-cidade" placeholder="Cidade">
+            <input type="password" id="log-senha" placeholder="Senha">
+            <button class="btn-entrar" onclick="fazerLogin()">ACESSAR PAINEL</button>
         </div>
     </div>
 
     <div id="painel-conteudo">
         <div class="header">
-            <div>
-                <div class="admin-name">LUIGY SENGER (ADM)</div>
-                <div id="data-hora" style="font-size: 12px; color: #888;"></div>
+            <div class="admin-badge">
+                <i class="fas fa-user-circle"></i>
+                <div>
+                    <div class="admin-name" id="display-name">LUIGY SENGER</div>
+                    <div id="relogio" style="font-size: 12px; color: #666; margin-top: 5px;"></div>
+                </div>
             </div>
-            <button onclick="fazerSair()" style="background:none; border:1px solid #ff4444; color:#ff4444; padding:8px 15px; border-radius:5px; cursor:pointer; font-weight:bold">SAIR DO PAINEL</button>
+            <button class="btn-sair" onclick="fazerSair()">LOGOUT</button>
         </div>
 
         <div class="main-grid">
             <div class="left-col">
-                <div class="card" style="display: flex; gap: 10px; margin-bottom: 20px;">
-                    <input type="text" id="radio-n" placeholder="Nome da Rádio" style="flex:1; background:#222; border:1px solid #444; color:white; padding:10px; border-radius:8px;">
-                    <input type="text" id="radio-u" placeholder="URL .mp3" style="flex:1; background:#222; border:1px solid #444; color:white; padding:10px; border-radius:8px;">
-                    <input type="color" id="radio-c" value="#A020F0" style="height:42px; border:none; background:none; cursor:pointer">
-                    <button class="btn-entrar" style="width:120px" onclick="addRadio()">SALVAR</button>
+                <div class="section-title"><i class="fas fa-plus"></i> Gerenciar Emissoras</div>
+                <div class="card-cadastro">
+                    <input type="text" id="radio-nome" placeholder="Nome da Rádio">
+                    <input type="text" id="radio-url" placeholder="Link do Streaming (.mp3)">
+                    <input type="color" id="radio-cor" value="#A020F0" style="width:60px; height:45px; border:none; background:none; cursor:pointer;">
+                    <button class="btn-entrar" style="width:150px; margin-top:0;" onclick="salvarRadio()">SALVAR</button>
                 </div>
-                <div id="radio-list" class="radio-list"></div>
+
+                <div id="radio-list" class="radio-list">
+                    </div>
             </div>
 
             <div class="right-col">
-                <h3 style="margin-top:0; font-size:14px; color:#888;">OUVINTES ONLINE</h3>
-                <div class="card" id="user-monitor"></div>
+                <div class="section-title"><i class="fas fa-satellite-dish"></i> Ouvintes em Tempo Real</div>
+                <div class="monitor-card" id="lista-usuarios">
+                    </div>
             </div>
         </div>
     </div>
 
     <script>
-        // FIREBASE CONFIG
+        // CONFIGURAÇÃO FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
             authDomain: "meu-painel-f2efe.firebaseapp.com",
@@ -90,44 +112,49 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // LOGIN LÓGICA
-        function validarAcesso() {
-            const u = document.getElementById('user-adm').value.trim().toUpperCase();
-            const p = document.getElementById('pass-adm').value.trim();
+        // LÓGICA DE LOGIN COM OS NOVOS CAMPOS
+        function fazerLogin() {
+            const n = document.getElementById('log-nome').value.trim().toUpperCase();
+            const s = document.getElementById('log-sobrenome').value.trim().toUpperCase();
+            const c = document.getElementById('log-cidade').value.trim().toUpperCase();
+            const p = document.getElementById('log-senha').value.trim();
 
-            if (u === "LUIGY" && p === "1045") {
-                localStorage.setItem('luigy_adm', 'true');
-                abrirPainel();
+            if (n === "LUIGY" && s === "SENGER" && c === "CASCAVEL" && p === "1045") {
+                localStorage.setItem('adm_logado', 'true');
+                localStorage.setItem('adm_full_name', n + " " + s);
+                entrar();
             } else {
-                alert("Dados incorretos!");
+                alert("Dados de administrador incorretos!");
             }
         }
 
-        // Detectar Enter
-        document.getElementById('pass-adm').addEventListener('keypress', (e) => { if(e.key === 'Enter') validarAcesso(); });
-        document.getElementById('user-adm').addEventListener('keypress', (e) => { if(e.key === 'Enter') validarAcesso(); });
+        // Atalho Enter nos inputs
+        document.querySelectorAll('.login-box input').forEach(input => {
+            input.addEventListener('keypress', (e) => { if(e.key === 'Enter') fazerLogin(); });
+        });
 
-        function abrirPainel() {
+        function entrar() {
             document.getElementById('tela-login').style.display = 'none';
             document.getElementById('painel-conteudo').style.display = 'block';
-            carregarDados();
+            document.getElementById('display-name').innerText = localStorage.getItem('adm_full_name');
+            iniciarApp();
         }
 
         function fazerSair() {
-            localStorage.removeItem('luigy_adm');
+            localStorage.clear();
             window.location.reload();
         }
 
-        if (localStorage.getItem('luigy_adm') === 'true') {
-            abrirPainel();
-        }
+        if (localStorage.getItem('adm_logado') === 'true') entrar();
 
-        // FUNÇÕES DO SISTEMA
-        function carregarDados() {
+        // APP LOGIC
+        function iniciarApp() {
+            // Relógio
             setInterval(() => {
-                document.getElementById('data-hora').innerText = new Date().toLocaleString('pt-BR');
+                document.getElementById('relogio').innerText = new Date().toLocaleString('pt-BR', { dateStyle: 'full', timeStyle: 'medium' });
             }, 1000);
 
+            // Carregar Rádios
             db.ref('radios').on('value', snap => {
                 const list = document.getElementById('radio-list');
                 list.innerHTML = "";
@@ -135,24 +162,25 @@
                     const r = child.val();
                     list.innerHTML += `
                         <div class="radio-item" style="background:${r.color || '#A020F0'}">
-                            <button class="btn-del" onclick="deleteRadio('${child.key}')">×</button>
-                            <i class="fas fa-radio" style="font-size:24px; margin-bottom:10px"></i>
-                            ${r.name}
+                            <button class="btn-del" onclick="deletarRadio('${child.key}')">×</button>
+                            <i class="fas fa-broadcast-tower" style="font-size:30px; margin-bottom:10px; opacity:0.8"></i>
+                            <div style="font-size:16px">${r.name}</div>
                         </div>`;
                 });
             });
 
+            // Carregar Ouvintes
             db.ref('usuarios').on('value', snap => {
-                const monitor = document.getElementById('user-monitor');
+                const monitor = document.getElementById('lista-usuarios');
                 monitor.innerHTML = "";
                 snap.forEach(child => {
                     const user = child.val();
-                    const isOnline = (Date.now() - user.lastSeen) < 15000;
+                    const online = (Date.now() - user.lastSeen) < 15000;
                     monitor.innerHTML += `
-                        <div class="user-status ${isOnline ? 'active' : ''}">
+                        <div class="user-status ${online ? 'active' : ''}">
                             <div>
-                                <div style="font-weight:bold">${child.key.toUpperCase()}</div>
-                                <div style="font-size:11px; color:#888">${user.radioAtual || 'Nenhuma rádio'}</div>
+                                <div style="font-weight:bold; font-size:14px;">${child.key.toUpperCase()}</div>
+                                <div style="font-size:11px; color:#888;">${user.radioAtual || 'Navegando...'}</div>
                             </div>
                             <div class="status-dot"></div>
                         </div>`;
@@ -162,18 +190,19 @@
             Sortable.create(document.getElementById('radio-list'), { animation: 150 });
         }
 
-        function addRadio() {
-            const name = document.getElementById('radio-n').value;
-            const url = document.getElementById('radio-u').value;
-            const color = document.getElementById('radio-c').value;
+        function salvarRadio() {
+            const name = document.getElementById('radio-nome').value;
+            const url = document.getElementById('radio-url').value;
+            const color = document.getElementById('radio-cor').value;
             if (name && url) {
                 db.ref('radios').push({ name, url, color });
-                document.getElementById('radio-n').value = '';
-                document.getElementById('radio-u').value = '';
+                document.getElementById('radio-nome').value = '';
+                document.getElementById('radio-url').value = '';
             }
         }
 
-        function deleteRadio(key) { if(confirm('Excluir?')) db.ref('radios/'+key).remove(); }
+        function deletarRadio(key) { if(confirm('Remover esta rádio permanentemente?')) db.ref('radios/'+key).remove(); }
+
     </script>
 </body>
 </html>
