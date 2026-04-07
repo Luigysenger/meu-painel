@@ -32,8 +32,15 @@
         h3 { color: var(--primary); font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; }
 
         .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; min-height: 100px; }
-        .radio-item { aspect-ratio: 1/1; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #fff; font-weight: bold; font-size: 11px; text-align: center; padding: 10px; cursor: grab; transition: 0.3s; position: relative; border: 2px solid #222; background: #181818; }
-        .radio-item:hover { border-color: var(--primary); transform: scale(1.02); }
+        
+        /* AJUSTE PARA CORES CLARAS NAS RÁDIOS (IGUAL ADM) */
+        .radio-item { 
+            aspect-ratio: 1/1; border-radius: 15px; display: flex; flex-direction: column; 
+            justify-content: center; align-items: center; color: #000; font-weight: bold; 
+            font-size: 11px; text-align: center; padding: 10px; cursor: grab; 
+            transition: 0.3s; position: relative; border: 2px solid transparent;
+        }
+        .radio-item:hover { transform: scale(1.05); filter: brightness(1.1); }
         .radio-item.active { background: #000 !important; color: var(--primary) !important; border-color: var(--primary); box-shadow: 0 0 15px rgba(160, 32, 240, 0.4); }
         
         .antena { font-size: 20px; margin-bottom: 8px; display: none; }
@@ -47,7 +54,6 @@
         .btn-toggle-radio.add { color: #444; }
         .btn-toggle-radio.remove { color: var(--primary); }
 
-        /* PLAYER RODAPÉ E BARRA DE MENSAGEM */
         .player-footer { position: fixed; bottom: 0; left: 0; right: 0; background: #111; padding: 15px 25px 25px 25px; border-top: 2px solid var(--primary); text-align: center; z-index: 100; }
         .msg-barra { background: rgba(160, 32, 240, 0.1); color: var(--primary); font-size: 12px; font-weight: bold; padding: 8px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed var(--primary); display: none; width: auto; min-width: 300px; animation: bounce 2s infinite; }
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
@@ -94,7 +100,7 @@
 
     <div class="player-footer">
         <div id="aviso-novidade" class="msg-barra">
-            <i class="fas fa-bullhorn" style="margin-right:8px;"></i> EI OUVINTE, TEM RADIO NOVA, CONFIRA SUA LISTA DE RADIOS E MERGULHE
+            <i class="fas fa-bullhorn" style="margin-right:8px;"></i> EI OUVINTE, TA LIGADÃO AI? TEM RÁDIO NOVA ADICIONADA, CONFIRA E MERGULHE NESSA ONDA
         </div>
         
         <div id="now-title" style="font-size:11px; color:#888; margin-bottom:15px; letter-spacing: 1px; text-transform: uppercase;">SELECIONE UMA RÁDIO</div>
@@ -153,15 +159,24 @@
             myGrid.innerHTML = "";
             selector.innerHTML = "";
             const myRadios = mySelectedIds.map(id => allRadios.find(r => r.key === id)).filter(Boolean);
+            
             myRadios.forEach((r, i) => {
-                myGrid.innerHTML += `<div class="radio-item ${activeIndex === i ? 'active' : ''}" data-id="${r.key}" onclick="playRadio(${i})"><i class="fas fa-tower-broadcast antena"></i><span>${r.name}</span></div>`;
+                // APLICA A COR SALVA PELO ADM
+                myGrid.innerHTML += `
+                    <div class="radio-item ${activeIndex === i ? 'active' : ''}" 
+                         style="background: ${r.color || '#d1a3ff'}" 
+                         data-id="${r.key}" 
+                         onclick="playRadio(${i})">
+                        <i class="fas fa-tower-broadcast antena"></i>
+                        <span>${r.name}</span>
+                    </div>`;
             });
+
             allRadios.forEach(r => {
                 const isSelected = mySelectedIds.includes(r.key);
                 selector.innerHTML += `<div class="selector-item ${isSelected ? 'selected' : ''}"><span style="font-size:13px; font-weight:bold">${r.name}</span><button class="btn-toggle-radio ${isSelected ? 'remove' : 'add'}" onclick="toggleSelection('${r.key}')"><i class="fas ${isSelected ? 'fa-times-circle' : 'fa-plus-circle'}"></i></button></div>`;
             });
 
-            // LÓGICA DO AVISO: Se o total de rádios no DB for maior que o salvo no navegador, mostra a barra
             const ultimaContagem = localStorage.getItem('contagemRadios_' + nomeUsuario) || 0;
             if (allRadios.length > ultimaContagem) {
                 document.getElementById('aviso-novidade').style.display = 'inline-block';
@@ -173,10 +188,8 @@
             if (index > -1) mySelectedIds.splice(index, 1);
             else mySelectedIds.push(id);
             
-            // Quando interage com a lista, entende-se que ele viu as novidades
             localStorage.setItem('contagemRadios_' + nomeUsuario, allRadios.length);
             document.getElementById('aviso-novidade').style.display = 'none';
-            
             saveAndRefresh();
         }
 
