@@ -6,90 +6,96 @@
     <title>OUVINTE - MEU PAINEL</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #A020F0; --bg: #0b0b0b; --card: #181818; --danger: #ff4444; }
+        :root { --primary: #A020F0; --bg: #000; --card: #121212; --text-muted: #b3b3b3; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; user-select: none; }
-
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: var(--card); padding: 15px 25px; border-radius: 15px; border: 1px solid #333; }
-        .user-info { display: flex; flex-direction: column; gap: 5px; }
-        #nome-ouvinte { font-size: 18px; font-weight: bold; color: var(--primary); }
         
-        .btn-encerrar { background: none; border: 1px solid var(--danger); color: var(--danger); padding: 4px 10px; border-radius: 5px; font-size: 10px; font-weight: bold; cursor: pointer; width: fit-content; transition: 0.3s; text-transform: uppercase; }
-        .btn-encerrar:hover { background: var(--danger); color: white; }
+        .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 15px 25px; border-radius: 15px; border: 1px solid #333; margin-bottom: 25px; }
+        .header h2 { margin: 0; color: var(--primary); font-size: 20px; text-transform: uppercase; letter-spacing: 2px; }
+        .user-info { font-size: 14px; font-weight: bold; color: var(--text-muted); }
 
-        .date-info { text-align: right; }
-        #hora-atual { font-size: 24px; font-weight: 900; color: var(--primary); display: block; line-height: 1; }
-        #data-extenso { font-size: 12px; color: #888; text-transform: capitalize; }
-
-        .btn-config { background: #222; border: 1px solid #444; color: white; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-bottom: 20px; width: 100%; transition: 0.3s; }
-        .btn-config:hover { border-color: var(--primary); color: var(--primary); }
-
-        .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 15px; margin-bottom: 120px; }
-        .radio-square { aspect-ratio: 1/1; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; color: #000; text-align: center; font-weight: bold; font-size: 13px; }
-        .radio-square.playing { border: 3px solid var(--primary); box-shadow: 0 0 15px var(--primary); transform: scale(1.05); }
-
-        .player-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #121212; border-top: 1px solid #333; padding: 20px; display: flex; flex-direction: column; align-items: center; z-index: 999; }
-        #txt-status { font-size: 12px; color: #888; margin-bottom: 10px; }
-        .controls { display: flex; align-items: center; gap: 30px; }
-        .btn-ctrl { background: none; border: none; color: #888; font-size: 24px; cursor: pointer; transition: 0.3s; }
-        .btn-ctrl:hover { color: white; }
+        .container { max-width: 1000px; margin: 0 auto; }
         
-        .btn-main { width: 65px; height: 65px; font-size: 28px; color: white; position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .btn-main.playing::before { 
-            content: ''; position: absolute; inset: -5px; 
-            border: 2px solid var(--primary); border-radius: 50%; 
-            border-top-color: transparent; 
-            animation: spin 2.5s linear infinite; 
+        h3 { color: var(--primary); font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; }
+
+        /* GRADE DE RÁDIOS IGUAL ADM */
+        .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; margin-bottom: 100px; }
+        
+        .radio-item { 
+            aspect-ratio: 1/1; border-radius: 15px; display: flex; flex-direction: column; 
+            justify-content: center; align-items: center; color: #fff; font-weight: bold; 
+            font-size: 13px; text-align: center; padding: 10px; cursor: grab; 
+            transition: 0.3s; position: relative; border: 2px solid #222; 
+            background: var(--card);
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* Efeito de Hover Roxo */
+        .radio-item:hover { border-color: var(--primary); transform: scale(1.02); box-shadow: 0 0 15px rgba(160, 32, 240, 0.3); }
 
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 1000; align-items: center; justify-content: center; }
-        .modal-content { background: var(--card); width: 90%; max-width: 450px; border-radius: 20px; padding: 25px; border: 1px solid #444; }
-        .radio-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #222; }
-        .checkbox-custom { width: 20px; height: 20px; accent-color: var(--primary); }
+        /* Rádio Ativa (Destaque) */
+        .radio-item.active { background: #000 !important; color: var(--primary) !important; border-color: var(--primary); box-shadow: 0 0 20px rgba(160, 32, 240, 0.5); }
+        
+        /* Antena Piscando */
+        .antena { font-size: 24px; margin-bottom: 8px; display: none; }
+        .active .antena { display: block; animation: pulse-antena 1s infinite; }
+        @keyframes pulse-antena { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(1.1); } }
+
+        /* PLAYER RODAPÉ IGUAL ADM */
+        .player-footer { 
+            position: fixed; bottom: 0; left: 0; right: 0; 
+            background: #111; padding: 20px; border-top: 2px solid var(--primary); 
+            text-align: center; z-index: 100; 
+        }
+        .controls-row { display: flex; align-items: center; justify-content: center; gap: 35px; }
+        
+        .btn-nav { background: none; border: none; color: #b3b3b3; font-size: 24px; cursor: pointer; transition: 0.2s; }
+        .btn-nav:hover { color: var(--primary); transform: scale(1.1); }
+        
+        .play-outer { position: relative; width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; }
+        .ring-animation { 
+            position: absolute; width: 100%; height: 100%; 
+            border: 2px solid rgba(160, 32, 240, 0.1); 
+            border-top: 2px solid var(--primary); 
+            border-radius: 50%; animation: spin-slow 5s linear infinite; 
+        }
+        @keyframes spin-slow { 100% { transform: rotate(360deg); } }
+        
+        .btn-spotify-play { 
+            width: 50px; height: 50px; background: white; border: none; 
+            border-radius: 50%; display: flex; align-items: center; 
+            justify-content: center; font-size: 20px; color: black; 
+            cursor: pointer; z-index: 5; transition: 0.2s; 
+        }
+        .btn-spotify-play:hover { transform: scale(1.05); background: var(--primary); color: white; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div class="user-info">
-            <span id="data-extenso">...</span>
-            <span id="nome-ouvinte">CARREGANDO...</span>
-            <button class="btn-encerrar" onclick="encerrarSessao()">Encerrar</button>
-        </div>
-        <div class="date-info">
-            <span id="hora-atual">00:00:00</span>
-        </div>
+        <h2><i class="fas fa-headphones"></i> MEU PAINEL</h2>
+        <div class="user-info" id="user-display">---</div>
     </div>
 
-    <button class="btn-config" onclick="openModal()">
-        <i class="fas fa-plus-circle"></i> SELECIONAR MINHAS RÁDIOS
-    </button>
+    <div class="container">
+        <h3>ESCOLHA SUA EMISSORA (ARRASTE PARA ORGANIZAR)</h3>
+        <div id="radio-list" class="radio-grid"></div>
+    </div>
 
-    <div class="radio-grid" id="minhas-radios"></div>
-
-    <div class="player-bar">
-        <div id="txt-status">AGUARDANDO SELEÇÃO</div>
-        <div class="controls">
-            <button class="btn-ctrl" onclick="changeRadio(-1)"><i class="fas fa-step-backward"></i></button>
-            <div class="btn-main" id="btn-play-pause" onclick="togglePlay()">
-                <i class="fas fa-play" id="icon-play"></i>
+    <div class="player-footer">
+        <div id="now-title" style="font-size:11px; color:#888; margin-bottom:12px; letter-spacing: 1px; text-transform: uppercase;">SELECIONE UMA RÁDIO</div>
+        <div class="controls-row">
+            <button class="btn-nav" onclick="prevRadio()"><i class="fas fa-step-backward"></i></button>
+            <div class="play-outer">
+                <div class="ring-animation"></div>
+                <button class="btn-spotify-play" onclick="togglePlay()"><i class="fas fa-play" id="play-icon" style="margin-left: 3px;"></i></button>
             </div>
-            <button class="btn-ctrl" onclick="changeRadio(1)"><i class="fas fa-step-forward"></i></button>
+            <button class="btn-nav" onclick="nextRadio()"><i class="fas fa-step-forward"></i></button>
         </div>
     </div>
 
-    <div class="modal" id="modal-radios">
-        <div class="modal-content">
-            <h2 style="color:var(--primary); margin-top:0">Escolha suas Rádios</h2>
-            <div id="lista-geral-radios" style="max-height: 350px; overflow-y: auto; margin-bottom: 20px;"></div>
-            <button class="btn-config" onclick="closeModal()">SALVAR E SAIR</button>
-        </div>
-    </div>
-
-    <audio id="player"></audio>
+    <audio id="audio-player"></audio>
 
     <script>
         const firebaseConfig = {
@@ -101,156 +107,89 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // PADRONIZAÇÃO DO NOME
-        const nomeRaw = localStorage.getItem('usuarioNome') || 'OUVINTE';
-        const nomeLogado = nomeRaw.trim().toUpperCase();
-        const userPath = 'usuarios/' + nomeLogado;
+        const player = document.getElementById('audio-player');
+        const nomeUsuario = localStorage.getItem('usuarioNome') || "Ouvinte";
+        document.getElementById('user-display').innerText = "OLÁ, " + nomeUsuario;
 
-        document.getElementById('nome-ouvinte').innerText = "OLÁ, " + nomeLogado;
+        let radioData = [];
+        let activeIndex = -1;
 
-        // REGISTRAR ENTRADA E MANTER ONLINE
-        function updateHeartbeat(radio = null) {
-            const data = {
-                nome: nomeLogado,
-                lastSeen: Date.now()
-            };
-            if(radio) data.radioAtual = radio;
-            db.ref(userPath).update(data);
-        }
-
-        // Primeiro sinal ao abrir
-        db.ref(userPath).update({
-            nome: nomeLogado,
-            sessionStart: Date.now(),
-            lastSeen: Date.now(),
-            radioAtual: "Navegando..."
-        });
-
-        // Loop de sinal de vida (Status ON)
-        setInterval(() => updateHeartbeat(), 30000);
-
-        function encerrarSessao() {
-            db.ref(userPath).update({ lastSeen: 0, radioAtual: "Desconectou" });
-            localStorage.clear();
-            window.location.href = 'index.html';
-        }
-
-        setInterval(() => {
-            const agora = new Date();
-            document.getElementById('hora-atual').textContent = agora.toLocaleTimeString('pt-BR');
-            document.getElementById('data-extenso').textContent = agora.toLocaleDateString('pt-BR', {weekday:'long', day:'numeric', month:'long'});
-        }, 1000);
-
-        let todasRadios = [];
-        let minhasSelecoes = []; 
-        let r_selecionadas = [];
-        let currentIdx = -1;
-        const audio = document.getElementById('player');
-
-        db.ref(userPath + '/preferencias').on('value', snap => {
-            minhasSelecoes = snap.val() || [];
-            renderMinhasRadios();
-        });
-
-        db.ref('radios').on('value', snap => {
-            todasRadios = [];
-            const containerGeral = document.getElementById('lista-geral-radios');
-            containerGeral.innerHTML = "";
-            snap.forEach(child => {
-                const r = child.val(); r.key = child.key;
-                todasRadios.push(r);
-                const isChecked = minhasSelecoes.includes(r.key) ? 'checked' : '';
-                containerGeral.innerHTML += `
-                    <div class="radio-item">
+        // Renderizar Rádios (Padrão ADM)
+        function renderRadios() {
+            const list = document.getElementById('radio-list');
+            list.innerHTML = "";
+            radioData.forEach((r, i) => {
+                list.innerHTML += `
+                    <div class="radio-item ${activeIndex === i ? 'active' : ''}" data-id="${r.key}" onclick="playRadio(${i})">
+                        <i class="fas fa-tower-broadcast antena"></i>
                         <span>${r.name}</span>
-                        <input type="checkbox" class="checkbox-custom" id="chk-${r.key}" ${isChecked} onchange="toggleSelectRadio('${r.key}')">
                     </div>`;
             });
-            renderMinhasRadios();
+        }
+
+        // Buscar Rádios do Firebase
+        db.ref('radios').on('value', snap => {
+            radioData = [];
+            snap.forEach(c => { radioData.push({ ...c.val(), key: c.key }); });
+            radioData.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
+            renderRadios();
         });
 
-        function toggleSelectRadio(key) {
-            if (minhasSelecoes.includes(key)) {
-                minhasSelecoes = minhasSelecoes.filter(k => k !== key);
-            } else {
-                minhasSelecoes.push(key);
-            }
-            db.ref(userPath + '/preferencias').set(minhasSelecoes);
-        }
-
-        function renderMinhasRadios() {
-            const grid = document.getElementById('minhas-radios');
-            grid.innerHTML = "";
-            r_selecionadas = [];
-            minhasSelecoes.forEach(key => {
-                const radio = todasRadios.find(r => r.key === key);
-                if(radio) r_selecionadas.push(radio);
-            });
-            r_selecionadas.forEach((r, index) => {
-                grid.innerHTML += `
-                    <div class="radio-square" data-id="${r.key}" id="card-${r.key}" style="background:${r.color}" onclick="playByIndex(${index})">
-                        ${r.name}
-                    </div>`;
-            });
-        }
-
-        Sortable.create(document.getElementById('minhas-radios'), {
+        // Arrastar (Sortable)
+        Sortable.create(document.getElementById('radio-list'), {
             animation: 150,
-            onEnd: function () {
-                let novaOrdem = [];
-                document.querySelectorAll('.radio-square').forEach(el => {
-                    novaOrdem.push(el.getAttribute('data-id'));
-                });
-                minhasSelecoes = novaOrdem;
-                db.ref(userPath + '/preferencias').set(novaOrdem);
+            onEnd: function() {
+                // Opcional: Salvar posição pessoal ou apenas visual
             }
         });
 
-        function playByIndex(index) {
-            if (index < 0 || index >= r_selecionadas.length) return;
-            currentIdx = index;
-            const r = r_selecionadas[index];
-            audio.src = r.url;
-            audio.play();
+        // Função Play
+        function playRadio(index) {
+            if (index < 0 || index >= radioData.length) return;
+            activeIndex = index;
+            const r = radioData[index];
+            player.src = r.url; 
+            player.play();
             
-            // INFORMAR AO ADM
-            db.ref(userPath).update({
+            document.getElementById('now-title').innerText = "OUVINDO: " + r.name;
+            const icon = document.getElementById('play-icon');
+            icon.className = "fas fa-stop"; 
+            icon.style.marginLeft = "0px";
+
+            // Atualizar Status no Firebase para o ADM ver
+            db.ref('usuarios/' + nomeUsuario).update({
                 radioAtual: r.name,
                 radioStart: Date.now(),
                 lastSeen: Date.now()
             });
 
-            document.getElementById('txt-status').innerHTML = `OUVINDO: <b style="color:var(--primary)">${r.name.toUpperCase()}</b>`;
-            document.getElementById('icon-play').className = "fas fa-stop";
-            document.getElementById('btn-play-pause').classList.add('playing');
-            document.querySelectorAll('.radio-square').forEach(el => el.classList.remove('playing'));
-            if(document.getElementById('card-'+r.key)) document.getElementById('card-'+r.key).classList.add('playing');
+            renderRadios();
         }
 
         function togglePlay() {
-            if(!audio.src) return;
-            if(audio.paused) {
-                audio.play();
-                document.getElementById('icon-play').className = "fas fa-stop";
-                document.getElementById('btn-play-pause').classList.add('playing');
-                updateHeartbeat();
-            } else {
-                audio.pause();
-                document.getElementById('icon-play').className = "fas fa-play";
-                document.getElementById('btn-play-pause').classList.remove('playing');
+            if(!player.src) return;
+            const icon = document.getElementById('play-icon');
+            if(player.paused) { 
+                player.play(); 
+                icon.className = "fas fa-stop"; 
+                icon.style.marginLeft = "0px"; 
+            } else { 
+                player.pause(); 
+                icon.className = "fas fa-play"; 
+                icon.style.marginLeft = "3px"; 
             }
         }
 
-        function changeRadio(dir) {
-            if (r_selecionadas.length === 0) return;
-            let next = currentIdx + dir;
-            if (next >= r_selecionadas.length) next = 0;
-            if (next < 0) next = r_selecionadas.length - 1;
-            playByIndex(next);
-        }
+        function nextRadio() { let next = activeIndex + 1; if (next >= radioData.length) next = 0; playRadio(next); }
+        function prevRadio() { let prev = activeIndex - 1; if (prev < 0) prev = radioData.length - 1; playRadio(prev); }
 
-        function openModal() { document.getElementById('modal-radios').style.display = 'flex'; }
-        function closeModal() { document.getElementById('modal-radios').style.display = 'none'; }
+        // Manter sinal de vida (Monitor ADM)
+        setInterval(() => {
+            if(nomeUsuario) {
+                db.ref('usuarios/' + nomeUsuario).update({ lastSeen: Date.now() });
+            }
+        }, 30000);
+
     </script>
 </body>
 </html>
