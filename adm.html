@@ -25,15 +25,27 @@
         .input-group { display: flex; gap: 10px; margin-bottom: 25px; }
         input, select { flex: 1; padding: 12px; background: #2a2a2a; border: none; color: white; border-radius: 8px; outline: none; }
         .btn-save { padding: 0 25px; background: var(--primary); border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: black; }
+        
+        /* PUBLICIDADE */
         .pub-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .pub-preview { width: 100%; max-height: 100px; border-radius: 10px; object-fit: contain; margin-top: 10px; border: 1px dashed #444; display: none; }
         label { font-size: 10px; color: #888; display: block; margin-bottom: 5px; margin-left: 5px; }
+        
+        /* LISTA DE PUBS CADASTRADAS (NOVO) */
+        .pub-list-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; overflow: hidden; border-left: 4px solid var(--primary); }
+        .pub-list-row { display: flex; align-items: center; width: 100%; }
+        .pub-list-btn { flex: 1; padding: 12px; background: none; border: none; color: white; text-align: left; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+        .pub-thumb-mini { width: 40px; height: 25px; object-fit: cover; border-radius: 4px; background: #000; }
+        .pub-details-bar { display: none; padding: 10px 15px; font-size: 12px; color: #ccc; border-top: 1px solid #222; background: #151515; }
+        .pub-details-bar b { color: var(--primary); }
+
         .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; }
         .radio-item { aspect-ratio: 1/1; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #000; font-weight: bold; font-size: 13px; text-align: center; padding: 10px; cursor: grab; transition: 0.3s; position: relative; border: 2px solid transparent; }
         .radio-item.active { background: #000 !important; color: var(--primary) !important; border-color: var(--primary); box-shadow: 0 0 15px rgba(29, 185, 84, 0.4); }
         .antena { font-size: 24px; margin-bottom: 8px; display: none; }
         .active .antena { display: block; animation: pulse-antena 1s infinite; }
         @keyframes pulse-antena { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(1.1); } }
+        
         .user-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; overflow: hidden; }
         .user-row { display: flex; align-items: center; width: 100%; }
         .user-name-btn { flex: 1; padding: 15px; background: none; border: none; color: white; text-align: left; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
@@ -107,6 +119,9 @@
                     </div>
                 </div>
                 <button class="btn-save" style="width:100%; margin-top:15px; height:45px;" onclick="savePub()">LANÇAR CAMPANHA</button>
+                
+                <h3 style="margin-top:25px;"><i class="fas fa-ad"></i> Campanhas Ativas</h3>
+                <div id="pub-list-admin"></div>
             </div>
         </div>
         <div class="col-right">
@@ -131,12 +146,14 @@
         let activeIndex = -1;
         setInterval(() => { document.getElementById('hora').innerText = new Date().toLocaleTimeString('pt-BR'); }, 1000);
         function logout() { if(confirm("Deseja sair?")) { localStorage.removeItem('usuarioNome'); window.location.href = 'index.html'; } }
+        
         db.ref('radios').on('value', snap => {
             radioData = [];
             snap.forEach(c => { radioData.push({ ...c.val(), key: c.key }); });
             radioData.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
             renderRadios();
         });
+
         function renderRadios() {
             const list = document.getElementById('radio-list');
             list.innerHTML = "";
@@ -144,6 +161,7 @@
                 list.innerHTML += `<div class="radio-item ${activeIndex === i ? 'active' : ''}" style="background:${r.color || '#1DB954'}" data-id="${r.key}" onclick="playRadio(${i})"><i class="fas fa-tower-broadcast antena"></i><span>${r.name}</span></div>`;
             });
         }
+
         Sortable.create(document.getElementById('radio-list'), {
             animation: 150,
             onEnd: function() {
@@ -151,6 +169,7 @@
                 items.forEach((item, index) => { db.ref('radios/' + item.getAttribute('data-id')).update({ posicao: index }); });
             }
         });
+
         function addRadio() {
             const n = document.getElementById('r-name').value, u = document.getElementById('r-url').value;
             if(n && u) {
@@ -159,12 +178,14 @@
                 document.getElementById('r-name').value = ""; document.getElementById('r-url').value = "";
             }
         }
+
         let imgBase64 = "";
         function previewPub(input) {
             const reader = new FileReader();
             reader.onload = (e) => { imgBase64 = e.target.result; document.getElementById('pub-view').src = imgBase64; document.getElementById('pub-view').style.display = "block"; };
             reader.readAsDataURL(input.files[0]);
         }
+
         function savePub() {
             const ini = document.getElementById('pub-ini').value, fim = document.getElementById('pub-fim').value;
             const target = document.getElementById('pub-target').value;
@@ -173,8 +194,47 @@
             db.ref('publicidade').push({
                 imagem: imgBase64, inicio: new Date(ini).getTime(), fim: new Date(fim).getTime(),
                 destino: target, ouvinteAlvo: target === 'MANUAL' ? manual : 'TODOS'
-            }).then(() => { alert("Campanha lançada!"); imgBase64 = ""; document.getElementById('pub-view').style.display = "none"; });
+            }).then(() => { 
+                alert("Campanha lançada!"); 
+                imgBase64 = ""; 
+                document.getElementById('pub-view').style.display = "none"; 
+                document.getElementById('pub-file').value = "";
+            });
         }
+
+        // --- LISTAR PUBLICIDADES NO ADM ---
+        db.ref('publicidade').on('value', snap => {
+            const container = document.getElementById('pub-list-admin');
+            container.innerHTML = "";
+            snap.forEach(c => {
+                const p = c.val(), id = c.key;
+                const dIni = new Date(p.inicio).toLocaleString();
+                const dFim = new Date(p.fim).toLocaleString();
+                
+                container.innerHTML += `
+                    <div class="pub-list-item">
+                        <div class="pub-list-row">
+                            <button class="pub-list-btn" onclick="togglePubDetails('${id}')">
+                                <img src="${p.imagem}" class="pub-thumb-mini">
+                                <span>Destino: <b>${p.ouvinteAlvo}</b></span>
+                            </button>
+                            <button class="btn-delete-user" onclick="if(confirm('Excluir esta campanha?')) db.ref('publicidade/${id}').remove()"><i class="fas fa-trash-alt"></i></button>
+                        </div>
+                        <div class="pub-details-bar" id="det-pub-${id}">
+                            Início: <b>${dIni}</b><br>
+                            Término: <b>${dFim}</b>
+                        </div>
+                    </div>`;
+            });
+        });
+
+        function togglePubDetails(id) {
+            const el = document.getElementById('det-pub-' + id);
+            const isVisible = el.style.display === 'block';
+            document.querySelectorAll('.pub-details-bar').forEach(d => d.style.display = 'none');
+            if (!isVisible) el.style.display = 'block';
+        }
+
         function playRadio(index) {
             activeIndex = index;
             const r = radioData[index];
@@ -183,13 +243,16 @@
             document.getElementById('play-icon').className = "fas fa-stop";
             renderRadios();
         }
+
         function togglePlay() {
             if(!player.src) return;
             if(player.paused) { player.play(); document.getElementById('play-icon').className = "fas fa-stop"; }
             else { player.pause(); document.getElementById('play-icon').className = "fas fa-play"; }
         }
+
         function nextRadio() { playRadio((activeIndex + 1) % radioData.length); }
         function prevRadio() { playRadio((activeIndex - 1 + radioData.length) % radioData.length); }
+
         db.ref('usuarios').on('value', snap => {
             const container = document.getElementById('user-list');
             container.innerHTML = "";
@@ -211,6 +274,7 @@
                     </div>`;
             });
         });
+
         function toggleUserDetails(id) {
             const el = document.getElementById('detalhes-' + id);
             const isVisible = el.style.display === 'block';
