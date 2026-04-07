@@ -21,10 +21,19 @@
         #img-publicidade { max-height: 55px; max-width: 100%; border-radius: 8px; display: none; object-fit: contain; transition: opacity 0.5s ease-in-out; }
         
         .header-right { display: flex; align-items: center; gap: 40px; flex-shrink: 0; }
-        .weather-box { display: flex; align-items: center; gap: 12px; color: var(--primary); font-weight: bold; font-size: 16px; }
-        .weather-box i { font-size: 22px; }
-        .weather-desc { font-size: 11px; text-transform: uppercase; margin-left: -5px; opacity: 0.8; }
+        .weather-box { display: flex; align-items: center; gap: 15px; color: var(--primary); font-weight: bold; font-size: 16px; }
+        .weather-box i { font-size: 24px; position: relative; }
+        
+        /* ANIMAÇÕES DE CLIMA */
+        .fa-sun { animation: spin-sun 10s linear infinite; color: #FFD700; }
+        @keyframes spin-sun { 100% { transform: rotate(360deg); } }
+        
+        .fa-cloud-showers-heavy { animation: rain-shake 0.5s ease-in-out infinite; }
+        @keyframes rain-shake { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(2px); } }
+
+        .weather-desc { font-size: 11px; text-transform: uppercase; margin-left: 5px; opacity: 0.8; letter-spacing: 1px; }
         .city-name { color: #888; font-size: 12px; text-transform: uppercase; margin-right: 5px; }
+        
         .btn-header { background: none; border: 1px solid #333; color: white; padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: 0.3s; display: flex; align-items: center; gap: 8px; }
         .btn-header:hover { background: #222; border-color: var(--primary); }
         .btn-sair { color: #ff4444; border-color: #442222; }
@@ -93,7 +102,7 @@
                 <span class="city-name" id="city">LOCALIZANDO...</span>
                 <i id="weather-icon" class="fas fa-sync-alt fa-spin"></i>
                 <span id="weather-desc" class="weather-desc"></span>
-                <span id="temp">--°C</span>
+                <span id="temp" style="margin-left: 10px;">--°C</span>
             </div>
             <div id="hora">00:00:00</div>
         </div>
@@ -144,10 +153,9 @@
 
         setInterval(() => { document.getElementById('hora').innerText = new Date().toLocaleTimeString('pt-BR'); }, 1000);
 
-        // --- MELHORIA DA PREVISÃO POR IP REAL ---
+        // --- PREVISÃO DO TEMPO COM ÍCONES E EFEITOS ---
         async function getWeather() {
             try {
-                // Busca localização por IP de forma silenciosa
                 const locRes = await fetch('https://ipapi.co/json/');
                 const loc = await locRes.json();
                 
@@ -158,22 +166,26 @@
                     if (clima.current_weather) {
                         const temp = Math.round(clima.current_weather.temperature);
                         const code = clima.current_weather.weathercode;
-                        const cidade = loc.city || "SUA CIDADE";
                         
                         document.getElementById('temp').innerText = temp + "°C";
-                        document.getElementById('city').innerText = cidade.toUpperCase();
+                        document.getElementById('city').innerText = (loc.city || "LOCAL").toUpperCase();
                         
                         const icon = document.getElementById('weather-icon');
                         const desc = document.getElementById('weather-desc');
-                        icon.className = "fas"; // limpa anteriores
+                        icon.className = "fas"; 
 
-                        // Mapeamento de clima com texto solicitado
+                        // Lógica de ícones solicitada
                         if (code >= 51 && code <= 67 || code >= 80 && code <= 82) {
                             icon.classList.add("fa-cloud-showers-heavy");
                             desc.innerText = "CHUVA";
-                        } else if (code >= 1 && code <= 3) {
-                            icon.classList.add("fa-cloud-sun");
+                        } else if (code === 3) {
+                            icon.classList.add("fa-cloud"); // Nuvem escura (Nublado)
+                            icon.style.color = "#555";
                             desc.innerText = "NUBLADO";
+                        } else if (code >= 1 && code <= 2) {
+                            icon.classList.add("fa-cloud-sun");
+                            icon.style.color = "";
+                            desc.innerText = "SOL ENTRE NUVENS";
                         } else if (code === 0) {
                             icon.classList.add("fa-sun");
                             desc.innerText = "SOL";
@@ -186,14 +198,12 @@
                         }
                     }
                 }
-            } catch (e) { 
-                document.getElementById('city').innerText = "CLIMA"; 
-            }
+            } catch (e) { document.getElementById('city').innerText = "CLIMA"; }
         }
         getWeather();
         setInterval(getWeather, 600000);
 
-        // --- RESTANTE DO CÓDIGO MANTIDO INTACTO ---
+        // --- RESTANTE DO CÓDIGO ---
         db.ref('radios').on('value', snap => {
             allRadios = [];
             snap.forEach(c => { allRadios.push({ ...c.val(), key: c.key }); });
@@ -255,7 +265,7 @@
             activeIndex = index;
             const r = myRadios[index];
             player.src = r.url; player.play();
-            document.getElementById('now-title').innerText = "OUVINDO: " + r.name;
+            document.getElementById('now-title').innerText = "OUVINDE: " + r.name;
             document.getElementById('play-icon').className = "fas fa-stop";
             db.ref('usuarios/' + nomeUsuario).update({ radioAtual: r.name, lastSeen: Date.now(), sessionStart: Date.now() });
             renderAll();
