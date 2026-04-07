@@ -33,7 +33,7 @@
         .active .antena { display: block; animation: pulse-antena 1s infinite; }
         @keyframes pulse-antena { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(1.1); } }
 
-        /* MONITOR DE OUVINTES - CORREÇÃO TOTAL */
+        /* MONITOR DE OUVINTES */
         .user-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; border-left: 4px solid var(--primary); overflow: hidden; }
         .user-row { display: flex; align-items: center; width: 100%; }
         .user-name-btn { flex: 1; padding: 15px; background: none; border: none; color: white; text-align: left; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
@@ -46,7 +46,7 @@
         .user-details-bar { display: none; padding: 15px; background: #080808; border-top: 1px solid #333; font-size: 13px; color: #bbb; line-height: 1.8; }
         .user-details-bar b { color: var(--primary); }
 
-        /* PLAYER RODAPÉ (SEU DESIGN ORIGINAL) */
+        /* PLAYER RODAPÉ (DESIGN ORIGINAL PRESERVADO) */
         .player-footer { margin-top: 20px; background: #111; padding: 25px; border-radius: 20px; border: 1px solid #222; text-align: center; }
         .controls-row { display: flex; align-items: center; justify-content: center; gap: 35px; }
         .btn-nav { background: none; border: none; color: #b3b3b3; font-size: 24px; cursor: pointer; transition: 0.2s; }
@@ -170,16 +170,16 @@
             }
         }
 
-        // --- LÓGICA DO MONITOR CORRIGIDA ---
-        function formatarMinutos(timestamp) {
-            const ts = Number(timestamp);
-            if (!ts || ts <= 0) return "---";
+        // --- MONITOR DE OUVINTES (SISTEMA DE CAPTURA ROBUSTO) ---
+        function formatarTempo(valor) {
+            const ts = parseInt(valor);
+            if (!ts || isNaN(ts)) return "0 min";
             const diff = Math.floor((Date.now() - ts) / 60000);
             return diff < 1 ? "Agora" : diff + " min";
         }
 
         function deleteUser(id) {
-            if(confirm("Remover ouvinte?")) db.ref('usuarios/' + id).remove();
+            if(confirm("Deseja remover este ouvinte?")) db.ref('usuarios/' + id).remove();
         }
 
         db.ref('usuarios').on('value', snap => {
@@ -190,35 +190,39 @@
                 const u = c.val();
                 const id = c.key;
                 
-                // Status baseado no lastSeen (1 minuto de tolerância)
-                const isOnline = (Date.now() - Number(u.lastSeen || 0) < 60000);
-                const statusTag = isOnline ? '<span class="status-on">ON</span>' : '<span class="status-off">OFF</span>';
+                // Checa se está online (último sinal em 60s)
+                const lastSeen = parseInt(u.lastSeen || 0);
+                const isOnline = (Date.now() - lastSeen < 60000);
+                const statusHTML = isOnline ? '<span class="status-on">ON</span>' : '<span class="status-off">OFF</span>';
                 
-                // Garantia de exibição da rádio e tempos
-                const radioNome = u.radioAtual || "Navegando";
-                const tSessao = formatarMinutos(u.sessionStart);
-                const tRadio = formatarMinutos(u.radioStart);
+                // Captura a rádio e os tempos (com fallback se os nomes mudarem)
+                const rAtual = u.radioAtual || u.radio || "Navegando...";
+                const sStart = u.sessionStart || u.sessao || 0;
+                const rStart = u.radioStart || u.radioInicio || 0;
 
                 container.innerHTML += `
                     <div class="user-item">
                         <div class="user-row">
                             <button class="user-name-btn" onclick="toggleUserBar('${id}')">
-                                <span>${u.nome || 'Ouvinte'}</span> ${statusTag}
+                                <span>${u.nome || 'Ouvinte'}</span> ${statusHTML}
                             </button>
                             <button class="btn-delete-user" onclick="deleteUser('${id}')"><i class="fas fa-trash-alt"></i></button>
                         </div>
                         <div class="user-details-bar" id="bar-${id}">
-                            📻 Ouvindo: <b>${radioNome}</b><br>
-                            ⏳ Na Rádio: <b>${tRadio}</b><br>
-                            🚀 Conectado: <b>${tSessao}</b>
+                            📻 Ouvindo: <b>${rAtual}</b><br>
+                            ⏳ Na Rádio: <b>${formatarTempo(rStart)}</b><br>
+                            🚀 Conectado: <b>${formatarTempo(sStart)}</b>
                         </div>
                     </div>`;
             });
         });
 
         function toggleUserBar(id) {
-            const bar = document.getElementById('bar-'+id);
-            if(bar) bar.style.display = bar.style.display === 'block' ? 'none' : 'block';
+            const bars = document.querySelectorAll('.user-details-bar');
+            const target = document.getElementById('bar-' + id);
+            const isVisible = target.style.display === 'block';
+            bars.forEach(b => b.style.display = 'none'); // Fecha outros para não poluir
+            if (!isVisible) target.style.display = 'block';
         }
     </script>
 </body>
