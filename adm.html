@@ -6,6 +6,7 @@
     <title>PAINEL ADM SUPREMO - LUIGY</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --primary: #1DB954; --bg: #000; --card: #121212; --text-muted: #b3b3b3; }
@@ -19,7 +20,6 @@
             user-select: none;
         }
 
-        /* HEADER */
         .header { 
             display: flex; 
             justify-content: space-between; 
@@ -56,7 +56,6 @@
             margin-bottom: 15px;
         }
 
-        /* INPUTS */
         .input-group { display: flex; gap: 10px; margin-bottom: 25px; }
         input { 
             flex: 1; 
@@ -75,7 +74,6 @@
             cursor: pointer; 
         }
 
-        /* GRID DE RÁDIOS */
         .radio-grid { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); 
@@ -94,11 +92,13 @@
             font-size: 13px; 
             text-align: center; 
             padding: 10px;
-            cursor: pointer;
+            cursor: grab; /* Mãozinha de arrastar */
             transition: 0.3s;
             position: relative;
             border: 2px solid transparent;
         }
+
+        .radio-item:active { cursor: grabbing; }
 
         .radio-item.active {
             background: #000 !important;
@@ -111,7 +111,6 @@
         .active .antena { display: block; animation: pulse-antena 1s infinite; }
         @keyframes pulse-antena { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(1.1); } }
 
-        /* MONITOR OUVINTES */
         .user-card { 
             background: #181818; 
             padding: 12px; 
@@ -123,7 +122,6 @@
             align-items: center;
         }
 
-        /* PLAYER RODAPÉ SPOTIFY */
         .player-footer { 
             margin-top: 20px; 
             background: #111; 
@@ -207,7 +205,7 @@
                     <button class="btn-save" onclick="addRadio()">SALVAR</button>
                 </div>
 
-                <h3>GRADE DE RÁDIOS</h3>
+                <h3>GRADE DE RÁDIOS (ARRASTE PARA REORDENAR)</h3>
                 <div class="radio-grid" id="radio-list"></div>
                 
                 <div class="player-footer">
@@ -266,6 +264,7 @@
                 list.innerHTML += `
                     <div class="radio-item ${activeIndex === i ? 'active' : ''}" 
                          style="background:${r.color || '#1DB954'}" 
+                         data-id="${r.key}"
                          onclick="playRadio(${i})">
                         <i class="fas fa-tower-broadcast antena"></i>
                         <span>${r.name}</span>
@@ -273,10 +272,29 @@
             });
         }
 
+        // Carregar Rádios com Ordenação
         db.ref('radios').on('value', snap => {
             radioData = [];
-            snap.forEach(c => { radioData.push({ ...c.val(), key: c.key }); });
+            snap.forEach(c => { 
+                radioData.push({ ...c.val(), key: c.key }); 
+            });
+            // Ordena pelo campo 'posicao' que vamos criar
+            radioData.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
             renderRadios();
+        });
+
+        // Configuração do Drag and Drop
+        const radioListEl = document.getElementById('radio-list');
+        Sortable.create(radioListEl, {
+            animation: 150,
+            onEnd: function() {
+                const items = radioListEl.querySelectorAll('.radio-item');
+                items.forEach((item, index) => {
+                    const key = item.getAttribute('data-id');
+                    // Salva a nova posição de cada rádio no Firebase
+                    db.ref('radios/' + key).update({ posicao: index });
+                });
+            }
         });
 
         function playRadio(index) {
@@ -286,12 +304,9 @@
             player.src = r.url;
             player.play();
             document.getElementById('now-title').innerText = "OUVINDO: " + r.name;
-            
-            // Define ícone como STOP (quadrado)
             const icon = document.getElementById('play-icon');
             icon.className = "fas fa-stop";
             icon.style.marginLeft = "0px";
-            
             renderRadios();
         }
 
@@ -325,8 +340,15 @@
             const n = document.getElementById('r-name').value, u = document.getElementById('r-url').value;
             if(n && u) {
                 const col = `hsl(${Math.floor(Math.random() * 360)}, 70%, 75%)`;
-                db.ref('radios').push({ name: n, url: u, color: col });
-                document.getElementById('r-name').value = ""; document.getElementById('r-url').value = "";
+                // Ao adicionar, coloca na última posição
+                db.ref('radios').push({ 
+                    name: n, 
+                    url: u, 
+                    color: col,
+                    posicao: radioData.length 
+                });
+                document.getElementById('r-name').value = ""; 
+                document.getElementById('r-url').value = "";
             }
         }
 
