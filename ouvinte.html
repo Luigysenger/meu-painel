@@ -12,12 +12,11 @@
         :root { --primary: #A020F0; --bg: #000; --card: #121212; --text-muted: #b3b3b3; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; user-select: none; }
         
-        /* AJUSTE RESPONSIVO DO HEADER */
+        /* HEADER RESPONSIVO */
         .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 20px 30px; border-radius: 15px; border: 1px solid #333; margin-bottom: 25px; gap: 10px; }
         .header-left { display: flex; align-items: center; gap: 20px; flex-shrink: 0; }
         .header h2 { margin: 0; color: var(--primary); font-size: 22px; text-transform: uppercase; }
         
-        /* CONTAINER DA PUB - AJUSTADO PARA SER FLEXÍVEL */
         #container-pub { flex: 1; display: flex; justify-content: center; align-items: center; padding: 0 10px; height: 55px; overflow: hidden; }
         #img-publicidade { max-height: 55px; max-width: 100%; border-radius: 8px; display: none; object-fit: contain; transition: opacity 0.5s ease-in-out; }
         
@@ -31,21 +30,19 @@
         .btn-sair:hover { background: #331111; border-color: #ff4444; }
         #hora { font-size: 26px; font-weight: 900; min-width: 120px; text-align: right; }
         
-        /* AJUSTE RESPONSIVO DAS COLUNAS */
         .main-container { display: grid; grid-template-columns: 1fr 350px; gap: 20px; max-width: 1400px; margin: 0 auto; margin-bottom: 150px; }
         
-        /* MÁGICA PARA CELULAR E TABLET */
         @media (max-width: 900px) {
             body { padding: 10px; }
             .header { padding: 10px 15px; }
             .header h2 { font-size: 16px; }
             .header-right { gap: 15px; }
-            .city-name, .weather-box i { display: none; } /* Esconde texto da cidade no celular para caber tudo */
+            .city-name, .weather-box i { display: none; }
             .weather-box { font-size: 14px; }
             #hora { font-size: 18px; min-width: 70px; }
             #container-pub { height: 45px; }
-            .main-container { grid-template-columns: 1fr; } /* Coloca uma lista abaixo da outra no celular */
-            .btn-header span { display: none; } /* Deixa só o ícone do botão sair no celular */
+            .main-container { grid-template-columns: 1fr; }
+            .btn-header span { display: none; }
         }
 
         .card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid #282828; }
@@ -140,7 +137,7 @@
         const nomeUsuario = localStorage.getItem('usuarioNome') || "OUVINTE";
         document.getElementById('nome-exibicao').innerText = nomeUsuario;
 
-        let allRadios = [], mySelectedIds = JSON.parse(localStorage.getItem('myRadios_' + nomeUsuario)) || [], activeIndex = -1;
+        let allRadios = [], mySelectedIds = [], activeIndex = -1;
 
         setInterval(() => { document.getElementById('hora').innerText = new Date().toLocaleTimeString('pt-BR'); }, 1000);
 
@@ -154,7 +151,46 @@
         }
         getWeather();
 
-        // Ativando o Arrastar (SortableJS)
+        // 1. CARREGAR RADIOS E DEPOIS CARREGAR PREFERENCIA DO USUARIO NO FIREBASE
+        db.ref('radios').on('value', snap => {
+            allRadios = [];
+            snap.forEach(c => { allRadios.push({ ...c.val(), key: c.key }); });
+            allRadios.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
+            
+            // Buscar ordem do usuário no banco de dados
+            db.ref('usuarios/' + nomeUsuario + '/grade').once('value', userSnap => {
+                const gradeSalva = userSnap.val();
+                if (gradeSalva) {
+                    mySelectedIds = gradeSalva;
+                } else {
+                    // Se for novo, tenta pegar do LocalStorage ou começa vazio
+                    mySelectedIds = JSON.parse(localStorage.getItem('myRadios_' + nomeUsuario)) || [];
+                }
+                renderAll();
+            });
+        });
+
+        function renderAll() {
+            const myGrid = document.getElementById('my-radio-list'), selector = document.getElementById('selector-list');
+            myGrid.innerHTML = ""; selector.innerHTML = "";
+            const myRadios = mySelectedIds.map(id => allRadios.find(r => r.key === id)).filter(Boolean);
+            
+            myRadios.forEach((r, i) => {
+                myGrid.innerHTML += `<div class="radio-item ${activeIndex === i ? 'active' : ''}" style="background: ${r.color || '#d1a3ff'}" data-id="${r.key}" onclick="playRadio(${i})"><i class="fas fa-tower-broadcast antena"></i><span>${r.name}</span></div>`;
+            });
+
+            allRadios.forEach(r => {
+                const isSelected = mySelectedIds.includes(r.key);
+                selector.innerHTML += `<div class="selector-item ${isSelected ? 'selected' : ''}"><span style="font-size:13px; font-weight:bold">${r.name}</span><button class="btn-toggle-radio ${isSelected ? 'remove' : 'add'}" onclick="toggleSelection('${r.key}')"><i class="fas ${isSelected ? 'fa-times-circle' : 'fa-plus-circle'}"></i></button></div>`;
+            });
+        }
+
+        // SALVAR NO FIREBASE SEMPRE QUE MUDAR A ORDEM OU ADICIONAR
+        function salvarGrade() {
+            db.ref('usuarios/' + nomeUsuario + '/grade').set(mySelectedIds);
+            localStorage.setItem('myRadios_' + nomeUsuario, JSON.stringify(mySelectedIds));
+        }
+
         new Sortable(document.getElementById('my-radio-list'), {
             animation: 150,
             onEnd: function() {
@@ -163,36 +199,14 @@
                     newIds.push(el.getAttribute('data-id'));
                 });
                 mySelectedIds = newIds;
-                localStorage.setItem('myRadios_' + nomeUsuario, JSON.stringify(mySelectedIds));
+                salvarGrade();
             }
         });
-
-        function logout() { if(confirm("Deseja sair?")) { localStorage.removeItem('usuarioNome'); window.location.href = 'index.html'; } }
-
-        db.ref('radios').on('value', snap => {
-            allRadios = [];
-            snap.forEach(c => { allRadios.push({ ...c.val(), key: c.key }); });
-            allRadios.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
-            renderAll();
-        });
-
-        function renderAll() {
-            const myGrid = document.getElementById('my-radio-list'), selector = document.getElementById('selector-list');
-            myGrid.innerHTML = ""; selector.innerHTML = "";
-            const myRadios = mySelectedIds.map(id => allRadios.find(r => r.key === id)).filter(Boolean);
-            myRadios.forEach((r, i) => {
-                myGrid.innerHTML += `<div class="radio-item ${activeIndex === i ? 'active' : ''}" style="background: ${r.color || '#d1a3ff'}" data-id="${r.key}" onclick="playRadio(${i})"><i class="fas fa-tower-broadcast antena"></i><span>${r.name}</span></div>`;
-            });
-            allRadios.forEach(r => {
-                const isSelected = mySelectedIds.includes(r.key);
-                selector.innerHTML += `<div class="selector-item ${isSelected ? 'selected' : ''}"><span style="font-size:13px; font-weight:bold">${r.name}</span><button class="btn-toggle-radio ${isSelected ? 'remove' : 'add'}" onclick="toggleSelection('${r.key}')"><i class="fas ${isSelected ? 'fa-times-circle' : 'fa-plus-circle'}"></i></button></div>`;
-            });
-        }
 
         function toggleSelection(id) {
             const index = mySelectedIds.indexOf(id);
             if (index > -1) mySelectedIds.splice(index, 1); else mySelectedIds.push(id);
-            localStorage.setItem('myRadios_' + nomeUsuario, JSON.stringify(mySelectedIds));
+            salvarGrade();
             renderAll();
         }
 
@@ -217,23 +231,21 @@
         function nextRadio() { if(activeIndex < mySelectedIds.length - 1) playRadio(activeIndex + 1); else playRadio(0); }
         function prevRadio() { if(activeIndex > 0) playRadio(activeIndex - 1); else playRadio(mySelectedIds.length - 1); }
 
+        function logout() { if(confirm("Deseja sair?")) { localStorage.removeItem('usuarioNome'); window.location.href = 'index.html'; } }
+
+        // PUBLICIDADE
         let listaPubs = [], idxPub = 0;
         db.ref('publicidade').on('value', snap => {
             listaPubs = [];
             const agora = Date.now();
             snap.forEach(child => {
                 const p = child.val();
-                const paraMim = (p.destino === 'TODOS' || p.ouvinteAlvo === nomeUsuario.toUpperCase());
-                const noPrazo = (agora >= p.inicio && agora <= p.fim);
-                if (paraMim && noPrazo) { listaPubs.push(p); }
-                if (agora > p.fim) { db.ref('publicidade/' + child.key).remove(); }
+                if ((p.destino === 'TODOS' || p.ouvinteAlvo === nomeUsuario.toUpperCase()) && (agora >= p.inicio && agora <= p.fim)) {
+                    listaPubs.push(p);
+                }
             });
-            if (listaPubs.length === 0) {
-                document.getElementById('img-publicidade').style.display = "none";
-            } else {
-                idxPub = 0;
-                mostrarPub();
-            }
+            if (listaPubs.length === 0) { document.getElementById('img-publicidade').style.display = "none"; } 
+            else { idxPub = 0; mostrarPub(); }
         });
 
         function mostrarPub() {
