@@ -32,6 +32,15 @@
         .radio-square { aspect-ratio: 1/1; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s; color: #000; text-align: center; font-weight: bold; font-size: 13px; position: relative; }
         .radio-square.playing { background: #000 !important; color: var(--primary) !important; border: 2px solid var(--primary); box-shadow: 0 0 15px var(--primary); }
 
+        /* ANTENA PISCANDO */
+        .antena-piscando { font-size: 24px; margin-bottom: 8px; animation: blink-antena 1s infinite; display: none; }
+        .tem-ouvinte .antena-piscando { display: block; }
+        @keyframes blink-antena {
+            0% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 2px var(--primary)); }
+            50% { opacity: 0.3; transform: scale(1.1); filter: drop-shadow(0 0 8px var(--primary)); }
+            100% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 2px var(--primary)); }
+        }
+
         /* MONITOR DE OUVINTES MELHORADO */
         .user-card { background: #222; padding: 12px; border-radius: 10px; margin-bottom: 5px; border-left: 4px solid #444; cursor: pointer; transition: 0.3s; position: relative; display: flex; justify-content: space-between; align-items: center; }
         .user-card:hover { background: #2a2a2a; }
@@ -140,6 +149,7 @@
         // RÁDIOS
         let radioArray = [];
         let currentIndex = -1;
+        let ouvintesAtivos = []; // Variável global para rastrear quem está sendo ouvido
         const player = document.getElementById('main-player');
 
         function saveRadio() {
@@ -150,20 +160,32 @@
             document.getElementById('r-nome').value=""; document.getElementById('r-url').value="";
         }
 
+        // FUNÇÃO PARA ATUALIZAR VISUAL DAS RÁDIOS
+        function renderRadios() {
+            const list = document.getElementById('radios-list'); 
+            list.innerHTML = "";
+            radioArray.forEach((r, index) => {
+                const temOuvinte = ouvintesAtivos.includes(r.name);
+                list.innerHTML += `
+                    <div class="radio-square ${temOuvinte ? 'tem-ouvinte' : ''} ${currentIndex === index ? 'playing' : ''}" 
+                         id="sq-${r.key}" style="background:${r.color}" onclick="playRadio(${index})">
+                        <i class="fas fa-tower-broadcast antena-piscando"></i>
+                        <span>${r.name}</span>
+                    </div>`;
+            });
+        }
+
         db.ref('radios').on('value', snap => {
-            const list = document.getElementById('radios-list'); list.innerHTML = ""; radioArray = [];
+            radioArray = [];
             snap.forEach(c => {
                 const r = c.val(); r.key = c.key; radioArray.push(r);
-                list.innerHTML += `<div class="radio-square" id="sq-${r.key}" style="background:${r.color}" onclick="playRadio(${radioArray.length-1})">
-                    <span>${r.name}</span>
-                </div>`;
             });
+            renderRadios();
         });
 
         function playRadio(index) {
             currentIndex = index; const r = radioArray[index]; player.src = r.url; player.play();
-            document.querySelectorAll('.radio-square').forEach(el => el.classList.remove('playing'));
-            document.getElementById('sq-'+r.key).classList.add('playing');
+            renderRadios();
             document.getElementById('txt-ouvindo').innerHTML = `OUVINDO: <b style="color:var(--primary)">${r.name}</b>`;
             document.getElementById('play-icon').className = 'fas fa-circle-pause';
         }
@@ -184,10 +206,19 @@
         }
 
         db.ref('usuarios').on('value', snap => {
-            const mon = document.getElementById('user-monitor'); mon.innerHTML = "";
+            const mon = document.getElementById('user-monitor'); 
+            mon.innerHTML = "";
+            ouvintesAtivos = []; // Reseta a lista de rádios sendo ouvidas
+
             snap.forEach(c => {
                 const u = c.val(); 
                 const on = (Date.now() - (u.lastSeen || 0) < 30000);
+                
+                // Se o usuário estiver online, adiciona a rádio dele na lista global para a antena piscar
+                if(on && u.radioAtual) {
+                    ouvintesAtivos.push(u.radioAtual);
+                }
+
                 const tempoTotal = Math.floor((Date.now() - (u.loginTime || Date.now())) / 60000);
                 const tempoRadio = Math.floor((Date.now() - (u.radioStartTime || Date.now())) / 60000);
 
@@ -202,6 +233,8 @@
                         <p>🎵 Tempo na Rádio: <b>${tempoRadio} min</b></p>
                     </div>`;
             });
+            // Atualiza o grid de rádios para refletir quem tem ouvinte agora
+            renderRadios();
         });
 
         Sortable.create(document.getElementById('radios-list'), { animation: 150 });
