@@ -23,6 +23,7 @@
         .header-right { display: flex; align-items: center; gap: 40px; flex-shrink: 0; }
         .weather-box { display: flex; align-items: center; gap: 12px; color: var(--primary); font-weight: bold; font-size: 16px; }
         .weather-box i { font-size: 22px; }
+        .weather-desc { font-size: 11px; text-transform: uppercase; margin-left: -5px; opacity: 0.8; }
         .city-name { color: #888; font-size: 12px; text-transform: uppercase; margin-right: 5px; }
         .btn-header { background: none; border: 1px solid #333; color: white; padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: 0.3s; display: flex; align-items: center; gap: 8px; }
         .btn-header:hover { background: #222; border-color: var(--primary); }
@@ -37,7 +38,7 @@
             .header { padding: 10px 15px; }
             .header h2 { font-size: 16px; }
             .header-right { gap: 15px; }
-            .city-name, .weather-box i { display: none; }
+            .city-name, .weather-box i, .weather-desc { display: none; }
             .weather-box { font-size: 14px; }
             #hora { font-size: 18px; min-width: 70px; }
             #container-pub { height: 45px; }
@@ -90,7 +91,9 @@
         <div class="header-right">
             <div class="weather-box" id="weather">
                 <span class="city-name" id="city">LOCALIZANDO...</span>
-                <i id="weather-icon" class="fas fa-cloud-sun"></i><span id="temp">--°C</span>
+                <i id="weather-icon" class="fas fa-sync-alt fa-spin"></i>
+                <span id="weather-desc" class="weather-desc"></span>
+                <span id="temp">--°C</span>
             </div>
             <div id="hora">00:00:00</div>
         </div>
@@ -141,9 +144,10 @@
 
         setInterval(() => { document.getElementById('hora').innerText = new Date().toLocaleTimeString('pt-BR'); }, 1000);
 
-        // --- MELHORIA DA PREVISÃO POR IP ---
+        // --- MELHORIA DA PREVISÃO POR IP REAL ---
         async function getWeather() {
             try {
+                // Busca localização por IP de forma silenciosa
                 const locRes = await fetch('https://ipapi.co/json/');
                 const loc = await locRes.json();
                 
@@ -152,33 +156,44 @@
                     const clima = await climaRes.json();
                     
                     if (clima.current_weather) {
-                        document.getElementById('temp').innerText = Math.round(clima.current_weather.temperature) + "°C";
-                        document.getElementById('city').innerText = loc.city.toUpperCase();
-                        
+                        const temp = Math.round(clima.current_weather.temperature);
                         const code = clima.current_weather.weathercode;
+                        const cidade = loc.city || "SUA CIDADE";
+                        
+                        document.getElementById('temp').innerText = temp + "°C";
+                        document.getElementById('city').innerText = cidade.toUpperCase();
+                        
                         const icon = document.getElementById('weather-icon');
+                        const desc = document.getElementById('weather-desc');
                         icon.className = "fas"; // limpa anteriores
 
-                        // Mapeamento de códigos de chuva real
+                        // Mapeamento de clima com texto solicitado
                         if (code >= 51 && code <= 67 || code >= 80 && code <= 82) {
-                            icon.classList.add("fa-cloud-showers-heavy"); // ÍCONE CHUVA
+                            icon.classList.add("fa-cloud-showers-heavy");
+                            desc.innerText = "CHUVA";
                         } else if (code >= 1 && code <= 3) {
                             icon.classList.add("fa-cloud-sun");
+                            desc.innerText = "NUBLADO";
                         } else if (code === 0) {
                             icon.classList.add("fa-sun");
+                            desc.innerText = "SOL";
                         } else if (code >= 95) {
                             icon.classList.add("fa-bolt");
+                            desc.innerText = "TEMPESTADE";
                         } else {
                             icon.classList.add("fa-cloud");
+                            desc.innerText = "NUVENS";
                         }
                     }
                 }
-            } catch (e) { document.getElementById('city').innerText = "CLIMA"; }
+            } catch (e) { 
+                document.getElementById('city').innerText = "CLIMA"; 
+            }
         }
         getWeather();
         setInterval(getWeather, 600000);
 
-        // --- RESTANTE DO CÓDIGO ---
+        // --- RESTANTE DO CÓDIGO MANTIDO INTACTO ---
         db.ref('radios').on('value', snap => {
             allRadios = [];
             snap.forEach(c => { allRadios.push({ ...c.val(), key: c.key }); });
