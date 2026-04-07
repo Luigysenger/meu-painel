@@ -1,59 +1,216 @@
-<div class="card" style="margin-top:20px;">
-    <h3>GERENCIAR PUBLICIDADE</h3>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-        <div>
-            <label style="font-size:10px; color:var(--primary)">IMAGEM DA CAMPANHA</label>
-            <input type="file" id="pub-file" accept="image/*" onchange="previewImage(this)">
-            <img id="pub-preview" style="width:100%; max-height:100px; object-fit:contain; margin-top:10px; display:none; border:1px solid #333;">
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADM - LUIGY PUBLICIDADE</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --primary: #A020F0; --bg: #000; --card: #121212; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 20px; border-radius: 15px; border: 1px solid #333; margin-bottom: 20px; }
+        .btn-sair { background: none; border: 1px solid #ff4444; color: #ff4444; padding: 8px 15px; border-radius: 8px; cursor: pointer; transition: 0.3s; }
+        .btn-sair:hover { background: #ff4444; color: white; }
+
+        .main-grid { display: grid; grid-template-columns: 1fr 350px; gap: 20px; }
+        .card { background: var(--card); border-radius: 15px; padding: 20px; border: 1px solid #282828; margin-bottom: 20px; }
+        h3 { color: var(--primary); font-size: 14px; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 1px; }
+
+        input, select { background: #1a1a1a; border: 1px solid #333; color: white; padding: 12px; border-radius: 8px; width: 100%; box-sizing: border-box; margin-bottom: 10px; font-size: 14px; }
+        input:focus { border-color: var(--primary); outline: none; }
+        
+        .btn-add { background: var(--primary); border: none; color: white; padding: 12px; border-radius: 8px; width: 100%; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-add:hover { filter: brightness(1.2); }
+
+        /* Grade de Rádios */
+        .radio-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 10px; }
+        .radio-item { aspect-ratio: 1/1; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #000; font-weight: bold; font-size: 11px; text-align: center; padding: 10px; cursor: grab; position: relative; }
+        .btn-del { position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; font-size: 10px; }
+
+        /* Lista de Usuários */
+        .user-item { background: #1a1a1a; padding: 12px; border-radius: 10px; margin-bottom: 8px; font-size: 12px; border-left: 4px solid var(--primary); }
+        .status-on { color: #00ff00; font-weight: bold; }
+        .status-off { color: #555; }
+
+        /* Estilo Específico Publicidade */
+        .pub-flex { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .preview-img { width: 100%; max-height: 120px; object-fit: contain; margin-top: 10px; border: 1px dashed #444; border-radius: 8px; display: none; }
+        label { font-size: 11px; color: #888; display: block; margin-bottom: 5px; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2>PAINEL ADM - LUIGY</h2>
+        <button class="btn-sair" onclick="location.href='index.html'">SAIR</button>
+    </div>
+
+    <div class="main-grid">
+        <div class="left-col">
+            <div class="card">
+                <h3>CADASTRAR RÁDIO</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 150px 120px; gap: 10px;">
+                    <input type="text" id="nome" placeholder="Nome da Rádio">
+                    <input type="text" id="url" placeholder="URL do Stream">
+                    <select id="cor">
+                        <option value="#d1a3ff">Roxo Claro</option>
+                        <option value="#a3d1ff">Azul Claro</option>
+                        <option value="#a3ffb5">Verde Claro</option>
+                        <option value="#fff9a3">Amarelo Claro</option>
+                        <option value="#ffa3a3">Vermelho Claro</option>
+                    </select>
+                    <button class="btn-add" onclick="addRadio()">SALVAR</button>
+                </div>
+                <div id="radio-list" class="radio-list"></div>
+            </div>
+
+            <div class="card">
+                <h3>GERENCIAR PUBLICIDADE (BANNER)</h3>
+                <div class="pub-flex">
+                    <div>
+                        <label>1. SELECIONE A IMAGEM</label>
+                        <input type="file" id="pub-file" accept="image/*" onchange="previewImage(this)">
+                        <img id="pub-preview" class="preview-img">
+                    </div>
+                    <div>
+                        <label>2. AGENDAMENTO (INÍCIO / FIM)</label>
+                        <input type="datetime-local" id="pub-inicio">
+                        <input type="datetime-local" id="pub-fim">
+                        
+                        <label>3. DESTINATÁRIO</label>
+                        <select id="pub-destino" onchange="toggleManual()">
+                            <option value="TODOS">X - TODOS OS OUVINTES</option>
+                            <option value="MANUAL">SELECIONAR MANUAL</option>
+                        </select>
+                        <input type="text" id="pub-ouvinte-especifico" placeholder="Nome do Ouvinte (MAIÚSCULO)" style="display:none">
+                    </div>
+                </div>
+                <button class="btn-add" onclick="salvarPublicidade()" style="margin-top:15px; background: #28a745;">LANÇAR CAMPANHA AGORA</button>
+                <button class="btn-add" onclick="removerPublicidade()" style="margin-top:10px; background: #444; font-size: 11px; padding: 5px;">REMOVER PUBLICIDADE ATUAL</button>
+            </div>
         </div>
-        <div>
-            <label style="font-size:10px; color:var(--primary)">AGENDAMENTO (INÍCIO E FIM)</label>
-            <input type="datetime-local" id="pub-inicio">
-            <input type="datetime-local" id="pub-fim">
-            
-            <label style="font-size:10px; color:var(--primary)">DESTINATÁRIOS</label>
-            <select id="pub-destino">
-                <option value="TODOS">X - TODOS OS OUVINTES</option>
-                <option value="MANUAL">SELECIONAR MANUAL (DIGITE O NOME)</option>
-            </select>
-            <input type="text" id="pub-ouvinte-especifico" placeholder="Nome do Ouvinte (se manual)" style="display:none">
+
+        <div class="right-col">
+            <div class="card">
+                <h3>OUVINTES ONLINE</h3>
+                <div id="user-list"></div>
+            </div>
         </div>
     </div>
-    <button class="btn-add" onclick="salvarPublicidade()" style="margin-top:15px">LANÇAR CAMPANHA</button>
-</div>
 
-<script>
-// Lógica para o campo manual aparecer/sumir
-document.getElementById('pub-destino').onchange = function() {
-    document.getElementById('pub-ouvinte-especifico').style.display = this.value === 'MANUAL' ? 'block' : 'none';
-};
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
+            authDomain: "meu-painel-f2efe.firebaseapp.com",
+            databaseURL: "https://meu-painel-f2efe-default-rtdb.firebaseio.com/",
+            projectId: "meu-painel-f2efe"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-let base64Image = "";
-function previewImage(input) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        base64Image = e.target.result;
-        const img = document.getElementById('pub-preview');
-        img.src = base64Image;
-        img.style.display = "block";
-    };
-    reader.readAsDataURL(input.files[0]);
-}
+        // FUNÇÃO ENTER PARA RÁDIOS
+        [document.getElementById('nome'), document.getElementById('url')].forEach(item => {
+            item.addEventListener('keypress', (e) => { if(e.key === 'Enter') addRadio(); });
+        });
 
-function salvarPublicidade() {
-    const inicio = document.getElementById('pub-inicio').value;
-    const fim = document.getElementById('pub-fim').value;
-    const destino = document.getElementById('pub-destino').value;
-    const ouvinte = document.getElementById('pub-ouvinte-especifico').value.toUpperCase();
+        // --- LÓGICA DE RÁDIOS ---
+        function addRadio() {
+            const nome = document.getElementById('nome').value;
+            const url = document.getElementById('url').value;
+            const cor = document.getElementById('cor').value;
+            if(!nome || !url) return alert("Preencha o nome e a URL!");
+            db.ref('radios').push({ name: nome, url: url, color: cor, posicao: Date.now() });
+            document.getElementById('nome').value = '';
+            document.getElementById('url').value = '';
+        }
 
-    if(!base64Image || !inicio || !fim) return alert("Preencha imagem e datas!");
+        db.ref('radios').on('value', snap => {
+            const list = document.getElementById('radio-list');
+            list.innerHTML = "";
+            let radios = [];
+            snap.forEach(c => { radios.push({...c.val(), key: c.key}); });
+            radios.sort((a,b) => a.posicao - b.posicao);
+            radios.forEach(r => {
+                list.innerHTML += `<div class="radio-item" data-id="${r.key}" style="background:${r.color}">
+                    <button class="btn-del" onclick="deleteRadio('${r.key}')"><i class="fas fa-trash"></i></button>
+                    ${r.name}
+                </div>`;
+            });
+        });
 
-    db.ref('publicidade').set({
-        imagem: base64Image,
-        inicio: new Date(inicio).getTime(),
-        fim: new Date(fim).getTime(),
-        destino: destino,
-        ouvinteAlvo: destino === 'MANUAL' ? ouvinte : 'TODOS'
-    }).then(() => alert("Publicidade Ativada!"));
-}
-</script>
+        function deleteRadio(key) { if(confirm("Deletar rádio?")) db.ref('radios/'+key).remove(); }
+
+        Sortable.create(document.getElementById('radio-list'), {
+            animation: 150,
+            onEnd: function() {
+                const items = document.querySelectorAll('.radio-item');
+                items.forEach((item, index) => {
+                    db.ref('radios/' + item.getAttribute('data-id')).update({ posicao: index });
+                });
+            }
+        });
+
+        // --- LÓGICA DE PUBLICIDADE ---
+        let base64Image = "";
+        function previewImage(input) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                base64Image = e.target.result;
+                const img = document.getElementById('pub-preview');
+                img.src = base64Image;
+                img.style.display = "block";
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+
+        function toggleManual() {
+            const dest = document.getElementById('pub-destino').value;
+            document.getElementById('pub-ouvinte-especifico').style.display = (dest === 'MANUAL') ? 'block' : 'none';
+        }
+
+        function salvarPublicidade() {
+            const inicio = document.getElementById('pub-inicio').value;
+            const fim = document.getElementById('pub-fim').value;
+            const destino = document.getElementById('pub-destino').value;
+            const ouvinte = document.getElementById('pub-ouvinte-especifico').value.toUpperCase();
+
+            if(!base64Image || !inicio || !fim) return alert("Erro: Selecione a imagem e as datas de início e fim!");
+
+            db.ref('publicidade').set({
+                imagem: base64Image,
+                inicio: new Date(inicio).getTime(),
+                fim: new Date(fim).getTime(),
+                destino: destino,
+                ouvinteAlvo: destino === 'MANUAL' ? ouvinte : 'TODOS'
+            }).then(() => alert("Campanha lançada com sucesso!"));
+        }
+
+        function removerPublicidade() {
+            if(confirm("Deseja apagar a publicidade atual?")) {
+                db.ref('publicidade').remove();
+                document.getElementById('pub-preview').style.display = 'none';
+                base64Image = "";
+            }
+        }
+
+        // --- MONITOR DE USUÁRIOS ---
+        db.ref('usuarios').on('value', snap => {
+            const list = document.getElementById('user-list');
+            list.innerHTML = "";
+            snap.forEach(child => {
+                const u = child.val();
+                const online = (Date.now() - u.lastSeen) < 60000;
+                list.innerHTML += `<div class="user-item">
+                    <span class="${online ? 'status-on' : 'status-off'}">${online ? '● ONLINE' : '○ OFF'}</span><br>
+                    <b>${child.key}</b><br>
+                    <small style="color:#888">${u.radioAtual || 'Nenhuma'}</small>
+                </div>`;
+            });
+        });
+    </script>
+</body>
+</html>
