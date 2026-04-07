@@ -2,113 +2,95 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>PAINEL ADM - RECUPERAÇÃO FORÇADA</title>
+    <title>PAINEL ADM - LIBERADO</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     
     <style>
-        body { background: #000; color: #fff; font-family: 'Segoe UI', Arial; padding: 30px; text-align: center; }
-        .caixa { background: #111; border: 2px solid #1DB954; padding: 25px; border-radius: 15px; max-width: 600px; margin: 0 auto; box-shadow: 0 0 20px rgba(29, 185, 84, 0.3); }
-        .status-badge { padding: 10px; border-radius: 5px; margin-bottom: 20px; font-weight: bold; }
-        .erro { background: #ff4444; color: white; }
-        .ok { background: #1DB954; color: black; }
-        input { background: #222; border: 1px solid #444; color: #fff; padding: 10px; border-radius: 5px; width: 80%; margin-bottom: 10px; }
-        button { background: #1DB954; color: #000; border: none; padding: 12px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        button:hover { background: #1ed760; transform: scale(1.05); }
-        .lista-radios { margin-top: 30px; text-align: left; }
-        .item-radio { background: #222; padding: 15px; margin-bottom: 10px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #333; }
+        body { background: #000; color: #fff; font-family: sans-serif; padding: 30px; text-align: center; }
+        .caixa { background: #181818; border: 2px solid #A020F0; padding: 25px; border-radius: 15px; max-width: 500px; margin: auto; }
+        input { width: 90%; padding: 12px; margin: 10px 0; background: #222; border: 1px solid #444; color: white; border-radius: 8px; }
+        button { width: 95%; padding: 15px; background: #A020F0; border: none; color: white; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 10px; }
+        .radio-item { background: #222; padding: 15px; margin: 10px 0; display: flex; justify-content: space-between; border-radius: 8px; border-left: 5px solid #A020F0; text-align: left; }
+        .btn-excluir { background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
 
+    <script>
+        // ISSO AQUI MATA O ERRO DE "DADOS INCORRETOS" NA HORA:
+        localStorage.clear();
+        sessionStorage.clear();
+    </script>
+
     <div class="caixa">
-        <h1 style="color: #1DB954;">PAINEL ADM LUIGY</h1>
-        <div id="status-conexao" class="status-badge erro">CONECTANDO AO BANCO DE DADOS...</div>
+        <h2 style="color:#A020F0">LUIGY - PAINEL ADM</h2>
+        <p style="font-size: 12px; color: #888;">Acesso direto liberado (Regravado em ADM.HTM)</p>
+        
+        <div id="form-cadastro">
+            <input type="text" id="n_radio" placeholder="Nome da Rádio">
+            <input type="text" id="u_radio" placeholder="URL do Streaming (.mp3)">
+            <button onclick="enviar()">ADICIONAR RÁDIO AGORA</button>
+        </div>
 
-        <div id="area-trabalho" style="display:none;">
-            <h3>CADASTRAR RÁDIO</h3>
-            <input type="text" id="nome_radio" placeholder="Nome da Rádio">
-            <input type="text" id="url_radio" placeholder="Link do Streaming (.mp3)">
-            <br>
-            <button onclick="salvar()">SALVAR AGORA</button>
-
-            <div class="lista-radios">
-                <h3>RÁDIOS NO AR:</h3>
-                <div id="lista_container"></div>
-            </div>
+        <div style="margin-top: 30px;">
+            <h3 style="text-align: left; border-bottom: 1px solid #333; padding-bottom: 5px;">RÁDIOS CADASTRADAS:</h3>
+            <div id="lista_radios">Carregando rádios...</div>
         </div>
     </div>
 
     <script>
-        // Forçar limpeza de qualquer trava de login
-        localStorage.clear();
-
-        const firebaseConfig = {
+        // Sua configuração do Firebase
+        const config = {
             apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
             authDomain: "meu-painel-f2efe.firebaseapp.com",
             databaseURL: "https://meu-painel-f2efe-default-rtdb.firebaseio.com/",
             projectId: "meu-painel-f2efe"
         };
 
-        // Tenta inicializar o Firebase com tratamento de erro
-        try {
-            if (!firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
-            }
-            const db = firebase.database();
-            const statusDiv = document.getElementById('status-conexao');
+        // Inicia o Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(config);
+        }
+        const database = firebase.database();
 
-            // Testa se o banco de dados responde
-            db.ref('.info/connected').on('value', (snap) => {
-                if (snap.val() === true) {
-                    statusDiv.innerText = "CONECTADO COM SUCESSO!";
-                    statusDiv.className = "status-badge ok";
-                    document.getElementById('area-trabalho').style.display = "block";
-                } else {
-                    statusDiv.innerText = "ERRO: SEM RESPOSTA DO FIREBASE";
-                    statusDiv.className = "status-badge erro";
-                }
+        // Carregar as rádios na tela
+        database.ref('radios').on('value', (snap) => {
+            const lista = document.getElementById('lista_radios');
+            lista.innerHTML = "";
+            snap.forEach((child) => {
+                const r = child.val();
+                lista.innerHTML += `
+                    <div class="radio-item">
+                        <span><b>${r.name}</b></span>
+                        <button class="btn-excluir" onclick="remover('${child.key}')">EXCLUIR</button>
+                    </div>`;
             });
+        });
 
-            // Carregar as rádios
-            db.ref('radios').on('value', (snapshot) => {
-                const container = document.getElementById('lista_container');
-                container.innerHTML = "";
-                snapshot.forEach((child) => {
-                    const r = child.val();
-                    container.innerHTML += `
-                        <div class="item-radio">
-                            <span><b>${r.name}</b></span>
-                            <button onclick="excluir('${child.key}')" style="background: #ff4444; color: white; padding: 5px 10px; font-size: 12px;">APAGAR</button>
-                        </div>
-                    `;
+        // Função de Salvar
+        function enviar() {
+            const nome = document.getElementById('n_radio').value;
+            const url = document.getElementById('u_radio').value;
+            if (nome && url) {
+                database.ref('radios').push({
+                    name: nome,
+                    url: url,
+                    color: '#A020F0'
+                }).then(() => {
+                    document.getElementById('n_radio').value = "";
+                    document.getElementById('u_radio').value = "";
                 });
-            });
+            } else {
+                alert("Preencha o nome e a URL!");
+            }
+        }
 
-            // Função Salvar
-            window.salvar = function() {
-                const n = document.getElementById('nome_radio').value;
-                const u = document.getElementById('url_radio').value;
-                if(n && u) {
-                    db.ref('radios').push({ name: n, url: u, color: '#1DB954' })
-                    .then(() => {
-                        document.getElementById('nome_radio').value = "";
-                        document.getElementById('url_radio').value = "";
-                    });
-                }
-            };
-
-            // Função Excluir
-            window.excluir = function(id) {
-                if(confirm("Deseja apagar esta rádio?")) {
-                    db.ref('radios/' + id).remove();
-                }
-            };
-
-        } catch (e) {
-            document.getElementById('status-conexao').innerText = "ERRO CRÍTICO: " + e.message;
-            console.error(e);
+        // Função de Remover
+        function remover(id) {
+            if (confirm("Deseja apagar esta rádio?")) {
+                database.ref('radios/' + id).remove();
+            }
         }
     </script>
 </body>
