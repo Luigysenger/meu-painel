@@ -39,8 +39,8 @@
         .user-name-btn { width: 100%; padding: 15px; background: none; border: none; color: white; text-align: left; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .user-name-btn:hover { background: #222; }
         
-        .status-on { color: var(--primary); font-weight: 900; }
-        .status-off { color: var(--purple); font-weight: 900; }
+        .status-on { color: var(--primary); font-weight: 900; font-size: 11px; border: 1px solid var(--primary); padding: 2px 6px; border-radius: 4px; }
+        .status-off { color: var(--purple); font-weight: 900; font-size: 11px; border: 1px solid var(--purple); padding: 2px 6px; border-radius: 4px; }
 
         .user-details-bar { display: none; padding: 12px; background: #080808; border-top: 1px solid #333; font-size: 12px; color: #bbb; line-height: 1.6; }
         .user-details-bar b { color: var(--primary); }
@@ -172,43 +172,51 @@
             }
         }
 
-        // --- MONITOR DE OUVINTES (CADASTRADOS + STATUS ON/OFF) ---
-        function atualizarMonitor() {
-            db.ref('cadastros').once('value', snapCadastros => {
-                db.ref('usuarios').once('value', snapOnline => {
-                    const container = document.getElementById('user-list');
-                    container.innerHTML = "";
-                    const onlineVal = snapOnline.val() || {};
+        // --- MONITOR DE OUVINTES CORRIGIDO ---
+        function formatarTempo(ms) {
+            if(!ms) return "0 min";
+            let min = Math.floor((Date.now() - ms) / 60000);
+            return min + " min";
+        }
 
-                    snapCadastros.forEach(c => {
-                        const cad = c.val();
+        // Escuta os cadastros e os dados online simultaneamente
+        function monitorarOuvintes() {
+            const container = document.getElementById('user-list');
+            
+            db.ref('cadastros').on('value', snapCad => {
+                db.ref('usuarios').on('value', snapOn => {
+                    const onlineData = snapOn.val() || {};
+                    container.innerHTML = "";
+                    
+                    snapCad.forEach(c => {
                         const id = c.key;
-                        const on = onlineVal[id];
+                        const cad = c.val();
+                        const on = onlineData[id];
                         
                         const isOnline = on && (Date.now() - (on.lastSeen || 0) < 30000);
-                        const statusHTML = isOnline ? '<span class="status-on">ON</span>' : '<span class="status-off">OFF</span>';
+                        const statusTag = isOnline ? '<span class="status-on">ON</span>' : '<span class="status-off">OFF</span>';
                         
-                        const radio = isOnline ? (on.radioAtual || "Navegando") : "---";
-                        const sessao = isOnline && on.sessionStart ? Math.floor((Date.now() - on.sessionStart)/60000) + " min" : "---";
-                        const tempoRadio = isOnline && on.radioStart ? Math.floor((Date.now() - on.radioStart)/60000) + " min" : "---";
+                        const radioNome = isOnline ? (on.radioAtual || "Navegando") : "---";
+                        const tempoTotal = isOnline ? formatarTempo(on.sessionStart) : "---";
+                        const tempoNessaRadio = isOnline ? formatarTempo(on.radioStart) : "---";
 
                         container.innerHTML += `
                             <div class="user-item">
                                 <button class="user-name-btn" onclick="toggleUserBar('${id}')">
-                                    <span>${cad.nome}</span> ${statusHTML}
+                                    <span>${cad.nome || 'Sem Nome'}</span> ${statusTag}
                                 </button>
                                 <div class="user-details-bar" id="bar-${id}">
-                                    📻 Ouvindo: <b>${radio}</b><br>
-                                    ⏳ Tempo Rádio: <b>${tempoRadio}</b><br>
-                                    🚀 Sessão Total: <b>${sessao}</b>
+                                    📻 Ouvindo: <b>${radioNome}</b><br>
+                                    ⏳ Tempo na Rádio: <b>${tempoNessaRadio}</b><br>
+                                    🚀 Sessão Total: <b>${tempoTotal}</b>
                                 </div>
                             </div>`;
                     });
                 });
             });
         }
-        setInterval(atualizarMonitor, 5000);
-        atualizarMonitor();
+
+        monitorarOuvintes();
 
         function toggleUserBar(id) {
             const bar = document.getElementById('bar-'+id);
