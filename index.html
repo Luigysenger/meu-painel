@@ -62,7 +62,7 @@
     <div class="login-card">
         <h2>IDENTIFIQUE-SE</h2>
         <input type="text" id="nome-usuario" placeholder="DIGITE SEU NOME..." autocomplete="off">
-        <button onclick="fazerLogin()">ENTRAR NO SISTEMA</button>
+        <button id="btn-entrar" onclick="fazerLogin()">ENTRAR NO SISTEMA</button>
     </div>
 
     <script>
@@ -74,10 +74,8 @@
                 return;
             }
 
-            // Salva o nome para usar nos painéis
             localStorage.setItem('usuarioNome', nomeInput);
 
-            // Lógica de Redirecionamento
             if (nomeInput.toUpperCase() === "LUIGY") {
                 window.location.href = 'adm.html';
             } else {
@@ -85,9 +83,9 @@
             }
         }
 
-        // --- AJUSTE QUE VOCÊ PEDIU: FUNÇÃO PARA TECLA ENTER ---
-        document.getElementById('nome-usuario').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
+        // --- UNICA ALTERAÇÃO: ESCUTAR A TECLA ENTER NO CAMPO DE TEXTO ---
+        document.getElementById('nome-usuario').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
                 fazerLogin();
             }
         });
