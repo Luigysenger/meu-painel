@@ -37,7 +37,7 @@
         .active .antena { display: block; animation: pulse-antena 1s infinite; }
         @keyframes pulse-antena { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(1.1); } }
 
-        /* SELETOR DE RÁDIOS (ESTILO ADM) */
+        /* SELETOR DE RÁDIOS */
         .selector-list { display: flex; flex-direction: column; gap: 8px; max-height: 500px; overflow-y: auto; padding-right: 5px; }
         .selector-item { background: #1a1a1a; padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #333; transition: 0.3s; }
         .selector-item.selected { border-left-color: var(--primary); background: #222; }
@@ -74,7 +74,7 @@
         </div>
 
         <div class="card">
-            <h3>DISPONÍVEIS (CLIQUE NO X PARA ADD/REMOVER)</h3>
+            <h3>SELECIONE AQUI SUA LISTA DE RADIOS</h3>
             <div id="selector-list" class="selector-list"></div>
         </div>
     </div>
@@ -107,20 +107,18 @@
         const nomeUsuario = localStorage.getItem('usuarioNome') || "OUVINTE";
         document.getElementById('nome-exibicao').innerText = nomeUsuario;
 
-        let allRadios = []; // Rádios que vêm do Firebase
-        let mySelectedIds = JSON.parse(localStorage.getItem('myRadios_' + nomeUsuario)) || []; // IDs salvos pelo ouvinte
+        let allRadios = []; 
+        let mySelectedIds = JSON.parse(localStorage.getItem('myRadios_' + nomeUsuario)) || []; 
         let activeIndex = -1;
 
         setInterval(() => { document.getElementById('hora').innerText = new Date().toLocaleTimeString('pt-BR'); }, 1000);
 
-        // Renderiza as duas listas
         function renderAll() {
             const myGrid = document.getElementById('my-radio-list');
             const selector = document.getElementById('selector-list');
             myGrid.innerHTML = "";
             selector.innerHTML = "";
 
-            // Filtra as rádios que o usuário escolheu, mantendo a ordem que ele salvou
             const myRadios = mySelectedIds.map(id => allRadios.find(r => r.key === id)).filter(Boolean);
 
             myRadios.forEach((r, i) => {
@@ -131,7 +129,6 @@
                     </div>`;
             });
 
-            // Lista lateral para selecionar
             allRadios.forEach(r => {
                 const isSelected = mySelectedIds.includes(r.key);
                 selector.innerHTML += `
@@ -144,12 +141,10 @@
             });
         }
 
-        // Liga/Desliga rádio na lista do ouvinte
         function toggleSelection(id) {
             const index = mySelectedIds.indexOf(id);
             if (index > -1) mySelectedIds.splice(index, 1);
             else mySelectedIds.push(id);
-            
             saveAndRefresh();
         }
 
@@ -165,7 +160,6 @@
             renderAll();
         });
 
-        // Habilita reordenar na GRADE e SALVA a nova ordem
         Sortable.create(document.getElementById('my-radio-list'), {
             animation: 150,
             onEnd: function() {
