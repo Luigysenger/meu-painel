@@ -11,31 +11,28 @@
     <style>
         :root { --primary: #A020F0; --bg: #000; --card: #121212; --text-muted: #b3b3b3; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; user-select: none; }
-        
         .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 20px 30px; border-radius: 15px; border: 1px solid #333; margin-bottom: 25px; }
         .header-left { display: flex; align-items: center; gap: 20px; }
         .header h2 { margin: 0; color: var(--primary); font-size: 22px; text-transform: uppercase; }
         
-        /* CONTAINER DE PUBLICIDADE CENTRALIZADO NO HEADER */
-        #container-pub { flex: 1; display: flex; justify-content: center; align-items: center; padding: 0 20px; }
-        #img-publicidade { max-height: 50px; border-radius: 8px; display: none; object-fit: contain; }
-
+        /* CONTAINER DA PUB */
+        #container-pub { flex: 1; display: flex; justify-content: center; align-items: center; padding: 0 20px; height: 50px; }
+        #img-publicidade { max-height: 50px; border-radius: 8px; display: none; object-fit: contain; transition: opacity 0.5s ease-in-out; }
+        
         .header-right { display: flex; align-items: center; gap: 40px; }
         .weather-box { display: flex; align-items: center; gap: 12px; color: var(--primary); font-weight: bold; font-size: 16px; }
         .weather-box i { font-size: 22px; }
         .city-name { color: #888; font-size: 12px; text-transform: uppercase; margin-right: 5px; }
-        
         .btn-header { background: none; border: 1px solid #333; color: white; padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: 0.3s; display: flex; align-items: center; gap: 8px; }
         .btn-header:hover { background: #222; border-color: var(--primary); }
         .btn-sair { color: #ff4444; border-color: #442222; }
         .btn-sair:hover { background: #331111; border-color: #ff4444; }
-        
         #hora { font-size: 26px; font-weight: 900; min-width: 120px; text-align: right; }
-
+        
         .main-container { display: grid; grid-template-columns: 1fr 350px; gap: 20px; max-width: 1400px; margin: 0 auto; margin-bottom: 150px; }
         .card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid #282828; }
         h3 { color: var(--primary); font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; }
-
+        
         .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; min-height: 100px; }
         .radio-item { aspect-ratio: 1/1; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #000; font-weight: bold; font-size: 11px; text-align: center; padding: 10px; cursor: grab; transition: 0.3s; position: relative; border: 2px solid transparent; }
         .radio-item:hover { transform: scale(1.05); filter: brightness(1.1); }
@@ -44,18 +41,18 @@
         .antena { font-size: 20px; margin-bottom: 8px; display: none; }
         .active .antena { display: block; animation: pulse-antena 1s infinite; }
         @keyframes pulse-antena { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(1.1); } }
-
+        
         .selector-list { display: flex; flex-direction: column; gap: 8px; max-height: 500px; overflow-y: auto; padding-right: 5px; }
         .selector-item { background: #1a1a1a; padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #333; transition: 0.3s; }
         .selector-item.selected { border-left-color: var(--primary); background: #222; }
         .btn-toggle-radio { background: none; border: none; font-size: 18px; cursor: pointer; transition: 0.2s; }
         .btn-toggle-radio.add { color: #444; }
         .btn-toggle-radio.remove { color: var(--primary); }
-
+        
         .player-footer { position: fixed; bottom: 0; left: 0; right: 0; background: #111; padding: 15px 25px 25px 25px; border-top: 2px solid var(--primary); text-align: center; z-index: 100; }
         .msg-barra { background: rgba(160, 32, 240, 0.1); color: var(--primary); font-size: 12px; font-weight: bold; padding: 8px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed var(--primary); display: none; width: auto; min-width: 300px; animation: bounce 2s infinite; }
         @keyframes bounce { 0%, 100% { opacity: 1; transform: translateY(0); } 50% { opacity: 0.8; transform: translateY(-5px); } }
-
+        
         .controls-row { display: flex; align-items: center; justify-content: center; gap: 35px; }
         .btn-nav { background: none; border: none; color: #b3b3b3; font-size: 24px; cursor: pointer; transition: 0.2s; }
         .btn-nav:hover { color: var(--primary); transform: scale(1.1); }
@@ -64,28 +61,21 @@
         @keyframes spin-slow { 100% { transform: rotate(360deg); } }
         .btn-spotify-play { width: 60px; height: 60px; background: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; color: black; cursor: pointer; z-index: 5; transition: 0.2s; }
         .btn-spotify-play:hover { transform: scale(1.05); background: var(--primary); color: white; }
-
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
     </style>
 </head>
 <body>
-
     <div class="header">
         <div class="header-left">
             <h2 id="nome-exibicao">OUVINTE</h2>
             <button class="btn-header btn-sair" onclick="logout()"><i class="fas fa-sign-out-alt"></i> SAIR</button>
         </div>
-
-        <div id="container-pub">
-            <img id="img-publicidade" src="" alt="Publicidade">
-        </div>
-
+        <div id="container-pub"><img id="img-publicidade" src=""></div>
         <div class="header-right">
             <div class="weather-box" id="weather">
                 <span class="city-name" id="city">LOCALIZANDO...</span>
-                <i class="fas fa-cloud-sun"></i>
-                <span id="temp">--°C</span>
+                <i class="fas fa-cloud-sun"></i><span id="temp">--°C</span>
             </div>
             <div id="hora">00:00:00</div>
         </div>
@@ -106,7 +96,6 @@
         <div id="aviso-novidade" class="msg-barra">
             <i class="fas fa-bullhorn" style="margin-right:8px;"></i> EI OUVINTE, TA LIGADÃO AI? TEM RÁDIO NOVA ADICIONADA, CONFIRA E MERGULHE NESSA ONDA
         </div>
-        
         <div id="now-title" style="font-size:11px; color:#888; margin-bottom:15px; letter-spacing: 1px; text-transform: uppercase;">SELECIONE UMA RÁDIO</div>
         <div class="controls-row">
             <button class="btn-nav" onclick="prevRadio()"><i class="fas fa-step-backward"></i></button>
@@ -129,14 +118,11 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-
         const player = document.getElementById('audio-player');
         const nomeUsuario = localStorage.getItem('usuarioNome') || "OUVINTE";
         document.getElementById('nome-exibicao').innerText = nomeUsuario;
 
-        let allRadios = [];
-        let mySelectedIds = JSON.parse(localStorage.getItem('myRadios_' + nomeUsuario)) || [];
-        let activeIndex = -1;
+        let allRadios = [], mySelectedIds = JSON.parse(localStorage.getItem('myRadios_' + nomeUsuario)) || [], activeIndex = -1;
 
         setInterval(() => { document.getElementById('hora').innerText = new Date().toLocaleTimeString('pt-BR'); }, 1000);
 
@@ -145,64 +131,12 @@
                 const res = await fetch('https://wttr.in/?format=%20%7b%22temp%22:%22%25t%22,%22city%22:%22%25l%22%7d');
                 const data = await res.json();
                 document.getElementById('temp').innerText = data.temp.replace('+', '');
-                const cidadeCurta = data.city.split(',')[0].split('-')[0].trim();
-                document.getElementById('city').innerText = cidadeCurta;
-            } catch (e) {
-                document.getElementById('city').innerText = "CLIMA";
-            }
+                document.getElementById('city').innerText = data.city.split(',')[0].trim();
+            } catch (e) { document.getElementById('city').innerText = "CLIMA"; }
         }
         getWeather();
-        setInterval(getWeather, 600000);
 
-        function logout() {
-            if(confirm("Deseja encerrar a sessão?")) {
-                localStorage.removeItem('usuarioNome');
-                window.location.href = 'index.html';
-            }
-        }
-
-        function renderAll() {
-            const myGrid = document.getElementById('my-radio-list');
-            const selector = document.getElementById('selector-list');
-            myGrid.innerHTML = "";
-            selector.innerHTML = "";
-            const myRadios = mySelectedIds.map(id => allRadios.find(r => r.key === id)).filter(Boolean);
-            
-            myRadios.forEach((r, i) => {
-                myGrid.innerHTML += `
-                    <div class="radio-item ${activeIndex === i ? 'active' : ''}"
-                         style="background: ${r.color || '#d1a3ff'}"
-                         data-id="${r.key}"
-                         onclick="playRadio(${i})">
-                        <i class="fas fa-tower-broadcast antena"></i>
-                        <span>${r.name}</span>
-                    </div>`;
-            });
-
-            allRadios.forEach(r => {
-                const isSelected = mySelectedIds.includes(r.key);
-                selector.innerHTML += `<div class="selector-item ${isSelected ? 'selected' : ''}"><span style="font-size:13px; font-weight:bold">${r.name}</span><button class="btn-toggle-radio ${isSelected ? 'remove' : 'add'}" onclick="toggleSelection('${r.key}')"><i class="fas ${isSelected ? 'fa-times-circle' : 'fa-plus-circle'}"></i></button></div>`;
-            });
-
-            const ultimaContagem = localStorage.getItem('contagemRadios_' + nomeUsuario) || 0;
-            if (allRadios.length > ultimaContagem) {
-                document.getElementById('aviso-novidade').style.display = 'inline-block';
-            }
-        }
-
-        function toggleSelection(id) {
-            const index = mySelectedIds.indexOf(id);
-            if (index > -1) mySelectedIds.splice(index, 1);
-            else mySelectedIds.push(id);
-            localStorage.setItem('contagemRadios_' + nomeUsuario, allRadios.length);
-            document.getElementById('aviso-novidade').style.display = 'none';
-            saveAndRefresh();
-        }
-
-        function saveAndRefresh() {
-            localStorage.setItem('myRadios_' + nomeUsuario, JSON.stringify(mySelectedIds));
-            renderAll();
-        }
+        function logout() { if(confirm("Deseja sair?")) { localStorage.removeItem('usuarioNome'); window.location.href = 'index.html'; } }
 
         db.ref('radios').on('value', snap => {
             allRadios = [];
@@ -211,64 +145,96 @@
             renderAll();
         });
 
-        Sortable.create(document.getElementById('my-radio-list'), {
-            animation: 150,
-            onEnd: function() {
-                const items = document.getElementById('my-radio-list').querySelectorAll('.radio-item');
-                mySelectedIds = Array.from(items).map(item => item.getAttribute('data-id'));
-                saveAndRefresh();
-            }
-        });
+        function renderAll() {
+            const myGrid = document.getElementById('my-radio-list'), selector = document.getElementById('selector-list');
+            myGrid.innerHTML = ""; selector.innerHTML = "";
+            const myRadios = mySelectedIds.map(id => allRadios.find(r => r.key === id)).filter(Boolean);
+            myRadios.forEach((r, i) => {
+                myGrid.innerHTML += `<div class="radio-item ${activeIndex === i ? 'active' : ''}" style="background: ${r.color || '#d1a3ff'}" data-id="${r.key}" onclick="playRadio(${i})"><i class="fas fa-tower-broadcast antena"></i><span>${r.name}</span></div>`;
+            });
+            allRadios.forEach(r => {
+                const isSelected = mySelectedIds.includes(r.key);
+                selector.innerHTML += `<div class="selector-item ${isSelected ? 'selected' : ''}"><span style="font-size:13px; font-weight:bold">${r.name}</span><button class="btn-toggle-radio ${isSelected ? 'remove' : 'add'}" onclick="toggleSelection('${r.key}')"><i class="fas ${isSelected ? 'fa-times-circle' : 'fa-plus-circle'}"></i></button></div>`;
+            });
+        }
+
+        function toggleSelection(id) {
+            const index = mySelectedIds.indexOf(id);
+            if (index > -1) mySelectedIds.splice(index, 1); else mySelectedIds.push(id);
+            localStorage.setItem('myRadios_' + nomeUsuario, JSON.stringify(mySelectedIds));
+            renderAll();
+        }
 
         function playRadio(index) {
             const myRadios = mySelectedIds.map(id => allRadios.find(r => r.key === id)).filter(Boolean);
-            if (index < 0 || index >= myRadios.length) return;
+            if (!myRadios[index]) return;
             activeIndex = index;
             const r = myRadios[index];
             player.src = r.url; player.play();
-            document.getElementById('now-title').innerText = "OUVINTE: " + r.name;
-            const icon = document.getElementById('play-icon');
-            icon.className = "fas fa-stop"; icon.style.marginLeft = "0px";
-            db.ref('usuarios/' + nomeUsuario).update({ radioAtual: r.name, radioStart: Date.now(), lastSeen: Date.now(), sessionStart: Date.now() });
+            document.getElementById('now-title').innerText = "OUVINDO: " + r.name;
+            document.getElementById('play-icon').className = "fas fa-stop";
+            db.ref('usuarios/' + nomeUsuario).update({ radioAtual: r.name, lastSeen: Date.now(), sessionStart: Date.now() });
             renderAll();
         }
 
         function togglePlay() {
             if(!player.src) return;
-            const icon = document.getElementById('play-icon');
-            if(player.paused) { player.play(); icon.className = "fas fa-stop"; icon.style.marginLeft = "0px"; }
-            else { player.pause(); icon.className = "fas fa-play"; icon.style.marginLeft = "3px"; }
+            if(player.paused) { player.play(); document.getElementById('play-icon').className = "fas fa-stop"; }
+            else { player.pause(); document.getElementById('play-icon').className = "fas fa-play"; }
         }
 
-        function nextRadio() { playRadio(activeIndex + 1); }
-        function prevRadio() { playRadio(activeIndex - 1); }
+        function nextRadio() { if(activeIndex < mySelectedIds.length - 1) playRadio(activeIndex + 1); else playRadio(0); }
+        function prevRadio() { if(activeIndex > 0) playRadio(activeIndex - 1); else playRadio(mySelectedIds.length - 1); }
 
-        setInterval(() => { if(nomeUsuario) { db.ref('usuarios/' + nomeUsuario).update({ lastSeen: Date.now() }); } }, 30000);
+        // --- LÓGICA DE CARROSSEL DE PUBLICIDADE CORRIGIDA ---
+        let listaPubs = [], idxPub = 0;
 
-        // --- MONITOR DE PUBLICIDADE (LÓGICA) ---
         db.ref('publicidade').on('value', snap => {
-            const pub = snap.val();
-            const imgElement = document.getElementById('img-publicidade');
-            if (!pub) { imgElement.style.display = "none"; return; }
-
+            listaPubs = [];
             const agora = Date.now();
-            const paraMim = (pub.destino === 'TODOS' || pub.ouvinteAlvo === nomeUsuario.toUpperCase());
-            const noPrazo = (agora >= pub.inicio && agora <= pub.fim);
+            
+            snap.forEach(child => {
+                const p = child.val();
+                const paraMim = (p.destino === 'TODOS' || p.ouvinteAlvo === nomeUsuario.toUpperCase());
+                const noPrazo = (agora >= p.inicio && agora <= p.fim);
+                
+                if (paraMim && noPrazo) {
+                    listaPubs.push(p);
+                }
+                
+                // Auto-exclusão se expirou
+                if (agora > p.fim) {
+                    db.ref('publicidade/' + child.key).remove();
+                }
+            });
 
-            if (paraMim && noPrazo) {
-                imgElement.src = pub.imagem;
-                imgElement.style.display = "block";
+            if (listaPubs.length === 0) {
+                document.getElementById('img-publicidade').style.display = "none";
             } else {
-                imgElement.style.display = "none";
+                idxPub = 0;
+                mostrarPub();
             }
         });
 
+        function mostrarPub() {
+            const img = document.getElementById('img-publicidade');
+            if (listaPubs[idxPub]) {
+                img.src = listaPubs[idxPub].imagem;
+                img.style.display = "block";
+                img.style.opacity = 1;
+            }
+        }
+
         setInterval(() => {
-            db.ref('publicidade').once('value', snap => {
-                const pub = snap.val();
-                if(pub && Date.now() > pub.fim) { document.getElementById('img-publicidade').style.display = "none"; }
-            });
-        }, 30000);
+            if (listaPubs.length > 1) {
+                idxPub = (idxPub + 1) % listaPubs.length;
+                const img = document.getElementById('img-publicidade');
+                img.style.opacity = 0;
+                setTimeout(mostrarPub, 500);
+            }
+        }, 7000);
+
+        setInterval(() => { if(nomeUsuario) db.ref('usuarios/'+nomeUsuario).update({lastSeen: Date.now()}); }, 30000);
     </script>
 </body>
 </html>
