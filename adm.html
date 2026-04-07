@@ -10,52 +10,42 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --primary: #1DB954; --bg: #000; --card: #121212; --text-muted: #b3b3b3; --purple-light: #d1a3ff; }
-        
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; user-select: none; }
-
         .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 20px 30px; border-radius: 15px; border: 1px solid #333; margin-bottom: 25px; }
         .header h2 { margin: 0; color: var(--primary); font-size: 22px; }
         #hora { font-size: 26px; font-weight: 900; }
-
         .main-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; max-width: 1400px; margin: 0 auto; }
         .card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid #282828; }
-
         h3 { color: var(--primary); font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; }
-
         .input-group { display: flex; gap: 10px; margin-bottom: 25px; }
         input { flex: 1; padding: 12px; background: #2a2a2a; border: none; color: white; border-radius: 8px; }
         .btn-save { padding: 0 25px; background: var(--primary); border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-
         .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; }
         .radio-item { aspect-ratio: 1/1; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #000; font-weight: bold; font-size: 13px; text-align: center; padding: 10px; cursor: grab; transition: 0.3s; position: relative; border: 2px solid transparent; }
         .radio-item.active { background: #000 !important; color: var(--primary) !important; border-color: var(--primary); box-shadow: 0 0 15px rgba(29, 185, 84, 0.4); }
-        
         .antena { font-size: 24px; margin-bottom: 8px; display: none; }
         .active .antena { display: block; animation: pulse-antena 1s infinite; }
         @keyframes pulse-antena { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(1.1); } }
 
-        /* MONITOR DE OUVINTES */
+        /* MONITOR DE OUVINTES - EXCLUSIVO */
         .user-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; border-left: 4px solid var(--primary); overflow: hidden; }
         .user-row { display: flex; align-items: center; width: 100%; }
         .user-name-btn { flex: 1; padding: 15px; background: none; border: none; color: white; text-align: left; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-        .btn-delete-user { background: none; border: none; color: #ff4444; padding: 15px; cursor: pointer; font-size: 16px; }
-        
+        .btn-delete-user { background: none; border: none; color: #ff4444; padding: 15px; cursor: pointer; font-size: 16px; transition: 0.2s; }
+        .btn-delete-user:hover { transform: scale(1.2); }
         .status-on { color: #00ff00; font-weight: 900; font-size: 11px; }
-        .status-off { color: #a333ff; font-weight: 900; font-size: 11px; }
-
+        .status-off { color: #d1a3ff; font-weight: 900; font-size: 11px; }
         .user-details-bar { display: none; padding: 15px; background: #080808; border-top: 1px solid #333; font-size: 13px; color: #bbb; line-height: 1.8; }
         .user-details-bar b { color: var(--primary); }
 
-        /* PLAYER RODAPÉ (EFEITOS ORIGINAIS VOLTADOS) */
+        /* PLAYER RODAPÉ (INTACTO) */
         .player-footer { margin-top: 20px; background: #111; padding: 25px; border-radius: 20px; border: 1px solid #222; text-align: center; }
         .controls-row { display: flex; align-items: center; justify-content: center; gap: 35px; }
         .btn-nav { background: none; border: none; color: #b3b3b3; font-size: 24px; cursor: pointer; transition: 0.2s; }
         .btn-nav:hover { color: white; transform: scale(1.1); }
-        
         .play-outer { position: relative; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; }
         .ring-animation { position: absolute; width: 100%; height: 100%; border: 2px solid rgba(29, 185, 84, 0.1); border-top: 2px solid var(--primary); border-radius: 50%; animation: spin-slow 5s linear infinite; }
         @keyframes spin-slow { 100% { transform: rotate(360deg); } }
-        
         .btn-spotify-play { width: 60px; height: 60px; background: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; color: black; cursor: pointer; z-index: 5; transition: 0.2s; }
         .btn-spotify-play:hover { transform: scale(1.05); background: var(--primary); }
     </style>
@@ -170,45 +160,57 @@
             }
         }
 
-        // --- MONITOR DE OUVINTES ---
+        // --- MONITOR DE OUVINTES CORRIGIDO ---
         function calcMinutos(ms) {
-            if(!ms) return "0 min";
+            if(!ms) return "---";
             const diff = Math.floor((Date.now() - ms) / 60000);
             return diff < 1 ? "Agora" : diff + " min";
         }
 
         function deleteUser(id) {
-            if(confirm("Excluir ouvinte?")) db.ref('usuarios/' + id).remove();
+            if(confirm("Deseja excluir este ouvinte definitivamente?")) {
+                db.ref('cadastros/' + id).remove();
+                db.ref('usuarios/' + id).remove();
+            }
         }
 
-        db.ref('usuarios').on('value', snap => {
-            const container = document.getElementById('user-list');
-            container.innerHTML = "";
-            
-            snap.forEach(c => {
-                const u = c.val();
-                const id = c.key;
-                
-                // Tolerância de 60 segundos para considerar ON
-                const isOnline = (Date.now() - (u.lastSeen || 0) < 60000);
-                const statusHTML = isOnline ? '<span class="status-on">ON</span>' : '<span class="status-off">OFF</span>';
+        // Esta função sincroniza Cadastros (nomes) com Usuarios (online/tempo)
+        function atualizarMonitorGeral() {
+            db.ref('cadastros').on('value', snapCad => {
+                db.ref('usuarios').on('value', snapUser => {
+                    const onlineMap = snapUser.val() || {};
+                    const container = document.getElementById('user-list');
+                    container.innerHTML = "";
 
-                container.innerHTML += `
-                    <div class="user-item">
-                        <div class="user-row">
-                            <button class="user-name-btn" onclick="toggleUserBar('${id}')">
-                                <span>${u.nome || 'Ouvinte'}</span> ${statusHTML}
-                            </button>
-                            <button class="btn-delete-user" onclick="deleteUser('${id}')"><i class="fas fa-trash"></i></button>
-                        </div>
-                        <div class="user-details-bar" id="bar-${id}">
-                            📻 Ouvindo: <b>${u.radioAtual || 'Navegando'}</b><br>
-                            ⏳ Na Rádio: <b>${calcMinutos(u.radioStart)}</b><br>
-                            🚀 Conectado: <b>${calcMinutos(u.sessionStart)}</b>
-                        </div>
-                    </div>`;
+                    snapCad.forEach(c => {
+                        const id = c.key;
+                        const cadastro = c.val();
+                        const online = onlineMap[id];
+
+                        // Critério ON: lastSeen nos últimos 60 segundos
+                        const isOnline = online && (Date.now() - (online.lastSeen || 0) < 60000);
+                        const statusHTML = isOnline ? '<span class="status-on">ON</span>' : '<span class="status-off">OFF</span>';
+
+                        container.innerHTML += `
+                            <div class="user-item">
+                                <div class="user-row">
+                                    <button class="user-name-btn" onclick="toggleUserBar('${id}')">
+                                        <span>${cadastro.nome || 'Sem Nome'}</span> ${statusHTML}
+                                    </button>
+                                    <button class="btn-delete-user" onclick="deleteUser('${id}')"><i class="fas fa-trash-alt"></i></button>
+                                </div>
+                                <div class="user-details-bar" id="bar-${id}">
+                                    📻 Ouvindo agora: <b>${isOnline ? (online.radioAtual || 'Navegando') : 'Offline'}</b><br>
+                                    ⏳ Tempo na rádio: <b>${isOnline ? calcMinutos(online.radioStart) : '---'}</b><br>
+                                    🚀 Sessão total: <b>${isOnline ? calcMinutos(online.sessionStart) : '---'}</b>
+                                </div>
+                            </div>`;
+                    });
+                });
             });
-        });
+        }
+
+        atualizarMonitorGeral();
 
         function toggleUserBar(id) {
             const bar = document.getElementById('bar-'+id);
