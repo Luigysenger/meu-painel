@@ -2,130 +2,75 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PAINEL ADM SUPREMO - LUIGY</title>
+    <title>ADM - ACESSO TOTAL</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #1DB954; --bg: #0b0b0b; --card: #181818; --danger: #e91e63; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; user-select: none; }
-
-        /* TELA DE LOGIN */
-        #tela-login { position: fixed; inset: 0; background: #000; display: flex; align-items: center; justify-content: center; z-index: 10000; }
-        .login-box { background: var(--card); padding: 40px; border-radius: 20px; border: 1px solid #333; width: 300px; text-align: center; }
-        .login-box input { width: 100%; padding: 12px; margin: 10px 0; background: #222; border: 1px solid #444; color: white; border-radius: 8px; box-sizing: border-box; }
-        .btn-login { width: 100%; padding: 12px; background: var(--primary); border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: #000; }
-
-        /* PAINEL OCULTO ATÉ LOGAR */
-        #painel-conteudo { display: none; }
-
-        /* HEADER */
-        .info-header { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 10px 25px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #333; height: 85px; }
-        #temp-valor { font-size: 32px; color: var(--primary); font-weight: 900; }
-        .date-display { text-align: right; color: var(--primary); }
-        #hora-atual { font-size: 30px; font-weight: 900; }
-
-        .main-container { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; max-width: 1300px; margin: 0 auto; }
-        .card { background: var(--card); border-radius: 15px; padding: 20px; border: 1px solid #222; }
+        :root { --primary: #1DB954; --bg: #000; --card: #121212; }
+        body { font-family: sans-serif; background: var(--bg); color: white; margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; }
         
-        /* RADIOS */
-        .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; }
-        .radio-square { aspect-ratio: 1/1; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s; color: #000; text-align: center; font-weight: bold; font-size: 13px; position: relative; }
-        .radio-square.playing { background: #000 !important; color: var(--primary) !important; border: 2px solid var(--primary); box-shadow: 0 0 15px var(--primary); }
+        /* TELA DE LOGIN */
+        .login-box { background: var(--card); padding: 40px; border-radius: 20px; border: 1px solid #333; width: 320px; text-align: center; box-shadow: 0 0 30px rgba(29, 185, 84, 0.2); }
+        input { width: 100%; padding: 15px; margin: 10px 0; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
+        .btn-entrar { width: 100%; padding: 15px; background: var(--primary); border: none; border-radius: 10px; font-weight: bold; cursor: pointer; color: black; font-size: 16px; transition: 0.3s; }
+        .btn-entrar:hover { background: #1ed760; transform: scale(1.02); }
 
-        /* ANTENA PISCANDO */
-        .antena-piscando { font-size: 24px; margin-bottom: 8px; animation: blink-antena 1s infinite; display: none; }
-        .tem-ouvinte .antena-piscando { display: block; }
-        @keyframes blink-antena { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        /* PAINEL (ESCONDIDO NO INICIO) */
+        #painel-adm { display: none; width: 100%; height: 100vh; padding: 20px; box-sizing: border-box; flex-direction: column; }
+        .grid { display: grid; grid-template-columns: 1fr 350px; gap: 20px; flex: 1; overflow: hidden; }
+        .card { background: var(--card); border-radius: 15px; padding: 20px; border: 1px solid #222; overflow-y: auto; }
 
-        /* PLAYER SPOTIFY */
-        .player-footer { margin-top: 20px; background: #111; padding: 20px; border-radius: 15px; border: 1px solid #222; text-align: center; }
-        .controls-wrapper { display: flex; align-items: center; justify-content: center; gap: 25px; }
-        .play-outer { position: relative; width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; }
+        /* PLAYER SPOTIFY STYLE */
+        .player-footer { background: #181818; padding: 20px; border-radius: 20px; border: 1px solid #333; text-align: center; margin-top: 20px; }
+        .play-outer { position: relative; width: 70px; height: 70px; margin: 0 auto; display: flex; align-items: center; justify-content: center; }
         .play-ring { position: absolute; width: 100%; height: 100%; border: 2px solid rgba(29, 185, 84, 0.1); border-top: 2px solid var(--primary); border-radius: 50%; animation: spin 4s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
-        .btn-play-main { width: 55px; height: 55px; background: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 25px; color: black; cursor: pointer; z-index: 2; }
-
-        /* MONITOR OUVINTES */
-        .user-card { background: #222; padding: 12px; border-radius: 10px; margin-bottom: 5px; border-left: 4px solid #444; cursor: pointer; display: flex; justify-content: space-between; }
-        .user-card.online { border-left-color: var(--primary); }
+        .btn-main-play { width: 55px; height: 55px; background: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: black; cursor: pointer; z-index: 2; }
     </style>
 </head>
 <body>
 
-    <div id="tela-login">
-        <div class="login-box">
-            <h2 style="color:var(--primary)">ADM LUIGY</h2>
-            <input type="text" id="adm-user" placeholder="Usuário">
-            <input type="password" id="adm-pass" placeholder="Senha">
-            <button class="btn-login" onclick="logar()">ENTRAR</button>
-        </div>
+    <div id="box-login" class="login-box">
+        <i class="fas fa-user-shield" style="font-size: 40px; color: var(--primary); margin-bottom: 20px;"></i>
+        <h2 style="margin:0 0 20px 0">LOGIN ADM</h2>
+        <input type="text" id="u" placeholder="USUÁRIO">
+        <input type="password" id="s" placeholder="SENHA">
+        <button class="btn-entrar" onclick="tentarLogar()">ENTRAR NO PAINEL</button>
     </div>
 
-    <div id="painel-conteudo">
-        <div class="info-header">
-            <div class="clima-container">
-                <span id="cidade-nome" style="font-size:11px; color:#888;">CASCAVEL</span><br>
-                <span id="temp-valor">--°</span>
+    <div id="painel-adm">
+        <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h1 style="color:var(--primary); margin:0;">LUIGY ADM</h1>
+            <button onclick="sair()" style="background:none; border:1px solid #ff4444; color:#ff4444; padding:8px 15px; border-radius:8px; cursor:pointer">ENCERRAR</button>
+        </div>
+        
+        <div class="grid">
+            <div class="card">
+                <h3>RADIO MANAGER</h3>
+                <div id="lista-radios"></div>
             </div>
-            <div class="date-display">
-                <span id="hora-atual">00:00:00</span>
+            <div class="card">
+                <h3>OUVINTES ONLINE</h3>
+                <div id="monitor"></div>
             </div>
         </div>
 
-        <div class="main-container">
-            <div class="side-left">
-                <div class="card" style="margin-bottom:20px; display:flex; gap:10px;">
-                    <input type="text" id="r-nome" placeholder="Nome da Rádio" style="flex:1">
-                    <input type="text" id="r-url" placeholder="URL .mp3" style="flex:1">
-                    <button class="btn-login" style="width:100px;" onclick="saveRadio()">SALVAR</button>
-                    <button onclick="sair()" style="background:red; color:white; border:none; padding:10px; border-radius:8px; cursor:pointer">SAIR</button>
-                </div>
-
-                <div class="card">
-                    <div class="radio-grid" id="radios-list"></div>
-                    <div class="player-footer">
-                        <div id="txt-ouvindo" style="font-size: 12px; color: #888; margin-bottom:15px;">PAUSADO</div>
-                        <div class="controls-wrapper">
-                            <button onclick="prevRadio()" style="background:none; border:none; color:white; cursor:pointer;"><i class="fas fa-step-backward"></i></button>
-                            <div class="play-outer">
-                                <div class="play-ring"></div>
-                                <button class="btn-play-main" onclick="togglePlay()"><i class="fas fa-play" id="play-icon"></i></button>
-                            </div>
-                            <button onclick="nextRadio()" style="background:none; border:none; color:white; cursor:pointer;"><i class="fas fa-step-forward"></i></button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="side-right">
-                <div class="card">
-                    <h3>👥 MONITOR DE OUVINTES</h3>
-                    <div id="user-monitor"></div>
-                </div>
+        <div class="player-footer">
+            <div class="play-outer">
+                <div class="play-ring"></div>
+                <button class="btn-main-play"><i class="fas fa-play"></i></button>
             </div>
         </div>
     </div>
 
     <script>
-        // LOGIN
-        function logar() {
-            const u = document.getElementById('adm-user').value.toUpperCase();
-            const p = document.getElementById('adm-pass').value;
-            if(u === "LUIGY" && p === "1045") {
-                localStorage.setItem('adm_logado', 'true');
-                location.reload();
-            } else { alert("Erro!"); }
-        }
-        function sair() { localStorage.removeItem('adm_logado'); location.reload(); }
-        if(localStorage.getItem('adm_logado') === 'true') {
-            document.getElementById('tela-login').style.display = 'none';
-            document.getElementById('painel-conteudo').style.display = 'block';
+        // LIMPANDO ERROS DE CACHE AO ABRIR
+        if (window.location.hash === "#relog") {
+            localStorage.clear();
+            window.location.hash = "";
         }
 
-        // FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
             authDomain: "meu-painel-f2efe.firebaseapp.com",
@@ -135,69 +80,50 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // RÁDIOS E PLAYER (Mantendo sua lógica anterior)
-        let radioArray = [];
-        let currentIndex = -1;
-        let ouvintesAtivos = [];
-        const player = document.getElementById('main-player') || new Audio();
+        function tentarLogar() {
+            const user = document.getElementById('u').value.toUpperCase().trim();
+            const pass = document.getElementById('s').value.trim();
 
-        function renderRadios() {
-            const list = document.getElementById('radios-list');
-            list.innerHTML = "";
-            radioArray.forEach((r, index) => {
-                const temOuvinte = ouvintesAtivos.includes(r.name);
-                list.innerHTML += `
-                    <div class="radio-square ${temOuvinte ? 'tem-ouvinte' : ''} ${currentIndex === index ? 'playing' : ''}" 
-                         style="background:${r.color}" onclick="playRadio(${index})">
-                        <i class="fas fa-tower-broadcast antena-piscando"></i>
-                        <span>${r.name}</span>
-                    </div>`;
-            });
-        }
-
-        db.ref('radios').on('value', snap => {
-            radioArray = [];
-            snap.forEach(c => { const r = c.val(); r.key = c.key; radioArray.push(r); });
-            renderRadios();
-        });
-
-        function playRadio(index) {
-            currentIndex = index; const r = radioArray[index]; player.src = r.url; player.play();
-            renderRadios();
-            document.getElementById('txt-ouvindo').innerHTML = `OUVINDO: <b style="color:var(--primary)">${r.name}</b>`;
-            document.getElementById('play-icon').className = 'fas fa-pause';
-        }
-
-        function togglePlay() {
-            if(player.paused) { player.play(); document.getElementById('play-icon').className = 'fas fa-pause'; }
-            else { player.pause(); document.getElementById('play-icon').className = 'fas fa-play'; }
-        }
-
-        function nextRadio() { if(radioArray.length) playRadio((currentIndex + 1) % radioArray.length); }
-        function prevRadio() { if(radioArray.length) playRadio((currentIndex - 1 + radioArray.length) % radioArray.length); }
-
-        function saveRadio() {
-            const n = document.getElementById('r-nome').value, u = document.getElementById('r-url').value;
-            if(n && u) {
-                const color = `hsl(${Math.floor(Math.random() * 360)}, 70%, 80%)`;
-                db.ref('radios').push({ name: n, url: u, color: color });
-                document.getElementById('r-nome').value=""; document.getElementById('r-url').value="";
+            if (user === "LUIGY" && pass === "1045") {
+                localStorage.setItem('autenticado', 'SIM');
+                mostrarPainel();
+            } else {
+                alert("Dados Incorretos!");
             }
         }
 
-        db.ref('usuarios').on('value', snap => {
-            const mon = document.getElementById('user-monitor'); mon.innerHTML = "";
-            ouvintesAtivos = [];
-            snap.forEach(c => {
-                const u = c.val(); 
-                const on = (Date.now() - (u.lastSeen || 0) < 30000);
-                if(on && u.radioAtual) ouvintesAtivos.push(u.radioAtual);
-                mon.innerHTML += `<div class="user-card ${on?'online':''}"><b>${u.nome}</b> <span>${on?'on':'off'}</span></div>`;
-            });
-            renderRadios();
-        });
+        function mostrarPainel() {
+            document.getElementById('box-login').style.display = 'none';
+            document.getElementById('painel-adm').style.display = 'flex';
+            document.body.style.display = 'block';
+            carregarDados();
+        }
 
-        setInterval(() => { document.getElementById('hora-atual').textContent = new Date().toLocaleTimeString('pt-BR'); }, 1000);
+        function sair() {
+            localStorage.clear();
+            window.location.hash = "relog";
+            location.reload();
+        }
+
+        // VERIFICA SE JÁ ESTÁ LOGADO
+        if (localStorage.getItem('autenticado') === 'SIM') {
+            mostrarPainel();
+        }
+
+        function carregarDados() {
+            // Monitor de Usuários
+            db.ref('usuarios').on('value', snap => {
+                const mon = document.getElementById('monitor');
+                mon.innerHTML = "";
+                snap.forEach(c => {
+                    const u = c.val();
+                    const status = (Date.now() - (u.lastSeen || 0) < 30000) ? 'online' : 'offline';
+                    mon.innerHTML += `<div style="padding:10px; background:#1a1a1a; margin-bottom:5px; border-radius:8px; border-left:4px solid ${status === 'online' ? '#1DB954' : '#444'}">
+                        <b>${u.nome}</b> - ${u.radioAtual || 'Nenhuma'}
+                    </div>`;
+                });
+            });
+        }
     </script>
 </body>
 </html>
