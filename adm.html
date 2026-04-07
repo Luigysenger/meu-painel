@@ -34,7 +34,7 @@
         .active .antena { display: block; animation: pulse-antena 1s infinite; }
         @keyframes pulse-antena { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(1.1); } }
 
-        /* MONITOR DE OUVINTES */
+        /* MONITOR DE OUVINTES PROFISSIONAL */
         .user-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; border-left: 4px solid var(--primary); overflow: hidden; }
         .user-name-btn { width: 100%; padding: 15px; background: none; border: none; color: white; text-align: left; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .user-name-btn:hover { background: #222; }
@@ -42,20 +42,17 @@
         .status-on { color: var(--primary); font-weight: 900; font-size: 11px; border: 1px solid var(--primary); padding: 2px 6px; border-radius: 4px; }
         .status-off { color: var(--purple); font-weight: 900; font-size: 11px; border: 1px solid var(--purple); padding: 2px 6px; border-radius: 4px; }
 
-        .user-details-bar { display: none; padding: 12px; background: #080808; border-top: 1px solid #333; font-size: 12px; color: #bbb; line-height: 1.6; }
+        .user-details-bar { display: none; padding: 15px; background: #080808; border-top: 1px solid #333; font-size: 13px; color: #bbb; line-height: 1.8; }
         .user-details-bar b { color: var(--primary); }
 
-        /* PLAYER RODAPÉ */
+        /* PLAYER RODAPÉ (ORIGINAL) */
         .player-footer { margin-top: 20px; background: #111; padding: 25px; border-radius: 20px; border: 1px solid #222; text-align: center; }
         .controls-row { display: flex; align-items: center; justify-content: center; gap: 35px; }
         .btn-nav { background: none; border: none; color: #b3b3b3; font-size: 24px; cursor: pointer; transition: 0.2s; }
-        
         .play-outer { position: relative; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; }
         .ring-animation { position: absolute; width: 100%; height: 100%; border: 2px solid rgba(29, 185, 84, 0.1); border-top: 2px solid var(--primary); border-radius: 50%; animation: spin-slow 5s linear infinite; }
         @keyframes spin-slow { 100% { transform: rotate(360deg); } }
-        
         .btn-spotify-play { width: 60px; height: 60px; background: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; color: black; cursor: pointer; z-index: 5; transition: 0.2s; }
-        .btn-spotify-play:hover { transform: scale(1.05); background: var(--primary); }
     </style>
 </head>
 <body>
@@ -82,9 +79,7 @@
                         <button class="btn-nav" onclick="prevRadio()"><i class="fas fa-step-backward"></i></button>
                         <div class="play-outer">
                             <div class="ring-animation"></div>
-                            <button class="btn-spotify-play" onclick="togglePlay()">
-                                <i class="fas fa-play" id="play-icon" style="margin-left: 3px;"></i>
-                            </button>
+                            <button class="btn-spotify-play" onclick="togglePlay()"><i class="fas fa-play" id="play-icon" style="margin-left: 3px;"></i></button>
                         </div>
                         <button class="btn-nav" onclick="nextRadio()"><i class="fas fa-step-forward"></i></button>
                     </div>
@@ -172,51 +167,43 @@
             }
         }
 
-        // --- MONITOR DE OUVINTES CORRIGIDO ---
+        // --- MONITOR DE OUVINTES EM TEMPO REAL ---
         function formatarTempo(ms) {
             if(!ms) return "0 min";
             let min = Math.floor((Date.now() - ms) / 60000);
             return min + " min";
         }
 
-        // Escuta os cadastros e os dados online simultaneamente
-        function monitorarOuvintes() {
+        // Monitora o nó 'usuarios' (onde o sistema grava quem está conectado agora)
+        db.ref('usuarios').on('value', snap => {
             const container = document.getElementById('user-list');
+            container.innerHTML = "";
             
-            db.ref('cadastros').on('value', snapCad => {
-                db.ref('usuarios').on('value', snapOn => {
-                    const onlineData = snapOn.val() || {};
-                    container.innerHTML = "";
-                    
-                    snapCad.forEach(c => {
-                        const id = c.key;
-                        const cad = c.val();
-                        const on = onlineData[id];
-                        
-                        const isOnline = on && (Date.now() - (on.lastSeen || 0) < 30000);
-                        const statusTag = isOnline ? '<span class="status-on">ON</span>' : '<span class="status-off">OFF</span>';
-                        
-                        const radioNome = isOnline ? (on.radioAtual || "Navegando") : "---";
-                        const tempoTotal = isOnline ? formatarTempo(on.sessionStart) : "---";
-                        const tempoNessaRadio = isOnline ? formatarTempo(on.radioStart) : "---";
+            snap.forEach(c => {
+                const u = c.val();
+                const id = c.key;
+                
+                // Considera online se o lastSeen foi nos últimos 40 segundos
+                const isOnline = (Date.now() - (u.lastSeen || 0) < 40000);
+                const statusTag = isOnline ? '<span class="status-on">ON</span>' : '<span class="status-off">OFF</span>';
+                
+                const rádioNome = u.radioAtual || "Navegando";
+                const tempoTotal = formatarTempo(u.sessionStart);
+                const tempoNessaRadio = formatarTempo(u.radioStart);
 
-                        container.innerHTML += `
-                            <div class="user-item">
-                                <button class="user-name-btn" onclick="toggleUserBar('${id}')">
-                                    <span>${cad.nome || 'Sem Nome'}</span> ${statusTag}
-                                </button>
-                                <div class="user-details-bar" id="bar-${id}">
-                                    📻 Ouvindo: <b>${radioNome}</b><br>
-                                    ⏳ Tempo na Rádio: <b>${tempoNessaRadio}</b><br>
-                                    🚀 Sessão Total: <b>${tempoTotal}</b>
-                                </div>
-                            </div>`;
-                    });
-                });
+                container.innerHTML += `
+                    <div class="user-item">
+                        <button class="user-name-btn" onclick="toggleUserBar('${id}')">
+                            <span>${u.nome || 'Ouvinte Anônimo'}</span> ${statusTag}
+                        </button>
+                        <div class="user-details-bar" id="bar-${id}">
+                            📻 Rádio: <b>${rádioNome}</b><br>
+                            ⏳ Tempo na Rádio: <b>${tempoNessaRadio}</b><br>
+                            🚀 Sessão Total: <b>${tempoTotal}</b>
+                        </div>
+                    </div>`;
             });
-        }
-
-        monitorarOuvintes();
+        });
 
         function toggleUserBar(id) {
             const bar = document.getElementById('bar-'+id);
