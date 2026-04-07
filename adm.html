@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #1DB954; --bg: #000; --card: #121212; --text-muted: #b3b3b3; --purple: #a333ff; }
+        :root { --primary: #1DB954; --bg: #000; --card: #121212; --text-muted: #b3b3b3; --purple-light: #d1a3ff; }
         
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; user-select: none; }
 
@@ -34,18 +34,20 @@
         .active .antena { display: block; animation: pulse-antena 1s infinite; }
         @keyframes pulse-antena { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(1.1); } }
 
-        /* MONITOR DE OUVINTES PROFISSIONAL */
-        .user-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; border-left: 4px solid var(--primary); overflow: hidden; }
-        .user-name-btn { width: 100%; padding: 15px; background: none; border: none; color: white; text-align: left; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-        .user-name-btn:hover { background: #222; }
+        /* MONITOR DE OUVINTES - ATUALIZADO */
+        .user-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; border-left: 4px solid var(--primary); overflow: hidden; position: relative; }
+        .user-row { display: flex; align-items: center; width: 100%; }
+        .user-name-btn { flex: 1; padding: 15px; background: none; border: none; color: white; text-align: left; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .btn-delete-user { background: none; border: none; color: #ff4444; padding: 15px; cursor: pointer; transition: 0.2s; font-size: 16px; }
+        .btn-delete-user:hover { color: #ff0000; transform: scale(1.1); }
         
-        .status-on { color: var(--primary); font-weight: 900; font-size: 11px; border: 1px solid var(--primary); padding: 2px 6px; border-radius: 4px; }
-        .status-off { color: var(--purple); font-weight: 900; font-size: 11px; border: 1px solid var(--purple); padding: 2px 6px; border-radius: 4px; }
+        .status-on { color: #00ff00; font-weight: 900; font-size: 11px; text-shadow: 0 0 5px rgba(0,255,0,0.3); }
+        .status-off { color: var(--purple-light); font-weight: 900; font-size: 11px; opacity: 0.8; }
 
         .user-details-bar { display: none; padding: 15px; background: #080808; border-top: 1px solid #333; font-size: 13px; color: #bbb; line-height: 1.8; }
         .user-details-bar b { color: var(--primary); }
 
-        /* PLAYER RODAPÉ (ORIGINAL) */
+        /* PLAYER RODAPÉ (PRESERVADO) */
         .player-footer { margin-top: 20px; background: #111; padding: 25px; border-radius: 20px; border: 1px solid #222; text-align: center; }
         .controls-row { display: flex; align-items: center; justify-content: center; gap: 35px; }
         .btn-nav { background: none; border: none; color: #b3b3b3; font-size: 24px; cursor: pointer; transition: 0.2s; }
@@ -72,7 +74,7 @@
                     <button class="btn-save" onclick="addRadio()">SALVAR</button>
                 </div>
                 <h3>GRADE DE RÁDIOS (ARRASTE PARA REORDENAR)</h3>
-                <div class="radio-grid" id="radio-list"></div>
+                <div id="radio-list" class="radio-grid"></div>
                 <div class="player-footer">
                     <div id="now-title" style="font-size:11px; color:#888; margin-bottom:15px; letter-spacing: 1px;">SELECIONE UMA RÁDIO</div>
                     <div class="controls-row">
@@ -97,6 +99,7 @@
     <audio id="audio-player"></audio>
 
     <script>
+        // CONFIGURAÇÃO FIREBASE (SUBSTITUA SEUS DADOS AQUI)
         const firebaseConfig = {
             apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
             authDomain: "meu-painel-f2efe.firebaseapp.com",
@@ -112,6 +115,7 @@
 
         setInterval(() => { document.getElementById('hora').innerText = new Date().toLocaleTimeString('pt-BR'); }, 1000);
 
+        // --- FUNÇÕES DE RÁDIO (PRESERVADAS) ---
         function renderRadios() {
             const list = document.getElementById('radio-list');
             list.innerHTML = "";
@@ -139,12 +143,10 @@
             if (index < 0 || index >= radioData.length) return;
             activeIndex = index;
             const r = radioData[index];
-            player.src = r.url;
-            player.play();
+            player.src = r.url; player.play();
             document.getElementById('now-title').innerText = "OUVINDO: " + r.name;
             const icon = document.getElementById('play-icon');
-            icon.className = "fas fa-stop";
-            icon.style.marginLeft = "0px";
+            icon.className = "fas fa-stop"; icon.style.marginLeft = "0px";
             renderRadios();
         }
 
@@ -167,14 +169,23 @@
             }
         }
 
-        // --- MONITOR DE OUVINTES EM TEMPO REAL ---
-        function formatarTempo(ms) {
-            if(!ms) return "0 min";
-            let min = Math.floor((Date.now() - ms) / 60000);
-            return min + " min";
+        // --- MONITOR DE OUVINTES (AJUSTADO) ---
+        function formatarTempoReal(timestamp) {
+            if (!timestamp) return "---";
+            const diff = Date.now() - timestamp;
+            const minutos = Math.floor(diff / 60000);
+            if (minutos < 1) return "Agora mesmo";
+            if (minutos < 60) return minutos + " min";
+            const horas = Math.floor(minutos / 60);
+            return horas + "h " + (minutos % 60) + "m";
         }
 
-        // Monitora o nó 'usuarios' (onde o sistema grava quem está conectado agora)
+        function deleteUser(id) {
+            if(confirm("Deseja realmente remover este ouvinte do painel?")) {
+                db.ref('usuarios/' + id).remove();
+            }
+        }
+
         db.ref('usuarios').on('value', snap => {
             const container = document.getElementById('user-list');
             container.innerHTML = "";
@@ -183,27 +194,36 @@
                 const u = c.val();
                 const id = c.key;
                 
-                // Considera online se o lastSeen foi nos últimos 40 segundos
-                const isOnline = (Date.now() - (u.lastSeen || 0) < 40000);
+                // Status Dinâmico: Verde se ativo em 45 seg, Roxo se offline
+                const isOnline = (Date.now() - (u.lastSeen || 0) < 45000);
                 const statusTag = isOnline ? '<span class="status-on">ON</span>' : '<span class="status-off">OFF</span>';
                 
-                const rádioNome = u.radioAtual || "Navegando";
-                const tempoTotal = formatarTempo(u.sessionStart);
-                const tempoNessaRadio = formatarTempo(u.radioStart);
-
                 container.innerHTML += `
                     <div class="user-item">
-                        <button class="user-name-btn" onclick="toggleUserBar('${id}')">
-                            <span>${u.nome || 'Ouvinte Anônimo'}</span> ${statusTag}
-                        </button>
+                        <div class="user-row">
+                            <button class="user-name-btn" onclick="toggleUserBar('${id}')">
+                                <span>${u.nome || 'Ouvinte Anonimo'}</span> ${statusTag}
+                            </button>
+                            <button class="btn-delete-user" onclick="deleteUser('${id}')">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
                         <div class="user-details-bar" id="bar-${id}">
-                            📻 Rádio: <b>${rádioNome}</b><br>
-                            ⏳ Tempo na Rádio: <b>${tempoNessaRadio}</b><br>
-                            🚀 Sessão Total: <b>${tempoTotal}</b>
+                            📻 Sintonizado: <b>${u.radioAtual || 'Navegando...'}</b><br>
+                            ⏳ Tempo na Rádio: <b class="timer" data-time="${u.radioStart}">${formatarTempoReal(u.radioStart)}</b><br>
+                            🚀 Sessão Total: <b class="timer" data-time="${u.sessionStart}">${formatarTempoReal(u.sessionStart)}</b>
                         </div>
                     </div>`;
             });
         });
+
+        // Atualiza apenas os números de tempo a cada 10 segundos para não pesar
+        setInterval(() => {
+            document.querySelectorAll('.timer').forEach(el => {
+                const ts = parseInt(el.getAttribute('data-time'));
+                if(ts) el.innerText = formatarTempoReal(ts);
+            });
+        }, 10000);
 
         function toggleUserBar(id) {
             const bar = document.getElementById('bar-'+id);
