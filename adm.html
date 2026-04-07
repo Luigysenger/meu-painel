@@ -12,8 +12,15 @@
         :root { --primary: #1DB954; --bg: #000; --card: #121212; --text-muted: #b3b3b3; --purple-light: #d1a3ff; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; user-select: none; }
         
+        /* HEADER COM NOVOS BOTÕES */
         .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 20px 30px; border-radius: 15px; border: 1px solid #333; margin-bottom: 25px; }
+        .header-left { display: flex; align-items: center; gap: 20px; }
         .header h2 { margin: 0; color: var(--primary); font-size: 22px; }
+        .btn-header { background: none; border: 1px solid #333; color: white; padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: 0.3s; display: flex; align-items: center; gap: 8px; }
+        .btn-header:hover { background: #222; border-color: var(--primary); }
+        .btn-sair { color: #ff4444; border-color: #442222; }
+        .btn-sair:hover { background: #331111; border-color: #ff4444; }
+        
         #hora { font-size: 26px; font-weight: 900; }
 
         .main-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; max-width: 1400px; margin: 0 auto; }
@@ -33,7 +40,6 @@
         .active .antena { display: block; animation: pulse-antena 1s infinite; }
         @keyframes pulse-antena { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(1.1); } }
 
-        /* MONITOR DE OUVINTES - CSS BASE */
         .user-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; overflow: hidden; transition: 0.3s; }
         .user-row { display: flex; align-items: center; width: 100%; }
         .user-name-btn { flex: 1; padding: 15px; background: none; border: none; color: white; text-align: left; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
@@ -62,7 +68,11 @@
 <body>
 
     <div class="header">
-        <h2><i class="fab fa-spotify"></i> LUIGY ADM</h2>
+        <div class="header-left">
+            <h2><i class="fab fa-spotify"></i> LUIGY ADM</h2>
+            <button class="btn-header" onclick="location.reload()"><i class="fas fa-sync-alt"></i> REINICIAR</button>
+            <button class="btn-header btn-sair" onclick="logout()"><i class="fas fa-sign-out-alt"></i> SAIR</button>
+        </div>
         <div id="hora">00:00:00</div>
     </div>
 
@@ -115,6 +125,13 @@
         let activeIndex = -1;
 
         setInterval(() => { document.getElementById('hora').innerText = new Date().toLocaleTimeString('pt-BR'); }, 1000);
+
+        function logout() {
+            if(confirm("Deseja encerrar a sessão de ADM?")) {
+                localStorage.removeItem('usuarioNome');
+                window.location.href = 'index.html';
+            }
+        }
 
         function renderRadios() {
             const list = document.getElementById('radio-list');
@@ -183,18 +200,13 @@
         db.ref('usuarios').on('value', snap => {
             const container = document.getElementById('user-list');
             container.innerHTML = "";
-            
             snap.forEach(c => {
                 const u = c.val();
                 const id = c.key;
-                
                 const lastSeen = parseInt(u.lastSeen || 0);
                 const isOnline = (Date.now() - lastSeen < 60000);
-                
-                // CORES DINÂMICAS: Verde se ON, Roxo se OFF
                 const corBorda = isOnline ? '#00ff00' : '#d1a3ff';
                 const statusHTML = isOnline ? '<span class="status-on">ON</span>' : '<span class="status-off">OFF</span>';
-                
                 const rAtual = u.radioAtual || u.radio || "Navegando...";
                 const sStart = u.sessionStart || u.sessao || 0;
                 const rStart = u.radioStart || u.radioInicio || 0;
