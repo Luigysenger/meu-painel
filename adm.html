@@ -11,56 +11,58 @@
         :root { --primary: #A020F0; --bg: #0b0b0b; --card: #181818; --danger: #ff4444; --success: #1DB954; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; }
 
-        .header-adm { background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid #333; margin-bottom: 20px; text-align: center; }
-        h2 { color: var(--primary); margin: 0; text-transform: uppercase; letter-spacing: 2px; }
-
-        /* MONITOR DE OUVINTES */
-        .monitor-section { background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid #333; }
-        .monitor-title { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; color: var(--primary); font-weight: bold; }
+        .header-adm { background: var(--card); padding: 15px 25px; border-radius: 15px; border: 1px solid #333; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
         
-        #user-list { display: flex; flex-direction: column; gap: 10px; }
+        .section-title { color: var(--primary); font-weight: bold; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; text-transform: uppercase; font-size: 14px; }
 
+        /* FORMULÁRIO */
+        .form-add { background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid #333; margin-bottom: 20px; }
+        .input-group { margin-bottom: 10px; }
+        input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #333; background: #0b0b0b; color: white; box-sizing: border-box; }
+        .btn-save { width: 100%; padding: 10px; border-radius: 8px; border: none; background: var(--primary); color: white; font-weight: bold; cursor: pointer; }
+
+        /* MONITOR DE OUVINTES - ONDE MUDA A BORDA */
         .user-item { 
-            background: #222; 
+            background: #181818; 
+            margin-bottom: 8px; 
             border-radius: 10px; 
-            overflow: hidden; 
+            overflow: hidden;
             transition: 0.3s;
-            border-left: 5px solid var(--primary); /* Borda padrão */
+            /* A cor da borda será aplicada via JS */
         }
-
-        .user-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; }
+        .user-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; }
+        .user-name-btn { background: none; border: none; color: white; font-weight: bold; cursor: pointer; text-align: left; flex: 1; }
         
-        .user-name-btn { 
-            background: none; border: none; color: white; font-weight: bold; 
-            cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px;
-        }
+        .status-on { color: var(--success); font-weight: bold; font-size: 11px; margin-left: 8px; }
+        .status-off { color: var(--primary); font-weight: bold; font-size: 11px; margin-left: 8px; }
 
-        .status-on { color: var(--success); font-size: 10px; font-weight: 900; }
-        .status-off { color: var(--primary); font-size: 10px; font-weight: 900; }
+        .user-details-bar { display: none; background: #111; padding: 12px; font-size: 12px; border-top: 1px solid #222; }
 
-        .btn-delete-user { background: none; border: none; color: #555; cursor: pointer; transition: 0.3s; }
-        .btn-delete-user:hover { color: var(--danger); }
-
-        .user-details-bar { 
-            display: none; background: #1a1a1a; padding: 15px; 
-            font-size: 13px; border-top: 1px solid #333; line-height: 1.6;
-        }
-
-        .user-details-bar b { color: var(--primary); }
+        /* GRADE DE RADIOS */
+        .radio-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+        .radio-card { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid #333; text-align: center; position: relative; }
+        .btn-del-radio { position: absolute; top: 5px; right: 5px; color: var(--danger); background: none; border: none; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div class="header-adm">
-        <h2>PAINEL ADM SUPREMO</h2>
-        <p style="font-size: 12px; color: #888;">Monitoramento em Tempo Real</p>
+        <h2 style="margin:0; font-size:18px">PAINEL ADM SUPREMO</h2>
+        <div id="relogio" style="color:var(--primary); font-weight:900">00:00:00</div>
     </div>
 
-    <div class="monitor-section">
-        <div class="monitor-title"><i class="fas fa-users"></i> MONITOR DE OUVINTES</div>
-        <div id="user-list">
-            </div>
+    <div class="form-add">
+        <div class="section-title"><i class="fas fa-plus-circle"></i> Adicionar Nova Emissora</div>
+        <div class="input-group"><input type="text" id="radio-nome" placeholder="Nome da Rádio"></div>
+        <div class="input-group"><input type="text" id="radio-url" placeholder="Link .mp3 / Stream"></div>
+        <button class="btn-save" onclick="addRadio()">SALVAR EMISSORA</button>
     </div>
+
+    <div class="section-title"><i class="fas fa-users"></i> Monitor de Ouvintes</div>
+    <div id="user-list" style="margin-bottom: 30px;"></div>
+
+    <div class="section-title"><i class="fas fa-list"></i> Grade de Rádios</div>
+    <div id="radio-grid" class="radio-list"></div>
 
     <script>
         const firebaseConfig = {
@@ -72,11 +74,41 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        function formatarTempo(valor) {
-            const ts = parseInt(valor);
-            if (!ts || isNaN(ts) || ts <= 0) return "0 min";
-            const agora = Date.now();
-            const diff = Math.floor((agora - ts) / 60000);
+        // Relógio
+        setInterval(() => {
+            document.getElementById('relogio').innerText = new Date().toLocaleTimeString();
+        }, 1000);
+
+        // Funções de Rádio
+        function addRadio() {
+            const nome = document.getElementById('radio-nome').value;
+            const url = document.getElementById('radio-url').value;
+            if(nome && url) {
+                db.ref('radios').push({ name: nome, url: url, color: '#A020F0' });
+                document.getElementById('radio-nome').value = '';
+                document.getElementById('radio-url').value = '';
+            }
+        }
+
+        db.ref('radios').on('value', snap => {
+            const grid = document.getElementById('radio-grid');
+            grid.innerHTML = "";
+            snap.forEach(child => {
+                const r = child.val();
+                grid.innerHTML += `
+                    <div class="radio-card">
+                        <button class="btn-del-radio" onclick="deleteRadio('${child.key}')"><i class="fas fa-times"></i></button>
+                        <div style="font-weight:bold">${r.name}</div>
+                    </div>`;
+            });
+        });
+
+        function deleteRadio(key) { db.ref('radios/' + key).remove(); }
+
+        // MONITOR DE OUVINTES (COM AJUSTE DE BORDA)
+        function formatarTempo(ts) {
+            if(!ts) return "0 min";
+            const diff = Math.floor((Date.now() - ts) / 60000);
             return diff < 1 ? "Agora" : diff + " min";
         }
 
@@ -85,45 +117,32 @@
             bar.style.display = (bar.style.display === 'block') ? 'none' : 'block';
         }
 
-        function deleteUser(id) {
-            if(confirm("Deseja remover este ouvinte da lista?")) {
-                db.ref('usuarios/' + id).remove();
-            }
-        }
-
-        // --- MONITORAMENTO EM TEMPO REAL ---
         db.ref('usuarios').on('value', snap => {
-            const container = document.getElementById('user-list');
-            container.innerHTML = "";
-            
-            snap.forEach(c => {
-                const u = c.val();
-                const id = c.key;
+            const list = document.getElementById('user-list');
+            list.innerHTML = "";
+            snap.forEach(child => {
+                const u = child.val();
+                const id = child.key;
                 
-                // Lógica de Status Online (1 minuto de tolerância)
-                const ultimaVez = parseInt(u.lastSeen || 0);
-                const isOnline = (Date.now() - ultimaVez < 60000);
-                
-                // Definição de Cores e Bordas
-                const corStatus = isOnline ? '#1DB954' : '#A020F0';
-                const textoStatus = isOnline ? 'ON' : 'OFF';
-                const classeStatus = isOnline ? 'status-on' : 'status-off';
+                const isOnline = (Date.now() - (u.lastSeen || 0) < 60000);
+                const corBorda = isOnline ? '#1DB954' : '#A020F0';
+                const statusTxt = isOnline ? 'ON' : 'OFF';
+                const statusClass = isOnline ? 'status-on' : 'status-off';
 
-                container.innerHTML += `
-                    <div class="user-item" style="border-left: 5px solid ${corStatus}">
+                list.innerHTML += `
+                    <div class="user-item" style="border-left: 5px solid ${corBorda}">
                         <div class="user-row">
                             <button class="user-name-btn" onclick="toggleUserBar('${id}')">
-                                <span>${u.nome || id}</span> 
-                                <span class="${classeStatus}">${textoStatus}</span>
+                                ${u.nome || id} <span class="${statusClass}">${statusTxt}</span>
                             </button>
-                            <button class="btn-delete-user" onclick="deleteUser('${id}')">
-                                <i class="fas fa-trash-alt"></i>
+                            <button onclick="db.ref('usuarios/${id}').remove()" style="background:none; border:none; color:#444; cursor:pointer">
+                                <i class="fas fa-trash"></i>
                             </button>
                         </div>
                         <div class="user-details-bar" id="bar-${id}">
-                            📻 Ouvindo agora: <b style="color:#1DB954">${u.radioAtual || "Navegando..."}</b><br>
-                            ⏳ Tempo na rádio: <b>${formatarTempo(u.radioStart)}</b><br>
-                            🚀 Sessão iniciada: <b>${formatarTempo(u.sessionStart)}</b>
+                            📻 Ouvindo: <b style="color:#1DB954">${u.radioAtual || '---'}</b><br>
+                            ⏳ Na Rádio: <b>${formatarTempo(u.radioStart)}</b><br>
+                            🚀 Sessão: <b>${formatarTempo(u.sessionStart)}</b>
                         </div>
                     </div>`;
             });
