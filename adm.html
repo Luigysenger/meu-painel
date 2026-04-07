@@ -3,106 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PAINEL SUPREMO - LUIGY SENGER</title>
+    <title>PAINEL ADM SUPREMO - LUIGY</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #A020F0; --bg: #050505; --card: #121212; --text: #ffffff; --accent: #1DB954; }
-        
-        body { font-family: 'Inter', 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; overflow-x: hidden; }
+        :root { --primary: #1DB954; --bg: #0b0b0b; --card: #181818; --danger: #e91e63; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; user-select: none; }
 
-        /* TELA DE LOGIN ESTILIZADA */
-        #tela-login { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 10000; }
-        .login-box { background: var(--card); padding: 40px; border-radius: 24px; border: 1px solid #333; width: 350px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-        .login-box h2 { color: var(--primary); margin-bottom: 25px; font-size: 24px; letter-spacing: 1px; }
-        .login-box input { width: 100%; margin-bottom: 12px; padding: 14px; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 12px; box-sizing: border-box; outline: none; transition: 0.3s; }
-        .login-box input:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(160,32,240,0.3); }
-        .btn-entrar { width: 100%; padding: 14px; background: var(--primary); border: none; border-radius: 12px; font-weight: bold; cursor: pointer; color: white; font-size: 16px; margin-top: 10px; }
+        /* HEADER */
+        .info-header { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 10px 25px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #333; height: 85px; }
+        .clima-container { display: flex; align-items: center; gap: 12px; }
+        .clima-info { display: flex; flex-direction: column; }
+        #cidade-nome { font-size: 11px; color: #888; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
+        #temp-valor { font-size: 32px; color: var(--primary); font-weight: 900; line-height: 1; }
+        #clima-icon-wrapper img { width: 45px; height: 45px; filter: drop-shadow(0 0 5px var(--primary)); }
+        .date-display { text-align: right; color: var(--primary); }
+        #hora-atual { font-size: 30px; font-weight: 900; display: block; line-height: 1; }
+        #data-extenso { font-size: 13px; font-weight: 600; opacity: 0.8; text-transform: capitalize; }
 
-        /* PAINEL PRINCIPAL */
-        #painel-conteudo { display: none; max-width: 1400px; margin: 0 auto; animation: fadeIn 0.5s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .main-container { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; max-width: 1300px; margin: 0 auto; }
+        .card { background: var(--card); border-radius: 15px; padding: 20px; border: 1px solid #222; }
+        h3 { margin-top: 0; color: var(--primary); font-size: 11px; text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px; }
 
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid #222; }
-        .admin-badge { display: flex; align-items: center; gap: 15px; }
-        .admin-badge i { font-size: 40px; color: var(--primary); }
-        .admin-name { font-size: 22px; font-weight: 800; background: linear-gradient(45deg, #fff, var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        /* RADIOS */
+        .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; }
+        .radio-square { aspect-ratio: 1/1; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s; color: #000; text-align: center; font-weight: bold; font-size: 13px; position: relative; }
+        .radio-square.playing { background: #000 !important; color: var(--primary) !important; border: 2px solid var(--primary); box-shadow: 0 0 15px var(--primary); }
 
-        .main-grid { display: grid; grid-template-columns: 1fr 380px; gap: 25px; }
+        /* MONITOR DE OUVINTES MELHORADO */
+        .user-card { background: #222; padding: 12px; border-radius: 10px; margin-bottom: 5px; border-left: 4px solid #444; cursor: pointer; transition: 0.3s; position: relative; display: flex; justify-content: space-between; align-items: center; }
+        .user-card:hover { background: #2a2a2a; }
+        .user-card.online { border-left-color: var(--primary); }
+        .status-badge { font-size: 10px; font-weight: 900; padding: 2px 8px; border-radius: 20px; text-transform: uppercase; }
+        .status-on { background: rgba(29, 185, 84, 0.2); color: var(--primary); border: 1px solid var(--primary); }
+        .status-off { background: #333; color: #888; border: 1px solid #444; }
 
-        /* SEÇÃO ESQUERDA: CADASTRO E RÁDIOS */
-        .section-title { font-size: 14px; color: #666; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
-        .card-cadastro { background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid #222; display: flex; gap: 15px; align-items: center; }
-        .card-cadastro input { background: #1a1a1a; border: 1px solid #333; color: white; padding: 12px; border-radius: 10px; flex: 1; outline: none; }
-        
-        .radio-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; margin-top: 20px; }
-        .radio-item { aspect-ratio: 1/1; border-radius: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; font-weight: bold; transition: 0.3s; cursor: grab; border: 1px solid rgba(255,255,255,0.1); color: #000; padding: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
-        .radio-item:hover { transform: translateY(-5px); }
-        .btn-del { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.1); border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        /* GAVETA DE DETALHES */
+        .user-details { background: #111; margin-top: -5px; margin-bottom: 10px; border-radius: 0 0 10px 10px; padding: 12px; border: 1px solid #333; border-top: none; font-size: 12px; display: none; animation: slideDown 0.3s ease-out; }
+        .user-details b { color: var(--primary); }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* SEÇÃO DIREITA: MONITOR */
-        .monitor-card { background: var(--card); padding: 20px; border-radius: 20px; border: 1px solid #222; height: fit-content; }
-        .user-status { background: #1a1a1a; padding: 15px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-left: 4px solid #333; transition: 0.3s; }
-        .user-status.active { border-left-color: var(--accent); background: #1d1d1d; }
-        .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #444; }
-        .active .status-dot { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
-        
-        .btn-sair { background: rgba(255,68,68,0.1); border: 1px solid #ff4444; color: #ff4444; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        .btn-sair:hover { background: #ff4444; color: white; }
+        /* INPUTS E BOTÕES */
+        .input-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+        input { padding: 10px; border-radius: 6px; border: 1px solid #333; background: #222; color: white; outline: none; }
+        .btn-salvar { padding: 10px 20px; background: var(--primary); border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: #000; }
+        .btn-logout { padding: 10px 15px; background: var(--danger); border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: white; }
+        .btn-refresh { padding: 10px 12px; background: #333; border: none; border-radius: 6px; cursor: pointer; color: white; }
+
+        .player-footer { margin-top: 20px; background: #111; padding: 15px; border-radius: 12px; border: 1px solid #333; text-align: center; }
+        .btn-ctrl { background: none; border: none; color: white; font-size: 24px; cursor: pointer; margin: 0 15px; }
     </style>
 </head>
 <body>
 
-    <div id="tela-login">
-        <div class="login-box">
-            <i class="fas fa-lock" style="font-size: 40px; color: var(--primary); margin-bottom: 15px;"></i>
-            <h2>ADM ACCESS</h2>
-            <input type="text" id="log-nome" placeholder="Nome">
-            <input type="text" id="log-sobrenome" placeholder="Sobrenome">
-            <input type="text" id="log-cidade" placeholder="Cidade">
-            <input type="password" id="log-senha" placeholder="Senha">
-            <button class="btn-entrar" onclick="fazerLogin()">ACESSAR PAINEL</button>
+    <div class="info-header">
+        <div class="clima-container">
+            <div id="clima-icon-wrapper"><i class="fas fa-sun" style="color:var(--primary); font-size:30px"></i></div>
+            <div class="clima-info">
+                <span id="cidade-nome">BUSCANDO...</span>
+                <span id="temp-valor">--°</span>
+            </div>
+        </div>
+        <div class="date-display">
+            <span id="hora-atual">00:00:00</span>
+            <span id="data-extenso">...</span>
         </div>
     </div>
 
-    <div id="painel-conteudo">
-        <div class="header">
-            <div class="admin-badge">
-                <i class="fas fa-user-circle"></i>
-                <div>
-                    <div class="admin-name" id="display-name">LUIGY SENGER</div>
-                    <div id="relogio" style="font-size: 12px; color: #666; margin-top: 5px;"></div>
+    <div class="main-container">
+        <div class="side-left">
+            <div class="card input-bar">
+                <input type="text" id="r-nome" placeholder="Nome da Rádio">
+                <input type="text" id="r-url" placeholder="URL .mp3">
+                <button class="btn-salvar" onclick="saveRadio()">SALVAR</button>
+                <button class="btn-logout" onclick="window.location.href='index.html'">SAIR</button>
+                <button class="btn-refresh" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
+            </div>
+
+            <div class="card">
+                <h3>📻 EMISSORAS</h3>
+                <div class="radio-grid" id="radios-list"></div>
+                <div class="player-footer">
+                    <div id="txt-ouvindo" style="font-size: 13px; color: #aaa; margin-bottom:10px">PAUSADO</div>
+                    <button class="btn-ctrl" onclick="prevRadio()"><i class="fas fa-backward-step"></i></button>
+                    <button class="btn-ctrl" onclick="togglePlay()" style="font-size:35px"><i class="fas fa-circle-play" id="play-icon"></i></button>
+                    <button class="btn-ctrl" onclick="nextRadio()"><i class="fas fa-forward-step"></i></button>
+                    <audio id="main-player"></audio>
                 </div>
             </div>
-            <button class="btn-sair" onclick="fazerSair()">LOGOUT</button>
         </div>
 
-        <div class="main-grid">
-            <div class="left-col">
-                <div class="section-title"><i class="fas fa-plus"></i> Gerenciar Emissoras</div>
-                <div class="card-cadastro">
-                    <input type="text" id="radio-nome" placeholder="Nome da Rádio">
-                    <input type="text" id="radio-url" placeholder="Link do Streaming (.mp3)">
-                    <input type="color" id="radio-cor" value="#A020F0" style="width:60px; height:45px; border:none; background:none; cursor:pointer;">
-                    <button class="btn-entrar" style="width:150px; margin-top:0;" onclick="salvarRadio()">SALVAR</button>
-                </div>
-
-                <div id="radio-list" class="radio-list">
-                    </div>
-            </div>
-
-            <div class="right-col">
-                <div class="section-title"><i class="fas fa-satellite-dish"></i> Ouvintes em Tempo Real</div>
-                <div class="monitor-card" id="lista-usuarios">
-                    </div>
+        <div class="side-right">
+            <div class="card">
+                <h3>👥 MONITOR DE OUVINTES</h3>
+                <div id="user-monitor"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // CONFIGURAÇÃO FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
             authDomain: "meu-painel-f2efe.firebaseapp.com",
@@ -112,97 +113,98 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // LÓGICA DE LOGIN COM OS NOVOS CAMPOS
-        function fazerLogin() {
-            const n = document.getElementById('log-nome').value.trim().toUpperCase();
-            const s = document.getElementById('log-sobrenome').value.trim().toUpperCase();
-            const c = document.getElementById('log-cidade').value.trim().toUpperCase();
-            const p = document.getElementById('log-senha').value.trim();
+        // RELÓGIO
+        setInterval(() => {
+            const agora = new Date();
+            document.getElementById('hora-atual').textContent = agora.toLocaleTimeString('pt-BR');
+            document.getElementById('data-extenso').textContent = agora.toLocaleDateString('pt-BR', {weekday:'long', day:'numeric', month:'long'});
+        }, 1000);
 
-            if (n === "LUIGY" && s === "SENGER" && c === "CASCAVEL" && p === "1045") {
-                localStorage.setItem('adm_logado', 'true');
-                localStorage.setItem('adm_full_name', n + " " + s);
-                entrar();
-            } else {
-                alert("Dados de administrador incorretos!");
+        // CLIMA
+        async function getClima() {
+            try {
+                const res = await fetch(`https://api.weatherapi.com/v1/current.json?key=7662c16260844781a79133649241505&q=Cascavel&lang=pt`);
+                const data = await res.json();
+                if (data && data.current) {
+                    document.getElementById('cidade-nome').textContent = data.location.name.toUpperCase();
+                    document.getElementById('temp-valor').textContent = Math.round(data.current.temp_c) + "°";
+                    document.getElementById('clima-icon-wrapper').innerHTML = `<img src="https:${data.current.condition.icon}" width="45">`;
+                }
+            } catch (e) {
+                document.getElementById('cidade-nome').textContent = "CASCAVEL";
+                document.getElementById('temp-valor').textContent = "22°";
             }
         }
+        getClima();
 
-        // Atalho Enter nos inputs
-        document.querySelectorAll('.login-box input').forEach(input => {
-            input.addEventListener('keypress', (e) => { if(e.key === 'Enter') fazerLogin(); });
+        // RÁDIOS
+        let radioArray = [];
+        let currentIndex = -1;
+        const player = document.getElementById('main-player');
+
+        function saveRadio() {
+            const n = document.getElementById('r-nome').value, u = document.getElementById('r-url').value;
+            if(!n || !u) return;
+            const color = `hsl(${Math.floor(Math.random() * 360)}, 70%, 80%)`;
+            db.ref('radios').push({ name: n, url: u, color: color });
+            document.getElementById('r-nome').value=""; document.getElementById('r-url').value="";
+        }
+
+        db.ref('radios').on('value', snap => {
+            const list = document.getElementById('radios-list'); list.innerHTML = ""; radioArray = [];
+            snap.forEach(c => {
+                const r = c.val(); r.key = c.key; radioArray.push(r);
+                list.innerHTML += `<div class="radio-square" id="sq-${r.key}" style="background:${r.color}" onclick="playRadio(${radioArray.length-1})">
+                    <span>${r.name}</span>
+                </div>`;
+            });
         });
 
-        function entrar() {
-            document.getElementById('tela-login').style.display = 'none';
-            document.getElementById('painel-conteudo').style.display = 'block';
-            document.getElementById('display-name').innerText = localStorage.getItem('adm_full_name');
-            iniciarApp();
+        function playRadio(index) {
+            currentIndex = index; const r = radioArray[index]; player.src = r.url; player.play();
+            document.querySelectorAll('.radio-square').forEach(el => el.classList.remove('playing'));
+            document.getElementById('sq-'+r.key).classList.add('playing');
+            document.getElementById('txt-ouvindo').innerHTML = `OUVINDO: <b style="color:var(--primary)">${r.name}</b>`;
+            document.getElementById('play-icon').className = 'fas fa-circle-pause';
         }
 
-        function fazerSair() {
-            localStorage.clear();
-            window.location.reload();
+        function togglePlay() {
+            if(!player.src) return;
+            if(player.paused) { player.play(); document.getElementById('play-icon').className = 'fas fa-circle-pause'; }
+            else { player.pause(); document.getElementById('play-icon').className = 'fas fa-circle-play'; }
         }
 
-        if (localStorage.getItem('adm_logado') === 'true') entrar();
+        function nextRadio() { if(radioArray.length) playRadio((currentIndex + 1) % radioArray.length); }
+        function prevRadio() { if(radioArray.length) playRadio((currentIndex - 1 + radioArray.length) % radioArray.length); }
 
-        // APP LOGIC
-        function iniciarApp() {
-            // Relógio
-            setInterval(() => {
-                document.getElementById('relogio').innerText = new Date().toLocaleString('pt-BR', { dateStyle: 'full', timeStyle: 'medium' });
-            }, 1000);
+        // MONITOR DE OUVINTES (COM GAVETA DE DETALHES)
+        function toggleUser(id) {
+            const el = document.getElementById('det-'+id);
+            el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+        }
 
-            // Carregar Rádios
-            db.ref('radios').on('value', snap => {
-                const list = document.getElementById('radio-list');
-                list.innerHTML = "";
-                snap.forEach(child => {
-                    const r = child.val();
-                    list.innerHTML += `
-                        <div class="radio-item" style="background:${r.color || '#A020F0'}">
-                            <button class="btn-del" onclick="deletarRadio('${child.key}')">×</button>
-                            <i class="fas fa-broadcast-tower" style="font-size:30px; margin-bottom:10px; opacity:0.8"></i>
-                            <div style="font-size:16px">${r.name}</div>
-                        </div>`;
-                });
+        db.ref('usuarios').on('value', snap => {
+            const mon = document.getElementById('user-monitor'); mon.innerHTML = "";
+            snap.forEach(c => {
+                const u = c.val(); 
+                const on = (Date.now() - (u.lastSeen || 0) < 30000);
+                const tempoTotal = Math.floor((Date.now() - (u.loginTime || Date.now())) / 60000);
+                const tempoRadio = Math.floor((Date.now() - (u.radioStartTime || Date.now())) / 60000);
+
+                mon.innerHTML += `
+                    <div class="user-card ${on?'online':''}" onclick="toggleUser('${c.key}')">
+                        <b>${u.nome}</b>
+                        <span class="status-badge ${on?'status-on':'status-off'}">${on?'on':'off'}</span>
+                    </div>
+                    <div class="user-details" id="det-${c.key}">
+                        <p>🕒 Sessão Total: <b>${tempoTotal} min</b></p>
+                        <p>📻 Ouvindo: <b>${u.radioAtual || 'Nenhuma'}</b></p>
+                        <p>🎵 Tempo na Rádio: <b>${tempoRadio} min</b></p>
+                    </div>`;
             });
+        });
 
-            // Carregar Ouvintes
-            db.ref('usuarios').on('value', snap => {
-                const monitor = document.getElementById('lista-usuarios');
-                monitor.innerHTML = "";
-                snap.forEach(child => {
-                    const user = child.val();
-                    const online = (Date.now() - user.lastSeen) < 15000;
-                    monitor.innerHTML += `
-                        <div class="user-status ${online ? 'active' : ''}">
-                            <div>
-                                <div style="font-weight:bold; font-size:14px;">${child.key.toUpperCase()}</div>
-                                <div style="font-size:11px; color:#888;">${user.radioAtual || 'Navegando...'}</div>
-                            </div>
-                            <div class="status-dot"></div>
-                        </div>`;
-                });
-            });
-
-            Sortable.create(document.getElementById('radio-list'), { animation: 150 });
-        }
-
-        function salvarRadio() {
-            const name = document.getElementById('radio-nome').value;
-            const url = document.getElementById('radio-url').value;
-            const color = document.getElementById('radio-cor').value;
-            if (name && url) {
-                db.ref('radios').push({ name, url, color });
-                document.getElementById('radio-nome').value = '';
-                document.getElementById('radio-url').value = '';
-            }
-        }
-
-        function deletarRadio(key) { if(confirm('Remover esta rádio permanentemente?')) db.ref('radios/'+key).remove(); }
-
+        Sortable.create(document.getElementById('radios-list'), { animation: 150 });
     </script>
 </body>
 </html>
