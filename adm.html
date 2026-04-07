@@ -2,96 +2,178 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>PAINEL ADM - LIBERADO</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAINEL ADM - LUIGY SENGER</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background: #000; color: #fff; font-family: sans-serif; padding: 30px; text-align: center; }
-        .caixa { background: #181818; border: 2px solid #A020F0; padding: 25px; border-radius: 15px; max-width: 500px; margin: auto; }
-        input { width: 90%; padding: 12px; margin: 10px 0; background: #222; border: 1px solid #444; color: white; border-radius: 8px; }
-        button { width: 95%; padding: 15px; background: #A020F0; border: none; color: white; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 10px; }
-        .radio-item { background: #222; padding: 15px; margin: 10px 0; display: flex; justify-content: space-between; border-radius: 8px; border-left: 5px solid #A020F0; text-align: left; }
-        .btn-excluir { background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
+        :root { --primary: #A020F0; --bg: #0b0b0b; --card: #181818; --text: #ffffff; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+        
+        /* TELA DE LOGIN */
+        #tela-login { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+        .login-box { background: var(--card); padding: 40px; border-radius: 20px; border: 1px solid #333; width: 320px; text-align: center; box-shadow: 0 0 20px rgba(160, 32, 240, 0.2); }
+        .login-box h2 { color: var(--primary); margin-bottom: 20px; font-weight: 900; }
+        .login-box input { width: 100%; margin-bottom: 15px; padding: 12px; background: #222; border: 1px solid #444; color: white; border-radius: 8px; box-sizing: border-box; }
+        .btn-entrar { width: 100%; padding: 12px; background: var(--primary); border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; }
+
+        /* PAINEL OCULTO */
+        #painel-conteudo { display: none; }
+
+        /* HEADER E GRID */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid #333; }
+        .admin-name { font-size: 20px; font-weight: bold; color: var(--primary); }
+        
+        .main-grid { display: grid; grid-template-columns: 1fr 350px; gap: 20px; }
+        .card { background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid #333; }
+        
+        /* LISTA DE RÁDIOS */
+        .radio-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; margin-top: 20px; }
+        .radio-item { aspect-ratio: 1/1; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; font-weight: bold; text-align: center; padding: 10px; color: #000; cursor: grab; }
+        .btn-del { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.2); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; font-weight: bold; }
+
+        /* MONITOR OUVINTES */
+        .user-status { background: #222; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-left: 4px solid #444; }
+        .user-status.active { border-left-color: var(--primary); }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #444; }
+        .active .status-dot { background: var(--primary); box-shadow: 0 0 10px var(--primary); }
     </style>
 </head>
 <body>
 
-    <script>
-        // ISSO AQUI MATA O ERRO DE "DADOS INCORRETOS" NA HORA:
-        localStorage.clear();
-        sessionStorage.clear();
-    </script>
+    <div id="tela-login">
+        <div class="login-box">
+            <h2>ADM LOGIN</h2>
+            <input type="text" id="user-adm" placeholder="Usuário">
+            <input type="password" id="pass-adm" placeholder="Senha">
+            <button class="btn-entrar" onclick="validarAcesso()">ENTRAR NO SISTEMA</button>
+        </div>
+    </div>
 
-    <div class="caixa">
-        <h2 style="color:#A020F0">LUIGY - PAINEL ADM</h2>
-        <p style="font-size: 12px; color: #888;">Acesso direto liberado (Regravado em ADM.HTM)</p>
-        
-        <div id="form-cadastro">
-            <input type="text" id="n_radio" placeholder="Nome da Rádio">
-            <input type="text" id="u_radio" placeholder="URL do Streaming (.mp3)">
-            <button onclick="enviar()">ADICIONAR RÁDIO AGORA</button>
+    <div id="painel-conteudo">
+        <div class="header">
+            <div>
+                <div class="admin-name">LUIGY SENGER (ADM)</div>
+                <div id="data-hora" style="font-size: 12px; color: #888;"></div>
+            </div>
+            <button onclick="fazerSair()" style="background:none; border:1px solid #ff4444; color:#ff4444; padding:8px 15px; border-radius:5px; cursor:pointer; font-weight:bold">SAIR DO PAINEL</button>
         </div>
 
-        <div style="margin-top: 30px;">
-            <h3 style="text-align: left; border-bottom: 1px solid #333; padding-bottom: 5px;">RÁDIOS CADASTRADAS:</h3>
-            <div id="lista_radios">Carregando rádios...</div>
+        <div class="main-grid">
+            <div class="left-col">
+                <div class="card" style="display: flex; gap: 10px; margin-bottom: 20px;">
+                    <input type="text" id="radio-n" placeholder="Nome da Rádio" style="flex:1; background:#222; border:1px solid #444; color:white; padding:10px; border-radius:8px;">
+                    <input type="text" id="radio-u" placeholder="URL .mp3" style="flex:1; background:#222; border:1px solid #444; color:white; padding:10px; border-radius:8px;">
+                    <input type="color" id="radio-c" value="#A020F0" style="height:42px; border:none; background:none; cursor:pointer">
+                    <button class="btn-entrar" style="width:120px" onclick="addRadio()">SALVAR</button>
+                </div>
+                <div id="radio-list" class="radio-list"></div>
+            </div>
+
+            <div class="right-col">
+                <h3 style="margin-top:0; font-size:14px; color:#888;">OUVINTES ONLINE</h3>
+                <div class="card" id="user-monitor"></div>
+            </div>
         </div>
     </div>
 
     <script>
-        // Sua configuração do Firebase
-        const config = {
+        // FIREBASE CONFIG
+        const firebaseConfig = {
             apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
             authDomain: "meu-painel-f2efe.firebaseapp.com",
             databaseURL: "https://meu-painel-f2efe-default-rtdb.firebaseio.com/",
             projectId: "meu-painel-f2efe"
         };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-        // Inicia o Firebase
-        if (!firebase.apps.length) {
-            firebase.initializeApp(config);
-        }
-        const database = firebase.database();
+        // LOGIN LÓGICA
+        function validarAcesso() {
+            const u = document.getElementById('user-adm').value.trim().toUpperCase();
+            const p = document.getElementById('pass-adm').value.trim();
 
-        // Carregar as rádios na tela
-        database.ref('radios').on('value', (snap) => {
-            const lista = document.getElementById('lista_radios');
-            lista.innerHTML = "";
-            snap.forEach((child) => {
-                const r = child.val();
-                lista.innerHTML += `
-                    <div class="radio-item">
-                        <span><b>${r.name}</b></span>
-                        <button class="btn-excluir" onclick="remover('${child.key}')">EXCLUIR</button>
-                    </div>`;
-            });
-        });
-
-        // Função de Salvar
-        function enviar() {
-            const nome = document.getElementById('n_radio').value;
-            const url = document.getElementById('u_radio').value;
-            if (nome && url) {
-                database.ref('radios').push({
-                    name: nome,
-                    url: url,
-                    color: '#A020F0'
-                }).then(() => {
-                    document.getElementById('n_radio').value = "";
-                    document.getElementById('u_radio').value = "";
-                });
+            if (u === "LUIGY" && p === "1045") {
+                localStorage.setItem('luigy_adm', 'true');
+                abrirPainel();
             } else {
-                alert("Preencha o nome e a URL!");
+                alert("Dados incorretos!");
             }
         }
 
-        // Função de Remover
-        function remover(id) {
-            if (confirm("Deseja apagar esta rádio?")) {
-                database.ref('radios/' + id).remove();
+        // Detectar Enter
+        document.getElementById('pass-adm').addEventListener('keypress', (e) => { if(e.key === 'Enter') validarAcesso(); });
+        document.getElementById('user-adm').addEventListener('keypress', (e) => { if(e.key === 'Enter') validarAcesso(); });
+
+        function abrirPainel() {
+            document.getElementById('tela-login').style.display = 'none';
+            document.getElementById('painel-conteudo').style.display = 'block';
+            carregarDados();
+        }
+
+        function fazerSair() {
+            localStorage.removeItem('luigy_adm');
+            window.location.reload();
+        }
+
+        if (localStorage.getItem('luigy_adm') === 'true') {
+            abrirPainel();
+        }
+
+        // FUNÇÕES DO SISTEMA
+        function carregarDados() {
+            setInterval(() => {
+                document.getElementById('data-hora').innerText = new Date().toLocaleString('pt-BR');
+            }, 1000);
+
+            db.ref('radios').on('value', snap => {
+                const list = document.getElementById('radio-list');
+                list.innerHTML = "";
+                snap.forEach(child => {
+                    const r = child.val();
+                    list.innerHTML += `
+                        <div class="radio-item" style="background:${r.color || '#A020F0'}">
+                            <button class="btn-del" onclick="deleteRadio('${child.key}')">×</button>
+                            <i class="fas fa-radio" style="font-size:24px; margin-bottom:10px"></i>
+                            ${r.name}
+                        </div>`;
+                });
+            });
+
+            db.ref('usuarios').on('value', snap => {
+                const monitor = document.getElementById('user-monitor');
+                monitor.innerHTML = "";
+                snap.forEach(child => {
+                    const user = child.val();
+                    const isOnline = (Date.now() - user.lastSeen) < 15000;
+                    monitor.innerHTML += `
+                        <div class="user-status ${isOnline ? 'active' : ''}">
+                            <div>
+                                <div style="font-weight:bold">${child.key.toUpperCase()}</div>
+                                <div style="font-size:11px; color:#888">${user.radioAtual || 'Nenhuma rádio'}</div>
+                            </div>
+                            <div class="status-dot"></div>
+                        </div>`;
+                });
+            });
+
+            Sortable.create(document.getElementById('radio-list'), { animation: 150 });
+        }
+
+        function addRadio() {
+            const name = document.getElementById('radio-n').value;
+            const url = document.getElementById('radio-u').value;
+            const color = document.getElementById('radio-c').value;
+            if (name && url) {
+                db.ref('radios').push({ name, url, color });
+                document.getElementById('radio-n').value = '';
+                document.getElementById('radio-u').value = '';
             }
         }
+
+        function deleteRadio(key) { if(confirm('Excluir?')) db.ref('radios/'+key).remove(); }
     </script>
 </body>
 </html>
