@@ -12,8 +12,15 @@
         :root { --primary: #A020F0; --bg: #000; --card: #121212; --text-muted: #b3b3b3; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; user-select: none; }
         
+        /* HEADER COM BOTÃO SAIR */
         .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 20px 30px; border-radius: 15px; border: 1px solid #333; margin-bottom: 25px; }
+        .header-left { display: flex; align-items: center; gap: 20px; }
         .header h2 { margin: 0; color: var(--primary); font-size: 22px; text-transform: uppercase; }
+        .btn-header { background: none; border: 1px solid #333; color: white; padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: 0.3s; display: flex; align-items: center; gap: 8px; }
+        .btn-header:hover { background: #222; border-color: var(--primary); }
+        .btn-sair { color: #ff4444; border-color: #442222; }
+        .btn-sair:hover { background: #331111; border-color: #ff4444; }
+        
         #hora { font-size: 26px; font-weight: 900; }
 
         .main-container { display: grid; grid-template-columns: 1fr 350px; gap: 20px; max-width: 1400px; margin: 0 auto; }
@@ -21,15 +28,8 @@
 
         h3 { color: var(--primary); font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; }
 
-        /* GRADE DE MINHAS RÁDIOS */
         .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; min-height: 100px; }
-        .radio-item { 
-            aspect-ratio: 1/1; border-radius: 15px; display: flex; flex-direction: column; 
-            justify-content: center; align-items: center; color: #fff; font-weight: bold; 
-            font-size: 11px; text-align: center; padding: 10px; cursor: grab; 
-            transition: 0.3s; position: relative; border: 2px solid #222; 
-            background: #181818;
-        }
+        .radio-item { aspect-ratio: 1/1; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #fff; font-weight: bold; font-size: 11px; text-align: center; padding: 10px; cursor: grab; transition: 0.3s; position: relative; border: 2px solid #222; background: #181818; }
         .radio-item:hover { border-color: var(--primary); transform: scale(1.02); }
         .radio-item.active { background: #000 !important; color: var(--primary) !important; border-color: var(--primary); box-shadow: 0 0 15px rgba(160, 32, 240, 0.4); }
         
@@ -37,7 +37,6 @@
         .active .antena { display: block; animation: pulse-antena 1s infinite; }
         @keyframes pulse-antena { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(1.1); } }
 
-        /* SELETOR DE RÁDIOS */
         .selector-list { display: flex; flex-direction: column; gap: 8px; max-height: 500px; overflow-y: auto; padding-right: 5px; }
         .selector-item { background: #1a1a1a; padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #333; transition: 0.3s; }
         .selector-item.selected { border-left-color: var(--primary); background: #222; }
@@ -45,7 +44,6 @@
         .btn-toggle-radio.add { color: #444; }
         .btn-toggle-radio.remove { color: var(--primary); }
 
-        /* PLAYER RODAPÉ */
         .player-footer { position: fixed; bottom: 0; left: 0; right: 0; background: #111; padding: 25px; border-top: 2px solid var(--primary); text-align: center; z-index: 100; }
         .controls-row { display: flex; align-items: center; justify-content: center; gap: 35px; }
         .btn-nav { background: none; border: none; color: #b3b3b3; font-size: 24px; cursor: pointer; transition: 0.2s; }
@@ -63,7 +61,10 @@
 <body>
 
     <div class="header">
-        <h2 id="nome-exibicao">OUVINTE</h2>
+        <div class="header-left">
+            <h2 id="nome-exibicao">OUVINTE</h2>
+            <button class="btn-header btn-sair" onclick="logout()"><i class="fas fa-sign-out-alt"></i> SAIR</button>
+        </div>
         <div id="hora">00:00:00</div>
     </div>
 
@@ -112,6 +113,13 @@
         let activeIndex = -1;
 
         setInterval(() => { document.getElementById('hora').innerText = new Date().toLocaleTimeString('pt-BR'); }, 1000);
+
+        function logout() {
+            if(confirm("Deseja encerrar a sessão?")) {
+                localStorage.removeItem('usuarioNome');
+                window.location.href = 'index.html';
+            }
+        }
 
         function renderAll() {
             const myGrid = document.getElementById('my-radio-list');
