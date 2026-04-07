@@ -9,46 +9,46 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // --- LÓGICA DE LOGIN CORRIGIDA ---
+        // --- SISTEMA DE LOGIN "BLINDADO" ---
         function validarAcesso() {
-            // Pega os valores, remove espaços e coloca em MAIÚSCULO para não ter erro
-            const u = document.getElementById('user-adm').value.trim().toUpperCase();
-            const p = document.getElementById('pass-adm').value.trim();
+            // Pega os campos, limpa espaços e ignora se é maiúsculo ou minúsculo
+            const campoUsuario = document.getElementById('user-adm').value.trim().toUpperCase();
+            const campoSenha = document.getElementById('pass-adm').value.trim();
 
-            if (u === "LUIGY" && p === "1045") {
+            if (campoUsuario === "LUIGY" && campoSenha === "1045") {
                 localStorage.setItem('adm_logado', 'true');
                 mostrarPainel();
             } else {
-                alert("DADOS INCORRETOS!\nUsuário: LUIGY\nSenha: 1045");
+                alert("ACESSO NEGADO!\nVerifique se o usuário é LUIGY e a senha 1045");
             }
         }
 
-        // Detectar Tecla ENTER nos campos
-        document.getElementById('pass-adm').addEventListener('keypress', (e) => { 
-            if(e.key === 'Enter') { e.preventDefault(); validarAcesso(); } 
+        // Permitir ENTER nos dois campos
+        document.getElementById('user-adm').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') validarAcesso();
         });
-        document.getElementById('user-adm').addEventListener('keypress', (e) => { 
-            if(e.key === 'Enter') { e.preventDefault(); validarAcesso(); } 
+        document.getElementById('pass-adm').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') validarAcesso();
         });
 
         function mostrarPainel() {
             document.getElementById('tela-login').style.display = 'none';
             document.getElementById('painel-conteudo').style.display = 'block';
-            carregarDadosIniciais(); // Inicia as funções do painel
+            iniciarFuncoesPainel();
         }
 
         function sair() {
-            localStorage.clear(); // Limpa tudo para garantir
+            localStorage.clear();
             window.location.reload();
         }
 
-        // Verifica se já está logado ao abrir
+        // Se já estiver logado, entra direto
         if (localStorage.getItem('adm_logado') === 'true') {
             mostrarPainel();
         }
 
-        // --- FUNÇÕES DO PAINEL (MANTIDAS) ---
-        function carregarDadosIniciais() {
+        // --- FUNÇÕES DO PAINEL (MANTIDAS INTACTAS) ---
+        function iniciarFuncoesPainel() {
             setInterval(() => {
                 const now = new Date();
                 document.getElementById('data-hora').innerText = now.toLocaleString('pt-BR');
