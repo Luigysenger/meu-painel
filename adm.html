@@ -6,90 +6,100 @@
     <title>PAINEL ADM SUPREMO - LUIGY</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #A020F0; --bg: #0b0b0b; --card: #181818; --danger: #ff4444; --success: #1DB954; }
+        :root { --primary: #1DB954; --bg: #000; --card: #121212; --text-muted: #b3b3b3; --purple-light: #d1a3ff; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; user-select: none; }
-
-        /* HEADER */
-        .header-adm { background: var(--card); padding: 15px 25px; border-radius: 15px; border: 1px solid #333; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        .logo-area h2 { margin: 0; font-size: 20px; letter-spacing: 2px; color: var(--primary); }
-        #relogio { font-size: 18px; font-weight: 900; color: var(--primary); }
-
-        /* SEÇÕES */
-        .section-title { color: var(--primary); font-weight: bold; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; text-transform: uppercase; font-size: 13px; }
-
-        /* FORMULÁRIO COM EFEITO */
-        .form-add { background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid #333; margin-bottom: 25px; }
-        .input-group { margin-bottom: 12px; }
-        input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #333; background: #0b0b0b; color: white; outline: none; transition: 0.3s; box-sizing: border-box; }
-        input:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(160, 32, 240, 0.3); }
-        .btn-save { width: 100%; padding: 12px; border-radius: 10px; border: none; background: var(--primary); color: white; font-weight: bold; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
-        .btn-save:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(160, 32, 240, 0.4); }
-
-        /* MONITOR DE OUVINTES - BORDAS DINÂMICAS */
-        .user-item { 
-            background: #181818; 
-            margin-bottom: 10px; 
-            border-radius: 12px; 
-            overflow: hidden; 
-            transition: 0.3s;
-            border: 1px solid #333;
-            /* border-left será definido pelo JS */
-        }
-        .user-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; }
-        .user-name-btn { background: none; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 10px; flex: 1; text-align: left; }
         
-        .status-on { color: var(--success); font-size: 10px; font-weight: 900; background: rgba(29, 185, 84, 0.1); padding: 2px 6px; border-radius: 4px; }
-        .status-off { color: var(--primary); font-size: 10px; font-weight: 900; background: rgba(160, 32, 240, 0.1); padding: 2px 6px; border-radius: 4px; }
+        .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 20px 30px; border-radius: 15px; border: 1px solid #333; margin-bottom: 25px; }
+        .header h2 { margin: 0; color: var(--primary); font-size: 22px; }
+        #hora { font-size: 26px; font-weight: 900; }
 
-        .btn-del-user { color: #444; background: none; border: none; cursor: pointer; transition: 0.3s; padding: 5px; }
-        .btn-del-user:hover { color: var(--danger); }
+        .main-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; max-width: 1400px; margin: 0 auto; }
+        .card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid #282828; }
 
-        .user-details-bar { display: none; background: #111; padding: 15px; font-size: 12px; border-top: 1px solid #222; animation: slideDown 0.3s ease-out; }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        h3 { color: var(--primary); font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; }
 
-        /* GRADE DE RADIOS */
-        .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
-        .radio-card { 
-            aspect-ratio: 1/1; background: var(--card); border-radius: 15px; 
-            display: flex; flex-direction: column; justify-content: center; align-items: center; 
-            cursor: grab; transition: 0.3s; border: 1px solid #333; position: relative; padding: 10px;
-        }
-        .radio-card:hover { border-color: var(--primary); transform: scale(1.02); }
-        .btn-del-radio { position: absolute; top: 8px; right: 8px; background: rgba(255,0,0,0.1); color: var(--danger); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; font-size: 12px; }
+        .input-group { display: flex; gap: 10px; margin-bottom: 25px; }
+        input { flex: 1; padding: 12px; background: #2a2a2a; border: none; color: white; border-radius: 8px; }
+        .btn-save { padding: 0 25px; background: var(--primary); border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
 
-        /* PLAYER BAR */
-        .admin-player { position: fixed; bottom: 0; left: 0; right: 0; background: #121212; border-top: 2px solid var(--primary); padding: 15px; text-align: center; }
+        .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; }
+        .radio-item { aspect-ratio: 1/1; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #000; font-weight: bold; font-size: 13px; text-align: center; padding: 10px; cursor: grab; transition: 0.3s; position: relative; border: 2px solid transparent; }
+        .radio-item.active { background: #000 !important; color: var(--primary) !important; border-color: var(--primary); box-shadow: 0 0 15px rgba(29, 185, 84, 0.4); }
+        
+        .antena { font-size: 24px; margin-bottom: 8px; display: none; }
+        .active .antena { display: block; animation: pulse-antena 1s infinite; }
+        @keyframes pulse-antena { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(1.1); } }
+
+        /* MONITOR DE OUVINTES */
+        .user-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; border-left: 4px solid var(--primary); overflow: hidden; }
+        .user-row { display: flex; align-items: center; width: 100%; }
+        .user-name-btn { flex: 1; padding: 15px; background: none; border: none; color: white; text-align: left; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .btn-delete-user { background: none; border: none; color: #ff4444; padding: 15px; cursor: pointer; font-size: 16px; transition: 0.2s; }
+        .btn-delete-user:hover { transform: scale(1.2); }
+        
+        .status-on { color: #00ff00; font-weight: 900; font-size: 11px; }
+        .status-off { color: #d1a3ff; font-weight: 900; font-size: 11px; }
+
+        .user-details-bar { display: none; padding: 15px; background: #080808; border-top: 1px solid #333; font-size: 13px; color: #bbb; line-height: 1.8; }
+        .user-details-bar b { color: var(--primary); }
+
+        /* PLAYER RODAPÉ (DESIGN ORIGINAL PRESERVADO) */
+        .player-footer { margin-top: 20px; background: #111; padding: 25px; border-radius: 20px; border: 1px solid #222; text-align: center; }
+        .controls-row { display: flex; align-items: center; justify-content: center; gap: 35px; }
+        .btn-nav { background: none; border: none; color: #b3b3b3; font-size: 24px; cursor: pointer; transition: 0.2s; }
+        .btn-nav:hover { color: white; transform: scale(1.1); }
+        
+        .play-outer { position: relative; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; }
+        .ring-animation { position: absolute; width: 100%; height: 100%; border: 2px solid rgba(29, 185, 84, 0.1); border-top: 2px solid var(--primary); border-radius: 50%; animation: spin-slow 5s linear infinite; }
+        @keyframes spin-slow { 100% { transform: rotate(360deg); } }
+        
+        .btn-spotify-play { width: 60px; height: 60px; background: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; color: black; cursor: pointer; z-index: 5; transition: 0.2s; }
+        .btn-spotify-play:hover { transform: scale(1.05); background: var(--primary); }
     </style>
 </head>
 <body>
 
-    <div class="header-adm">
-        <div class="logo-area"><h2>LUIGY ADM</h2></div>
-        <div id="relogio">00:00:00</div>
+    <div class="header">
+        <h2><i class="fab fa-spotify"></i> LUIGY ADM</h2>
+        <div id="hora">00:00:00</div>
     </div>
 
-    <div class="form-add">
-        <div class="section-title"><i class="fas fa-plus-circle"></i> ADICIONAR NOVA EMISSORA</div>
-        <div class="input-group"><input type="text" id="radio-nome" placeholder="Nome da Rádio"></div>
-        <div class="input-group"><input type="text" id="radio-url" placeholder="Link .mp3 / Stream"></div>
-        <button class="btn-save" onclick="addRadio()">SALVAR</button>
+    <div class="main-grid">
+        <div class="col-left">
+            <div class="card">
+                <h3>ADICIONAR NOVA EMISSORA</h3>
+                <div class="input-group">
+                    <input type="text" id="r-name" placeholder="Nome da Rádio">
+                    <input type="text" id="r-url" placeholder="Link .mp3">
+                    <button class="btn-save" onclick="addRadio()">SALVAR</button>
+                </div>
+                <h3>GRADE DE RÁDIOS (ARRASTE PARA REORDENAR)</h3>
+                <div id="radio-list" class="radio-grid"></div>
+                <div class="player-footer">
+                    <div id="now-title" style="font-size:11px; color:#888; margin-bottom:15px; letter-spacing: 1px;">SELECIONE UMA RÁDIO</div>
+                    <div class="controls-row">
+                        <button class="btn-nav" onclick="prevRadio()"><i class="fas fa-step-backward"></i></button>
+                        <div class="play-outer">
+                            <div class="ring-animation"></div>
+                            <button class="btn-spotify-play" onclick="togglePlay()"><i class="fas fa-play" id="play-icon" style="margin-left: 3px;"></i></button>
+                        </div>
+                        <button class="btn-nav" onclick="nextRadio()"><i class="fas fa-step-forward"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-right">
+            <div class="card">
+                <h3>👥 MONITOR DE OUVINTES</h3>
+                <div id="user-list"></div>
+            </div>
+        </div>
     </div>
 
-    <div class="section-title"><i class="fas fa-users"></i> MONITOR DE OUVINTES</div>
-    <div id="user-list" style="margin-bottom: 40px;"></div>
-
-    <div class="section-title"><i class="fas fa-th-large"></i> GRADE DE RÁDIOS (ARRASTE PARA REORDENAR)</div>
-    <div id="radio-grid" class="radio-grid"></div>
-
-    <div style="height: 100px;"></div>
-
-    <div class="admin-player">
-        <div id="status-player" style="font-size: 11px; color: #888; margin-bottom: 5px;">SELECIONE UMA RÁDIO</div>
-        <audio id="player-adm" controls style="height: 30px; width: 100%; max-width: 400px;"></audio>
-    </div>
+    <audio id="audio-player"></audio>
 
     <script>
         const firebaseConfig = {
@@ -101,93 +111,119 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Relógio Realista
-        setInterval(() => {
-            document.getElementById('relogio').innerText = new Date().toLocaleTimeString('pt-BR');
-        }, 1000);
+        const player = document.getElementById('audio-player');
+        let radioData = [];
+        let activeIndex = -1;
 
-        // Gerenciamento de Rádios
-        function addRadio() {
-            const nome = document.getElementById('radio-nome').value;
-            const url = document.getElementById('radio-url').value;
-            if(nome && url) {
-                db.ref('radios').push({ name: nome, url: url, color: '#181818' });
-                document.getElementById('radio-nome').value = '';
-                document.getElementById('radio-url').value = '';
-            }
+        setInterval(() => { document.getElementById('hora').innerText = new Date().toLocaleTimeString('pt-BR'); }, 1000);
+
+        function renderRadios() {
+            const list = document.getElementById('radio-list');
+            list.innerHTML = "";
+            radioData.forEach((r, i) => {
+                list.innerHTML += `<div class="radio-item ${activeIndex === i ? 'active' : ''}" style="background:${r.color || '#1DB954'}" data-id="${r.key}" onclick="playRadio(${i})"><i class="fas fa-tower-broadcast antena"></i><span>${r.name}</span></div>`;
+            });
         }
 
         db.ref('radios').on('value', snap => {
-            const grid = document.getElementById('radio-grid');
-            grid.innerHTML = "";
-            snap.forEach(child => {
-                const r = child.val();
-                grid.innerHTML += `
-                    <div class="radio-card" onclick="tocarRadio('${r.url}', '${r.name}')">
-                        <button class="btn-del-radio" onclick="event.stopPropagation(); deleteRadio('${child.key}')"><i class="fas fa-times"></i></button>
-                        <i class="fas fa-broadcast-tower" style="font-size: 24px; color: var(--primary); margin-bottom: 10px;"></i>
-                        <div style="font-size: 12px; font-weight: bold; text-align: center;">${r.name}</div>
-                    </div>`;
-            });
+            radioData = [];
+            snap.forEach(c => { radioData.push({ ...c.val(), key: c.key }); });
+            radioData.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
+            renderRadios();
         });
 
-        function deleteRadio(key) { if(confirm("Excluir esta rádio?")) db.ref('radios/' + key).remove(); }
-        
-        function tocarRadio(url, nome) {
-            const p = document.getElementById('player-adm');
-            p.src = url; p.play();
-            document.getElementById('status-player').innerText = "OUVINDO: " + nome;
+        Sortable.create(document.getElementById('radio-list'), {
+            animation: 150,
+            onEnd: function() {
+                const items = document.getElementById('radio-list').querySelectorAll('.radio-item');
+                items.forEach((item, index) => { db.ref('radios/' + item.getAttribute('data-id')).update({ posicao: index }); });
+            }
+        });
+
+        function playRadio(index) {
+            if (index < 0 || index >= radioData.length) return;
+            activeIndex = index;
+            const r = radioData[index];
+            player.src = r.url; player.play();
+            document.getElementById('now-title').innerText = "OUVINDO: " + r.name;
+            const icon = document.getElementById('play-icon');
+            icon.className = "fas fa-stop"; icon.style.marginLeft = "0px";
+            renderRadios();
         }
 
-        // Monitor de Ouvintes - COM AS BORDAS QUE VOCÊ PEDIU
-        function formatarTempo(ts) {
-            if(!ts || ts <= 0) return "---";
+        function togglePlay() {
+            if(!player.src) return;
+            const icon = document.getElementById('play-icon');
+            if(player.paused) { player.play(); icon.className = "fas fa-stop"; icon.style.marginLeft = "0px"; }
+            else { player.pause(); icon.className = "fas fa-play"; icon.style.marginLeft = "3px"; }
+        }
+
+        function nextRadio() { let next = activeIndex + 1; if (next >= radioData.length) next = 0; playRadio(next); }
+        function prevRadio() { let prev = activeIndex - 1; if (prev < 0) prev = radioData.length - 1; playRadio(prev); }
+
+        function addRadio() {
+            const n = document.getElementById('r-name').value, u = document.getElementById('r-url').value;
+            if(n && u) {
+                const col = `hsl(${Math.floor(Math.random() * 360)}, 70%, 75%)`;
+                db.ref('radios').push({ name: n, url: u, color: col, posicao: radioData.length });
+                document.getElementById('r-name').value = ""; document.getElementById('r-url').value = "";
+            }
+        }
+
+        // --- MONITOR DE OUVINTES (SISTEMA DE CAPTURA ROBUSTO) ---
+        function formatarTempo(valor) {
+            const ts = parseInt(valor);
+            if (!ts || isNaN(ts)) return "0 min";
             const diff = Math.floor((Date.now() - ts) / 60000);
             return diff < 1 ? "Agora" : diff + " min";
         }
 
-        function toggleUserBar(id) {
-            const bar = document.getElementById('bar-' + id);
-            bar.style.display = (bar.style.display === 'block') ? 'none' : 'block';
+        function deleteUser(id) {
+            if(confirm("Deseja remover este ouvinte?")) db.ref('usuarios/' + id).remove();
         }
 
         db.ref('usuarios').on('value', snap => {
-            const list = document.getElementById('user-list');
-            list.innerHTML = "";
-            snap.forEach(child => {
-                const u = child.val();
-                const id = child.key;
+            const container = document.getElementById('user-list');
+            container.innerHTML = "";
+            
+            snap.forEach(c => {
+                const u = c.val();
+                const id = c.key;
                 
-                // Lógica Online/Offline (1 minuto)
-                const isOnline = (Date.now() - (u.lastSeen || 0) < 60000);
-                const corBorda = isOnline ? 'var(--success)' : 'var(--primary)';
-                const statusTxt = isOnline ? 'ON' : 'OFF';
-                const statusClass = isOnline ? 'status-on' : 'status-off';
+                // Checa se está online (último sinal em 60s)
+                const lastSeen = parseInt(u.lastSeen || 0);
+                const isOnline = (Date.now() - lastSeen < 60000);
+                const statusHTML = isOnline ? '<span class="status-on">ON</span>' : '<span class="status-off">OFF</span>';
+                
+                // Captura a rádio e os tempos (com fallback se os nomes mudarem)
+                const rAtual = u.radioAtual || u.radio || "Navegando...";
+                const sStart = u.sessionStart || u.sessao || 0;
+                const rStart = u.radioStart || u.radioInicio || 0;
 
-                list.innerHTML += `
-                    <div class="user-item" style="border-left: 5px solid ${corBorda}">
+                container.innerHTML += `
+                    <div class="user-item">
                         <div class="user-row">
                             <button class="user-name-btn" onclick="toggleUserBar('${id}')">
-                                <span>${u.nome || id}</span>
-                                <span class="${statusClass}">${statusTxt}</span>
+                                <span>${u.nome || 'Ouvinte'}</span> ${statusHTML}
                             </button>
-                            <button class="btn-del-user" onclick="db.ref('usuarios/${id}').remove()">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
+                            <button class="btn-delete-user" onclick="deleteUser('${id}')"><i class="fas fa-trash-alt"></i></button>
                         </div>
                         <div class="user-details-bar" id="bar-${id}">
-                            <div style="margin-bottom: 5px;">📻 Ouvindo: <b style="color:var(--success)">${u.radioAtual || 'Navegando'}</b></div>
-                            <div style="display: flex; gap: 20px; color: #888;">
-                                <span>⏳ Na Rádio: <b style="color:white">${formatarTempo(u.radioStart)}</b></span>
-                                <span>🚀 Sessão: <b style="color:white">${formatarTempo(u.sessionStart)}</b></span>
-                            </div>
+                            📻 Ouvindo: <b>${rAtual}</b><br>
+                            ⏳ Na Rádio: <b>${formatarTempo(rStart)}</b><br>
+                            🚀 Conectado: <b>${formatarTempo(sStart)}</b>
                         </div>
                     </div>`;
             });
         });
 
-        // Habilitar Reordenar Rádios
-        Sortable.create(document.getElementById('radio-grid'), { animation: 150 });
+        function toggleUserBar(id) {
+            const bars = document.querySelectorAll('.user-details-bar');
+            const target = document.getElementById('bar-' + id);
+            const isVisible = target.style.display === 'block';
+            bars.forEach(b => b.style.display = 'none'); // Fecha outros para não poluir
+            if (!isVisible) target.style.display = 'block';
+        }
     </script>
 </body>
 </html>
