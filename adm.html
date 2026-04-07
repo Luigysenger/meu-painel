@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PAINEL ADM - LUIGY</title>
+    <title>PAINEL ADM - LIBERADO</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -11,46 +11,25 @@
     <style>
         :root { --primary: #1DB954; --bg: #0b0b0b; --card: #181818; --text: #ffffff; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
-        
-        /* TELA DE LOGIN */
-        #tela-login { position: fixed; inset: 0; background: #000; display: flex; align-items: center; justify-content: center; z-index: 9999; }
-        .login-box { background: var(--card); padding: 40px; border-radius: 20px; border: 2px solid var(--primary); width: 320px; text-align: center; box-shadow: 0 0 30px rgba(29, 185, 84, 0.2); }
-        .login-box input { width: 100%; margin-bottom: 15px; padding: 15px; background: #222; border: 1px solid #444; color: white; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
-        .btn-entrar { width: 100%; padding: 15px; background: var(--primary); border: none; border-radius: 10px; font-weight: 900; cursor: pointer; color: black; font-size: 16px; text-transform: uppercase; }
-
-        /* PAINEL (ESCONDIDO) */
-        #painel-conteudo { display: none; }
-
-        /* INTERFACE ADM */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid #333; }
         .main-grid { display: grid; grid-template-columns: 1fr 350px; gap: 20px; }
         .card { background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid #333; }
         .radio-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; margin-top: 20px; }
         .radio-item { aspect-ratio: 1/1; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; font-weight: bold; text-align: center; padding: 10px; color: #000; cursor: grab; }
-        .btn-del { position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.5); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; font-weight: bold; }
+        .btn-del { position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.5); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; }
         .user-status { background: #222; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-left: 4px solid #444; }
         .active { border-left-color: var(--primary); }
     </style>
 </head>
 <body>
 
-    <div id="tela-login">
-        <div class="login-box">
-            <h2 style="color: var(--primary); margin-top: 0;">ACESSO ADM</h2>
-            <input type="text" id="user-adm" placeholder="USUÁRIO" autocomplete="off">
-            <input type="password" id="pass-adm" placeholder="SENHA" autocomplete="off">
-            <button class="btn-entrar" id="btn-login-trigger">ENTRAR NO PAINEL</button>
-            <p id="erro-msg" style="color: #ff4444; font-size: 12px; margin-top: 10px; display: none;">Dados incorretos!</p>
-        </div>
-    </div>
-
     <div id="painel-conteudo">
         <div class="header">
             <div>
-                <div style="font-size: 20px; font-weight: bold; color: var(--primary);">LUIGY SENGER (ADM)</div>
+                <div style="font-size: 20px; font-weight: bold; color: var(--primary);">LUIGY SENGER (MODO ACESSO DIRETO)</div>
                 <div id="data-hora" style="font-size: 12px; color: #888;"></div>
             </div>
-            <button onclick="fazerLogout()" style="background:#ff4444; border:none; color:white; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:bold;">SAIR</button>
+            <div style="color: #1DB954; font-weight: bold;">PAINEL ATIVO <i class="fas fa-check-circle"></i></div>
         </div>
 
         <div class="main-grid">
@@ -71,6 +50,9 @@
     </div>
 
     <script>
+        // LIMPANDO QUALQUER BLOQUEIO ANTERIOR ASSIM QUE ABRE
+        localStorage.clear();
+
         const firebaseConfig = {
             apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
             authDomain: "meu-painel-f2efe.firebaseapp.com",
@@ -80,44 +62,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // --- SISTEMA DE LOGIN DIRETO ---
-        const btnLogin = document.getElementById('btn-login-trigger');
-        const inputU = document.getElementById('user-adm');
-        const inputP = document.getElementById('pass-adm');
-
-        function realizarLogin() {
-            const u = inputU.value.trim().toUpperCase();
-            const p = inputP.value.trim();
-
-            if (u === "LUIGY" && p === "1045") {
-                localStorage.setItem('adm_auth', 'ativo');
-                abrirPainel();
-            } else {
-                document.getElementById('erro-msg').style.display = 'block';
-                setTimeout(() => { document.getElementById('erro-msg').style.display = 'none'; }, 3000);
-            }
-        }
-
-        btnLogin.onclick = realizarLogin;
-        inputU.onkeypress = (e) => { if(e.key === 'Enter') realizarLogin(); };
-        inputP.onkeypress = (e) => { if(e.key === 'Enter') realizarLogin(); };
-
-        function abrirPainel() {
-            document.getElementById('tela-login').style.display = 'none';
-            document.getElementById('painel-conteudo').style.display = 'block';
-            carregarTudo();
-        }
-
-        function fazerLogout() {
-            localStorage.removeItem('adm_auth');
-            location.reload();
-        }
-
-        if (localStorage.getItem('adm_auth') === 'ativo') {
-            abrirPainel();
-        }
-
-        // --- FUNÇÕES DO BANCO DE DADOS ---
+        // FUNÇÕES DO PAINEL
         function carregarTudo() {
             setInterval(() => {
                 document.getElementById('data-hora').innerText = new Date().toLocaleString('pt-BR');
@@ -168,6 +113,9 @@
         }
 
         function apagarRadio(key) { if(confirm('Excluir?')) db.ref('radios/'+key).remove(); }
+
+        // INICIA O PAINEL AUTOMATICAMENTE
+        carregarTudo();
     </script>
 </body>
 </html>
