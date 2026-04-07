@@ -34,27 +34,30 @@
         .active .antena { display: block; animation: pulse-antena 1s infinite; }
         @keyframes pulse-antena { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(1.1); } }
 
-        /* MONITOR DE OUVINTES - ATUALIZADO */
-        .user-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; border-left: 4px solid var(--primary); overflow: hidden; position: relative; }
+        /* MONITOR DE OUVINTES */
+        .user-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; border-left: 4px solid var(--primary); overflow: hidden; }
         .user-row { display: flex; align-items: center; width: 100%; }
         .user-name-btn { flex: 1; padding: 15px; background: none; border: none; color: white; text-align: left; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-        .btn-delete-user { background: none; border: none; color: #ff4444; padding: 15px; cursor: pointer; transition: 0.2s; font-size: 16px; }
-        .btn-delete-user:hover { color: #ff0000; transform: scale(1.1); }
+        .btn-delete-user { background: none; border: none; color: #ff4444; padding: 15px; cursor: pointer; font-size: 16px; }
         
-        .status-on { color: #00ff00; font-weight: 900; font-size: 11px; text-shadow: 0 0 5px rgba(0,255,0,0.3); }
-        .status-off { color: var(--purple-light); font-weight: 900; font-size: 11px; opacity: 0.8; }
+        .status-on { color: #00ff00; font-weight: 900; font-size: 11px; }
+        .status-off { color: #a333ff; font-weight: 900; font-size: 11px; }
 
         .user-details-bar { display: none; padding: 15px; background: #080808; border-top: 1px solid #333; font-size: 13px; color: #bbb; line-height: 1.8; }
         .user-details-bar b { color: var(--primary); }
 
-        /* PLAYER RODAPÉ (PRESERVADO) */
+        /* PLAYER RODAPÉ (EFEITOS ORIGINAIS VOLTADOS) */
         .player-footer { margin-top: 20px; background: #111; padding: 25px; border-radius: 20px; border: 1px solid #222; text-align: center; }
         .controls-row { display: flex; align-items: center; justify-content: center; gap: 35px; }
         .btn-nav { background: none; border: none; color: #b3b3b3; font-size: 24px; cursor: pointer; transition: 0.2s; }
+        .btn-nav:hover { color: white; transform: scale(1.1); }
+        
         .play-outer { position: relative; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; }
         .ring-animation { position: absolute; width: 100%; height: 100%; border: 2px solid rgba(29, 185, 84, 0.1); border-top: 2px solid var(--primary); border-radius: 50%; animation: spin-slow 5s linear infinite; }
         @keyframes spin-slow { 100% { transform: rotate(360deg); } }
+        
         .btn-spotify-play { width: 60px; height: 60px; background: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; color: black; cursor: pointer; z-index: 5; transition: 0.2s; }
+        .btn-spotify-play:hover { transform: scale(1.05); background: var(--primary); }
     </style>
 </head>
 <body>
@@ -99,7 +102,6 @@
     <audio id="audio-player"></audio>
 
     <script>
-        // CONFIGURAÇÃO FIREBASE (SUBSTITUA SEUS DADOS AQUI)
         const firebaseConfig = {
             apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
             authDomain: "meu-painel-f2efe.firebaseapp.com",
@@ -115,7 +117,6 @@
 
         setInterval(() => { document.getElementById('hora').innerText = new Date().toLocaleTimeString('pt-BR'); }, 1000);
 
-        // --- FUNÇÕES DE RÁDIO (PRESERVADAS) ---
         function renderRadios() {
             const list = document.getElementById('radio-list');
             list.innerHTML = "";
@@ -169,21 +170,15 @@
             }
         }
 
-        // --- MONITOR DE OUVINTES (AJUSTADO) ---
-        function formatarTempoReal(timestamp) {
-            if (!timestamp) return "---";
-            const diff = Date.now() - timestamp;
-            const minutos = Math.floor(diff / 60000);
-            if (minutos < 1) return "Agora mesmo";
-            if (minutos < 60) return minutos + " min";
-            const horas = Math.floor(minutos / 60);
-            return horas + "h " + (minutos % 60) + "m";
+        // --- MONITOR DE OUVINTES ---
+        function calcMinutos(ms) {
+            if(!ms) return "0 min";
+            const diff = Math.floor((Date.now() - ms) / 60000);
+            return diff < 1 ? "Agora" : diff + " min";
         }
 
         function deleteUser(id) {
-            if(confirm("Deseja realmente remover este ouvinte do painel?")) {
-                db.ref('usuarios/' + id).remove();
-            }
+            if(confirm("Excluir ouvinte?")) db.ref('usuarios/' + id).remove();
         }
 
         db.ref('usuarios').on('value', snap => {
@@ -194,36 +189,26 @@
                 const u = c.val();
                 const id = c.key;
                 
-                // Status Dinâmico: Verde se ativo em 45 seg, Roxo se offline
-                const isOnline = (Date.now() - (u.lastSeen || 0) < 45000);
-                const statusTag = isOnline ? '<span class="status-on">ON</span>' : '<span class="status-off">OFF</span>';
-                
+                // Tolerância de 60 segundos para considerar ON
+                const isOnline = (Date.now() - (u.lastSeen || 0) < 60000);
+                const statusHTML = isOnline ? '<span class="status-on">ON</span>' : '<span class="status-off">OFF</span>';
+
                 container.innerHTML += `
                     <div class="user-item">
                         <div class="user-row">
                             <button class="user-name-btn" onclick="toggleUserBar('${id}')">
-                                <span>${u.nome || 'Ouvinte Anonimo'}</span> ${statusTag}
+                                <span>${u.nome || 'Ouvinte'}</span> ${statusHTML}
                             </button>
-                            <button class="btn-delete-user" onclick="deleteUser('${id}')">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
+                            <button class="btn-delete-user" onclick="deleteUser('${id}')"><i class="fas fa-trash"></i></button>
                         </div>
                         <div class="user-details-bar" id="bar-${id}">
-                            📻 Sintonizado: <b>${u.radioAtual || 'Navegando...'}</b><br>
-                            ⏳ Tempo na Rádio: <b class="timer" data-time="${u.radioStart}">${formatarTempoReal(u.radioStart)}</b><br>
-                            🚀 Sessão Total: <b class="timer" data-time="${u.sessionStart}">${formatarTempoReal(u.sessionStart)}</b>
+                            📻 Ouvindo: <b>${u.radioAtual || 'Navegando'}</b><br>
+                            ⏳ Na Rádio: <b>${calcMinutos(u.radioStart)}</b><br>
+                            🚀 Conectado: <b>${calcMinutos(u.sessionStart)}</b>
                         </div>
                     </div>`;
             });
         });
-
-        // Atualiza apenas os números de tempo a cada 10 segundos para não pesar
-        setInterval(() => {
-            document.querySelectorAll('.timer').forEach(el => {
-                const ts = parseInt(el.getAttribute('data-time'));
-                if(ts) el.innerText = formatarTempoReal(ts);
-            });
-        }, 10000);
 
         function toggleUserBar(id) {
             const bar = document.getElementById('bar-'+id);
