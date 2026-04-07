@@ -1,173 +1,26 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OUVINTE - LUIGY</title>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root { --primary: #A020F0; --bg: #000; --card: #121212; --text-muted: #b3b3b3; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; user-select: none; }
-        
-        /* HEADER RESPONSIVO */
-        .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 20px 30px; border-radius: 15px; border: 1px solid #333; margin-bottom: 25px; gap: 10px; }
-        .header-left { display: flex; align-items: center; gap: 20px; flex-shrink: 0; }
-        .header h2 { margin: 0; color: var(--primary); font-size: 22px; text-transform: uppercase; }
-        
-        #container-pub { flex: 1; display: flex; justify-content: center; align-items: center; padding: 0 10px; height: 55px; overflow: hidden; }
-        #img-publicidade { max-height: 55px; max-width: 100%; border-radius: 8px; display: none; object-fit: contain; transition: opacity 0.5s ease-in-out; }
-        
-        .header-right { display: flex; align-items: center; gap: 40px; flex-shrink: 0; }
-        .weather-box { display: flex; align-items: center; gap: 12px; color: var(--primary); font-weight: bold; font-size: 16px; }
-        .weather-box i { font-size: 22px; }
-        .city-name { color: #888; font-size: 12px; text-transform: uppercase; margin-right: 5px; }
-        .btn-header { background: none; border: 1px solid #333; color: white; padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: 0.3s; display: flex; align-items: center; gap: 8px; }
-        .btn-header:hover { background: #222; border-color: var(--primary); }
-        .btn-sair { color: #ff4444; border-color: #442222; }
-        .btn-sair:hover { background: #331111; border-color: #ff4444; }
-        #hora { font-size: 26px; font-weight: 900; min-width: 120px; text-align: right; }
-        
-        .main-container { display: grid; grid-template-columns: 1fr 350px; gap: 20px; max-width: 1400px; margin: 0 auto; margin-bottom: 150px; }
-        
-        @media (max-width: 900px) {
-            body { padding: 10px; }
-            .header { padding: 10px 15px; }
-            .header h2 { font-size: 16px; }
-            .header-right { gap: 15px; }
-            .city-name, .weather-box i { display: none; }
-            .weather-box { font-size: 14px; }
-            #hora { font-size: 18px; min-width: 70px; }
-            #container-pub { height: 45px; }
-            .main-container { grid-template-columns: 1fr; }
-            .btn-header span { display: none; }
-        }
-
-        .card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid #282828; }
-        h3 { color: var(--primary); font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; }
-        
-        .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; min-height: 100px; }
-        .radio-item { aspect-ratio: 1/1; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #000; font-weight: bold; font-size: 11px; text-align: center; padding: 10px; cursor: grab; transition: 0.3s; position: relative; border: 2px solid transparent; }
-        .radio-item:hover { transform: scale(1.05); filter: brightness(1.1); }
-        .radio-item.active { background: #000 !important; color: var(--primary) !important; border-color: var(--primary); box-shadow: 0 0 15px rgba(160, 32, 240, 0.4); }
-        
-        .antena { font-size: 20px; margin-bottom: 8px; display: none; }
-        .active .antena { display: block; animation: pulse-antena 1s infinite; }
-        @keyframes pulse-antena { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(1.1); } }
-        
-        .selector-list { display: flex; flex-direction: column; gap: 8px; max-height: 500px; overflow-y: auto; padding-right: 5px; }
-        .selector-item { background: #1a1a1a; padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #333; transition: 0.3s; }
-        .selector-item.selected { border-left-color: var(--primary); background: #222; }
-        .btn-toggle-radio { background: none; border: none; font-size: 18px; cursor: pointer; transition: 0.2s; }
-        .btn-toggle-radio.add { color: #444; }
-        .btn-toggle-radio.remove { color: var(--primary); }
-        
-        .player-footer { position: fixed; bottom: 0; left: 0; right: 0; background: #111; padding: 15px 25px 25px 25px; border-top: 2px solid var(--primary); text-align: center; z-index: 100; }
-        .msg-barra { background: rgba(160, 32, 240, 0.1); color: var(--primary); font-size: 12px; font-weight: bold; padding: 8px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed var(--primary); display: none; width: auto; min-width: 300px; animation: bounce 2s infinite; }
-        @keyframes bounce { 0%, 100% { opacity: 1; transform: translateY(0); } 50% { opacity: 0.8; transform: translateY(-5px); } }
-        
-        .controls-row { display: flex; align-items: center; justify-content: center; gap: 35px; }
-        .btn-nav { background: none; border: none; color: #b3b3b3; font-size: 24px; cursor: pointer; transition: 0.2s; }
-        .btn-nav:hover { color: var(--primary); transform: scale(1.1); }
-        .play-outer { position: relative; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; }
-        .ring-animation { position: absolute; width: 100%; height: 100%; border: 2px solid rgba(160, 32, 240, 0.1); border-top: 2px solid var(--primary); border-radius: 50%; animation: spin-slow 5s linear infinite; }
-        @keyframes spin-slow { 100% { transform: rotate(360deg); } }
-        .btn-spotify-play { width: 60px; height: 60px; background: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; color: black; cursor: pointer; z-index: 5; transition: 0.2s; }
-        .btn-spotify-play:hover { transform: scale(1.05); background: var(--primary); color: white; }
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <div class="header-left">
-            <h2 id="nome-exibicao">OUVINTE</h2>
-            <button class="btn-header btn-sair" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span>SAIR</span></button>
-        </div>
-        <div id="container-pub"><img id="img-publicidade" src=""></div>
-        <div class="header-right">
-            <div class="weather-box" id="weather">
-                <span class="city-name" id="city">LOCALIZANDO...</span>
-                <i id="weather-icon" class="fas fa-sync-alt fa-spin"></i><span id="temp">--°C</span>
-            </div>
-            <div id="hora">00:00:00</div>
-        </div>
-    </div>
-
-    <div class="main-container">
-        <div class="card">
-            <h3>MINHA GRADE PERSONALIZADA (ARRASTE PARA ORDENAR)</h3>
-            <div id="my-radio-list" class="radio-grid"></div>
-        </div>
-        <div class="card">
-            <h3>SELECIONE AQUI SUA LISTA DE RADIOS</h3>
-            <div id="selector-list" class="selector-list"></div>
-        </div>
-    </div>
-
-    <div class="player-footer">
-        <div id="aviso-novidade" class="msg-barra">
-            <i class="fas fa-bullhorn" style="margin-right:8px;"></i> EI OUVINTE, TA LIGADÃO AI? TEM RÁDIO NOVA ADICIONADA, CONFIRA E MERGULHE NESSA ONDA
-        </div>
-        <div id="now-title" style="font-size:11px; color:#888; margin-bottom:15px; letter-spacing: 1px; text-transform: uppercase;">SELECIONE UMA RÁDIO</div>
-        <div class="controls-row">
-            <button class="btn-nav" onclick="prevRadio()"><i class="fas fa-step-backward"></i></button>
-            <div class="play-outer">
-                <div class="ring-animation"></div>
-                <button class="btn-spotify-play" onclick="togglePlay()"><i class="fas fa-play" id="play-icon" style="margin-left: 3px;"></i></button>
-            </div>
-            <button class="btn-nav" onclick="nextRadio()"><i class="fas fa-step-forward"></i></button>
-        </div>
-    </div>
-
-    <audio id="audio-player"></audio>
-
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
-            authDomain: "meu-painel-f2efe.firebaseapp.com",
-            databaseURL: "https://meu-painel-f2efe-default-rtdb.firebaseio.com/",
-            projectId: "meu-painel-f2efe"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        const player = document.getElementById('audio-player');
-        const nomeUsuario = localStorage.getItem('usuarioNome') || "OUVINTE";
-        document.getElementById('nome-exibicao').innerText = nomeUsuario;
-
-        let allRadios = [], mySelectedIds = [], activeIndex = -1;
-
-        setInterval(() => { document.getElementById('hora').innerText = new Date().toLocaleTimeString('pt-BR'); }, 1000);
-
-        // --- AJUSTE NA PREVISÃO DO TEMPO ---
+// --- AJUSTE NA PREVISÃO DO TEMPO POR IP (SILENCIOSO E REAL) ---
         async function getWeather() {
             try {
-                // Tenta pegar localização real do navegador para ser preciso por ouvinte
-                navigator.geolocation.getCurrentPosition(async (pos) => {
-                    const lat = pos.coords.latitude;
-                    const lon = pos.coords.longitude;
-                    
-                    // Busca clima exato e nome da cidade
-                    const resClima = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
-                    const dataClima = await resClima.json();
-                    
-                    const resCidade = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
-                    const dataCidade = await resCidade.json();
-                    const cidade = dataCidade.address.city || dataCidade.address.town || "SUA CIDADE";
+                // 1. Pega a localização pelo IP (sem pedir permissão de GPS)
+                const locRes = await fetch('https://demo.ip-api.com/json/?fields=status,message,city,lat,lon');
+                const locData = await locRes.json();
 
-                    updateWeatherUI(dataClima.current_weather.temperature, dataClima.current_weather.weathercode, cidade);
-                }, async () => {
-                    // Fallback caso o usuário negue GPS: usa IP
-                    const res = await fetch('https://ipapi.co/json/');
-                    const ipData = await res.json();
-                    const resClima = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${ipData.latitude}&longitude=${ipData.longitude}&current_weather=true`);
-                    const dataClima = await resClima.json();
-                    updateWeatherUI(dataClima.current_weather.temperature, dataClima.current_weather.weathercode, ipData.city);
-                });
-            } catch (e) { 
-                document.getElementById('city').innerText = "CLIMA INDISPONÍVEL"; 
+                if (locData.status !== 'success') throw new Error('Falha na localização');
+
+                const lat = locData.lat;
+                const lon = locData.lon;
+                const cidade = locData.city;
+
+                // 2. Busca o clima real usando as coordenadas do IP
+                const climaRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+                const climaData = await climaRes.json();
+
+                if (climaData.current_weather) {
+                    updateWeatherUI(climaData.current_weather.temperature, climaData.current_weather.weathercode, cidade);
+                }
+            } catch (e) {
+                console.error("Erro clima:", e);
+                document.getElementById('city').innerText = "CLIMA INDISPONÍVEL";
             }
         }
 
@@ -176,132 +29,26 @@
             document.getElementById('city').innerText = cidade.toUpperCase();
             
             const iconEl = document.getElementById('weather-icon');
-            iconEl.className = "fas"; // limpa classes
+            iconEl.className = "fas"; // Reset
 
-            // Mapeamento de Códigos Open-Meteo para Ícones FontAwesome
-            if (code <= 1) iconEl.classList.add("fa-sun"); // Céu limpo
-            else if (code <= 3) iconEl.classList.add("fa-cloud-sun"); // Parcialmente nublado
-            else if (code <= 48) iconEl.classList.add("fa-smog"); // Nevoeiro
-            else if (code <= 67) iconEl.classList.add("fa-cloud-showers-heavy"); // Chuva/Garoa
-            else if (code <= 77) iconEl.classList.add("fa-snowflake"); // Neve
-            else if (code <= 82) iconEl.classList.add("fa-cloud-rain"); // Pancadas de chuva
-            else iconEl.classList.add("fa-bolt"); // Tempestade
+            // Mapeamento preciso de códigos (WMO) para ícones
+            // 0: Limpo, 1-3: Nublado, 45-48: Nevoeiro, 51-67: Chuva/Garoa, 71-77: Neve, 80-82: Pancadas, 95-99: Tempestade
+            if (code === 0) {
+                iconEl.classList.add("fa-sun");
+            } else if (code >= 1 && code <= 3) {
+                iconEl.classList.add("fa-cloud-sun");
+            } else if (code >= 51 && code <= 67) {
+                iconEl.classList.add("fa-cloud-showers-heavy"); // ÍCONE DE CHUVA
+            } else if (code >= 80 && code <= 82) {
+                iconEl.classList.add("fa-cloud-rain"); // ÍCONE DE PANCADAS
+            } else if (code >= 95) {
+                iconEl.classList.add("fa-bolt"); // TEMPESTADE
+            } else if (code >= 45 && code <= 48) {
+                iconEl.classList.add("fa-smog");
+            } else {
+                iconEl.classList.add("fa-cloud"); // PADRÃO NUVEM
+            }
         }
+        
         getWeather();
-        setInterval(getWeather, 600000); // Atualiza a cada 10 min
-
-        // --- RESTANTE DO CÓDIGO (SEM ALTERAÇÕES) ---
-        db.ref('radios').on('value', snap => {
-            allRadios = [];
-            snap.forEach(c => { allRadios.push({ ...c.val(), key: c.key }); });
-            allRadios.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
-            
-            db.ref('usuarios/' + nomeUsuario + '/grade').once('value', userSnap => {
-                const gradeSalva = userSnap.val();
-                if (gradeSalva) {
-                    mySelectedIds = gradeSalva;
-                } else {
-                    mySelectedIds = JSON.parse(localStorage.getItem('myRadios_' + nomeUsuario)) || [];
-                }
-                renderAll();
-            });
-        });
-
-        function renderAll() {
-            const myGrid = document.getElementById('my-radio-list'), selector = document.getElementById('selector-list');
-            myGrid.innerHTML = ""; selector.innerHTML = "";
-            const myRadios = mySelectedIds.map(id => allRadios.find(r => r.key === id)).filter(Boolean);
-            
-            myRadios.forEach((r, i) => {
-                myGrid.innerHTML += `<div class="radio-item ${activeIndex === i ? 'active' : ''}" style="background: ${r.color || '#d1a3ff'}" data-id="${r.key}" onclick="playRadio(${i})"><i class="fas fa-tower-broadcast antena"></i><span>${r.name}</span></div>`;
-            });
-
-            allRadios.forEach(r => {
-                const isSelected = mySelectedIds.includes(r.key);
-                selector.innerHTML += `<div class="selector-item ${isSelected ? 'selected' : ''}"><span style="font-size:13px; font-weight:bold">${r.name}</span><button class="btn-toggle-radio ${isSelected ? 'remove' : 'add'}" onclick="toggleSelection('${r.key}')"><i class="fas ${isSelected ? 'fa-times-circle' : 'fa-plus-circle'}"></i></button></div>`;
-            });
-        }
-
-        function salvarGrade() {
-            db.ref('usuarios/' + nomeUsuario + '/grade').set(mySelectedIds);
-            localStorage.setItem('myRadios_' + nomeUsuario, JSON.stringify(mySelectedIds));
-        }
-
-        new Sortable(document.getElementById('my-radio-list'), {
-            animation: 150,
-            onEnd: function() {
-                const newIds = [];
-                document.querySelectorAll('#my-radio-list .radio-item').forEach(el => {
-                    newIds.push(el.getAttribute('data-id'));
-                });
-                mySelectedIds = newIds;
-                salvarGrade();
-            }
-        });
-
-        function toggleSelection(id) {
-            const index = mySelectedIds.indexOf(id);
-            if (index > -1) mySelectedIds.splice(index, 1); else mySelectedIds.push(id);
-            salvarGrade();
-            renderAll();
-        }
-
-        function playRadio(index) {
-            const myRadios = mySelectedIds.map(id => allRadios.find(r => r.key === id)).filter(Boolean);
-            if (!myRadios[index]) return;
-            activeIndex = index;
-            const r = myRadios[index];
-            player.src = r.url; player.play();
-            document.getElementById('now-title').innerText = "OUVINDO: " + r.name;
-            document.getElementById('play-icon').className = "fas fa-stop";
-            db.ref('usuarios/' + nomeUsuario).update({ radioAtual: r.name, lastSeen: Date.now(), sessionStart: Date.now() });
-            renderAll();
-        }
-
-        function togglePlay() {
-            if(!player.src) return;
-            if(player.paused) { player.play(); document.getElementById('play-icon').className = "fas fa-stop"; }
-            else { player.pause(); document.getElementById('play-icon').className = "fas fa-play"; }
-        }
-
-        function nextRadio() { if(activeIndex < mySelectedIds.length - 1) playRadio(activeIndex + 1); else playRadio(0); }
-        function prevRadio() { if(activeIndex > 0) playRadio(activeIndex - 1); else playRadio(mySelectedIds.length - 1); }
-
-        function logout() { if(confirm("Deseja sair?")) { localStorage.removeItem('usuarioNome'); window.location.href = 'index.html'; } }
-
-        let listaPubs = [], idxPub = 0;
-        db.ref('publicidade').on('value', snap => {
-            listaPubs = [];
-            const agora = Date.now();
-            snap.forEach(child => {
-                const p = child.val();
-                if ((p.destino === 'TODOS' || p.ouvinteAlvo === nomeUsuario.toUpperCase()) && (agora >= p.inicio && agora <= p.fim)) {
-                    listaPubs.push(p);
-                }
-            });
-            if (listaPubs.length === 0) { document.getElementById('img-publicidade').style.display = "none"; } 
-            else { idxPub = 0; mostrarPub(); }
-        });
-
-        function mostrarPub() {
-            const img = document.getElementById('img-publicidade');
-            if (listaPubs[idxPub]) {
-                img.src = listaPubs[idxPub].imagem;
-                img.style.display = "block";
-                img.style.opacity = 1;
-            }
-        }
-
-        setInterval(() => {
-            if (listaPubs.length > 1) {
-                idxPub = (idxPub + 1) % listaPubs.length;
-                const img = document.getElementById('img-publicidade');
-                img.style.opacity = 0;
-                setTimeout(mostrarPub, 500);
-            }
-        }, 7000);
-
-        setInterval(() => { if(nomeUsuario) db.ref('usuarios/'+nomeUsuario).update({lastSeen: Date.now()}); }, 30000);
-    </script>
-</body>
-</html>
+        setInterval(getWeather, 900000); // Atualiza a cada 15 minutos
