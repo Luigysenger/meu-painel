@@ -2,98 +2,114 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>PAINEL ADM - FORÇADO</title>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <title>PAINEL ADM - RECUPERAÇÃO FORÇADA</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    
     <style>
-        body { background: #0b0b0b; color: white; font-family: sans-serif; padding: 20px; }
-        .card { background: #181818; padding: 20px; border-radius: 10px; border: 1px solid #333; margin-bottom: 20px; }
-        input { background: #222; border: 1px solid #444; color: white; padding: 10px; border-radius: 5px; margin-right: 10px; }
-        button { background: #1DB954; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; }
-        .radio-item { background: #1DB954; color: black; padding: 15px; margin: 10px 0; border-radius: 8px; display: flex; justify-content: space-between; font-weight: bold; }
-        .btn-del { background: red; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; }
-        .user-line { border-bottom: 1px solid #333; padding: 10px 0; display: flex; justify-content: space-between; }
-        .status-online { color: #1DB954; font-weight: bold; }
+        body { background: #000; color: #fff; font-family: 'Segoe UI', Arial; padding: 30px; text-align: center; }
+        .caixa { background: #111; border: 2px solid #1DB954; padding: 25px; border-radius: 15px; max-width: 600px; margin: 0 auto; box-shadow: 0 0 20px rgba(29, 185, 84, 0.3); }
+        .status-badge { padding: 10px; border-radius: 5px; margin-bottom: 20px; font-weight: bold; }
+        .erro { background: #ff4444; color: white; }
+        .ok { background: #1DB954; color: black; }
+        input { background: #222; border: 1px solid #444; color: #fff; padding: 10px; border-radius: 5px; width: 80%; margin-bottom: 10px; }
+        button { background: #1DB954; color: #000; border: none; padding: 12px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #1ed760; transform: scale(1.05); }
+        .lista-radios { margin-top: 30px; text-align: left; }
+        .item-radio { background: #222; padding: 15px; margin-bottom: 10px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #333; }
     </style>
 </head>
 <body>
 
-    <h2>LUIGY, O PAINEL ESTÁ LIBERADO:</h2>
+    <div class="caixa">
+        <h1 style="color: #1DB954;">PAINEL ADM LUIGY</h1>
+        <div id="status-conexao" class="status-badge erro">CONECTANDO AO BANCO DE DADOS...</div>
 
-    <div class="card">
-        <h3>CADASTRAR RÁDIO</h3>
-        <input type="text" id="n" placeholder="Nome">
-        <input type="text" id="u" placeholder="Link .mp3">
-        <button onclick="add()">SALVAR RÁDIO</button>
-    </div>
+        <div id="area-trabalho" style="display:none;">
+            <h3>CADASTRAR RÁDIO</h3>
+            <input type="text" id="nome_radio" placeholder="Nome da Rádio">
+            <input type="text" id="url_radio" placeholder="Link do Streaming (.mp3)">
+            <br>
+            <button onclick="salvar()">SALVAR AGORA</button>
 
-    <div style="display: grid; grid-template-columns: 1fr 300px; gap: 20px;">
-        <div>
-            <h3>SUAS RÁDIOS (Arraste para ordenar)</h3>
-            <div id="lista"></div>
-        </div>
-        <div class="card">
-            <h3>QUEM ESTÁ OUVINDO</h3>
-            <div id="ouvintes"></div>
+            <div class="lista-radios">
+                <h3>RÁDIOS NO AR:</h3>
+                <div id="lista_container"></div>
+            </div>
         </div>
     </div>
 
     <script>
-        // Limpeza forçada de qualquer erro anterior
+        // Forçar limpeza de qualquer trava de login
         localStorage.clear();
 
-        const config = {
+        const firebaseConfig = {
             apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
             authDomain: "meu-painel-f2efe.firebaseapp.com",
             databaseURL: "https://meu-painel-f2efe-default-rtdb.firebaseio.com/",
             projectId: "meu-painel-f2efe"
         };
-        firebase.initializeApp(config);
-        const db = firebase.database();
 
-        // Carregar Rádios
-        db.ref('radios').on('value', s => {
-            const div = document.getElementById('lista');
-            div.innerHTML = "";
-            s.forEach(c => {
-                const r = c.val();
-                div.innerHTML += `
-                    <div class="radio-item">
-                        <span>${r.name}</span>
-                        <button class="btn-del" onclick="del('${c.key}')">EXCLUIR</button>
-                    </div>`;
-            });
-        });
-
-        // Carregar Ouvintes
-        db.ref('usuarios').on('value', s => {
-            const div = document.getElementById('ouvintes');
-            div.innerHTML = "";
-            s.forEach(c => {
-                const u = c.val();
-                const on = (Date.now() - u.lastSeen) < 15000;
-                div.innerHTML += `
-                    <div class="user-line">
-                        <span>${c.key.toUpperCase()}</span>
-                        <span class="${on ? 'status-online' : ''}">${on ? 'ONLINE' : 'OFF'}</span>
-                    </div>`;
-            });
-        });
-
-        function add() {
-            const name = document.getElementById('n').value;
-            const url = document.getElementById('u').value;
-            if(name && url) {
-                db.ref('radios').push({ name, url, color: '#1DB954' });
-                document.getElementById('n').value = '';
-                document.getElementById('u').value = '';
+        // Tenta inicializar o Firebase com tratamento de erro
+        try {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
             }
+            const db = firebase.database();
+            const statusDiv = document.getElementById('status-conexao');
+
+            // Testa se o banco de dados responde
+            db.ref('.info/connected').on('value', (snap) => {
+                if (snap.val() === true) {
+                    statusDiv.innerText = "CONECTADO COM SUCESSO!";
+                    statusDiv.className = "status-badge ok";
+                    document.getElementById('area-trabalho').style.display = "block";
+                } else {
+                    statusDiv.innerText = "ERRO: SEM RESPOSTA DO FIREBASE";
+                    statusDiv.className = "status-badge erro";
+                }
+            });
+
+            // Carregar as rádios
+            db.ref('radios').on('value', (snapshot) => {
+                const container = document.getElementById('lista_container');
+                container.innerHTML = "";
+                snapshot.forEach((child) => {
+                    const r = child.val();
+                    container.innerHTML += `
+                        <div class="item-radio">
+                            <span><b>${r.name}</b></span>
+                            <button onclick="excluir('${child.key}')" style="background: #ff4444; color: white; padding: 5px 10px; font-size: 12px;">APAGAR</button>
+                        </div>
+                    `;
+                });
+            });
+
+            // Função Salvar
+            window.salvar = function() {
+                const n = document.getElementById('nome_radio').value;
+                const u = document.getElementById('url_radio').value;
+                if(n && u) {
+                    db.ref('radios').push({ name: n, url: u, color: '#1DB954' })
+                    .then(() => {
+                        document.getElementById('nome_radio').value = "";
+                        document.getElementById('url_radio').value = "";
+                    });
+                }
+            };
+
+            // Função Excluir
+            window.excluir = function(id) {
+                if(confirm("Deseja apagar esta rádio?")) {
+                    db.ref('radios/' + id).remove();
+                }
+            };
+
+        } catch (e) {
+            document.getElementById('status-conexao').innerText = "ERRO CRÍTICO: " + e.message;
+            console.error(e);
         }
-
-        function del(k) { if(confirm('Apagar?')) db.ref('radios/'+k).remove(); }
-
-        Sortable.create(document.getElementById('lista'), { animation: 150 });
     </script>
 </body>
 </html>
