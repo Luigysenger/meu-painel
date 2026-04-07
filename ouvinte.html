@@ -60,7 +60,6 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
-            /* Espaço para publicidade lateral */
         }
 
         .center-content {
@@ -71,7 +70,7 @@
         
         @media (max-width: 1100px) {
             .main-container { grid-template-columns: 1fr; }
-            .side-pub { display: none; } /* Oculta laterais em telas pequenas */
+            .side-pub { display: none; }
         }
 
         .card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid #282828; }
@@ -94,8 +93,28 @@
         .btn-toggle-radio.remove { color: var(--primary); }
         
         .player-footer { position: fixed; bottom: 0; left: 0; right: 0; background: #111; padding: 15px 25px 25px 25px; border-top: 2px solid var(--primary); text-align: center; z-index: 100; }
-        .msg-barra { background: rgba(160, 32, 240, 0.1); color: var(--primary); font-size: 12px; font-weight: bold; padding: 8px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed var(--primary); display: none; width: auto; min-width: 300px; animation: bounce 2s infinite; }
-        @keyframes bounce { 0%, 100% { opacity: 1; transform: translateY(0); } 50% { opacity: 0.8; transform: translateY(-5px); } }
+        
+        /* AVISO DE RÁDIO NOVA - ESTILO PISCANTE */
+        .msg-barra { 
+            background: #ff0000; 
+            color: #fff; 
+            font-size: 14px; 
+            font-weight: 900; 
+            padding: 12px; 
+            border-radius: 8px; 
+            margin-bottom: 15px; 
+            border: 2px solid #fff; 
+            display: none; 
+            width: fit-content; 
+            margin-left: auto;
+            margin-right: auto;
+            cursor: pointer;
+            animation: piscar-alerta 0.8s infinite alternate; 
+        }
+        @keyframes piscar-alerta { 
+            0% { opacity: 1; transform: scale(1); background: #ff0000; } 
+            100% { opacity: 0.7; transform: scale(1.05); background: var(--primary); } 
+        }
         
         .controls-row { display: flex; align-items: center; justify-content: center; gap: 35px; }
         .btn-nav { background: none; border: none; color: #b3b3b3; font-size: 24px; cursor: pointer; transition: 0.2s; }
@@ -109,7 +128,7 @@
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
     </style>
 </head>
-<body>
+<body onclick="fecharAviso()">
     <div class="header">
         <div class="header-left">
             <h2 id="nome-exibicao">OUVINTE</h2>
@@ -147,8 +166,8 @@
     </div>
 
     <div class="player-footer">
-        <div id="aviso-novidade" class="msg-barra">
-            <i class="fas fa-bullhorn" style="margin-right:8px;"></i> EI OUVINTE, TA LIGADÃO AI? TEM RÁDIO NOVA ADICIONADA, CONFIRA E MERGULHE NESSA ONDA
+        <div id="aviso-novidade" class="msg-barra" onclick="fecharAviso()">
+            <i class="fas fa-bullhorn" style="margin-right:8px;"></i> EI, TEM RADIO NOVA NA AREA, CONFIRA SUA LISTA E MERGULHE NO SOM
         </div>
         <div id="now-title" style="font-size:11px; color:#888; margin-bottom:15px; letter-spacing: 1px; text-transform: uppercase;">SELECIONE UMA RÁDIO</div>
         <div class="controls-row">
@@ -180,47 +199,32 @@
 
         setInterval(() => { document.getElementById('hora').innerText = new Date().toLocaleTimeString('pt-BR'); }, 1000);
 
+        function fecharAviso() {
+            document.getElementById('aviso-novidade').style.display = 'none';
+        }
+
         async function getWeather() {
             try {
                 const locRes = await fetch('https://ipapi.co/json/');
                 const loc = await locRes.json();
-                
                 if (loc.latitude && loc.longitude) {
                     const climaRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${loc.latitude}&longitude=${loc.longitude}&current_weather=true`);
                     const clima = await climaRes.json();
-                    
                     if (clima.current_weather) {
                         const temp = Math.round(clima.current_weather.temperature);
                         const code = clima.current_weather.weathercode;
-                        
                         document.getElementById('temp').innerText = temp + "°C";
                         document.getElementById('city').innerText = (loc.city || "LOCAL").toUpperCase();
-                        
                         const icon = document.getElementById('weather-icon');
                         const desc = document.getElementById('weather-desc');
                         icon.className = "fas"; 
                         icon.style.color = "";
-
-                        if (code >= 51 && code <= 67 || code >= 80 && code <= 82) {
-                            icon.classList.add("fa-cloud-showers-heavy");
-                            desc.innerText = "CHOVENDO";
-                        } else if (code === 3) {
-                            icon.classList.add("fa-cloud");
-                            icon.style.color = "#555";
-                            desc.innerText = "NUBLADO";
-                        } else if (code >= 1 && code <= 2) {
-                            icon.classList.add("fa-cloud-sun");
-                            desc.innerText = "SOL ENTRE NUVENS";
-                        } else if (code === 0) {
-                            icon.classList.add("fa-sun");
-                            desc.innerText = "CÉU LIMPO";
-                        } else if (code >= 95) {
-                            icon.classList.add("fa-bolt");
-                            desc.innerText = "TEMPESTADE";
-                        } else {
-                            icon.classList.add("fa-cloud");
-                            desc.innerText = "NUVENS";
-                        }
+                        if (code >= 51 && code <= 67 || code >= 80 && code <= 82) { icon.classList.add("fa-cloud-showers-heavy"); desc.innerText = "CHOVENDO"; } 
+                        else if (code === 3) { icon.classList.add("fa-cloud"); icon.style.color = "#555"; desc.innerText = "NUBLADO"; } 
+                        else if (code >= 1 && code <= 2) { icon.classList.add("fa-cloud-sun"); desc.innerText = "SOL ENTRE NUVENS"; } 
+                        else if (code === 0) { icon.classList.add("fa-sun"); desc.innerText = "CÉU LIMPO"; } 
+                        else if (code >= 95) { icon.classList.add("fa-bolt"); desc.innerText = "TEMPESTADE"; } 
+                        else { icon.classList.add("fa-cloud"); desc.innerText = "NUVENS"; }
                     }
                 }
             } catch (e) { document.getElementById('city').innerText = "CLIMA"; }
@@ -229,17 +233,21 @@
         setInterval(getWeather, 600000);
 
         db.ref('radios').on('value', snap => {
+            const countAnterior = parseInt(localStorage.getItem('lastRadioCount')) || 0;
             allRadios = [];
             snap.forEach(c => { allRadios.push({ ...c.val(), key: c.key }); });
             allRadios.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
             
+            // Lógica para mostrar aviso de rádio nova
+            if (allRadios.length > countAnterior && countAnterior !== 0) {
+                document.getElementById('aviso-novidade').style.display = 'block';
+            }
+            localStorage.setItem('lastRadioCount', allRadios.length);
+
             db.ref('usuarios/' + nomeUsuario + '/grade').once('value', userSnap => {
                 const gradeSalva = userSnap.val();
-                if (gradeSalva) {
-                    mySelectedIds = gradeSalva;
-                } else {
-                    mySelectedIds = JSON.parse(localStorage.getItem('myRadios_' + nomeUsuario)) || [];
-                }
+                if (gradeSalva) { mySelectedIds = gradeSalva; } 
+                else { mySelectedIds = JSON.parse(localStorage.getItem('myRadios_' + nomeUsuario)) || []; }
                 renderAll();
             });
         });
@@ -248,11 +256,9 @@
             const myGrid = document.getElementById('my-radio-list'), selector = document.getElementById('selector-list');
             myGrid.innerHTML = ""; selector.innerHTML = "";
             const myRadios = mySelectedIds.map(id => allRadios.find(r => r.key === id)).filter(Boolean);
-            
             myRadios.forEach((r, i) => {
                 myGrid.innerHTML += `<div class="radio-item ${activeIndex === i ? 'active' : ''}" style="background: ${r.color || '#d1a3ff'}" data-id="${r.key}" onclick="playRadio(${i})"><i class="fas fa-tower-broadcast antena"></i><span>${r.name}</span></div>`;
             });
-
             allRadios.forEach(r => {
                 const isSelected = mySelectedIds.includes(r.key);
                 selector.innerHTML += `<div class="selector-item ${isSelected ? 'selected' : ''}"><span style="font-size:13px; font-weight:bold">${r.name}</span><button class="btn-toggle-radio ${isSelected ? 'remove' : 'add'}" onclick="toggleSelection('${r.key}')"><i class="fas ${isSelected ? 'fa-times-circle' : 'fa-plus-circle'}"></i></button></div>`;
@@ -268,9 +274,7 @@
             animation: 150,
             onEnd: function() {
                 const newIds = [];
-                document.querySelectorAll('#my-radio-list .radio-item').forEach(el => {
-                    newIds.push(el.getAttribute('data-id'));
-                });
+                document.querySelectorAll('#my-radio-list .radio-item').forEach(el => { newIds.push(el.getAttribute('data-id')); });
                 mySelectedIds = newIds;
                 salvarGrade();
             }
@@ -289,7 +293,7 @@
             activeIndex = index;
             const r = myRadios[index];
             player.src = r.url; player.play();
-            document.getElementById('now-title').innerText = "OUVINTE: " + r.name;
+            document.getElementById('now-title').innerText = "OUVINDO: " + r.name;
             document.getElementById('play-icon').className = "fas fa-stop";
             db.ref('usuarios/' + nomeUsuario).update({ radioAtual: r.name, lastSeen: Date.now(), sessionStart: Date.now() });
             renderAll();
