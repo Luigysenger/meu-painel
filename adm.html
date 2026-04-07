@@ -75,7 +75,7 @@
             cursor: pointer; 
         }
 
-        /* GRID DE RÁDIOS ESTILO OUVINTE */
+        /* GRID DE RÁDIOS */
         .radio-grid { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); 
@@ -100,7 +100,6 @@
             border: 2px solid transparent;
         }
 
-        /* DESTAQUE QUANDO ESTÁ TOCANDO (IGUAL OUVINTE) */
         .radio-item.active {
             background: #000 !important;
             color: var(--primary) !important;
@@ -108,20 +107,9 @@
             box-shadow: 0 0 15px rgba(29, 185, 84, 0.4);
         }
 
-        /* ANTENA PISCANDO SÓ NA ATIVA */
-        .antena { 
-            font-size: 24px; 
-            margin-bottom: 8px; 
-            display: none;
-        }
-        .active .antena {
-            display: block;
-            animation: pulse-antena 1s infinite;
-        }
-        @keyframes pulse-antena {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.3; transform: scale(1.1); }
-        }
+        .antena { font-size: 24px; margin-bottom: 8px; display: none; }
+        .active .antena { display: block; animation: pulse-antena 1s infinite; }
+        @keyframes pulse-antena { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(1.1); } }
 
         /* MONITOR OUVINTES */
         .user-card { 
@@ -134,30 +122,47 @@
             justify-content: space-between; 
             align-items: center;
         }
-        .user-info b { font-size: 14px; }
-        .user-info span { color: var(--text-muted); font-size: 11px; display: block; }
 
-        /* PLAYER RODAPÉ SPOTIFY */
+        /* PLAYER RODAPÉ SPOTIFY - COM BOTÕES EXTRAS */
         .player-footer { 
             margin-top: 20px; 
             background: #111; 
-            padding: 20px; 
+            padding: 25px; 
             border-radius: 20px; 
             border: 1px solid #222; 
             text-align: center;
+        }
+
+        .controls-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .btn-nav {
+            background: none;
+            border: none;
+            color: #b3b3b3;
+            font-size: 22px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-nav:hover {
+            color: white;
+            transform: scale(1.1);
         }
 
         .play-outer { 
             position: relative; 
             width: 80px; 
             height: 80px; 
-            margin: 0 auto; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
         }
 
-        /* CÍRCULO VERDE RODANDO BEM LENTO */
         .ring-animation { 
             position: absolute; 
             width: 100%; 
@@ -209,11 +214,22 @@
                 <div class="radio-grid" id="radio-list"></div>
                 
                 <div class="player-footer">
-                    <div id="now-title" style="font-size:11px; color:#888; margin-bottom:10px;">SELECIONE UMA RÁDIO</div>
-                    <div class="play-outer">
-                        <div class="ring-animation"></div>
-                        <button class="btn-spotify-play" onclick="togglePlay()">
-                            <i class="fas fa-play" id="play-icon" style="margin-left: 3px;"></i>
+                    <div id="now-title" style="font-size:11px; color:#888; margin-bottom:15px; letter-spacing: 1px;">SELECIONE UMA RÁDIO</div>
+                    
+                    <div class="controls-row">
+                        <button class="btn-nav" onclick="prevRadio()">
+                            <i class="fas fa-step-backward"></i>
+                        </button>
+
+                        <div class="play-outer">
+                            <div class="ring-animation"></div>
+                            <button class="btn-spotify-play" onclick="togglePlay()">
+                                <i class="fas fa-play" id="play-icon" style="margin-left: 3px;"></i>
+                            </button>
+                        </div>
+
+                        <button class="btn-nav" onclick="nextRadio()">
+                            <i class="fas fa-step-forward"></i>
                         </button>
                     </div>
                 </div>
@@ -244,21 +260,12 @@
         let radioData = [];
         let activeIndex = -1;
 
-        // ATUALIZAR HORA
-        setInterval(() => {
-            document.getElementById('hora').innerText = new Date().toLocaleTimeString('pt-BR');
-        }, 1000);
+        setInterval(() => { document.getElementById('hora').innerText = new Date().toLocaleTimeString('pt-BR'); }, 1000);
 
-        // CARREGAR RADIOS
-        db.ref('radios').on('value', snap => {
+        function renderRadios() {
             const list = document.getElementById('radio-list');
             list.innerHTML = "";
-            radioData = [];
-            let i = 0;
-            snap.forEach(c => {
-                const r = c.val();
-                r.key = c.key;
-                radioData.push(r);
+            radioData.forEach((r, i) => {
                 list.innerHTML += `
                     <div class="radio-item ${activeIndex === i ? 'active' : ''}" 
                          style="background:${r.color || '#1DB954'}" 
@@ -266,30 +273,21 @@
                         <i class="fas fa-tower-broadcast antena"></i>
                         <span>${r.name}</span>
                     </div>`;
-                i++;
             });
-        });
+        }
 
-        // MONITOR DE USUARIOS
-        db.ref('usuarios').on('value', snap => {
-            const container = document.getElementById('user-list');
-            container.innerHTML = "";
+        db.ref('radios').on('value', snap => {
+            radioData = [];
             snap.forEach(c => {
-                const u = c.val();
-                if(Date.now() - (u.lastSeen || 0) < 30000) {
-                    container.innerHTML += `
-                        <div class="user-card">
-                            <div class="user-info">
-                                <b>${u.nome}</b>
-                                <span>${u.radioAtual || 'Navegando'}</span>
-                            </div>
-                            <div style="width:8px; height:8px; background:var(--primary); border-radius:50%;"></div>
-                        </div>`;
-                }
+                const r = c.val();
+                r.key = c.key;
+                radioData.push(r);
             });
+            renderRadios();
         });
 
         function playRadio(index) {
+            if (index < 0 || index >= radioData.length) return;
             activeIndex = index;
             const r = radioData[index];
             player.src = r.url;
@@ -297,9 +295,7 @@
             document.getElementById('now-title').innerText = "OUVINDO: " + r.name;
             document.getElementById('play-icon').className = "fas fa-pause";
             document.getElementById('play-icon').style.marginLeft = "0px";
-            
-            // Força atualização visual das rádios para mostrar a antena
-            db.ref('radios').get(); 
+            renderRadios();
         }
 
         function togglePlay() {
@@ -316,16 +312,37 @@
             }
         }
 
+        function nextRadio() {
+            let next = activeIndex + 1;
+            if (next >= radioData.length) next = 0;
+            playRadio(next);
+        }
+
+        function prevRadio() {
+            let prev = activeIndex - 1;
+            if (prev < 0) prev = radioData.length - 1;
+            playRadio(prev);
+        }
+
         function addRadio() {
-            const n = document.getElementById('r-name').value;
-            const u = document.getElementById('r-url').value;
+            const n = document.getElementById('r-name').value, u = document.getElementById('r-url').value;
             if(n && u) {
                 const col = `hsl(${Math.floor(Math.random() * 360)}, 70%, 75%)`;
                 db.ref('radios').push({ name: n, url: u, color: col });
-                document.getElementById('r-name').value = "";
-                document.getElementById('r-url').value = "";
+                document.getElementById('r-name').value = ""; document.getElementById('r-url').value = "";
             }
         }
+
+        db.ref('usuarios').on('value', snap => {
+            const container = document.getElementById('user-list');
+            container.innerHTML = "";
+            snap.forEach(c => {
+                const u = c.val();
+                if(Date.now() - (u.lastSeen || 0) < 30000) {
+                    container.innerHTML += `<div class="user-card"><b>${u.nome}</b> <span>${u.radioAtual || 'Navegando'}</span></div>`;
+                }
+            });
+        });
     </script>
 </body>
 </html>
