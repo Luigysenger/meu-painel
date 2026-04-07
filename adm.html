@@ -34,22 +34,21 @@
         .active .antena { display: block; animation: pulse-antena 1s infinite; }
         @keyframes pulse-antena { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(1.1); } }
 
-        /* MONITOR DE OUVINTES - DESIGN SOLICITADO */
+        /* MONITOR DE OUVINTES */
         .user-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; border-left: 4px solid var(--primary); overflow: hidden; }
         .user-name-btn { width: 100%; padding: 15px; background: none; border: none; color: white; text-align: left; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .user-name-btn:hover { background: #222; }
         
-        .status-on { color: var(--primary); font-weight: 900; font-size: 12px; }
-        .status-off { color: var(--purple); font-weight: 900; font-size: 12px; }
+        .status-on { color: var(--primary); font-weight: 900; }
+        .status-off { color: var(--purple); font-weight: 900; }
 
         .user-details-bar { display: none; padding: 12px; background: #080808; border-top: 1px solid #333; font-size: 12px; color: #bbb; line-height: 1.6; }
         .user-details-bar b { color: var(--primary); }
 
-        /* PLAYER RODAPÉ - EFEITOS ORIGINAIS VOLTADOS */
+        /* PLAYER RODAPÉ */
         .player-footer { margin-top: 20px; background: #111; padding: 25px; border-radius: 20px; border: 1px solid #222; text-align: center; }
         .controls-row { display: flex; align-items: center; justify-content: center; gap: 35px; }
         .btn-nav { background: none; border: none; color: #b3b3b3; font-size: 24px; cursor: pointer; transition: 0.2s; }
-        .btn-nav:hover { color: white; transform: scale(1.1); }
         
         .play-outer { position: relative; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; }
         .ring-animation { position: absolute; width: 100%; height: 100%; border: 2px solid rgba(29, 185, 84, 0.1); border-top: 2px solid var(--primary); border-radius: 50%; animation: spin-slow 5s linear infinite; }
@@ -57,7 +56,6 @@
         
         .btn-spotify-play { width: 60px; height: 60px; background: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; color: black; cursor: pointer; z-index: 5; transition: 0.2s; }
         .btn-spotify-play:hover { transform: scale(1.05); background: var(--primary); }
-
     </style>
 </head>
 <body>
@@ -76,10 +74,8 @@
                     <input type="text" id="r-url" placeholder="Link .mp3">
                     <button class="btn-save" onclick="addRadio()">SALVAR</button>
                 </div>
-
                 <h3>GRADE DE RÁDIOS (ARRASTE PARA REORDENAR)</h3>
                 <div class="radio-grid" id="radio-list"></div>
-                
                 <div class="player-footer">
                     <div id="now-title" style="font-size:11px; color:#888; margin-bottom:15px; letter-spacing: 1px;">SELECIONE UMA RÁDIO</div>
                     <div class="controls-row">
@@ -95,7 +91,6 @@
                 </div>
             </div>
         </div>
-
         <div class="col-right">
             <div class="card">
                 <h3>👥 MONITOR DE OUVINTES</h3>
@@ -177,27 +172,25 @@
             }
         }
 
-        // --- MONITOR DE OUVINTES (CADASTRADOS + STATUS) ---
+        // --- MONITOR DE OUVINTES (CADASTRADOS + STATUS ON/OFF) ---
         function atualizarMonitor() {
             db.ref('cadastros').once('value', snapCadastros => {
                 db.ref('usuarios').once('value', snapOnline => {
                     const container = document.getElementById('user-list');
                     container.innerHTML = "";
-                    
-                    const usuariosOnline = snapOnline.val() || {};
+                    const onlineVal = snapOnline.val() || {};
 
                     snapCadastros.forEach(c => {
                         const cad = c.val();
                         const id = c.key;
-                        const onlineInfo = usuariosOnline[id];
+                        const on = onlineVal[id];
                         
-                        // Verifica se está online (últimos 30 segundos)
-                        const isOnline = onlineInfo && (Date.now() - (onlineInfo.lastSeen || 0) < 30000);
+                        const isOnline = on && (Date.now() - (on.lastSeen || 0) < 30000);
                         const statusHTML = isOnline ? '<span class="status-on">ON</span>' : '<span class="status-off">OFF</span>';
                         
-                        const rádio = isOnline ? (onlineInfo.radioAtual || "Navegando") : "---";
-                        const tempoSessao = isOnline && onlineInfo.sessionStart ? Math.floor((Date.now() - onlineInfo.sessionStart)/60000) + " min" : "---";
-                        const tempoRadio = isOnline && onlineInfo.radioStart ? Math.floor((Date.now() - onlineInfo.radioStart)/60000) + " min" : "---";
+                        const radio = isOnline ? (on.radioAtual || "Navegando") : "---";
+                        const sessao = isOnline && on.sessionStart ? Math.floor((Date.now() - on.sessionStart)/60000) + " min" : "---";
+                        const tempoRadio = isOnline && on.radioStart ? Math.floor((Date.now() - on.radioStart)/60000) + " min" : "---";
 
                         container.innerHTML += `
                             <div class="user-item">
@@ -205,17 +198,15 @@
                                     <span>${cad.nome}</span> ${statusHTML}
                                 </button>
                                 <div class="user-details-bar" id="bar-${id}">
-                                    📻 Ouvindo agora: <b>${rádio}</b><br>
-                                    ⏳ Tempo nesta rádio: <b>${tempoRadio}</b><br>
-                                    🚀 Sessão total: <b>${tempoSessao}</b>
+                                    📻 Ouvindo: <b>${radio}</b><br>
+                                    ⏳ Tempo Rádio: <b>${tempoRadio}</b><br>
+                                    🚀 Sessão Total: <b>${sessao}</b>
                                 </div>
                             </div>`;
                     });
                 });
             });
         }
-
-        // Atualiza a lista a cada 5 segundos para manter os tempos e status reais
         setInterval(atualizarMonitor, 5000);
         atualizarMonitor();
 
