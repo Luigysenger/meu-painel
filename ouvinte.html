@@ -42,7 +42,7 @@
         .btn-sair:hover { background: #331111; border-color: #ff4444; }
         #hora { font-size: 26px; font-weight: 900; min-width: 120px; text-align: right; border-left: 1px solid #333; padding-left: 20px; }
         
-        /* ESTRUTURA PRINCIPAL COM PUBLICIDADE NAS LATERAIS */
+        /* ESTRUTURA PRINCIPAL */
         .main-container { 
             display: grid; 
             grid-template-columns: 180px 1fr 180px; 
@@ -53,10 +53,9 @@
             align-items: start;
         }
 
-        /* CONTEÚDO CENTRAL LADO A LADO */
         .center-content {
             display: grid;
-            grid-template-columns: 1.2fr 0.8fr; /* Lado Esquerdo maior que o Direito */
+            grid-template-columns: 1.2fr 0.8fr;
             gap: 20px;
             align-items: start;
         }
@@ -72,18 +71,17 @@
         .card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid #282828; }
         h3 { color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; }
         
-        /* GRID DE 4 POR FILEIRA COM TAMANHO FIXO */
+        /* AJUSTE FIXO: OS CARDS NÃO DIMINUEM NEM ESTICAM */
         .radio-grid { 
             display: grid; 
-            grid-template-columns: repeat(4, 1fr); 
+            grid-template-columns: repeat(auto-fill, 110px); 
             gap: 15px; 
-            justify-content: center;
+            justify-content: start; /* Mantém alinhado à esquerda para não deformar */
         }
         
         .radio-item { 
-            width: 100%;
-            max-width: 110px; /* Tamanho fixo dos cards */
-            aspect-ratio: 1/1; 
+            width: 110px; /* Largura rigorosamente fixa */
+            height: 110px; /* Altura rigorosamente fixa */
             border-radius: 15px; 
             display: flex; 
             flex-direction: column; 
@@ -98,7 +96,7 @@
             transition: 0.3s; 
             position: relative; 
             border: 2px solid transparent; 
-            margin: 0 auto;
+            box-sizing: border-box; /* Garante que padding/border não aumentem o card */
         }
         
         .radio-item:hover { transform: scale(1.05); filter: brightness(1.1); }
@@ -222,9 +220,7 @@
 
         setInterval(() => { document.getElementById('hora').innerText = new Date().toLocaleTimeString('pt-BR'); }, 1000);
 
-        function fecharAviso() {
-            document.getElementById('aviso-novidade').style.display = 'none';
-        }
+        function fecharAviso() { document.getElementById('aviso-novidade').style.display = 'none'; }
 
         async function getWeather() {
             try {
@@ -260,12 +256,8 @@
             allRadios = [];
             snap.forEach(c => { allRadios.push({ ...c.val(), key: c.key }); });
             allRadios.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
-            
-            if (allRadios.length > countAnterior && countAnterior !== 0) {
-                document.getElementById('aviso-novidade').style.display = 'block';
-            }
+            if (allRadios.length > countAnterior && countAnterior !== 0) { document.getElementById('aviso-novidade').style.display = 'block'; }
             localStorage.setItem('lastRadioCount', allRadios.length);
-
             db.ref('usuarios/' + nomeUsuario + '/grade').once('value', userSnap => {
                 const gradeSalva = userSnap.val();
                 if (gradeSalva) { mySelectedIds = gradeSalva; } 
