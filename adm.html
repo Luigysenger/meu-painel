@@ -417,14 +417,14 @@
 
                 if (isOnline) {
                     rádioAtual = u.radioAtual || 'Navegando...';
-                    // AJUSTE 1: Tempo na rádio zerado e reiniciado ao trocar (baseado no radioStartTime do Firebase)
+                    // AJUSTE: O Tempo da Rádio usa radioStartTime (resetado no app na troca de rádio)
                     tempoRádioHTML = `<span class="tempo-live" data-start="${u.radioStartTime || Date.now()}">00:00:00</span>`;
-                    // AJUSTE 2: Tempo de sessão contado desde o login (baseado no loginTime do Firebase)
+                    // AJUSTE: O Tempo de Sessão usa loginTime (fixo do login até o logout)
                     tempoSessãoHTML = `<span class="tempo-live" data-start="${u.loginTime || Date.now()}">00:00:00</span>`;
                 } else {
                     rádioAtual = u.ultimaRadio || 'Desconectado';
-                    tempoRádioHTML = `<span>Finalizado</span>`;
-                    tempoSessãoHTML = `<span>Encerrado</span>`;
+                    tempoRádioHTML = `<span>${formatarTempoReal(u.tempoUltimaRadio || 0)}</span>`;
+                    tempoSessãoHTML = `<span>${formatarTempoReal(u.totalSessionTime || 0)}</span>`;
                 }
 
                 container.innerHTML += `
