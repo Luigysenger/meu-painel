@@ -47,9 +47,9 @@
         /* AJUSTE CENTRALIZAÇÃO DO QUADRO */
         .main-container { 
             display: grid; 
-            grid-template-columns: 200px 1fr 200px; /* Colunas laterais reservadas */
+            grid-template-columns: 150px 1fr 150px; /* Reduzido colunas laterais */
             gap: 20px; 
-            max-width: 1600px; 
+            max-width: 1400px; 
             margin: 0 auto; 
             margin-bottom: 150px; 
             align-items: start;
@@ -66,6 +66,7 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
+            width: 100%;
         }
         
         @media (max-width: 1100px) {
@@ -73,11 +74,36 @@
             .side-pub { display: none; }
         }
 
-        .card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid #282828; }
-        h3 { color: var(--primary); font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; }
+        .card { background: var(--card); border-radius: 20px; padding: 25px; border: 1px solid #282828; }
+        h3 { color: var(--primary); font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; }
         
-        .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; min-height: 100px; }
-        .radio-item { aspect-ratio: 1/1; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #000; font-weight: bold; font-size: 11px; text-align: center; padding: 10px; cursor: grab; transition: 0.3s; position: relative; border: 2px solid transparent; }
+        /* AJUSTE SEQUENCIA DE 4 POR FILEIRA CENTRALIZADO */
+        .radio-grid { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 20px; 
+            min-height: 100px; 
+            justify-items: center;
+        }
+        .radio-item { 
+            width: 100%;
+            max-width: 130px;
+            aspect-ratio: 1/1; 
+            border-radius: 15px; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            color: #000; 
+            font-weight: bold; 
+            font-size: 11px; 
+            text-align: center; 
+            padding: 10px; 
+            cursor: grab; 
+            transition: 0.3s; 
+            position: relative; 
+            border: 2px solid transparent; 
+        }
         .radio-item:hover { transform: scale(1.05); filter: brightness(1.1); }
         .radio-item.active { background: #000 !important; color: var(--primary) !important; border-color: var(--primary); box-shadow: 0 0 15px rgba(160, 32, 240, 0.4); }
         
@@ -157,7 +183,9 @@
                 <div id="my-radio-list" class="radio-grid"></div>
             </div>
             <div class="card">
-                <h3>SELECIONE AQUI SUA LISTA DE RADIOS</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3 style="margin-bottom: 0;">SELECIONE AQUI SUA LISTA DE RADIOS</h3>
+                </div>
                 <div id="selector-list" class="selector-list"></div>
             </div>
         </div>
@@ -238,7 +266,6 @@
             snap.forEach(c => { allRadios.push({ ...c.val(), key: c.key }); });
             allRadios.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
             
-            // Lógica para mostrar aviso de rádio nova
             if (allRadios.length > countAnterior && countAnterior !== 0) {
                 document.getElementById('aviso-novidade').style.display = 'block';
             }
