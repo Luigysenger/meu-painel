@@ -308,7 +308,6 @@
             const container = document.getElementById('container-mensagem');
             container.classList.toggle('aberto');
             
-            // Se abrir o card, removemos o alerta visual
             if(container.classList.contains('aberto')) {
                 fecharAvisoResposta();
             }
@@ -319,7 +318,8 @@
         }
 
         function enviarMensagem() {
-            const texto = document.getElementById('texto-mensagem').value;
+            const campoTexto = document.getElementById('texto-mensagem');
+            const texto = campoTexto.value;
             if(!texto.trim()) return alert("Escreva algo antes de enviar!");
 
             db.ref('mensagens_ouvintes').push({
@@ -329,29 +329,28 @@
                 lida: false
             }).then(() => {
                 alert("Mensagem enviada com sucesso!");
-                document.getElementById('texto-mensagem').value = "";
+                campoTexto.value = ""; // LIMPA O CAMPO APÓS O ENVIO
                 toggleCardMensagem();
             });
         }
 
-        // MONITORAR RESPOSTAS DO ADM (Focado no usuário atual)
+        // MONITORAR RESPOSTAS (Melhorado para captar a resposta correta)
         db.ref('mensagens_ouvintes').orderByChild('usuario').equalTo(nomeUsuario).on('value', snap => {
-            let temRespostaNaoVista = false;
             let textoResposta = "";
+            let temResposta = false;
 
             snap.forEach(child => {
                 const dados = child.val();
                 if(dados.resposta) {
-                    temRespostaNaoVista = true;
+                    temResposta = true;
                     textoResposta = dados.resposta;
                 }
             });
 
-            if(temRespostaNaoVista) {
+            if(temResposta) {
                 document.getElementById('bloco-resposta').style.display = "block";
                 document.getElementById('texto-resposta-adm').innerText = textoResposta;
                 
-                // Só mostra o alerta se o card estiver fechado
                 if(!document.getElementById('container-mensagem').classList.contains('aberto')) {
                     document.getElementById('btn-abrir-msg').classList.add('tem-resposta');
                     document.getElementById('txt-btn-msg').innerText = "VOCÊ TEM UMA RESPOSTA!";
@@ -368,11 +367,9 @@
             document.getElementById('txt-btn-msg').innerText = "ENVIE UMA MENSAGEM PRA NÓS";
         }
 
-        // Atualização de Hora e Data
         setInterval(() => { 
             const agora = new Date();
             document.getElementById('hora').innerText = agora.toLocaleTimeString('pt-BR'); 
-            
             const opcoesData = { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' };
             document.getElementById('data-atual').innerText = agora.toLocaleDateString('pt-BR', opcoesData);
         }, 1000);
@@ -458,7 +455,7 @@
             const agora = Date.now();
             snap.forEach(child => {
                 const p = child.val();
-                if ((p.destino === 'TODOS' || p.ouvinteAlvo === nomeUsuario.toUpperCase()) && (agora >= p.inicio && agora <= p.fim)) {
+                if ((p.destino === 'TODOS' || (p.ouvinteAlvo && p.ouvinteAlvo.toUpperCase() === nomeUsuario.toUpperCase())) && (agora >= p.inicio && agora <= p.fim)) {
                     listaPubs.push(p);
                 }
             });
