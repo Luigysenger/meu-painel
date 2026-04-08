@@ -184,7 +184,7 @@
         const player = document.getElementById('audio-player');
         let radioData = [];
         let activeIndex = -1;
-        let abertoStatus = {}; // Guarda quais menus de ouvintes estão abertos
+        let abertoStatus = {}; 
 
         const emojisReply = ["👍", "❤️", "😂", "👏", "🔥", "🚀", "🎵", "📻", "🙌", "😲"];
 
@@ -192,8 +192,6 @@
         function logout() { if(confirm("Deseja sair?")) { localStorage.removeItem('usuarioNome'); window.location.href = 'index.html'; } }
         function toggleMensagens() { document.getElementById('container-mensagens-adm').classList.toggle('aberto'); }
 
-        // --- MONITOR DE OUVINTES (CRONÔMETRO CORRIGIDO) ---
-        
         function toggleUserDetails(id) {
             const el = document.getElementById('details-' + id);
             if(el.style.display === 'block') {
@@ -205,21 +203,27 @@
             }
         }
 
+        // FUNÇÃO DE TEMPO CORRIGIDA PARA MM:SS (ou HH:MM:SS se passar de uma hora)
         function formatarTempo(ms) {
             if (ms < 0) ms = 0;
             let totalSegundos = Math.floor(ms / 1000);
             let h = Math.floor(totalSegundos / 3600);
             let m = Math.floor((totalSegundos % 3600) / 60);
             let s = totalSegundos % 60;
-            return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            if (h > 0) {
+                return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            } else {
+                return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            }
         }
 
-        // Atualização Visual Automática dos tempos sem recarregar o Firebase
+        // CRONÔMETRO INDEPENDENTE (Não reseta nos 30 segundos)
         setInterval(() => {
             const agora = Date.now();
             document.querySelectorAll('.cronometro-ouvinte').forEach(span => {
                 const inicio = parseInt(span.getAttribute('data-start'));
-                if (inicio > 0) {
+                const online = span.getAttribute('data-online') === 'true';
+                if (inicio > 0 && online) {
                     span.innerText = formatarTempo(agora - inicio);
                 }
             });
@@ -230,12 +234,12 @@
             container.innerHTML = "";
             snap.forEach(c => {
                 const u = c.val(), id = c.key;
-                const isOnline = (Date.now() - (u.lastSeen || 0) < 60000);
+                const agora = Date.now();
+                const isOnline = (agora - (u.lastSeen || 0) < 60000);
                 const isAberto = abertoStatus[id] ? 'block' : 'none';
                 
-                // Usamos o radioStartTime que deve vir do painel do ouvinte. 
-                // Se não houver, usamos o loginTime ou o lastSeen.
-                const tempoBase = u.radioStartTime || u.loginTime || u.lastSeen || Date.now();
+                // Usamos o loginTime como âncora fixa para o tempo não pular ou resetar
+                const tempoBase = u.loginTime || u.lastSeen || agora;
 
                 container.innerHTML += `
                     <div class="user-item" style="border-left: 4px solid ${isOnline ? '#00ff00' : '#d1a3ff'}">
@@ -248,21 +252,18 @@
                         </div>
                         <div class="user-details-bar" id="details-${id}" style="display: ${isAberto}">
                             <p style="margin:5px 0">📻 Ouvindo: <b>${u.radioAtual || 'Nenhuma'}</b></p>
-                            <p style="margin:5px 0">⏳ Tempo Conectado: <b class="cronometro-ouvinte" data-start="${isOnline ? tempoBase : 0}">${isOnline ? formatarTempo(Date.now() - tempoBase) : '00:00:00'}</b></p>
-                            <p style="margin:5px 0; font-size:10px; color:#888">Visto por último: ${new Date(u.lastSeen).toLocaleTimeString()}</p>
+                            <p style="margin:5px 0">⏳ Tempo Conectado: <b class="cronometro-ouvinte" data-online="${isOnline}" data-start="${tempoBase}">${isOnline ? formatarTempo(agora - tempoBase) : '00:00'}</b></p>
+                            <p style="margin:5px 0; font-size:10px; color:#888">Sinal: ${new Date(u.lastSeen).toLocaleTimeString()}</p>
                         </div>
                     </div>`;
             });
         });
-
-        // --- CAMPANHAS (FUNÇÃO DE EDIÇÃO RESTAURADA) ---
 
         function prepareEditPub(id, img, ini, fim, target, manual) {
             document.getElementById('pub-key').value = id;
             imgBase64 = img;
             document.getElementById('pub-view').src = img;
             document.getElementById('pub-view').style.display = "block";
-            // Ajuste para formato do input datetime-local
             document.getElementById('pub-ini').value = new Date(ini).toISOString().slice(0, 16);
             document.getElementById('pub-fim').value = new Date(fim).toISOString().slice(0, 16);
             document.getElementById('pub-target').value = target;
@@ -296,9 +297,6 @@
                     </div>`;
             });
         });
-
-        // --- RESTANTE DAS FUNÇÕES (RADIOS E MENSAGENS) ---
-        // (Mantidas conforme seu original para não quebrar nada)
 
         db.ref('radios').on('value', snap => {
             radioData = [];
