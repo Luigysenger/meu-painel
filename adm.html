@@ -385,21 +385,22 @@
         }
 
         function formatarTempoReal(ms) {
-            if (!ms || ms < 0) return "00:00";
+            if (!ms || ms < 0) return "00:00:00";
             const totalSegundos = Math.floor(ms / 1000);
-            const minutos = Math.floor(totalSegundos / 60);
+            const horas = Math.floor(totalSegundos / 3600);
+            const minutos = Math.floor((totalSegundos % 3600) / 60);
             const segundos = totalSegundos % 60;
-            return `${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
+            return `${horas.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
         }
 
-        // Loop para atualização visual do tempo em tempo real (1 em 1 segundo)
+        // Loop de atualização constante dos tempos na tela
         setInterval(() => {
-            const itens = document.querySelectorAll('.tempo-live');
-            itens.forEach(span => {
+            const spans = document.querySelectorAll('.tempo-live');
+            spans.forEach(span => {
                 const start = parseInt(span.dataset.start);
-                const tipo = span.dataset.tipo;
+                const agora = Date.now();
                 if (start > 0) {
-                    span.innerText = formatarTempoReal(Date.now() - start);
+                    span.innerText = formatarTempoReal(agora - start);
                 }
             });
         }, 1000);
@@ -416,11 +417,13 @@
 
                 if (isOnline) {
                     rádioAtual = u.radioAtual || 'Navegando...';
-                    // Usamos classes para o setInterval atualizar
-                    tempoRádioHTML = `<span class="tempo-live" data-tipo="radio" data-start="${u.radioStartTime || u.lastSeen}">00:00</span>`;
-                    tempoSessãoHTML = `<span class="tempo-live" data-tipo="sessao" data-start="${u.loginTime || u.lastSeen}">00:00</span>`;
+                    // O Tempo da Rádio usa o radioStartTime (resetado quando muda de rádio no app)
+                    tempoRádioHTML = `<span class="tempo-live" data-start="${u.radioStartTime || u.lastSeen}">00:00:00</span>`;
+                    // O Tempo de Sessão usa o loginTime (fixo desde o login)
+                    tempoSessãoHTML = `<span class="tempo-live" data-start="${u.loginTime || u.lastSeen}">00:00:00</span>`;
                 } else {
                     rádioAtual = u.ultimaRadio || 'Desconectado';
+                    // Em OFF mostra o último cálculo salvo
                     tempoRádioHTML = `<span>${formatarTempoReal(u.tempoUltimaRadio || 0)}</span>`;
                     tempoSessãoHTML = `<span>${formatarTempoReal(u.totalSessionTime || 0)}</span>`;
                 }
@@ -435,8 +438,8 @@
                         </div>
                         <div class="user-details-bar" id="details-${id}">
                             <p><span>Rádio:</span> <b>${rádioAtual}</b></p>
-                            <p><span>Tempo na Rádio:</span> <b>${tempoRádioHTML} (M:S)</b></p>
-                            <p><span>Tempo de Sessão:</span> <b>${tempoSessãoHTML} (M:S)</b></p>
+                            <p><span>Tempo na Rádio:</span> <b style="color:white">${tempoRádioHTML}</b></p>
+                            <p><span>Tempo de Sessão:</span> <b style="color:var(--primary)">${tempoSessãoHTML}</b></p>
                             <p><span>Último Registro:</span> <b>${dataOuvindo}</b></p>
                         </div>
                     </div>`;
