@@ -11,138 +11,68 @@
     <style>
         :root { --primary: #A020F0; --bg: #000; --card: #121212; --text-muted: #b3b3b3; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; user-select: none; }
-       
+        
         /* HEADER RESPONSIVO */
         .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 20px 30px; border-radius: 15px; border: 1px solid #333; margin-bottom: 25px; gap: 10px; }
-       
+        
         /* Ajuste Nome e Sair */
         .header-left { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; flex-shrink: 0; }
         .header h2 { margin: 0; color: var(--primary); font-size: 22px; text-transform: uppercase; line-height: 1; }
-       
+        
         #container-pub { flex: 1; display: flex; justify-content: center; align-items: center; padding: 0 10px; height: 55px; overflow: hidden; }
         #img-publicidade { max-height: 55px; max-width: 100%; border-radius: 8px; display: none; object-fit: contain; transition: opacity 0.5s ease-in-out; }
-       
+        
         /* Ajuste Hora e Mensagem */
-        .header-right { display: flex; align-items: center; gap: 30px; flex-shrink: 0; }
-        .time-msg-box { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; border-left: 1px solid #333; padding-left: 20px; }
-       
-        .weather-box { display: flex; align-items: center; gap: 15px; color: var(--primary); }
-        .weather-info { display: flex; flex-direction: column; align-items: flex-end; text-align: right; line-height: 1.2; }
-        .weather-box i { font-size: 28px; position: relative; min-width: 30px; text-align: center; }
-       
-        .fa-sun { animation: spin-sun 10s linear infinite; color: #FFD700; }
-        @keyframes spin-sun { 100% { transform: rotate(360deg); } }
-       
-        .fa-cloud-showers-heavy { animation: rain-shake 0.5s ease-in-out infinite; }
-        @keyframes rain-shake { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(3px); } }
-
-        .weather-desc { font-size: 10px; text-transform: uppercase; opacity: 0.9; letter-spacing: 1px; font-weight: bold; }
-        .city-name { color: #888; font-size: 11px; text-transform: uppercase; font-weight: normal; }
-        .temp-val { font-size: 16px; font-weight: 900; }
-       
+        .header-right { display: flex; align-items: center; gap: 20px; flex-shrink: 0; }
+        
+        /* BLOCO DE DATA E HORA */
+        .datetime-container { display: flex; align-items: center; gap: 15px; border-left: 1px solid #333; padding-left: 20px; }
+        .date-box { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.1; }
+        .date-text { font-size: 11px; color: #888; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
+        .divider-line { width: 1px; height: 35px; background: #333; margin: 0 5px; }
+        
+        .time-msg-box { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+        
         .btn-header { background: none; border: 1px solid #333; color: white; padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; transition: 0.3s; display: flex; align-items: center; gap: 8px; text-transform: uppercase; font-weight: bold; }
         .btn-header:hover { background: #222; border-color: var(--primary); }
         .btn-sair { color: #ff4444; border-color: #442222; padding: 4px 10px; }
         .btn-sair:hover { background: #331111; border-color: #ff4444; }
-       
+        
         .btn-msg { border-color: var(--primary); color: var(--primary); font-size: 11px; padding: 4px 10px; }
         .btn-msg:hover { background: var(--primary); color: white; }
 
-        #hora { font-size: 24px; font-weight: 900; line-height: 1; }
-       
+        #hora { font-size: 24px; font-weight: 900; line-height: 1; color: white; }
+        
         /* ESTRUTURA PRINCIPAL */
-        .main-container {
-            display: grid;
-            grid-template-columns: 180px 1fr 180px;
-            gap: 20px;
-            max-width: 100%;
-            margin: 0 auto;
-            margin-bottom: 150px;
-            align-items: start;
-        }
-
-        .center-content {
-            display: grid;
-            grid-template-columns: 1.2fr 0.8fr;
-            gap: 20px;
-            align-items: start;
-        }
-
+        .main-container { display: grid; grid-template-columns: 180px 1fr 180px; gap: 20px; max-width: 100%; margin: 0 auto; margin-bottom: 150px; align-items: start; }
+        .center-content { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; align-items: start; }
         .side-pub { min-height: 400px; display: flex; flex-direction: column; gap: 15px; }
-       
-        @media (max-width: 1200px) {
-            .center-content { grid-template-columns: 1fr; }
-            .main-container { grid-template-columns: 1fr; }
-            .side-pub { display: none; }
-        }
+        
+        @media (max-width: 1200px) { .center-content { grid-template-columns: 1fr; } .main-container { grid-template-columns: 1fr; } .side-pub { display: none; } }
 
         .card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid #282828; }
         h3 { color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; text-align: center; }
-       
-        .radio-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, 110px);
-            gap: 15px;
-            justify-content: center;
-        }
-       
-        .radio-item {
-            width: 110px;
-            height: 110px;
-            border-radius: 15px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: #000;
-            font-weight: bold;
-            font-size: 10px;
-            text-align: center;
-            padding: 10px;
-            cursor: grab;
-            transition: 0.3s;
-            position: relative;
-            border: 2px solid transparent;
-            box-sizing: border-box;
-        }
-       
+        
+        .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, 110px); gap: 15px; justify-content: center; }
+        .radio-item { width: 110px; height: 110px; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #000; font-weight: bold; font-size: 10px; text-align: center; padding: 10px; cursor: grab; transition: 0.3s; position: relative; border: 2px solid transparent; box-sizing: border-box; }
         .radio-item:hover { transform: scale(1.05); filter: brightness(1.1); }
         .radio-item.active { background: #000 !important; color: var(--primary) !important; border-color: var(--primary); box-shadow: 0 0 15px rgba(160, 32, 240, 0.4); }
-       
+        
         .antena { font-size: 20px; margin-bottom: 8px; display: none; }
         .active .antena { display: block; animation: pulse-antena 1s infinite; }
         @keyframes pulse-antena { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(1.1); } }
-       
+        
         .selector-list { display: flex; flex-direction: column; gap: 8px; max-height: 450px; overflow-y: auto; padding-right: 5px; }
         .selector-item { background: #1a1a1a; padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #333; transition: 0.3s; }
         .selector-item.selected { border-left-color: var(--primary); background: #222; }
         .btn-toggle-radio { background: none; border: none; font-size: 18px; cursor: pointer; transition: 0.2s; }
         .btn-toggle-radio.add { color: #444; }
         .btn-toggle-radio.remove { color: var(--primary); }
-       
+        
         .player-footer { position: fixed; bottom: 0; left: 0; right: 0; background: #111; padding: 15px 25px 25px 25px; border-top: 2px solid var(--primary); text-align: center; z-index: 100; }
-       
-        .msg-barra {
-            background: #ff0000;
-            color: #fff;
-            font-size: 14px;
-            font-weight: 900;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border: 2px solid #fff;
-            display: none;
-            width: fit-content;
-            margin-left: auto;
-            margin-right: auto;
-            cursor: pointer;
-            animation: piscar-alerta 0.8s infinite alternate;
-        }
-        @keyframes piscar-alerta {
-            0% { opacity: 1; transform: scale(1); background: #ff0000; }
-            100% { opacity: 0.7; transform: scale(1.05); background: var(--primary); }
-        }
-       
+        .msg-barra { background: #ff0000; color: #fff; font-size: 14px; font-weight: 900; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 2px solid #fff; display: none; width: fit-content; margin: 0 auto; cursor: pointer; animation: piscar-alerta 0.8s infinite alternate; }
+        @keyframes piscar-alerta { 0% { opacity: 1; transform: scale(1); background: #ff0000; } 100% { opacity: 0.7; transform: scale(1.05); background: var(--primary); } }
+        
         .controls-row { display: flex; align-items: center; justify-content: center; gap: 35px; }
         .btn-nav { background: none; border: none; color: #b3b3b3; font-size: 24px; cursor: pointer; transition: 0.2s; }
         .btn-nav:hover { color: var(--primary); transform: scale(1.1); }
@@ -161,24 +91,22 @@
             <h2 id="nome-exibicao">OUVINTE</h2>
             <button class="btn-header btn-sair" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span>SAIR</span></button>
         </div>
-       
+        
         <div id="container-pub"><img id="img-publicidade" src=""></div>
-       
+        
         <div class="header-right">
-            <div class="weather-box" id="weather">
-                <div class="weather-info">
-                    <span class="city-name" id="city">LOCALIZANDO...</span>
-                    <span class="temp-val" id="temp">--°C</span>
-                    <span class="weather-desc" id="weather-desc">AGUARDE</span>
+            <div class="datetime-container">
+                <div class="date-box">
+                    <span class="date-text" id="data-atual">00/00/0000</span>
+                    <span class="date-text" style="color: var(--primary); font-size: 9px;">DATA ATUAL</span>
                 </div>
-                <i id="weather-icon" class="fas fa-sync-alt fa-spin"></i>
-            </div>
-           
-            <div class="time-msg-box">
-                <div id="hora">00:00:00</div>
-                <button class="btn-header btn-msg" onclick="alert('Funcionalidade de mensagem em breve!')">
-                    <i class="fas fa-comment-dots"></i> ENVIE UMA MENSAGEM PRA NÓS
-                </button>
+                <div class="divider-line"></div>
+                <div class="time-msg-box">
+                    <div id="hora">00:00:00</div>
+                    <button class="btn-header btn-msg" onclick="alert('Funcionalidade de mensagem em breve!')">
+                        <i class="fas fa-comment-dots"></i> ENVIE UMA MENSAGEM
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -233,38 +161,18 @@
 
         let allRadios = [], mySelectedIds = [], activeIndex = -1;
 
-        setInterval(() => { document.getElementById('hora').innerText = new Date().toLocaleTimeString('pt-BR'); }, 1000);
+        // ATUALIZAÇÃO DE HORA E DATA
+        setInterval(() => { 
+            const agora = new Date();
+            document.getElementById('hora').innerText = agora.toLocaleTimeString('pt-BR'); 
+            
+            const dia = String(agora.getDate()).padStart(2, '0');
+            const mes = String(agora.getMonth() + 1).padStart(2, '0');
+            const ano = agora.getFullYear();
+            document.getElementById('data-atual').innerText = `${dia}/${mes}/${ano}`;
+        }, 1000);
 
         function fecharAviso() { document.getElementById('aviso-novidade').style.display = 'none'; }
-
-        async function getWeather() {
-            try {
-                const locRes = await fetch('https://ipapi.co/json/');
-                const loc = await locRes.json();
-                if (loc.latitude && loc.longitude) {
-                    const climaRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${loc.latitude}&longitude=${loc.longitude}&current_weather=true`);
-                    const clima = await climaRes.json();
-                    if (clima.current_weather) {
-                        const temp = Math.round(clima.current_weather.temperature);
-                        const code = clima.current_weather.weathercode;
-                        document.getElementById('temp').innerText = temp + "°C";
-                        document.getElementById('city').innerText = (loc.city || "LOCAL").toUpperCase();
-                        const icon = document.getElementById('weather-icon');
-                        const desc = document.getElementById('weather-desc');
-                        icon.className = "fas";
-                        icon.style.color = "";
-                        if (code >= 51 && code <= 67 || code >= 80 && code <= 82) { icon.classList.add("fa-cloud-showers-heavy"); desc.innerText = "CHOVENDO"; }
-                        else if (code === 3) { icon.classList.add("fa-cloud"); icon.style.color = "#555"; desc.innerText = "NUBLADO"; }
-                        else if (code >= 1 && code <= 2) { icon.classList.add("fa-cloud-sun"); desc.innerText = "SOL ENTRE NUVENS"; }
-                        else if (code === 0) { icon.classList.add("fa-sun"); desc.innerText = "CÉU LIMPO"; }
-                        else if (code >= 95) { icon.classList.add("fa-bolt"); desc.innerText = "TEMPESTADE"; }
-                        else { icon.classList.add("fa-cloud"); desc.innerText = "NUVENS"; }
-                    }
-                }
-            } catch (e) { document.getElementById('city').innerText = "CLIMA"; }
-        }
-        getWeather();
-        setInterval(getWeather, 600000);
 
         db.ref('radios').on('value', snap => {
             const countAnterior = parseInt(localStorage.getItem('lastRadioCount')) || 0;
@@ -324,7 +232,7 @@
             player.src = r.url; player.play();
             document.getElementById('now-title').innerText = "OUVINTE: " + r.name;
             document.getElementById('play-icon').className = "fas fa-stop";
-            db.ref('usuarios/' + nomeUsuario).update({ radioAtual: r.name, lastSeen: Date.now(), sessionStart: Date.now() });
+            db.ref('usuarios/' + nomeUsuario).update({ radioAtual: r.name, lastSeen: Date.now() });
             renderAll();
         }
 
