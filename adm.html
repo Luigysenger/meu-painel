@@ -74,10 +74,17 @@
         .pub-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .pub-preview { width: 100%; max-height: 100px; border-radius: 10px; object-fit: contain; margin-top: 10px; border: 1px dashed #444; display: none; }
         label { font-size: 10px; color: #888; display: block; margin-bottom: 5px; margin-left: 5px; }
-        .pub-list-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; overflow: hidden; border-left: 4px solid var(--primary); }
+        
+        /* ESTILO CAMPANHAS ATIVAS */
+        .pub-list-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; overflow: hidden; border-left: 4px solid var(--primary); transition: 0.3s; }
         .pub-list-row { display: flex; align-items: center; width: 100%; }
         .pub-list-btn { flex: 1; padding: 12px; background: none; border: none; color: white; text-align: left; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 10px; }
         .pub-thumb-mini { width: 40px; height: 25px; object-fit: cover; border-radius: 4px; background: #000; }
+        .pub-details-bar { display: none; padding: 10px 15px; font-size: 12px; color: #ccc; border-top: 1px solid #222; background: #141414; }
+        .pub-details-bar p { margin: 5px 0; }
+        .txt-inicio { color: #1DB954; font-weight: bold; }
+        .txt-fim { color: #ff4444; font-weight: bold; }
+
         .btn-delete-user { background: none; border: none; color: #ff4444; padding: 15px; cursor: pointer; font-size: 16px; transition: 0.2s; }
         .btn-edit-pub { color: #1DB954 !important; padding: 15px; cursor: pointer; font-size: 16px; background: none; border: none; transition: 0.2s; }
         .btn-edit-pub:hover { transform: scale(1.2); }
@@ -359,20 +366,34 @@
             window.scrollTo(0, 500);
         }
 
+        /* FUNÇÃO PARA ABRIR DETALHES DA CAMPANHA */
+        function togglePubDetails(id) {
+            const bar = document.getElementById('pub-details-' + id);
+            bar.style.display = (bar.style.display === 'block' ? 'none' : 'block');
+        }
+
         db.ref('publicidade').on('value', snap => {
             const container = document.getElementById('pub-list-admin');
             container.innerHTML = "";
             snap.forEach(c => {
                 const p = c.val(), id = c.key, vencida = Date.now() > p.fim;
+                const dataIni = new Date(p.inicio).toLocaleString('pt-BR');
+                const dataFim = new Date(p.fim).toLocaleString('pt-BR');
+
                 container.innerHTML += `
                     <div class="pub-list-item" style="border-left-color: ${vencida ? '#ff4444' : '#1DB954'}">
                         <div class="pub-list-row">
-                            <div class="pub-list-btn">
+                            <button class="pub-list-btn" onclick="togglePubDetails('${id}')">
                                 <img src="${p.imagem}" class="pub-thumb-mini">
                                 <span>Alvo: <b>${p.ouvinteAlvo}</b> ${vencida ? '(FINALIZADA)' : ''}</span>
-                            </div>
+                            </button>
                             <button class="btn-edit-pub" onclick="prepareEditPub('${id}', '${p.imagem}', ${p.inicio}, ${p.fim}, '${p.destino}', '${p.ouvinteAlvo}')"><i class="fas fa-edit"></i></button>
                             <button class="btn-delete-user" onclick="if(confirm('Excluir?')) db.ref('publicidade/${id}').remove()"><i class="fas fa-trash-alt"></i></button>
+                        </div>
+                        <div class="pub-details-bar" id="pub-details-${id}">
+                             <p>Início: <span class="txt-inicio">${dataIni}</span></p>
+                             <p>Término: <span class="txt-fim">${dataFim}</span></p>
+                             <p>Status: <b>${vencida ? 'Expirada' : 'Ativa'}</b></p>
                         </div>
                     </div>`;
             });
@@ -391,9 +412,6 @@
                 
                 // Cálculo do tempo de sessão
                 const sessaoMs = isOnline ? (Date.now() - parseInt(u.lastSeen || Date.now())) : 0;
-                // Para maior precisão, o 'lastSeen' costuma ser o último ping. 
-                // Se você tiver um 'sessionStart', use ele. Aqui usaremos uma simulação de "Tempo Online Recente"
-                const totalOnlineMs = u.totalTime || 0; 
                 const minutos = Math.floor(sessaoMs / 60000);
                 const segundos = Math.floor((sessaoMs % 60000) / 1000);
 
