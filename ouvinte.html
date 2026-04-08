@@ -222,7 +222,7 @@
                 <div class="separator"></div>
                 <div id="hora">00:00:00</div>
                 <button id="btn-abrir-msg" class="btn-header btn-msg" onclick="toggleCardMensagem()">
-                    <i class="fas fa-comment-dots"></i> <span id="txt-btn-msg">ENVIE UMA MENSAGEM PRA NÓS</span>
+                    <i class="fas fa-comment-dots"></i> <span id="txt-btn-msg">ENVIE MENSAGEM PARA NOSSO ADM</span>
                 </button>
             </div>
         </div>
@@ -234,7 +234,7 @@
                 <strong style="color: var(--primary); font-size: 12px;">RESPOSTA DO ADMIN:</strong>
                 <p id="texto-resposta-adm" style="margin: 5px 0; font-style: italic;"></p>
             </div>
-            <textarea id="texto-mensagem" placeholder="Escreva sua mensagem aqui para o Luigy..."></textarea>
+            <textarea id="texto-mensagem" placeholder="Escreva sua mensagem aqui para o nosso ADM..."></textarea>
             <div class="msg-footer">
                 <div class="emoji-bar">
                     <button class="btn-emoji" onclick="addEmoji('❤️')">❤️</button>
@@ -329,19 +329,20 @@
                 lida: false
             }).then(() => {
                 alert("Mensagem enviada com sucesso!");
-                campoTexto.value = ""; // LIMPA O CAMPO APÓS O ENVIO
+                campoTexto.value = ""; 
                 toggleCardMensagem();
             });
         }
 
-        // MONITORAR RESPOSTAS (Melhorado para captar a resposta correta)
+        // MONITORAR RESPOSTAS (Melhorado para captar a resposta em tempo real)
         db.ref('mensagens_ouvintes').orderByChild('usuario').equalTo(nomeUsuario).on('value', snap => {
             let textoResposta = "";
             let temResposta = false;
 
             snap.forEach(child => {
                 const dados = child.val();
-                if(dados.resposta) {
+                // Verifica se existe o campo 'resposta' na mensagem do usuário
+                if(dados.resposta && dados.resposta.trim() !== "") {
                     temResposta = true;
                     textoResposta = dados.resposta;
                 }
@@ -364,7 +365,7 @@
         function fecharAvisoResposta() {
             document.getElementById('aviso-resposta').style.display = "none";
             document.getElementById('btn-abrir-msg').classList.remove('tem-resposta');
-            document.getElementById('txt-btn-msg').innerText = "ENVIE UMA MENSAGEM PRA NÓS";
+            document.getElementById('txt-btn-msg').innerText = "ENVIE MENSAGEM PARA NOSSO ADM";
         }
 
         setInterval(() => { 
