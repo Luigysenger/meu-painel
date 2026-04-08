@@ -14,11 +14,36 @@
         .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 20px 30px; border-radius: 15px; border: 1px solid #333; margin-bottom: 25px; }
         .header-left { display: flex; align-items: center; gap: 20px; }
         .header h2 { margin: 0; color: var(--primary); font-size: 22px; }
+        
+        /* BOTÃO MENSAGENS NO TOPO */
+        .header-center { display: flex; align-items: center; gap: 10px; }
+        .btn-msg-notif { background: #ff4444; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; transition: 0.3s; }
+        .btn-msg-notif:hover { transform: scale(1.05); background: #cc0000; }
+        .btn-msg-notif span { background: white; color: #ff4444; padding: 2px 6px; border-radius: 50%; font-size: 12px; }
+
         .btn-header { background: none; border: 1px solid #333; color: white; padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: 0.3s; display: flex; align-items: center; gap: 8px; }
         .btn-header:hover { background: #222; border-color: var(--primary); }
         .btn-sair { color: #ff4444; border-color: #442222; }
         .btn-sair:hover { background: #331111; border-color: #ff4444; }
         #hora { font-size: 26px; font-weight: 900; }
+
+        /* AREA DE MENSAGENS DESLIZANTE */
+        #container-mensagens-adm { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out; margin-bottom: 0; }
+        #container-mensagens-adm.aberto { max-height: 2000px; margin-bottom: 25px; }
+        
+        .msg-grid-adm { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; padding: 10px; background: #080808; border-radius: 15px; border: 1px solid #222; }
+        .msg-card-individual { background: #181818; border: 1px solid #333; border-radius: 12px; padding: 15px; position: relative; }
+        .msg-card-individual h4 { margin: 0 0 5px 0; color: var(--primary); font-size: 14px; display: flex; justify-content: space-between; }
+        .msg-card-individual p { font-size: 13px; margin: 10px 0; line-height: 1.4; color: #eee; }
+        
+        .msg-emoji-reply { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; margin-top: 10px; border-top: 1px solid #222; padding-top: 10px; }
+        .btn-emoji-small { background: none; border: none; font-size: 18px; cursor: pointer; transition: 0.2s; padding: 2px; }
+        .btn-emoji-small:hover { transform: scale(1.3); }
+
+        .actions-msg { margin-top: 15px; display: flex; justify-content: space-between; }
+        .btn-del-msg { color: #ff4444; background: none; border: none; cursor: pointer; font-size: 12px; }
+        .btn-pdf-msg { color: #3498db; background: none; border: none; cursor: pointer; font-size: 12px; }
+
         .main-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; max-width: 1400px; margin: 0 auto; }
         .card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid #282828; margin-bottom: 20px; }
         h3 { color: var(--primary); font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; }
@@ -69,6 +94,13 @@
         @keyframes spin-slow { 100% { transform: rotate(360deg); } }
         .btn-spotify-play { width: 60px; height: 60px; background: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; color: black; cursor: pointer; z-index: 5; transition: 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
         .btn-spotify-play:hover { transform: scale(1.1); background: var(--primary); }
+
+        @media print {
+            body * { visibility: hidden; }
+            .msg-grid-adm, .msg-grid-adm * { visibility: visible; }
+            .msg-grid-adm { position: absolute; left: 0; top: 0; }
+            .msg-emoji-reply, .btn-del-msg, .btn-pdf-msg { display: none; }
+        }
     </style>
 </head>
 <body>
@@ -78,8 +110,25 @@
             <button class="btn-header" onclick="location.reload()"><i class="fas fa-sync-alt"></i> REINICIAR</button>
             <button class="btn-header btn-sair" onclick="logout()"><i class="fas fa-sign-out-alt"></i> SAIR</button>
         </div>
+        <div class="header-center">
+            <button class="btn-msg-notif" onclick="toggleMensagens()">
+                <i class="fas fa-envelope"></i> MENSAGENS <span id="count-msg">0</span>
+            </button>
+        </div>
         <div id="hora">00:00:00</div>
     </div>
+
+    <div id="container-mensagens-adm">
+        <div class="card">
+            <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3>MENSAGENS DOS OUVINTES</h3>
+                <button onclick="window.print()" class="btn-header" style="font-size: 11px;"><i class="fas fa-file-pdf"></i> BAIXAR TUDO EM PDF</button>
+            </div>
+            <div id="msg-list-adm" class="msg-grid-adm">
+                </div>
+        </div>
+    </div>
+
     <div class="main-grid">
         <div class="col-left">
             <div class="card">
@@ -152,9 +201,50 @@
         let radioData = [];
         let activeIndex = -1;
 
+        const emojisReply = ["👍", "❤️", "😂", "👏", "🔥", "🚀", "🎵", "📻", "🙌", "😲", "🤩", "🙏", "💪", "💡", "✨", "🔊", "🎧", "😎", "🤝", "✅"];
+
         setInterval(() => { document.getElementById('hora').innerText = new Date().toLocaleTimeString('pt-BR'); }, 1000);
         function logout() { if(confirm("Deseja sair?")) { localStorage.removeItem('usuarioNome'); window.location.href = 'index.html'; } }
-        
+
+        // MONITOR DE MENSAGENS
+        function toggleMensagens() {
+            document.getElementById('container-mensagens-adm').classList.toggle('aberto');
+        }
+
+        db.ref('mensagens_ouvintes').on('value', snap => {
+            const list = document.getElementById('msg-list-adm');
+            const count = document.getElementById('count-msg');
+            list.innerHTML = "";
+            let i = 0;
+            snap.forEach(c => {
+                const m = c.val(), id = c.key;
+                i++;
+                const card = document.createElement('div');
+                card.className = "msg-card-individual";
+                card.innerHTML = `
+                    <h4><span>${m.usuario}</span> <small>${new Date(m.data).toLocaleTimeString()}</small></h4>
+                    <p>${m.mensagem}</p>
+                    <div class="msg-emoji-reply">
+                        ${emojisReply.map(e => `<button class="btn-emoji-small" onclick="responderEmoji('${id}', '${e}')">${e}</button>`).join('')}
+                    </div>
+                    <div class="actions-msg">
+                        <button class="btn-del-msg" onclick="deletarMsg('${id}')"><i class="fas fa-trash"></i> Deletar</button>
+                    </div>
+                `;
+                list.prepend(card);
+            });
+            count.innerText = i;
+        });
+
+        function deletarMsg(id) {
+            if(confirm("Excluir esta mensagem?")) db.ref('mensagens_ouvintes/' + id).remove();
+        }
+
+        function responderEmoji(id, emoji) {
+            alert("Resposta '" + emoji + "' enviada para o ouvinte!");
+            // Aqui você poderia salvar a resposta no BD para o ouvinte ver
+        }
+
         db.ref('radios').on('value', snap => {
             radioData = [];
             snap.forEach(c => { radioData.push({ ...c.val(), key: c.key }); });
@@ -287,26 +377,21 @@
             imgBase64 = p.imagem;
             document.getElementById('pub-view').src = p.imagem;
             document.getElementById('pub-view').style.display = "block";
-            
-            // Converter timestamp para o formato do input datetime-local
             const formatTime = (ts) => {
                 const d = new Date(ts);
                 return d.toISOString().slice(0, 16);
             };
-
             document.getElementById('pub-ini').value = formatTime(p.inicio);
             document.getElementById('pub-fim').value = formatTime(p.fim);
             document.getElementById('pub-target').value = p.destino;
-            
             if(p.destino === 'MANUAL') {
                 document.getElementById('pub-manual').style.display = 'block';
                 document.getElementById('pub-manual').value = p.ouvinteAlvo;
             } else {
                 document.getElementById('pub-manual').style.display = 'none';
             }
-
             document.getElementById('btn-pub-save').innerText = "ATUALIZAR CAMPANHA";
-            window.scrollTo(0, 500); // Rola para a seção de publicidade
+            window.scrollTo(0, 500); 
         }
 
         db.ref('publicidade').on('value', snap => {
