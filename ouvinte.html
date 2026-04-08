@@ -47,7 +47,8 @@
         .card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid #282828; }
         h3 { color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; text-align: center; }
         
-        .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, 110px); gap: 15px; justify-content: center; }
+        /* AJUSTE FIXO PARA 4 EM 4 RADIOS */
+        .radio-grid { display: grid; grid-template-columns: repeat(4, 110px); gap: 15px; justify-content: center; }
         .radio-item { width: 110px; height: 110px; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #000; font-weight: bold; font-size: 10px; text-align: center; padding: 10px; cursor: grab; transition: 0.3s; position: relative; border: 2px solid transparent; box-sizing: border-box; }
         .radio-item:hover { transform: scale(1.05); filter: brightness(1.1); }
         .radio-item.active { background: #000 !important; color: var(--primary) !important; border-color: var(--primary); box-shadow: 0 0 15px rgba(160, 32, 240, 0.4); }
@@ -146,7 +147,7 @@
         const nomeUsuario = localStorage.getItem('usuarioNome') || "OUVINTE";
         document.getElementById('nome-exibicao').innerText = nomeUsuario;
 
-        // INICIALIZAÇÃO DE SESSÃO (MARCA O TEMPO QUE ENTROU)
+        // INICIALIZAÇÃO DE SESSÃO
         const tempoEntrada = Date.now();
         db.ref('usuarios/' + nomeUsuario).update({ 
             loginTime: tempoEntrada, 
@@ -279,14 +280,12 @@
             }
         }, 7000);
 
-        // HEARTBEAT OTIMIZADO (ATUALIZA LASTSEEN E MANTÉM LOGIN TIME)
+        // HEARTBEAT OTIMIZADO
         setInterval(() => { 
             if(nomeUsuario) {
-                db.ref('usuarios/' + nomeUsuario).update({
-                    lastSeen: Date.now()
-                });
+                db.ref('usuarios/' + nomeUsuario).update({ lastSeen: Date.now() });
             } 
-        }, 20000); // Atualiza a cada 20 segundos para maior precisão no ADM
+        }, 20000);
     </script>
 </body>
 </html>
