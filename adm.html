@@ -115,7 +115,6 @@
         .status-off { color: #d1a3ff; font-weight: 900; font-size: 11px; }
         .user-details-bar { display: none; padding: 0 15px 15px 15px; font-size: 13px; color: #ccc; border-top: 1px solid #222; }
 
-        /* EFEITOS RESTAURADOS NO PLAYER */
         .player-footer { margin-top: 20px; background: #111; padding: 25px; border-radius: 20px; border: 1px solid #222; text-align: center; }
         .controls-row { display: flex; align-items: center; justify-content: center; gap: 35px; }
         .btn-nav { background: none; border: none; color: #b3b3b3; font-size: 28px; cursor: pointer; transition: 0.3s; }
@@ -239,9 +238,15 @@
         const player = document.getElementById('audio-player');
         let radioData = [];
         let activeIndex = -1;
+        let usersDataCache = {}; // Cache para o cronômetro
         const emojisReply = ["👍", "❤️", "😂", "👏", "🔥", "🚀", "🎵", "📻", "🙌", "😲", "🤩", "🙏", "💪", "💡", "✨", "🔊", "🎧", "😎", "🤝", "✅"];
 
-        setInterval(() => { document.getElementById('hora').innerText = new Date().toLocaleTimeString('pt-BR'); }, 1000);
+        // Relógio do Painel e Cronômetro de Sessão
+        setInterval(() => { 
+            document.getElementById('hora').innerText = new Date().toLocaleTimeString('pt-BR'); 
+            updateUserTimers(); // Atualiza os cronômetros a cada segundo
+        }, 1000);
+
         function logout() { if(confirm("Deseja sair?")) { localStorage.removeItem('usuarioNome'); window.location.href = 'index.html'; } }
         function toggleMensagens() { document.getElementById('container-mensagens-adm').classList.toggle('aberto'); }
 
@@ -391,14 +396,11 @@
             imgBase64 = img;
             document.getElementById('pub-view').src = img;
             document.getElementById('pub-view').style.display = "block";
-            
-            // Formatar data para o input datetime-local
             const formatData = (ms) => {
                 const d = new Date(ms);
                 d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
                 return d.toISOString().slice(0, 16);
             };
-            
             document.getElementById('pub-ini').value = formatData(ini);
             document.getElementById('pub-fim').value = formatData(fim);
             document.getElementById('pub-target').value = target;
@@ -448,39 +450,70 @@
             });
         });
 
-        // --- MONITOR DE OUVINTES ---
+        // --- MONITOR DE OUVINTES COM CRONÔMETRO REAL-TIME ---
         function toggleUserDetails(id) {
             const bar = document.getElementById('details-' + id);
             bar.style.display = (bar.style.display === 'block' ? 'none' : 'block');
         }
 
+        // Listener Principal de Usuários
         db.ref('usuarios').on('value', snap => {
             const container = document.getElementById('user-list');
             container.innerHTML = "";
+            usersDataCache = {}; // Limpa o cache para atualizar com os novos dados do Firebase
+
             snap.forEach(c => {
                 const u = c.val(), id = c.key;
                 const lastSeen = parseInt(u.lastSeen || 0);
                 const loginTime = parseInt(u.loginTime || lastSeen);
                 const isOnline = (Date.now() - lastSeen < 60000);
-                const diffMs = isOnline ? (Date.now() - loginTime) : 0;
-                const m = Math.floor(diffMs / 60000);
-                const s = Math.floor((diffMs % 60000) / 1000);
+                
+                // Armazena no cache para o setInterval atualizar
+                usersDataCache[id] = { loginTime, isOnline };
 
-                container.innerHTML += `
-                    <div class="user-item" style="border-left: 4px solid ${isOnline?'#00ff00':'#d1a3ff'}">
-                        <div class="user-row">
-                            <button class="user-name-btn" onclick="toggleUserDetails('${id}')">
-                                <span>${u.nome || 'Ouvinte'}</span> ${isOnline?'<span class="status-on">ON</span>':'<span class="status-off">OFF</span>'}
-                            </button>
-                        </div>
-                        <div class="user-details-bar" id="details-${id}">
-                            <p>Ouvindo: <b>${u.radioAtual || 'Nenhuma'}</b></p>
-                            <p>Tempo nesta sessão: <b>${m}m ${s}s</b></p>
-                            <p>Último sinal: <b>${new Date(lastSeen).toLocaleTimeString()}</b></p>
-                        </div>
+                const div = document.createElement('div');
+                div.className = "user-item";
+                div.style.borderLeft = `4px solid ${isOnline ? '#00ff00' : '#d1a3ff'}`;
+                div.innerHTML = `
+                    <div class="user-row">
+                        <button class="user-name-btn" onclick="toggleUserDetails('${id}')">
+                            <span>${u.nome || 'Ouvinte'}</span> 
+                            ${isOnline ? '<span class="status-on">ON</span>' : '<span class="status-off">OFF</span>'}
+                        </button>
+                    </div>
+                    <div class="user-details-bar" id="details-${id}">
+                        <p>Ouvindo: <b>${u.radioAtual || 'Nenhuma'}</b></p>
+                        <p>Tempo nesta sessão: <b id="timer-${id}">0m 0s</b></p>
+                        <p>Último sinal: <b>${new Date(lastSeen).toLocaleTimeString()}</b></p>
                     </div>`;
+                container.appendChild(div);
             });
+            updateUserTimers(); // Chama imediatamente após renderizar
         });
+
+        // Função que atualiza os textos de tempo a cada segundo
+        function updateUserTimers() {
+            for (let id in usersDataCache) {
+                const el = document.getElementById(`timer-${id}`);
+                if (el) {
+                    const data = usersDataCache[id];
+                    if (data.isOnline) {
+                        const diffMs = Date.now() - data.loginTime;
+                        const h = Math.floor(diffMs / 3600000);
+                        const m = Math.floor((diffMs % 3600000) / 60000);
+                        const s = Math.floor((diffMs % 60000) / 1000);
+                        
+                        let tempoTexto = "";
+                        if(h > 0) tempoTexto += `${h}h `;
+                        tempoTexto += `${m}m ${s}s`;
+                        
+                        el.innerText = tempoTexto;
+                    } else {
+                        el.innerText = "Sessão encerrada";
+                    }
+                }
+            }
+        }
     </script>
 </body>
 </html>
