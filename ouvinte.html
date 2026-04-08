@@ -13,16 +13,14 @@
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; user-select: none; }
         
         /* HEADER RESPONSIVO */
-        .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 20px 30px; border-radius: 15px; border: 1px solid #333; margin-bottom: 25px; gap: 10px; }
+        .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 20px 30px; border-radius: 15px; border: 1px solid #333; margin-bottom: 25px; gap: 10px; position: relative; z-index: 101; }
         
-        /* Ajuste Nome e Sair */
         .header-left { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; flex-shrink: 0; }
         .header h2 { margin: 0; color: var(--primary); font-size: 22px; text-transform: uppercase; line-height: 1; }
         
         #container-pub { flex: 1; display: flex; justify-content: center; align-items: center; padding: 0 10px; height: 55px; overflow: hidden; }
         #img-publicidade { max-height: 55px; max-width: 100%; border-radius: 8px; display: none; object-fit: contain; transition: opacity 0.5s ease-in-out; }
         
-        /* Ajuste Data, Hora e Mensagem */
         .header-right { display: flex; align-items: center; gap: 15px; flex-shrink: 0; }
         .time-msg-box { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; border-left: 1px solid #333; padding-left: 20px; }
         
@@ -38,7 +36,60 @@
         .btn-msg:hover { background: var(--primary); color: white; }
 
         #hora { font-size: 24px; font-weight: 900; line-height: 1; color: var(--primary); }
+
+        /* CARD DE MENSAGEM DESLIZANTE */
+        #container-mensagem {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out, margin-bottom 0.5s ease-in-out;
+            margin-bottom: 0;
+        }
+        #container-mensagem.aberto {
+            max-height: 300px;
+            margin-bottom: 25px;
+        }
+        .card-msg {
+            background: #181818;
+            border: 1px solid var(--primary);
+            border-radius: 15px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .card-msg textarea {
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: white;
+            padding: 10px;
+            resize: none;
+            font-family: inherit;
+            height: 80px;
+        }
+        .card-msg textarea:focus { border-color: var(--primary); outline: none; }
         
+        .msg-footer { display: flex; justify-content: space-between; align-items: center; }
+        .emoji-bar { display: flex; gap: 8px; }
+        .btn-emoji { 
+            background: #222; border: 1px solid #333; border-radius: 5px; 
+            cursor: pointer; font-size: 18px; padding: 5px; transition: 0.2s; 
+        }
+        .btn-emoji:hover { background: #333; transform: scale(1.1); }
+        
+        .btn-enviar-msg {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+        .btn-enviar-msg:hover { opacity: 0.8; transform: translateY(-2px); }
+
         /* ESTRUTURA PRINCIPAL */
         .main-container { 
             display: grid; 
@@ -144,7 +195,7 @@
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
     </style>
 </head>
-<body onclick="fecharAviso()">
+<body>
     <div class="header">
         <div class="header-left">
             <h2 id="nome-exibicao">OUVINTE</h2>
@@ -158,9 +209,26 @@
                 <div id="data-atual" class="date-info">CARREGANDO DATA...</div>
                 <div class="separator"></div>
                 <div id="hora">00:00:00</div>
-                <button class="btn-header btn-msg" onclick="alert('Funcionalidade de mensagem em breve!')">
+                <button class="btn-header btn-msg" onclick="toggleCardMensagem()">
                     <i class="fas fa-comment-dots"></i> ENVIE UMA MENSAGEM PRA NÓS
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="container-mensagem">
+        <div class="card-msg">
+            <textarea id="texto-mensagem" placeholder="Escreva sua mensagem aqui para o Luigy..."></textarea>
+            <div class="msg-footer">
+                <div class="emoji-bar">
+                    <button class="btn-emoji" onclick="addEmoji('❤️')">❤️</button>
+                    <button class="btn-emoji" onclick="addEmoji('🚀')">🚀</button>
+                    <button class="btn-emoji" onclick="addEmoji('😊')">😊</button>
+                    <button class="btn-emoji" onclick="addEmoji('👏')">👏</button>
+                    <button class="btn-emoji" onclick="addEmoji('👍')">👍</button>
+                    <button class="btn-emoji" onclick="addEmoji('👎')">👎</button>
+                </div>
+                <button class="btn-enviar-msg" onclick="enviarMensagem()">Enviar Mensagem</button>
             </div>
         </div>
     </div>
@@ -214,6 +282,30 @@
         document.getElementById('nome-exibicao').innerText = nomeUsuario;
 
         let allRadios = [], mySelectedIds = [], activeIndex = -1;
+
+        // Funções de Mensagem
+        function toggleCardMensagem() {
+            document.getElementById('container-mensagem').classList.toggle('aberto');
+        }
+
+        function addEmoji(emoji) {
+            document.getElementById('texto-mensagem').value += emoji;
+        }
+
+        function enviarMensagem() {
+            const texto = document.getElementById('texto-mensagem').value;
+            if(!texto.trim()) return alert("Escreva algo antes de enviar!");
+
+            db.ref('mensagens_ouvintes').push({
+                usuario: nomeUsuario,
+                mensagem: texto,
+                data: Date.now()
+            }).then(() => {
+                alert("Mensagem enviada com sucesso!");
+                document.getElementById('texto-mensagem').value = "";
+                toggleCardMensagem();
+            });
+        }
 
         // Atualização de Hora e Data
         setInterval(() => { 
