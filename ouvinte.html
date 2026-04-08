@@ -147,10 +147,11 @@
         const nomeUsuario = localStorage.getItem('usuarioNome') || "OUVINTE";
         document.getElementById('nome-exibicao').innerText = nomeUsuario;
 
-        // INICIALIZAÇÃO DE SESSÃO
+        // INICIALIZAÇÃO DE SESSÃO - Adicionado radioTime aqui também
         const tempoEntrada = Date.now();
         db.ref('usuarios/' + nomeUsuario).update({ 
             loginTime: tempoEntrada, 
+            radioTime: tempoEntrada,
             lastSeen: tempoEntrada,
             status: "Online" 
         });
@@ -233,7 +234,14 @@
             player.src = r.url; player.play();
             document.getElementById('now-title').innerText = "OUVINTE: " + r.name;
             document.getElementById('play-icon').className = "fas fa-stop";
-            db.ref('usuarios/' + nomeUsuario).update({ radioAtual: r.name, lastSeen: Date.now() });
+            
+            // ATUALIZAÇÃO DO CRONÔMETRO DE RÁDIO NO FIREBASE
+            db.ref('usuarios/' + nomeUsuario).update({ 
+                radioAtual: r.name, 
+                radioTime: Date.now(),
+                lastSeen: Date.now() 
+            });
+            
             renderAll();
         }
 
