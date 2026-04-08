@@ -68,6 +68,7 @@
         .txt-fim { color: #ff4444; font-weight: bold; }
         .btn-delete-user { background: none; border: none; color: #ff4444; padding: 15px; cursor: pointer; font-size: 16px; transition: 0.2s; }
         .btn-edit-pub { color: #1DB954 !important; padding: 15px; cursor: pointer; font-size: 16px; background: none; border: none; transition: 0.2s; }
+        .btn-edit-pub:hover { transform: scale(1.2); }
         .user-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; overflow: hidden; }
         .user-row { display: flex; align-items: center; width: 100%; }
         .user-name-btn { flex: 1; padding: 15px; background: none; border: none; color: white; text-align: left; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
@@ -191,14 +192,11 @@
         const player = document.getElementById('audio-player');
         let radioData = [];
         let activeIndex = -1;
-        let openUsers = {}; 
+        let openUsers = {}; // Para manter o menu dos usuários aberto mesmo com refresh do Firebase
 
         const emojisReply = ["👍", "❤️", "😂", "👏", "🔥", "🚀", "🎵", "📻", "🙌", "😲", "🤩", "🙏", "💪", "💡", "✨", "🔊", "🎧", "😎", "🤝", "✅"];
 
-        setInterval(() => { 
-            document.getElementById('hora').innerText = new Date().toLocaleTimeString('pt-BR'); 
-        }, 1000);
-
+        setInterval(() => { document.getElementById('hora').innerText = new Date().toLocaleTimeString('pt-BR'); }, 1000);
         function logout() { if(confirm("Deseja sair?")) { localStorage.removeItem('usuarioNome'); window.location.href = 'index.html'; } }
         function toggleMensagens() { document.getElementById('container-mensagens-adm').classList.toggle('aberto'); }
 
@@ -335,6 +333,19 @@
             document.getElementById('btn-pub-save').innerText = "LANÇAR CAMPANHA";
         }
 
+        function prepareEditPub(id, img, ini, fim, target, manual) {
+            document.getElementById('pub-key').value = id;
+            imgBase64 = img;
+            document.getElementById('pub-view').src = img;
+            document.getElementById('pub-view').style.display = "block";
+            document.getElementById('pub-ini').value = new Date(ini).toISOString().slice(0,16);
+            document.getElementById('pub-fim').value = new Date(fim).toISOString().slice(0,16);
+            document.getElementById('pub-target').value = target;
+            if(target === 'MANUAL') { document.getElementById('pub-manual').style.display = "block"; document.getElementById('pub-manual').value = manual; }
+            document.getElementById('btn-pub-save').innerText = "ATUALIZAR CAMPANHA";
+            window.scrollTo(0, 500);
+        }
+
         function togglePubDetails(id) {
             const bar = document.getElementById('pub-details-' + id);
             bar.style.display = (bar.style.display === 'block' ? 'none' : 'block');
@@ -363,16 +374,16 @@
             });
         });
 
-        // --- LÓGICA DE TEMPO CORRIGIDA ---
+        // --- MONITOR DE OUVINTES CORRIGIDO ---
         function toggleUserDetails(id) {
             const bar = document.getElementById('details-' + id);
-            const isOpen = (bar.style.display === 'block');
-            bar.style.display = isOpen ? 'none' : 'block';
-            openUsers[id] = !isOpen; 
+            const isCurrentlyOpen = (bar.style.display === 'block');
+            bar.style.display = isCurrentlyOpen ? 'none' : 'block';
+            openUsers[id] = !isCurrentlyOpen;
         }
 
         function formatarTempoReal(ms) {
-            if (!ms || ms < 0 || ms > 86400000) return "00:00:00";
+            if (!ms || ms < 0) return "00:00:00";
             const totalSegundos = Math.floor(ms / 1000);
             const horas = Math.floor(totalSegundos / 3600);
             const minutos = Math.floor((totalSegundos % 3600) / 60);
@@ -380,16 +391,13 @@
             return `${horas.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
         }
 
+        // Loop para atualizar os tempos "Live" na tela a cada segundo
         setInterval(() => {
             const spans = document.querySelectorAll('.tempo-live');
             spans.forEach(span => {
                 const startTime = parseInt(span.dataset.start);
                 const agora = Date.now();
-                if (startTime > (agora - 86400000)) {
-                    span.innerText = formatarTempoReal(agora - startTime);
-                } else {
-                    span.innerText = "00:00:00";
-                }
+                span.innerText = formatarTempoReal(agora - startTime);
             });
         }, 1000);
 
@@ -400,15 +408,11 @@
                 const u = c.val(), id = c.key;
                 const agora = Date.now();
                 const isOnline = (agora - parseInt(u.lastSeen || 0) < 60000);
-                const dataOuvindo = u.lastSeen ? new Date(u.lastSeen).toLocaleString('pt-BR') : '---';
-                let rádioAtual = u.radioAtual || 'Navegando...';
-                let startTime = parseInt(u.radioStartTime || 0);
-                let diff = agora - startTime;
-                if (startTime === 0 || diff < 0 || diff > 86400000) { diff = 0; }
-                let tempoHTML = isOnline 
-                    ? `<span class="tempo-live" data-start="${startTime}">${formatarTempoReal(diff)}</span>`
-                    : `<span>${formatarTempoReal(u.tempoTotalRadio || 0)}</span>`;
                 const displayStyle = openUsers[id] ? 'block' : 'none';
+                
+                // Calcula tempo inicial para o HTML
+                const startTime = parseInt(u.radioStartTime || agora);
+                const tempoInicial = isOnline ? formatarTempoReal(agora - startTime) : '00:00:00';
 
                 container.innerHTML += `
                     <div class="user-item" style="border-left: 4px solid ${isOnline?'#00ff00':'#d1a3ff'}">
@@ -417,11 +421,12 @@
                                 <span>${u.nome || 'Ouvinte'}</span> 
                                 ${isOnline ? '<span class="status-on">ON</span>' : '<span class="status-off">OFF</span>'}
                             </button>
+                            <button class="btn-delete-user" onclick="if(confirm('Excluir ouvinte?')) db.ref('usuarios/${id}').remove()"><i class="fas fa-user-minus"></i></button>
                         </div>
                         <div class="user-details-bar" id="details-${id}" style="display: ${displayStyle}">
-                            <p><span>Rádio Atual:</span> <b>${rádioAtual}</b></p>
-                            <p><span>Tempo nesta Rádio:</span> <b style="color:white">${tempoHTML}</b></p>
-                            <p><span>Última Atividade:</span> <b>${dataOuvindo}</b></p>
+                            <p><span>Ouvindo agora:</span> <b>${u.radioAtual || 'Nenhuma'}</b></p>
+                            <p><span>Tempo de Conexão:</span> <b style="color:white" class="${isOnline?'tempo-live':''}" data-start="${startTime}">${tempoInicial}</b></p>
+                            <p><span>Última Atividade:</span> <b>${u.lastSeen ? new Date(u.lastSeen).toLocaleTimeString() : '---'}</b></p>
                         </div>
                     </div>`;
             });
