@@ -33,7 +33,8 @@
         .btn-sair:hover { background: #331111; border-color: #ff4444; }
         
         .btn-msg { border-color: var(--primary); color: var(--primary); font-size: 11px; padding: 4px 10px; }
-        .btn-msg:hover { background: var(--primary); color: white; }
+        .btn-msg.tem-resposta { background: #ffcc00; color: #000; border-color: #000; animation: pulse-yellow 1s infinite; }
+        @keyframes pulse-yellow { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
         #hora { font-size: 24px; font-weight: 900; line-height: 1; color: var(--primary); }
 
@@ -45,7 +46,7 @@
             margin-bottom: 0;
         }
         #container-mensagem.aberto {
-            max-height: 300px;
+            max-height: 500px;
             margin-bottom: 25px;
         }
         .card-msg {
@@ -67,8 +68,17 @@
             font-family: inherit;
             height: 80px;
         }
-        .card-msg textarea:focus { border-color: var(--primary); outline: none; }
         
+        /* AREA DE RESPOSTA */
+        #bloco-resposta {
+            background: #25103d;
+            border: 1px dashed var(--primary);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: none;
+        }
+
         .msg-footer { display: flex; justify-content: space-between; align-items: center; }
         .emoji-bar { display: flex; gap: 8px; }
         .btn-emoji { 
@@ -88,7 +98,6 @@
             text-transform: uppercase;
             transition: 0.3s;
         }
-        .btn-enviar-msg:hover { opacity: 0.8; transform: translateY(-2px); }
 
         /* ESTRUTURA PRINCIPAL */
         .main-container { 
@@ -178,9 +187,12 @@
             cursor: pointer;
             animation: piscar-alerta 0.8s infinite alternate; 
         }
+        /* Cor diferente para o alerta de resposta */
+        #aviso-resposta { background: #ffcc00; color: #000; }
+
         @keyframes piscar-alerta { 
-            0% { opacity: 1; transform: scale(1); background: #ff0000; } 
-            100% { opacity: 0.7; transform: scale(1.05); background: var(--primary); } 
+            0% { opacity: 1; transform: scale(1); } 
+            100% { opacity: 0.7; transform: scale(1.05); } 
         }
         
         .controls-row { display: flex; align-items: center; justify-content: center; gap: 35px; }
@@ -209,8 +221,8 @@
                 <div id="data-atual" class="date-info">CARREGANDO DATA...</div>
                 <div class="separator"></div>
                 <div id="hora">00:00:00</div>
-                <button class="btn-header btn-msg" onclick="toggleCardMensagem()">
-                    <i class="fas fa-comment-dots"></i> ENVIE UMA MENSAGEM PRA NÓS
+                <button id="btn-abrir-msg" class="btn-header btn-msg" onclick="toggleCardMensagem()">
+                    <i class="fas fa-comment-dots"></i> <span id="txt-btn-msg">ENVIE UMA MENSAGEM PRA NÓS</span>
                 </button>
             </div>
         </div>
@@ -218,6 +230,10 @@
 
     <div id="container-mensagem">
         <div class="card-msg">
+            <div id="bloco-resposta">
+                <strong style="color: var(--primary); font-size: 12px;">RESPOSTA DO ADMIN:</strong>
+                <p id="texto-resposta-adm" style="margin: 5px 0; font-style: italic;"></p>
+            </div>
             <textarea id="texto-mensagem" placeholder="Escreva sua mensagem aqui para o Luigy..."></textarea>
             <div class="msg-footer">
                 <div class="emoji-bar">
@@ -252,6 +268,10 @@
     </div>
 
     <div class="player-footer">
+        <div id="aviso-resposta" class="msg-barra" onclick="toggleCardMensagem(); fecharAvisoResposta()">
+            <i class="fas fa-reply" style="margin-right:8px;"></i> OBA! O ADM RESPONDEU SUA MENSAGEM, CLIQUE PARA VER!
+        </div>
+        
         <div id="aviso-novidade" class="msg-barra" onclick="fecharAviso()">
             <i class="fas fa-bullhorn" style="margin-right:8px;"></i> EI, TEM RADIO NOVA NA AREA, CONFIRA SUA LISTA E MERGULHE NO SOM
         </div>
@@ -286,6 +306,10 @@
         // Funções de Mensagem
         function toggleCardMensagem() {
             document.getElementById('container-mensagem').classList.toggle('aberto');
+            // Ao abrir, se houver resposta, podemos "limpar" o alerta visual do botão
+            if(document.getElementById('container-mensagem').classList.contains('aberto')) {
+                fecharAvisoResposta();
+            }
         }
 
         function addEmoji(emoji) {
@@ -299,12 +323,39 @@
             db.ref('mensagens_ouvintes').push({
                 usuario: nomeUsuario,
                 mensagem: texto,
-                data: Date.now()
+                data: Date.now(),
+                lida: false
             }).then(() => {
                 alert("Mensagem enviada com sucesso!");
                 document.getElementById('texto-mensagem').value = "";
                 toggleCardMensagem();
             });
+        }
+
+        // MONITORAR RESPOSTAS DO ADM
+        db.ref('mensagens_ouvintes').orderByChild('usuario').equalTo(nomeUsuario).on('value', snap => {
+            let ultimaMensagem = null;
+            snap.forEach(child => {
+                ultimaMensagem = child.val();
+            });
+
+            if(ultimaMensagem && ultimaMensagem.resposta) {
+                document.getElementById('bloco-resposta').style.display = "block";
+                document.getElementById('texto-resposta-adm').innerText = ultimaMensagem.resposta;
+                
+                // Alerta Visual no Botão e Barra
+                document.getElementById('btn-abrir-msg').classList.add('tem-resposta');
+                document.getElementById('txt-btn-msg').innerText = "VOCÊ TEM UMA RESPOSTA!";
+                document.getElementById('aviso-resposta').style.display = "block";
+            } else {
+                document.getElementById('bloco-resposta').style.display = "none";
+            }
+        });
+
+        function fecharAvisoResposta() {
+            document.getElementById('aviso-resposta').style.display = "none";
+            document.getElementById('btn-abrir-msg').classList.remove('tem-resposta');
+            document.getElementById('txt-btn-msg').innerText = "ENVIE UMA MENSAGEM PRA NÓS";
         }
 
         // Atualização de Hora e Data
