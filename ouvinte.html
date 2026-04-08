@@ -22,24 +22,13 @@
         #container-pub { flex: 1; display: flex; justify-content: center; align-items: center; padding: 0 10px; height: 55px; overflow: hidden; }
         #img-publicidade { max-height: 55px; max-width: 100%; border-radius: 8px; display: none; object-fit: contain; transition: opacity 0.5s ease-in-out; }
         
-        /* Ajuste Hora e Mensagem */
-        .header-right { display: flex; align-items: center; gap: 30px; flex-shrink: 0; }
+        /* Ajuste Data, Hora e Mensagem */
+        .header-right { display: flex; align-items: center; gap: 15px; flex-shrink: 0; }
         .time-msg-box { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; border-left: 1px solid #333; padding-left: 20px; }
         
-        .weather-box { display: flex; align-items: center; gap: 15px; color: var(--primary); }
-        .weather-info { display: flex; flex-direction: column; align-items: flex-end; text-align: right; line-height: 1.2; }
-        .weather-box i { font-size: 28px; position: relative; min-width: 30px; text-align: center; }
-        
-        .fa-sun { animation: spin-sun 10s linear infinite; color: #FFD700; }
-        @keyframes spin-sun { 100% { transform: rotate(360deg); } }
-        
-        .fa-cloud-showers-heavy { animation: rain-shake 0.5s ease-in-out infinite; }
-        @keyframes rain-shake { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(3px); } }
+        .date-info { font-size: 11px; color: #888; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
+        .separator { height: 1px; width: 100%; background: #333; margin: 2px 0; }
 
-        .weather-desc { font-size: 10px; text-transform: uppercase; opacity: 0.9; letter-spacing: 1px; font-weight: bold; }
-        .city-name { color: #888; font-size: 11px; text-transform: uppercase; font-weight: normal; }
-        .temp-val { font-size: 16px; font-weight: 900; }
-        
         .btn-header { background: none; border: 1px solid #333; color: white; padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; transition: 0.3s; display: flex; align-items: center; gap: 8px; text-transform: uppercase; font-weight: bold; }
         .btn-header:hover { background: #222; border-color: var(--primary); }
         .btn-sair { color: #ff4444; border-color: #442222; padding: 4px 10px; }
@@ -48,7 +37,7 @@
         .btn-msg { border-color: var(--primary); color: var(--primary); font-size: 11px; padding: 4px 10px; }
         .btn-msg:hover { background: var(--primary); color: white; }
 
-        #hora { font-size: 24px; font-weight: 900; line-height: 1; }
+        #hora { font-size: 24px; font-weight: 900; line-height: 1; color: var(--primary); }
         
         /* ESTRUTURA PRINCIPAL */
         .main-container { 
@@ -165,16 +154,9 @@
         <div id="container-pub"><img id="img-publicidade" src=""></div>
         
         <div class="header-right">
-            <div class="weather-box" id="weather">
-                <div class="weather-info">
-                    <span class="city-name" id="city">LOCALIZANDO...</span>
-                    <span class="temp-val" id="temp">--°C</span>
-                    <span class="weather-desc" id="weather-desc">AGUARDE</span>
-                </div>
-                <i id="weather-icon" class="fas fa-sync-alt fa-spin"></i>
-            </div>
-            
             <div class="time-msg-box">
+                <div id="data-atual" class="date-info">CARREGANDO DATA...</div>
+                <div class="separator"></div>
                 <div id="hora">00:00:00</div>
                 <button class="btn-header btn-msg" onclick="alert('Funcionalidade de mensagem em breve!')">
                     <i class="fas fa-comment-dots"></i> ENVIE UMA MENSAGEM PRA NÓS
@@ -233,38 +215,16 @@
 
         let allRadios = [], mySelectedIds = [], activeIndex = -1;
 
-        setInterval(() => { document.getElementById('hora').innerText = new Date().toLocaleTimeString('pt-BR'); }, 1000);
+        // Atualização de Hora e Data
+        setInterval(() => { 
+            const agora = new Date();
+            document.getElementById('hora').innerText = agora.toLocaleTimeString('pt-BR'); 
+            
+            const opcoesData = { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' };
+            document.getElementById('data-atual').innerText = agora.toLocaleDateString('pt-BR', opcoesData);
+        }, 1000);
 
         function fecharAviso() { document.getElementById('aviso-novidade').style.display = 'none'; }
-
-        async function getWeather() {
-            try {
-                const locRes = await fetch('https://ipapi.co/json/');
-                const loc = await locRes.json();
-                if (loc.latitude && loc.longitude) {
-                    const climaRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${loc.latitude}&longitude=${loc.longitude}&current_weather=true`);
-                    const clima = await climaRes.json();
-                    if (clima.current_weather) {
-                        const temp = Math.round(clima.current_weather.temperature);
-                        const code = clima.current_weather.weathercode;
-                        document.getElementById('temp').innerText = temp + "°C";
-                        document.getElementById('city').innerText = (loc.city || "LOCAL").toUpperCase();
-                        const icon = document.getElementById('weather-icon');
-                        const desc = document.getElementById('weather-desc');
-                        icon.className = "fas"; 
-                        icon.style.color = "";
-                        if (code >= 51 && code <= 67 || code >= 80 && code <= 82) { icon.classList.add("fa-cloud-showers-heavy"); desc.innerText = "CHOVENDO"; } 
-                        else if (code === 3) { icon.classList.add("fa-cloud"); icon.style.color = "#555"; desc.innerText = "NUBLADO"; } 
-                        else if (code >= 1 && code <= 2) { icon.classList.add("fa-cloud-sun"); desc.innerText = "SOL ENTRE NUVENS"; } 
-                        else if (code === 0) { icon.classList.add("fa-sun"); desc.innerText = "CÉU LIMPO"; } 
-                        else if (code >= 95) { icon.classList.add("fa-bolt"); desc.innerText = "TEMPESTADE"; } 
-                        else { icon.classList.add("fa-cloud"); desc.innerText = "NUVENS"; }
-                    }
-                }
-            } catch (e) { document.getElementById('city').innerText = "CLIMA"; }
-        }
-        getWeather();
-        setInterval(getWeather, 600000);
 
         db.ref('radios').on('value', snap => {
             const countAnterior = parseInt(localStorage.getItem('lastRadioCount')) || 0;
