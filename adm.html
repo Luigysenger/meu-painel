@@ -15,7 +15,6 @@
         .header-left { display: flex; align-items: center; gap: 20px; }
         .header h2 { margin: 0; color: var(--primary); font-size: 22px; }
         
-        /* BOTÃO MENSAGENS NO TOPO */
         .header-center { display: flex; align-items: center; gap: 10px; }
         .btn-msg-notif { background: #ff4444; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; transition: 0.3s; }
         .btn-msg-notif:hover { transform: scale(1.05); background: #cc0000; }
@@ -27,7 +26,6 @@
         .btn-sair:hover { background: #331111; border-color: #ff4444; }
         #hora { font-size: 26px; font-weight: 900; }
 
-        /* AREA DE MENSAGENS DESLIZANTE */
         #container-mensagens-adm { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out; margin-bottom: 0; }
         #container-mensagens-adm.aberto { max-height: 2000px; margin-bottom: 25px; }
         
@@ -36,7 +34,6 @@
         .msg-card-individual h4 { margin: 0 0 5px 0; color: var(--primary); font-size: 14px; display: flex; justify-content: space-between; }
         .msg-card-individual p { font-size: 13px; margin: 10px 0; line-height: 1.4; color: #eee; background: #222; padding: 8px; border-radius: 5px; }
         
-        /* CAMPO DE RESPOSTA */
         .reply-box { margin-top: 10px; display: flex; gap: 5px; }
         .reply-box input { flex: 1; padding: 8px; font-size: 12px; border-radius: 5px; border: 1px solid #444; background: #111; color: white; }
         .btn-send-reply { background: var(--primary); border: none; border-radius: 5px; padding: 0 10px; cursor: pointer; color: #000; }
@@ -48,7 +45,6 @@
         .actions-msg { margin-top: 15px; display: flex; justify-content: space-between; align-items: center; }
         .btn-del-msg { color: #ff4444; background: none; border: none; cursor: pointer; font-size: 12px; }
 
-        /* RESTANTE DO ESTILO */
         .main-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; max-width: 1400px; margin: 0 auto; }
         .card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid #282828; margin-bottom: 20px; }
         h3 { color: var(--primary); font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; }
@@ -75,7 +71,6 @@
         .pub-preview { width: 100%; max-height: 100px; border-radius: 10px; object-fit: contain; margin-top: 10px; border: 1px dashed #444; display: none; }
         label { font-size: 10px; color: #888; display: block; margin-bottom: 5px; margin-left: 5px; }
         
-        /* ESTILO CAMPANHAS ATIVAS */
         .pub-list-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; overflow: hidden; border-left: 4px solid var(--primary); transition: 0.3s; }
         .pub-list-row { display: flex; align-items: center; width: 100%; }
         .pub-list-btn { flex: 1; padding: 12px; background: none; border: none; color: white; text-align: left; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 10px; }
@@ -216,9 +211,11 @@
         let activeIndex = -1;
         const emojisReply = ["👍", "❤️", "😂", "👏", "🔥", "🚀", "🎵", "📻", "🙌", "😲", "🤩", "🙏", "💪", "💡", "✨", "🔊", "🎧", "😎", "🤝", "✅"];
 
-        setInterval(() => { document.getElementById('hora').innerText = new Date().toLocaleTimeString('pt-BR'); }, 1000);
-        function logout() { if(confirm("Deseja sair?")) { localStorage.removeItem('usuarioNome'); window.location.href = 'index.html'; } }
+        setInterval(() => { 
+            document.getElementById('hora').innerText = new Date().toLocaleTimeString('pt-BR'); 
+        }, 1000);
 
+        function logout() { if(confirm("Deseja sair?")) { localStorage.removeItem('usuarioNome'); window.location.href = 'index.html'; } }
         function toggleMensagens() { document.getElementById('container-mensagens-adm').classList.toggle('aberto'); }
 
         db.ref('mensagens_ouvintes').on('value', snap => {
@@ -354,19 +351,6 @@
             document.getElementById('btn-pub-save').innerText = "LANÇAR CAMPANHA";
         }
 
-        function prepareEditPub(id, img, ini, fim, target, manual) {
-            document.getElementById('pub-key').value = id;
-            imgBase64 = img;
-            document.getElementById('pub-view').src = img;
-            document.getElementById('pub-view').style.display = "block";
-            document.getElementById('pub-ini').value = new Date(ini).toISOString().slice(0,16);
-            document.getElementById('pub-fim').value = new Date(fim).toISOString().slice(0,16);
-            document.getElementById('pub-target').value = target;
-            if(target === 'MANUAL') { document.getElementById('pub-manual').style.display = "block"; document.getElementById('pub-manual').value = manual; }
-            document.getElementById('btn-pub-save').innerText = "ATUALIZAR CAMPANHA";
-            window.scrollTo(0, 500);
-        }
-
         function togglePubDetails(id) {
             const bar = document.getElementById('pub-details-' + id);
             bar.style.display = (bar.style.display === 'block' ? 'none' : 'block');
@@ -377,9 +361,6 @@
             container.innerHTML = "";
             snap.forEach(c => {
                 const p = c.val(), id = c.key, vencida = Date.now() > p.fim;
-                const dataIni = new Date(p.inicio).toLocaleString('pt-BR');
-                const dataFim = new Date(p.fim).toLocaleString('pt-BR');
-
                 container.innerHTML += `
                     <div class="pub-list-item" style="border-left-color: ${vencida ? '#ff4444' : '#1DB954'}">
                         <div class="pub-list-row">
@@ -391,9 +372,8 @@
                             <button class="btn-delete-user" onclick="if(confirm('Excluir?')) db.ref('publicidade/${id}').remove()"><i class="fas fa-trash-alt"></i></button>
                         </div>
                         <div class="pub-details-bar" id="pub-details-${id}">
-                             <p>Início: <span class="txt-inicio">${dataIni}</span></p>
-                             <p>Término: <span class="txt-fim">${dataFim}</span></p>
-                             <p>Status: <b>${vencida ? 'Expirada' : 'Ativa'}</b></p>
+                             <p>Início: <span class="txt-inicio">${new Date(p.inicio).toLocaleString()}</span></p>
+                             <p>Término: <span class="txt-fim">${new Date(p.fim).toLocaleString()}</span></p>
                         </div>
                     </div>`;
             });
@@ -404,7 +384,6 @@
             bar.style.display = (bar.style.display === 'block' ? 'none' : 'block');
         }
 
-        // Formatação de Tempo em Minutos e Segundos
         function formatarTempoReal(ms) {
             if (!ms || ms < 0) return "00:00";
             const totalSegundos = Math.floor(ms / 1000);
@@ -413,42 +392,52 @@
             return `${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
         }
 
+        // Loop para atualização visual do tempo em tempo real (1 em 1 segundo)
+        setInterval(() => {
+            const itens = document.querySelectorAll('.tempo-live');
+            itens.forEach(span => {
+                const start = parseInt(span.dataset.start);
+                const tipo = span.dataset.tipo;
+                if (start > 0) {
+                    span.innerText = formatarTempoReal(Date.now() - start);
+                }
+            });
+        }, 1000);
+
         db.ref('usuarios').on('value', snap => {
             const container = document.getElementById('user-list');
             container.innerHTML = "";
             snap.forEach(c => {
                 const u = c.val(), id = c.key;
                 const isOnline = (Date.now() - parseInt(u.lastSeen || 0) < 60000);
-                
-                // DATA E HORA FORMATADA
                 const dataOuvindo = new Date(u.lastSeen || Date.now()).toLocaleString('pt-BR');
 
-                let rádioAtual, tempoRádio, tempoSessão;
+                let rádioAtual, tempoRádioHTML, tempoSessãoHTML;
 
                 if (isOnline) {
-                    // SE ESTÁ ONLINE, MOSTRA DADOS EM TEMPO REAL
                     rádioAtual = u.radioAtual || 'Navegando...';
-                    tempoRádio = formatarTempoReal(Date.now() - parseInt(u.radioStartTime || u.lastSeen));
-                    tempoSessão = formatarTempoReal(Date.now() - parseInt(u.loginTime || u.lastSeen));
+                    // Usamos classes para o setInterval atualizar
+                    tempoRádioHTML = `<span class="tempo-live" data-tipo="radio" data-start="${u.radioStartTime || u.lastSeen}">00:00</span>`;
+                    tempoSessãoHTML = `<span class="tempo-live" data-tipo="sessao" data-start="${u.loginTime || u.lastSeen}">00:00</span>`;
                 } else {
-                    // SE ESTÁ OFFLINE, MANTÉM APENAS OS DADOS DA ÚLTIMA SESSÃO/RÁDIO SALVOS
                     rádioAtual = u.ultimaRadio || 'Desconectado';
-                    tempoRádio = formatarTempoReal(u.tempoUltimaRadio || 0);
-                    tempoSessão = formatarTempoReal(u.totalSessionTime || 0);
+                    tempoRádioHTML = `<span>${formatarTempoReal(u.tempoUltimaRadio || 0)}</span>`;
+                    tempoSessãoHTML = `<span>${formatarTempoReal(u.totalSessionTime || 0)}</span>`;
                 }
 
                 container.innerHTML += `
                     <div class="user-item" style="border-left: 4px solid ${isOnline?'#00ff00':'#d1a3ff'}">
                         <div class="user-row">
                             <button class="user-name-btn" onclick="toggleUserDetails('${id}')">
-                                <span>${u.nome || 'Ouvinte'}</span> ${isOnline?'<span class="status-on">ON</span>':'<span class="status-off">OFF</span>'}
+                                <span>${u.nome || 'Ouvinte'}</span> 
+                                ${isOnline ? '<span class="status-on">ON</span>' : '<span class="status-off" style="color:#d1a3ff">OFF</span>'}
                             </button>
                         </div>
                         <div class="user-details-bar" id="details-${id}">
                             <p><span>Rádio:</span> <b>${rádioAtual}</b></p>
-                            <p><span>Tempo na Rádio:</span> <b>${tempoRádio} (M:S)</b></p>
-                            <p><span>Tempo de Sessão:</span> <b>${tempoSessão} (M:S)</b></p>
-                            <p><span>Data:</span> <b>${dataOuvindo}</b></p>
+                            <p><span>Tempo na Rádio:</span> <b>${tempoRádioHTML} (M:S)</b></p>
+                            <p><span>Tempo de Sessão:</span> <b>${tempoSessãoHTML} (M:S)</b></p>
+                            <p><span>Último Registro:</span> <b>${dataOuvindo}</b></p>
                         </div>
                     </div>`;
             });
