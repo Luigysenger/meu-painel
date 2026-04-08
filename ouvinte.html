@@ -22,27 +22,20 @@
         #container-pub { flex: 1; display: flex; justify-content: center; align-items: center; padding: 0 10px; height: 55px; overflow: hidden; }
         #img-publicidade { max-height: 55px; max-width: 100%; border-radius: 8px; display: none; object-fit: contain; transition: opacity 0.5s ease-in-out; }
         
-        /* Ajuste Hora e Mensagem */
-        .header-right { display: flex; align-items: center; gap: 20px; flex-shrink: 0; }
+        /* Ajuste Hora e Data */
+        .header-right { display: flex; align-items: center; flex-shrink: 0; }
         
-        /* BLOCO DE DATA E HORA */
-        .datetime-container { display: flex; align-items: center; gap: 15px; border-left: 1px solid #333; padding-left: 20px; }
-        .date-box { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.1; }
-        .date-text { font-size: 11px; color: #888; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
-        .divider-line { width: 1px; height: 35px; background: #333; margin: 0 5px; }
+        /* BLOCO DE DATA E HORA LIMPO */
+        .datetime-container { display: flex; flex-direction: column; align-items: flex-end; border-left: 1px solid #333; padding-left: 20px; }
         
-        .time-msg-box { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
-        .day-text { font-size: 10px; color: var(--primary); text-transform: uppercase; font-weight: bold; letter-spacing: 1px; margin-bottom: -2px; }
-        
+        #hora { font-size: 28px; font-weight: 900; line-height: 1; color: white; letter-spacing: -1px; }
+        .date-info { font-size: 11px; color: #888; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; margin-top: 4px; }
+        .day-highlight { color: var(--primary); }
+
         .btn-header { background: none; border: 1px solid #333; color: white; padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; transition: 0.3s; display: flex; align-items: center; gap: 8px; text-transform: uppercase; font-weight: bold; }
         .btn-header:hover { background: #222; border-color: var(--primary); }
         .btn-sair { color: #ff4444; border-color: #442222; padding: 4px 10px; }
         .btn-sair:hover { background: #331111; border-color: #ff4444; }
-        
-        .btn-msg { border-color: var(--primary); color: var(--primary); font-size: 11px; padding: 4px 10px; }
-        .btn-msg:hover { background: var(--primary); color: white; }
-
-        #hora { font-size: 24px; font-weight: 900; line-height: 1; color: white; }
         
         /* ESTRUTURA PRINCIPAL */
         .main-container { display: grid; grid-template-columns: 180px 1fr 180px; gap: 20px; max-width: 100%; margin: 0 auto; margin-bottom: 150px; align-items: start; }
@@ -97,17 +90,9 @@
         
         <div class="header-right">
             <div class="datetime-container">
-                <div class="date-box">
-                    <span class="date-text" id="data-atual-top">00/00/0000</span>
-                    <span class="date-text" style="color: var(--primary); font-size: 9px;">DATA ATUAL</span>
-                </div>
-                <div class="divider-line"></div>
-                <div class="time-msg-box">
-                    <div id="hora">00:00:00</div>
-                    <span class="day-text"><span id="data-inline">00/00/0000</span> - <span id="dia-semana">...</span></span>
-                    <button class="btn-header btn-msg" onclick="alert('Funcionalidade de mensagem em breve!')">
-                        <i class="fas fa-comment-dots"></i> ENVIE UMA MENSAGEM
-                    </button>
+                <div id="hora">00:00:00</div>
+                <div class="date-info">
+                    <span id="data-inline">00/00/0000</span> — <span id="dia-semana" class="day-highlight">...</span>
                 </div>
             </div>
         </div>
@@ -173,11 +158,8 @@
             const ano = agora.getFullYear();
             const dataFormatada = `${dia}/${mes}/${ano}`;
             
-            // Atualiza data no topo e acima do botão
-            document.getElementById('data-atual-top').innerText = dataFormatada;
             document.getElementById('data-inline').innerText = dataFormatada;
 
-            // ATUALIZA DIA DA SEMANA
             const diasSemana = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
             document.getElementById('dia-semana').innerText = diasSemana[agora.getDay()];
         }, 1000);
