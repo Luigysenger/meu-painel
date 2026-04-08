@@ -393,7 +393,6 @@
             return `${horas.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
         }
 
-        // Loop de atualização constante dos tempos na tela
         setInterval(() => {
             const spans = document.querySelectorAll('.tempo-live');
             spans.forEach(span => {
@@ -413,18 +412,15 @@
                 const isOnline = (Date.now() - parseInt(u.lastSeen || 0) < 60000);
                 const dataOuvindo = new Date(u.lastSeen || Date.now()).toLocaleString('pt-BR');
 
-                let rádioAtual, tempoRádioHTML, tempoSessãoHTML;
+                let rádioAtual, tempoRádioHTML;
 
                 if (isOnline) {
                     rádioAtual = u.radioAtual || 'Navegando...';
-                    // AJUSTE: O Tempo da Rádio usa radioStartTime (resetado no app na troca de rádio)
+                    // O Tempo da Rádio usa radioStartTime em formato real
                     tempoRádioHTML = `<span class="tempo-live" data-start="${u.radioStartTime || Date.now()}">00:00:00</span>`;
-                    // AJUSTE: O Tempo de Sessão usa loginTime (fixo do login até o logout)
-                    tempoSessãoHTML = `<span class="tempo-live" data-start="${u.loginTime || Date.now()}">00:00:00</span>`;
                 } else {
                     rádioAtual = u.ultimaRadio || 'Desconectado';
                     tempoRádioHTML = `<span>${formatarTempoReal(u.tempoUltimaRadio || 0)}</span>`;
-                    tempoSessãoHTML = `<span>${formatarTempoReal(u.totalSessionTime || 0)}</span>`;
                 }
 
                 container.innerHTML += `
@@ -438,7 +434,6 @@
                         <div class="user-details-bar" id="details-${id}">
                             <p><span>Rádio:</span> <b>${rádioAtual}</b></p>
                             <p><span>Tempo na Rádio:</span> <b style="color:white">${tempoRádioHTML}</b></p>
-                            <p><span>Tempo de Sessão:</span> <b style="color:var(--primary)">${tempoSessãoHTML}</b></p>
                             <p><span>Último Registro:</span> <b>${dataOuvindo}</b></p>
                         </div>
                     </div>`;
