@@ -209,7 +209,6 @@
         const player = document.getElementById('audio-player');
         let radioData = [];
         let activeIndex = -1;
-        // VARIÁVEL PARA CONTROLAR QUAIS USUÁRIOS ESTÃO ABERTOS
         let openUsers = {}; 
 
         const emojisReply = ["👍", "❤️", "😂", "👏", "🔥", "🚀", "🎵", "📻", "🙌", "😲", "🤩", "🙏", "💪", "💡", "✨", "🔊", "🎧", "😎", "🤝", "✅"];
@@ -382,12 +381,13 @@
             });
         });
 
-        // FUNÇÃO DE TOGGLE AJUSTADA PARA PERSISTIR O ESTADO
+        // --- AJUSTE NO MONITOR DE OUVINTES ---
+
         function toggleUserDetails(id) {
             const bar = document.getElementById('details-' + id);
             const isOpen = (bar.style.display === 'block');
             bar.style.display = isOpen ? 'none' : 'block';
-            openUsers[id] = !isOpen; // Salva o estado atual do ID
+            openUsers[id] = !isOpen; 
         }
 
         function formatarTempoReal(ms) {
@@ -399,13 +399,14 @@
             return `${horas.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
         }
 
+        // Loop que atualiza os tempos na tela sem resetar a interface
         setInterval(() => {
             const spans = document.querySelectorAll('.tempo-live');
             spans.forEach(span => {
-                const start = parseInt(span.dataset.start);
-                const agora = Date.now();
-                if (start > 0) {
-                    span.innerText = formatarTempoReal(agora - start);
+                const startTime = parseInt(span.dataset.start);
+                if (startTime > 0) {
+                    const agora = Date.now();
+                    span.innerText = formatarTempoReal(agora - startTime);
                 }
             });
         }, 1000);
@@ -418,17 +419,17 @@
                 const isOnline = (Date.now() - parseInt(u.lastSeen || 0) < 60000);
                 const dataOuvindo = new Date(u.lastSeen || Date.now()).toLocaleString('pt-BR');
 
-                let rádioAtual, tempoRádioHTML;
+                // LÓGICA PRINCIPAL: O tempo real é sempre baseado no radioStartTime gravado no Firebase
+                // Esse valor só deve ser alterado pelo app do OUVINTE quando ele clica em outra rádio.
+                let rádioAtual = u.radioAtual || 'Navegando...';
+                let startTime = u.radioStartTime || 0;
+                
+                // Se o usuário estiver OFF, mostramos o tempo acumulado que ele ficou antes de sair
+                // Se estiver ON, usamos a classe "tempo-live" para o setInterval atualizar em tempo real
+                let tempoHTML = isOnline 
+                    ? `<span class="tempo-live" data-start="${startTime}">${formatarTempoReal(Date.now() - startTime)}</span>`
+                    : `<span>${formatarTempoReal(u.tempoTotalRadio || 0)}</span>`;
 
-                if (isOnline) {
-                    rádioAtual = u.radioAtual || 'Navegando...';
-                    tempoRádioHTML = `<span class="tempo-live" data-start="${u.radioStartTime || Date.now()}">00:00:00</span>`;
-                } else {
-                    rádioAtual = u.ultimaRadio || 'Desconectado';
-                    tempoRádioHTML = `<span>${formatarTempoReal(u.tempoUltimaRadio || 0)}</span>`;
-                }
-
-                // VERIFICA SE O USUÁRIO DEVE ESTAR COM DETALHES ABERTOS
                 const displayStyle = openUsers[id] ? 'block' : 'none';
 
                 container.innerHTML += `
@@ -436,13 +437,13 @@
                         <div class="user-row">
                             <button class="user-name-btn" onclick="toggleUserDetails('${id}')">
                                 <span>${u.nome || 'Ouvinte'}</span> 
-                                ${isOnline ? '<span class="status-on">ON</span>' : '<span class="status-off" style="color:#d1a3ff">OFF</span>'}
+                                ${isOnline ? '<span class="status-on">ON</span>' : '<span class="status-off">OFF</span>'}
                             </button>
                         </div>
                         <div class="user-details-bar" id="details-${id}" style="display: ${displayStyle}">
-                            <p><span>Rádio:</span> <b>${rádioAtual}</b></p>
-                            <p><span>Tempo na Rádio:</span> <b style="color:white">${tempoRádioHTML}</b></p>
-                            <p><span>Último Registro:</span> <b>${dataOuvindo}</b></p>
+                            <p><span>Rádio Atual:</span> <b>${rádioAtual}</b></p>
+                            <p><span>Tempo nesta Rádio:</span> <b style="color:white">${tempoHTML}</b></p>
+                            <p><span>Última Atividade:</span> <b>${dataOuvindo}</b></p>
                         </div>
                     </div>`;
             });
