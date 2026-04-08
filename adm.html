@@ -94,7 +94,8 @@
         .user-name-btn { flex: 1; padding: 15px; background: none; border: none; color: white; text-align: left; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .status-on { color: #00ff00; font-weight: 900; font-size: 11px; }
         .status-off { color: #d1a3ff; font-weight: 900; font-size: 11px; }
-        .user-details-bar { display: none; padding: 0 15px 15px 15px; font-size: 13px; color: #ccc; border-top: 1px solid #222; }
+        .user-details-bar { display: none; padding: 15px; font-size: 13px; color: #ccc; border-top: 1px solid #222; background: #141414; }
+        .user-details-bar p { margin: 8px 0; display: flex; justify-content: space-between; }
         .user-details-bar b { color: var(--primary); }
 
         .player-footer { margin-top: 20px; background: #111; padding: 25px; border-radius: 20px; border: 1px solid #222; text-align: center; }
@@ -403,15 +404,13 @@
             bar.style.display = (bar.style.display === 'block' ? 'none' : 'block');
         }
 
-        // Função auxiliar para formatar tempo (H e S)
-        function formatarTempo(ms) {
-            if (!ms || ms < 0) return "0h 0s";
+        // Formatação de Tempo em Minutos e Segundos
+        function formatarTempoReal(ms) {
+            if (!ms || ms < 0) return "00:00";
             const totalSegundos = Math.floor(ms / 1000);
-            const horas = Math.floor(totalSegundos / 3600);
+            const minutos = Math.floor(totalSegundos / 60);
             const segundos = totalSegundos % 60;
-            const minutos = Math.floor((totalSegundos % 3600) / 60);
-            // Retorna formato simplificado solicitado: Horas e Segundos (adicionado minutos para precisão)
-            return `${horas}h ${minutos}m ${segundos}s`;
+            return `${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
         }
 
         db.ref('usuarios').on('value', snap => {
@@ -421,11 +420,22 @@
                 const u = c.val(), id = c.key;
                 const isOnline = (Date.now() - parseInt(u.lastSeen || 0) < 60000);
                 
-                // TEMPO DE SESSÃO: Total desde que entrou no sistema (login)
-                const tempoSessao = formatarTempo(Date.now() - parseInt(u.loginTime || u.lastSeen));
-                
-                // TEMPO DE AUDIÊNCIA: Tempo na rádio atual (zera ao mudar de rádio)
-                const tempoAudiencia = formatarTempo(Date.now() - parseInt(u.radioStartTime || u.lastSeen));
+                // DATA E HORA FORMATADA
+                const dataOuvindo = new Date(u.lastSeen || Date.now()).toLocaleString('pt-BR');
+
+                let rádioAtual, tempoRádio, tempoSessão;
+
+                if (isOnline) {
+                    // SE ESTÁ ONLINE, MOSTRA DADOS EM TEMPO REAL
+                    rádioAtual = u.radioAtual || 'Navegando...';
+                    tempoRádio = formatarTempoReal(Date.now() - parseInt(u.radioStartTime || u.lastSeen));
+                    tempoSessão = formatarTempoReal(Date.now() - parseInt(u.loginTime || u.lastSeen));
+                } else {
+                    // SE ESTÁ OFFLINE, MANTÉM APENAS OS DADOS DA ÚLTIMA SESSÃO/RÁDIO SALVOS
+                    rádioAtual = u.ultimaRadio || 'Desconectado';
+                    tempoRádio = formatarTempoReal(u.tempoUltimaRadio || 0);
+                    tempoSessão = formatarTempoReal(u.totalSessionTime || 0);
+                }
 
                 container.innerHTML += `
                     <div class="user-item" style="border-left: 4px solid ${isOnline?'#00ff00':'#d1a3ff'}">
@@ -435,13 +445,10 @@
                             </button>
                         </div>
                         <div class="user-details-bar" id="details-${id}">
-                            <p>Ouvindo agora: <b>${u.radioAtual || 'Nenhuma'}</b></p>
-                            <p>Tempo de Sessão: <b>${tempoSessao}</b></p>
-                            <p>Tempo de Audiência: <b>${tempoAudiencia}</b></p>
-                            <hr style="border:0; border-top:1px solid #333; margin:10px 0;">
-                            <p>Última Rádio: <b>${u.ultimaRadio || u.radioAtual || '---'}</b></p>
-                            <p>Tempo na Última Rádio: <b>${formatarTempo(u.tempoUltimaRadio || 0)}</b></p>
-                            <p>Última vez visto: <b>${new Date(u.lastSeen).toLocaleString()}</b></p>
+                            <p><span>Rádio:</span> <b>${rádioAtual}</b></p>
+                            <p><span>Tempo na Rádio:</span> <b>${tempoRádio} (M:S)</b></p>
+                            <p><span>Tempo de Sessão:</span> <b>${tempoSessão} (M:S)</b></p>
+                            <p><span>Data:</span> <b>${dataOuvindo}</b></p>
                         </div>
                     </div>`;
             });
