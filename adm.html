@@ -366,7 +366,6 @@
             window.scrollTo(0, 500);
         }
 
-        /* FUNÇÃO PARA ABRIR DETALHES DA CAMPANHA */
         function togglePubDetails(id) {
             const bar = document.getElementById('pub-details-' + id);
             bar.style.display = (bar.style.display === 'block' ? 'none' : 'block');
@@ -404,16 +403,29 @@
             bar.style.display = (bar.style.display === 'block' ? 'none' : 'block');
         }
 
+        // Função auxiliar para formatar tempo (H e S)
+        function formatarTempo(ms) {
+            if (!ms || ms < 0) return "0h 0s";
+            const totalSegundos = Math.floor(ms / 1000);
+            const horas = Math.floor(totalSegundos / 3600);
+            const segundos = totalSegundos % 60;
+            const minutos = Math.floor((totalSegundos % 3600) / 60);
+            // Retorna formato simplificado solicitado: Horas e Segundos (adicionado minutos para precisão)
+            return `${horas}h ${minutos}m ${segundos}s`;
+        }
+
         db.ref('usuarios').on('value', snap => {
             const container = document.getElementById('user-list');
             container.innerHTML = "";
             snap.forEach(c => {
-                const u = c.val(), id = c.key, isOnline = (Date.now() - parseInt(u.lastSeen || 0) < 60000);
+                const u = c.val(), id = c.key;
+                const isOnline = (Date.now() - parseInt(u.lastSeen || 0) < 60000);
                 
-                // Cálculo do tempo de sessão
-                const sessaoMs = isOnline ? (Date.now() - parseInt(u.lastSeen || Date.now())) : 0;
-                const minutos = Math.floor(sessaoMs / 60000);
-                const segundos = Math.floor((sessaoMs % 60000) / 1000);
+                // TEMPO DE SESSÃO: Total desde que entrou no sistema (login)
+                const tempoSessao = formatarTempo(Date.now() - parseInt(u.loginTime || u.lastSeen));
+                
+                // TEMPO DE AUDIÊNCIA: Tempo na rádio atual (zera ao mudar de rádio)
+                const tempoAudiencia = formatarTempo(Date.now() - parseInt(u.radioStartTime || u.lastSeen));
 
                 container.innerHTML += `
                     <div class="user-item" style="border-left: 4px solid ${isOnline?'#00ff00':'#d1a3ff'}">
@@ -424,8 +436,12 @@
                         </div>
                         <div class="user-details-bar" id="details-${id}">
                             <p>Ouvindo agora: <b>${u.radioAtual || 'Nenhuma'}</b></p>
-                            <p>Duração da Conexão: <b>${minutos}m ${segundos}s</b></p>
-                            <p>Última vez visto: <b>${new Date(u.lastSeen).toLocaleTimeString()}</b></p>
+                            <p>Tempo de Sessão: <b>${tempoSessao}</b></p>
+                            <p>Tempo de Audiência: <b>${tempoAudiencia}</b></p>
+                            <hr style="border:0; border-top:1px solid #333; margin:10px 0;">
+                            <p>Última Rádio: <b>${u.ultimaRadio || u.radioAtual || '---'}</b></p>
+                            <p>Tempo na Última Rádio: <b>${formatarTempo(u.tempoUltimaRadio || 0)}</b></p>
+                            <p>Última vez visto: <b>${new Date(u.lastSeen).toLocaleString()}</b></p>
                         </div>
                     </div>`;
             });
