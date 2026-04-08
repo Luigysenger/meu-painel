@@ -14,13 +14,17 @@
         
         /* HEADER RESPONSIVO */
         .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 20px 30px; border-radius: 15px; border: 1px solid #333; margin-bottom: 25px; gap: 10px; }
-        .header-left { display: flex; align-items: center; gap: 20px; flex-shrink: 0; }
-        .header h2 { margin: 0; color: var(--primary); font-size: 22px; text-transform: uppercase; }
+        
+        /* Ajuste Nome e Sair */
+        .header-left { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; flex-shrink: 0; }
+        .header h2 { margin: 0; color: var(--primary); font-size: 22px; text-transform: uppercase; line-height: 1; }
         
         #container-pub { flex: 1; display: flex; justify-content: center; align-items: center; padding: 0 10px; height: 55px; overflow: hidden; }
         #img-publicidade { max-height: 55px; max-width: 100%; border-radius: 8px; display: none; object-fit: contain; transition: opacity 0.5s ease-in-out; }
         
+        /* Ajuste Hora e Mensagem */
         .header-right { display: flex; align-items: center; gap: 30px; flex-shrink: 0; }
+        .time-msg-box { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; border-left: 1px solid #333; padding-left: 20px; }
         
         .weather-box { display: flex; align-items: center; gap: 15px; color: var(--primary); }
         .weather-info { display: flex; flex-direction: column; align-items: flex-end; text-align: right; line-height: 1.2; }
@@ -36,11 +40,15 @@
         .city-name { color: #888; font-size: 11px; text-transform: uppercase; font-weight: normal; }
         .temp-val { font-size: 16px; font-weight: 900; }
         
-        .btn-header { background: none; border: 1px solid #333; color: white; padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: 0.3s; display: flex; align-items: center; gap: 8px; }
+        .btn-header { background: none; border: 1px solid #333; color: white; padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; transition: 0.3s; display: flex; align-items: center; gap: 8px; text-transform: uppercase; font-weight: bold; }
         .btn-header:hover { background: #222; border-color: var(--primary); }
-        .btn-sair { color: #ff4444; border-color: #442222; }
+        .btn-sair { color: #ff4444; border-color: #442222; padding: 4px 10px; }
         .btn-sair:hover { background: #331111; border-color: #ff4444; }
-        #hora { font-size: 26px; font-weight: 900; min-width: 120px; text-align: right; border-left: 1px solid #333; padding-left: 20px; }
+        
+        .btn-msg { border-color: var(--primary); color: var(--primary); font-size: 11px; padding: 4px 10px; }
+        .btn-msg:hover { background: var(--primary); color: white; }
+
+        #hora { font-size: 24px; font-weight: 900; line-height: 1; }
         
         /* ESTRUTURA PRINCIPAL */
         .main-container { 
@@ -71,12 +79,11 @@
         .card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid #282828; }
         h3 { color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; text-align: center; }
         
-        /* AJUSTE DE CENTRALIZAÇÃO DOS CARDS */
         .radio-grid { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, 110px); 
             gap: 15px; 
-            justify-content: center; /* CENTRALIZA OS CARDS NO CAMPO */
+            justify-content: center;
         }
         
         .radio-item { 
@@ -154,7 +161,9 @@
             <h2 id="nome-exibicao">OUVINTE</h2>
             <button class="btn-header btn-sair" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span>SAIR</span></button>
         </div>
+        
         <div id="container-pub"><img id="img-publicidade" src=""></div>
+        
         <div class="header-right">
             <div class="weather-box" id="weather">
                 <div class="weather-info">
@@ -164,7 +173,13 @@
                 </div>
                 <i id="weather-icon" class="fas fa-sync-alt fa-spin"></i>
             </div>
-            <div id="hora">00:00:00</div>
+            
+            <div class="time-msg-box">
+                <div id="hora">00:00:00</div>
+                <button class="btn-header btn-msg" onclick="alert('Funcionalidade de mensagem em breve!')">
+                    <i class="fas fa-comment-dots"></i> ENVIE UMA MENSAGEM PRA NÓS
+                </button>
+            </div>
         </div>
     </div>
 
