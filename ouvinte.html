@@ -69,19 +69,19 @@
         }
 
         .card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid #282828; }
-        h3 { color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; }
+        h3 { color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; text-align: center; }
         
-        /* AJUSTE FIXO: OS CARDS NÃO DIMINUEM NEM ESTICAM */
+        /* AJUSTE DE CENTRALIZAÇÃO DOS CARDS */
         .radio-grid { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, 110px); 
             gap: 15px; 
-            justify-content: start; /* Mantém alinhado à esquerda para não deformar */
+            justify-content: center; /* CENTRALIZA OS CARDS NO CAMPO */
         }
         
         .radio-item { 
-            width: 110px; /* Largura rigorosamente fixa */
-            height: 110px; /* Altura rigorosamente fixa */
+            width: 110px; 
+            height: 110px; 
             border-radius: 15px; 
             display: flex; 
             flex-direction: column; 
@@ -96,7 +96,7 @@
             transition: 0.3s; 
             position: relative; 
             border: 2px solid transparent; 
-            box-sizing: border-box; /* Garante que padding/border não aumentem o card */
+            box-sizing: border-box; 
         }
         
         .radio-item:hover { transform: scale(1.05); filter: brightness(1.1); }
