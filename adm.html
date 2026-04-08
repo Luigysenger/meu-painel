@@ -51,9 +51,8 @@
         .input-group { display: flex; gap: 10px; margin-bottom: 25px; }
         input, select { flex: 1; padding: 12px; background: #2a2a2a; border: none; color: white; border-radius: 8px; outline: none; }
         .btn-save { padding: 0 25px; background: var(--primary); border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: black; transition: 0.3s; }
-        .btn-save:hover { filter: brightness(1.2); }
+        .btn-save:hover { filter: brightness(1.2); transform: scale(1.02); }
         
-        /* EFEITO RESTAURADO NOS BOTÕES DE RÁDIO */
         .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; }
         .radio-item { 
             aspect-ratio: 1/1; 
@@ -104,7 +103,10 @@
         .txt-inicio { color: #1DB954; font-weight: bold; }
         .txt-fim { color: #ff4444; font-weight: bold; }
 
-        .btn-delete-user { background: none; border: none; color: #ff4444; padding: 15px; cursor: pointer; font-size: 16px; transition: 0.2s; }
+        .btn-action-pub { background: none; border: none; padding: 15px 10px; cursor: pointer; font-size: 14px; transition: 0.2s; }
+        .btn-edit-pub { color: var(--primary); }
+        .btn-delete-pub { color: #ff4444; }
+        .btn-action-pub:hover { transform: scale(1.2); }
 
         .user-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; overflow: hidden; }
         .user-row { display: flex; align-items: center; width: 100%; }
@@ -113,14 +115,20 @@
         .status-off { color: #d1a3ff; font-weight: 900; font-size: 11px; }
         .user-details-bar { display: none; padding: 0 15px 15px 15px; font-size: 13px; color: #ccc; border-top: 1px solid #222; }
 
+        /* EFEITOS RESTAURADOS NO PLAYER */
         .player-footer { margin-top: 20px; background: #111; padding: 25px; border-radius: 20px; border: 1px solid #222; text-align: center; }
         .controls-row { display: flex; align-items: center; justify-content: center; gap: 35px; }
-        .btn-nav { background: none; border: none; color: #b3b3b3; font-size: 24px; cursor: pointer; transition: 0.2s; }
-        .btn-nav:hover { color: white; transform: scale(1.2); }
-        .play-outer { position: relative; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; }
+        .btn-nav { background: none; border: none; color: #b3b3b3; font-size: 28px; cursor: pointer; transition: 0.3s; }
+        .btn-nav:hover { color: white; transform: scale(1.3); }
+        .btn-nav:active { transform: scale(0.9); }
+        
+        .play-outer { position: relative; width: 85px; height: 85px; display: flex; align-items: center; justify-content: center; }
         .ring-animation { position: absolute; width: 100%; height: 100%; border: 2px solid rgba(29, 185, 84, 0.1); border-top: 2px solid var(--primary); border-radius: 50%; animation: spin-slow 5s linear infinite; }
         @keyframes spin-slow { 100% { transform: rotate(360deg); } }
-        .btn-spotify-play { width: 60px; height: 60px; background: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; color: black; cursor: pointer; z-index: 5; transition: 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        
+        .btn-spotify-play { width: 65px; height: 65px; background: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; color: black; cursor: pointer; z-index: 5; transition: 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .btn-spotify-play:hover { transform: scale(1.1); box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4); }
+        .btn-spotify-play:active { transform: scale(0.95); }
 
         @media print {
             body * { visibility: hidden; }
@@ -270,7 +278,7 @@
             db.ref('respostas_adm').push({ mensagemId: id, resposta: campo.value, data: Date.now() }).then(() => { alert("Resposta enviada!"); campo.value = ""; });
         }
 
-        // --- RÁDIOS E DRAG & DROP ---
+        // --- RÁDIOS ---
         db.ref('radios').on('value', snap => {
             radioData = [];
             snap.forEach(c => { radioData.push({ ...c.val(), key: c.key }); });
@@ -284,7 +292,6 @@
             radioData.forEach((r, i) => {
                 const div = document.createElement('div');
                 div.className = `radio-item ${activeIndex === i ? 'active' : ''}`;
-                // Restaura a cor pastel aleatória caso não tenha cor salva, ou usa a cor do banco
                 div.style.background = r.color || `hsl(${Math.floor(Math.random() * 360)}, 70%, 75%)`;
                 div.setAttribute('data-id', r.key);
                 div.onclick = () => playRadio(i);
@@ -379,6 +386,28 @@
             else db.ref('publicidade').push(dados).then(() => { alert("Lançada!"); resetPubForm(); });
         }
 
+        function prepareEditPub(key, img, ini, fim, target, manual) {
+            document.getElementById('pub-key').value = key;
+            imgBase64 = img;
+            document.getElementById('pub-view').src = img;
+            document.getElementById('pub-view').style.display = "block";
+            
+            // Formatar data para o input datetime-local
+            const formatData = (ms) => {
+                const d = new Date(ms);
+                d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+                return d.toISOString().slice(0, 16);
+            };
+            
+            document.getElementById('pub-ini').value = formatData(ini);
+            document.getElementById('pub-fim').value = formatData(fim);
+            document.getElementById('pub-target').value = target;
+            document.getElementById('pub-manual').value = manual === 'TODOS' ? '' : manual;
+            document.getElementById('pub-manual').style.display = (target === 'MANUAL' ? 'block' : 'none');
+            document.getElementById('btn-pub-save').innerText = "ATUALIZAR CAMPANHA";
+            window.scrollTo(0, 500);
+        }
+
         function resetPubForm() {
             imgBase64 = ""; document.getElementById('pub-key').value = ""; document.getElementById('pub-view').style.display = "none"; document.getElementById('pub-file').value = "";
             document.getElementById('pub-ini').value = ""; document.getElementById('pub-fim').value = ""; document.getElementById('pub-manual').value = "";
@@ -395,20 +424,27 @@
             container.innerHTML = "";
             snap.forEach(c => {
                 const p = c.val(), id = c.key, vencida = Date.now() > p.fim;
-                container.innerHTML += `
-                    <div class="pub-list-item" style="border-left-color: ${vencida ? '#ff4444' : '#1DB954'}">
-                        <div class="pub-list-row">
-                            <button class="pub-list-btn" onclick="togglePubDetails('${id}')">
-                                <img src="${p.imagem}" class="pub-thumb-mini">
-                                <span>Alvo: <b>${p.ouvinteAlvo}</b> ${vencida ? '(FINALIZADA)' : ''}</span>
-                            </button>
-                            <button class="btn-delete-user" onclick="if(confirm('Excluir?')) db.ref('publicidade/${id}').remove()"><i class="fas fa-trash-alt"></i></button>
-                        </div>
-                        <div class="pub-details-bar" id="pub-details-${id}">
-                             <p>Início: <span class="txt-inicio">${new Date(p.inicio).toLocaleString()}</span></p>
-                             <p>Término: <span class="txt-fim">${new Date(p.fim).toLocaleString()}</span></p>
-                        </div>
+                const div = document.createElement('div');
+                div.className = "pub-list-item";
+                div.style.borderLeftColor = vencida ? '#ff4444' : '#1DB954';
+                div.innerHTML = `
+                    <div class="pub-list-row">
+                        <button class="pub-list-btn" onclick="togglePubDetails('${id}')">
+                            <img src="${p.imagem}" class="pub-thumb-mini">
+                            <span>Alvo: <b>${p.ouvinteAlvo}</b> ${vencida ? '(FINALIZADA)' : ''}</span>
+                        </button>
+                        <button class="btn-action-pub btn-edit-pub" onclick="prepareEditPub('${id}', '${p.imagem}', ${p.inicio}, ${p.fim}, '${p.destino}', '${p.ouvinteAlvo}')">
+                            <i class="fas fa-pencil-alt"></i>
+                        </button>
+                        <button class="btn-action-pub btn-delete-pub" onclick="if(confirm('Excluir?')) db.ref('publicidade/${id}').remove()">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                    <div class="pub-details-bar" id="pub-details-${id}">
+                         <p>Início: <span class="txt-inicio">${new Date(p.inicio).toLocaleString()}</span></p>
+                         <p>Término: <span class="txt-fim">${new Date(p.fim).toLocaleString()}</span></p>
                     </div>`;
+                container.appendChild(div);
             });
         });
 
@@ -426,7 +462,6 @@
                 const lastSeen = parseInt(u.lastSeen || 0);
                 const loginTime = parseInt(u.loginTime || lastSeen);
                 const isOnline = (Date.now() - lastSeen < 60000);
-                
                 const diffMs = isOnline ? (Date.now() - loginTime) : 0;
                 const m = Math.floor(diffMs / 60000);
                 const s = Math.floor((diffMs % 60000) / 1000);
