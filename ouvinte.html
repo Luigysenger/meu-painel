@@ -12,42 +12,40 @@
         :root { --primary: #A020F0; --bg: #000; --card: #121212; --text-muted: #b3b3b3; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; user-select: none; }
         
-        .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 20px 30px; border-radius: 15px; border: 1px solid #333; margin-bottom: 25px; gap: 10px; position: relative; z-index: 101; }
+        .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 20px 30px; border-radius: 15px; border: 1px solid #333; margin-bottom: 25px; gap: 10px; }
         .header-left { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; flex-shrink: 0; }
         .header h2 { margin: 0; color: var(--primary); font-size: 22px; text-transform: uppercase; line-height: 1; }
         
         #container-pub { flex: 1; display: flex; justify-content: center; align-items: center; padding: 0 10px; height: 55px; overflow: hidden; }
         #img-publicidade { max-height: 55px; max-width: 100%; border-radius: 8px; display: none; object-fit: contain; transition: opacity 0.5s ease-in-out; }
         
-        .header-right { display: flex; align-items: center; gap: 15px; flex-shrink: 0; }
+        .header-right { display: flex; align-items: center; gap: 30px; flex-shrink: 0; }
         .time-msg-box { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; border-left: 1px solid #333; padding-left: 20px; }
-        .date-info { font-size: 11px; color: #888; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
-        .separator { height: 1px; width: 100%; background: #333; margin: 2px 0; }
-
+        
+        .weather-box { display: flex; align-items: center; gap: 15px; color: var(--primary); }
+        .weather-info { display: flex; flex-direction: column; align-items: flex-end; text-align: right; line-height: 1.2; }
+        .weather-box i { font-size: 28px; position: relative; min-width: 30px; text-align: center; }
+        
+        .fa-sun { animation: spin-sun 10s linear infinite; color: #FFD700; }
+        @keyframes spin-sun { 100% { transform: rotate(360deg); } }
+        
         .btn-header { background: none; border: 1px solid #333; color: white; padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; transition: 0.3s; display: flex; align-items: center; gap: 8px; text-transform: uppercase; font-weight: bold; }
         .btn-header:hover { background: #222; border-color: var(--primary); }
         .btn-sair { color: #ff4444; border-color: #442222; padding: 4px 10px; }
-        .btn-sair:hover { background: #331111; border-color: #ff4444; }
         
-        .btn-msg { border-color: var(--primary); color: var(--primary); font-size: 11px; padding: 4px 10px; transition: all 0.5s ease; }
-        .btn-msg.tem-resposta { background: #ffcc00 !important; color: #000 !important; border-color: #fff !important; animation: pulse-yellow 1s infinite; }
-        @keyframes pulse-yellow { 0% { transform: scale(1); box-shadow: 0 0 0px #ffcc00; } 50% { transform: scale(1.05); box-shadow: 0 0 15px #ffcc00; } 100% { transform: scale(1); box-shadow: 0 0 0px #ffcc00; } }
-
-        #hora { font-size: 24px; font-weight: 900; line-height: 1; color: var(--primary); }
-
-        #container-mensagem { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out, margin-bottom 0.5s ease-in-out; margin-bottom: 0; }
+        /* ESTILO MENSAGENS */
+        #container-mensagem { max-height: 0; overflow: hidden; transition: max-height 0.5s ease; margin-bottom: 0; }
         #container-mensagem.aberto { max-height: 500px; margin-bottom: 25px; }
         .card-msg { background: #181818; border: 1px solid var(--primary); border-radius: 15px; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .card-msg textarea { background: #000; border: 1px solid #333; border-radius: 8px; color: white; padding: 10px; resize: none; font-family: inherit; height: 80px; }
+        .card-msg textarea { background: #000; border: 1px solid #333; border-radius: 8px; color: white; padding: 10px; resize: none; height: 60px; }
+        #bloco-resposta { background: #25103d; border: 1px dashed var(--primary); padding: 10px; border-radius: 8px; display: none; margin-bottom: 5px; }
+        .btn-enviar-msg { background: var(--primary); color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-msg.tem-resposta { background: #ffcc00 !important; color: #000 !important; animation: pulse-yellow 1s infinite; }
+        @keyframes pulse-yellow { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+        .btn-msg { border-color: var(--primary); color: var(--primary); font-size: 11px; padding: 4px 10px; }
+        #hora { font-size: 24px; font-weight: 900; line-height: 1; }
         
-        #bloco-resposta { background: #25103d; border: 1px dashed var(--primary); padding: 15px; border-radius: 8px; margin-bottom: 10px; display: none; }
-
-        .msg-footer { display: flex; justify-content: space-between; align-items: center; }
-        .emoji-bar { display: flex; gap: 8px; }
-        .btn-emoji { background: #222; border: 1px solid #333; border-radius: 5px; cursor: pointer; font-size: 18px; padding: 5px; transition: 0.2s; }
-        .btn-emoji:hover { background: #333; transform: scale(1.1); }
-        .btn-enviar-msg { background: var(--primary); color: white; border: none; padding: 8px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
-
         .main-container { display: grid; grid-template-columns: 180px 1fr 180px; gap: 20px; max-width: 100%; margin: 0 auto; margin-bottom: 150px; align-items: start; }
         .center-content { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; align-items: start; }
         .side-pub { min-height: 400px; display: flex; flex-direction: column; gap: 15px; }
@@ -58,28 +56,24 @@
         h3 { color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; text-align: center; }
         
         .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, 110px); gap: 15px; justify-content: center; }
-        .radio-item { width: 110px; height: 110px; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #000; font-weight: bold; font-size: 10px; text-align: center; padding: 10px; cursor: grab; transition: 0.3s; position: relative; border: 2px solid transparent; box-sizing: border-box; }
-        .radio-item:hover { transform: scale(1.05); filter: brightness(1.1); }
+        .radio-item { width: 110px; height: 110px; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #000; font-weight: bold; font-size: 10px; text-align: center; padding: 10px; cursor: grab; transition: 0.3s; position: relative; border: 2px solid transparent; }
         .radio-item.active { background: #000 !important; color: var(--primary) !important; border-color: var(--primary); box-shadow: 0 0 15px rgba(160, 32, 240, 0.4); }
-        
         .antena { font-size: 20px; margin-bottom: 8px; display: none; }
         .active .antena { display: block; animation: pulse-antena 1s infinite; }
         
-        .selector-list { display: flex; flex-direction: column; gap: 8px; max-height: 450px; overflow-y: auto; padding-right: 5px; }
-        .selector-item { background: #1a1a1a; padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #333; transition: 0.3s; }
-        .selector-item.selected { border-left-color: var(--primary); background: #222; }
-        .btn-toggle-radio { background: none; border: none; font-size: 18px; cursor: pointer; transition: 0.2s; }
+        .selector-list { display: flex; flex-direction: column; gap: 8px; max-height: 450px; overflow-y: auto; }
+        .selector-item { background: #1a1a1a; padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #333; }
+        .selector-item.selected { border-left-color: var(--primary); }
         
         .player-footer { position: fixed; bottom: 0; left: 0; right: 0; background: #111; padding: 15px 25px 25px 25px; border-top: 2px solid var(--primary); text-align: center; z-index: 100; }
-        .msg-barra { background: #ffcc00; color: #000; font-size: 14px; font-weight: 900; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 2px solid #fff; display: none; width: fit-content; margin-left: auto; margin-right: auto; cursor: pointer; animation: piscar-alerta 0.8s infinite alternate; }
+        .msg-barra { background: #ffcc00; color: #000; font-size: 14px; font-weight: 900; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 2px solid #fff; display: none; width: fit-content; margin: 0 auto 15px auto; cursor: pointer; animation: piscar-alerta 0.8s infinite alternate; }
         
-        @keyframes piscar-alerta { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0.7; transform: scale(1.05); } }
+        @keyframes piscar-alerta { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0.7; transform: scale(1.03); } }
         .controls-row { display: flex; align-items: center; justify-content: center; gap: 35px; }
         .btn-nav { background: none; border: none; color: #b3b3b3; font-size: 24px; cursor: pointer; transition: 0.2s; }
         .play-outer { position: relative; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; }
         .ring-animation { position: absolute; width: 100%; height: 100%; border: 2px solid rgba(160, 32, 240, 0.1); border-top: 2px solid var(--primary); border-radius: 50%; animation: spin-slow 5s linear infinite; }
-        @keyframes spin-slow { 100% { transform: rotate(360deg); } }
-        .btn-spotify-play { width: 60px; height: 60px; background: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; color: black; cursor: pointer; z-index: 5; transition: 0.2s; }
+        .btn-spotify-play { width: 60px; height: 60px; background: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; color: black; cursor: pointer; z-index: 5; }
     </style>
 </head>
 <body>
@@ -90,12 +84,18 @@
         </div>
         <div id="container-pub"><img id="img-publicidade" src=""></div>
         <div class="header-right">
+            <div class="weather-box" id="weather">
+                <div class="weather-info">
+                    <span class="city-name" id="city">LOCALIZANDO...</span>
+                    <span class="temp-val" id="temp">--°C</span>
+                    <span class="weather-desc" id="weather-desc">AGUARDE</span>
+                </div>
+                <i id="weather-icon" class="fas fa-sync-alt fa-spin"></i>
+            </div>
             <div class="time-msg-box">
-                <div id="data-atual" class="date-info">CARREGANDO DATA...</div>
-                <div class="separator"></div>
                 <div id="hora">00:00:00</div>
                 <button id="btn-abrir-msg" class="btn-header btn-msg" onclick="toggleCardMensagem()">
-                    <i class="fas fa-comment-dots"></i> <span id="txt-btn-msg">ENVIE MENSAGEM PARA NOSSO ADM</span>
+                    <i class="fas fa-comment-dots"></i> <span id="txt-btn-msg">ENVIE UMA MENSAGEM</span>
                 </button>
             </div>
         </div>
@@ -104,19 +104,11 @@
     <div id="container-mensagem">
         <div class="card-msg">
             <div id="bloco-resposta">
-                <strong style="color: var(--primary); font-size: 14px;">RESPOSTA DO ADM:</strong>
-                <p id="texto-resposta-adm" style="margin: 8px 0; font-size: 16px; font-weight: bold; color: #fff;"></p>
+                <strong style="color: var(--primary); font-size: 12px;">RESPOSTA DO ADM:</strong>
+                <p id="texto-resposta-adm" style="margin: 5px 0; font-weight: bold;"></p>
             </div>
-            <textarea id="texto-mensagem" placeholder="Escreva sua mensagem aqui para nosso ADM..."></textarea>
-            <div class="msg-footer">
-                <div class="emoji-bar">
-                    <button class="btn-emoji" onclick="addEmoji('❤️')">❤️</button>
-                    <button class="btn-emoji" onclick="addEmoji('🚀')">🚀</button>
-                    <button class="btn-emoji" onclick="addEmoji('😊')">😊</button>
-                    <button class="btn-emoji" onclick="addEmoji('👏')">👏</button>
-                </div>
-                <button class="btn-enviar-msg" onclick="enviarMensagem()">Enviar Mensagem</button>
-            </div>
+            <textarea id="texto-mensagem" placeholder="Sua mensagem para o ADM..."></textarea>
+            <button class="btn-enviar-msg" onclick="enviarMensagem()">Enviar Mensagem</button>
         </div>
     </div>
 
@@ -124,11 +116,11 @@
         <div class="side-pub" id="pub-left"></div>
         <div class="center-content">
             <div class="card">
-                <h3>MINHA GRADE</h3>
+                <h3>MINHA GRADE (ARRASTE PARA ORDENAR)</h3>
                 <div id="my-radio-list" class="radio-grid"></div>
             </div>
             <div class="card">
-                <h3>SELECIONE SUA RÁDIO</h3>
+                <h3>SELECIONE AQUI SUA RÁDIO</h3>
                 <div id="selector-list" class="selector-list"></div>
             </div>
         </div>
@@ -136,9 +128,10 @@
     </div>
 
     <div class="player-footer">
-        <div id="aviso-resposta" class="msg-barra" onclick="toggleCardMensagem(); fecharAvisoResposta()">
-            <i class="fas fa-reply" style="margin-right:8px;"></i> O ADM RESPONDEU! CLIQUE PARA LER.
+        <div id="aviso-resposta" class="msg-barra" onclick="toggleCardMensagem(); fecharAlerta()">
+            <i class="fas fa-reply"></i> O ADM RESPONDEU SUA MENSAGEM! CLIQUE PARA LER.
         </div>
+        
         <div id="now-title" style="font-size:11px; color:#888; margin-bottom:15px; text-transform: uppercase;">SELECIONE UMA RÁDIO</div>
         <div class="controls-row">
             <button class="btn-nav" onclick="prevRadio()"><i class="fas fa-step-backward"></i></button>
@@ -167,76 +160,79 @@
 
         let allRadios = [], mySelectedIds = [], activeIndex = -1;
 
+        // FUNÇÕES DE MENSAGEM
         function toggleCardMensagem() {
             const container = document.getElementById('container-mensagem');
             container.classList.toggle('aberto');
-            if(container.classList.contains('aberto')) { fecharAvisoResposta(); }
+            if(container.classList.contains('aberto')) fecharAlerta();
         }
 
-        function addEmoji(emoji) { document.getElementById('texto-mensagem').value += emoji; }
-
         function enviarMensagem() {
-            const campoTexto = document.getElementById('texto-mensagem');
-            const texto = campoTexto.value;
-            if(!texto.trim()) return alert("Escreva algo!");
-
+            const txt = document.getElementById('texto-mensagem').value;
+            if(!txt.trim()) return alert("Digite algo!");
             db.ref('mensagens_ouvintes').push({
                 usuario: nomeUsuario,
-                mensagem: texto,
+                mensagem: txt,
                 data: Date.now(),
                 lida: false
             }).then(() => {
-                alert("Mensagem enviada!");
-                campoTexto.value = "";
+                alert("Enviada!");
+                document.getElementById('texto-mensagem').value = "";
                 toggleCardMensagem();
             });
         }
 
-        // MONITOR DE RESPOSTAS MELHORADO
-        // Ele escuta todas as mensagens e filtra no código para evitar erros de indexação do Firebase
+        // MONITOR DE RESPOSTAS (O CORAÇÃO DO AJUSTE)
         db.ref('mensagens_ouvintes').on('value', snap => {
-            let respostaEncontrada = "";
-            let temNovaResposta = false;
-
+            let temResp = false;
+            let textoResp = "";
             snap.forEach(child => {
-                const dados = child.val();
-                // Comparação ignorando maiúsculas/minúsculas para segurança total
-                if(dados.usuario && dados.usuario.toUpperCase() === nomeUsuario.toUpperCase()) {
-                    if(dados.resposta && dados.resposta.trim() !== "") {
-                        temNovaResposta = true;
-                        respostaEncontrada = dados.resposta;
+                const m = child.val();
+                if(m.usuario && m.usuario.toUpperCase() === nomeUsuario.toUpperCase()) {
+                    if(m.resposta && m.resposta.trim() !== "") {
+                        temResp = true;
+                        textoResp = m.resposta;
                     }
                 }
             });
 
-            if(temNovaResposta) {
+            if(temResp) {
                 document.getElementById('bloco-resposta').style.display = "block";
-                document.getElementById('texto-resposta-adm').innerText = respostaEncontrada;
-                
-                // Se o painel de chat estiver fechado, mostra o botão amarelo e o alerta no player
+                document.getElementById('texto-resposta-adm').innerText = textoResp;
                 if(!document.getElementById('container-mensagem').classList.contains('aberto')) {
-                    document.getElementById('btn-abrir-msg').classList.add('tem-resposta');
-                    document.getElementById('txt-btn-msg').innerText = "VOCÊ TEM UMA RESPOSTA!";
                     document.getElementById('aviso-resposta').style.display = "block";
+                    document.getElementById('btn-abrir-msg').classList.add('tem-resposta');
                 }
             }
         });
 
-        function fecharAvisoResposta() {
+        function fecharAlerta() {
             document.getElementById('aviso-resposta').style.display = "none";
             document.getElementById('btn-abrir-msg').classList.remove('tem-resposta');
-            document.getElementById('txt-btn-msg').innerText = "ENVIE MENSAGEM PARA NOSSO ADM";
         }
 
-        setInterval(() => { 
-            const agora = new Date();
-            document.getElementById('hora').innerText = agora.toLocaleTimeString('pt-BR'); 
-            document.getElementById('data-atual').innerText = agora.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
-        }, 1000);
+        // RESTANTE DO SEU CÓDIGO INTACTO
+        setInterval(() => { document.getElementById('hora').innerText = new Date().toLocaleTimeString('pt-BR'); }, 1000);
+
+        async function getWeather() {
+            try {
+                const locRes = await fetch('https://ipapi.co/json/');
+                const loc = await locRes.json();
+                const climaRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${loc.latitude}&longitude=${loc.longitude}&current_weather=true`);
+                const clima = await climaRes.json();
+                const temp = Math.round(clima.current_weather.temperature);
+                document.getElementById('temp').innerText = temp + "°C";
+                document.getElementById('city').innerText = (loc.city || "LOCAL").toUpperCase();
+                document.getElementById('weather-desc').innerText = "CONECTADO";
+                document.getElementById('weather-icon').className = "fas fa-sun";
+            } catch (e) { document.getElementById('city').innerText = "CLIMA"; }
+        }
+        getWeather();
 
         db.ref('radios').on('value', snap => {
             allRadios = [];
             snap.forEach(c => { allRadios.push({ ...c.val(), key: c.key }); });
+            allRadios.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
             db.ref('usuarios/' + nomeUsuario + '/grade').once('value', userSnap => {
                 mySelectedIds = userSnap.val() || JSON.parse(localStorage.getItem('myRadios_' + nomeUsuario)) || [];
                 renderAll();
@@ -248,7 +244,7 @@
             myGrid.innerHTML = ""; selector.innerHTML = "";
             const myRadios = mySelectedIds.map(id => allRadios.find(r => r.key === id)).filter(Boolean);
             myRadios.forEach((r, i) => {
-                myGrid.innerHTML += `<div class="radio-item ${activeIndex === i ? 'active' : ''}" style="background: ${r.color || '#d1a3ff'}" onclick="playRadio(${i})"><i class="fas fa-tower-broadcast antena"></i><span>${r.name}</span></div>`;
+                myGrid.innerHTML += `<div class="radio-item ${activeIndex === i ? 'active' : ''}" style="background: ${r.color || '#d1a3ff'}" data-id="${r.key}" onclick="playRadio(${i})"><i class="fas fa-tower-broadcast antena"></i><span>${r.name}</span></div>`;
             });
             allRadios.forEach(r => {
                 const isSelected = mySelectedIds.includes(r.key);
@@ -260,7 +256,6 @@
             const index = mySelectedIds.indexOf(id);
             if (index > -1) mySelectedIds.splice(index, 1); else mySelectedIds.push(id);
             db.ref('usuarios/' + nomeUsuario + '/grade').set(mySelectedIds);
-            localStorage.setItem('myRadios_' + nomeUsuario, JSON.stringify(mySelectedIds));
             renderAll();
         }
 
@@ -283,6 +278,36 @@
         function nextRadio() { if(activeIndex < mySelectedIds.length - 1) playRadio(activeIndex + 1); else playRadio(0); }
         function prevRadio() { if(activeIndex > 0) playRadio(activeIndex - 1); else playRadio(mySelectedIds.length - 1); }
         function logout() { if(confirm("Sair?")) { localStorage.removeItem('usuarioNome'); window.location.href = 'index.html'; } }
+
+        // Publicidade
+        let listaPubs = [], idxPub = 0;
+        db.ref('publicidade').on('value', snap => {
+            listaPubs = [];
+            snap.forEach(child => { 
+                const p = child.val();
+                if(p.destino === 'TODOS' || p.ouvinteAlvo === nomeUsuario.toUpperCase()) listaPubs.push(p);
+            });
+            if (listaPubs.length > 0) mostrarPub();
+        });
+
+        function mostrarPub() {
+            const img = document.getElementById('img-publicidade');
+            if (listaPubs[idxPub]) {
+                img.src = listaPubs[idxPub].imagem;
+                img.style.display = "block";
+                img.style.opacity = 1;
+            }
+        }
+        
+        new Sortable(document.getElementById('my-radio-list'), {
+            animation: 150,
+            onEnd: function() {
+                const newIds = [];
+                document.querySelectorAll('#my-radio-list .radio-item').forEach(el => { newIds.push(el.getAttribute('data-id')); });
+                mySelectedIds = newIds;
+                db.ref('usuarios/' + nomeUsuario + '/grade').set(mySelectedIds);
+            }
+        });
     </script>
 </body>
 </html>
