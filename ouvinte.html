@@ -32,9 +32,9 @@
         .btn-sair { color: #ff4444; border-color: #442222; padding: 4px 10px; }
         .btn-sair:hover { background: #331111; border-color: #ff4444; }
         
-        .btn-msg { border-color: var(--primary); color: var(--primary); font-size: 11px; padding: 4px 10px; }
-        .btn-msg.tem-resposta { background: #ffcc00; color: #000; border-color: #000; animation: pulse-yellow 1s infinite; }
-        @keyframes pulse-yellow { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        .btn-msg { border-color: var(--primary); color: var(--primary); font-size: 11px; padding: 4px 10px; transition: all 0.5s ease; }
+        .btn-msg.tem-resposta { background: #ffcc00 !important; color: #000 !important; border-color: #fff !important; animation: pulse-yellow 1s infinite; }
+        @keyframes pulse-yellow { 0% { transform: scale(1); box-shadow: 0 0 0px #ffcc00; } 50% { transform: scale(1.05); box-shadow: 0 0 15px #ffcc00; } 100% { transform: scale(1); box-shadow: 0 0 0px #ffcc00; } }
 
         #hora { font-size: 24px; font-weight: 900; line-height: 1; color: var(--primary); }
 
@@ -305,9 +305,11 @@
 
         // Funções de Mensagem
         function toggleCardMensagem() {
-            document.getElementById('container-mensagem').classList.toggle('aberto');
-            // Ao abrir, se houver resposta, podemos "limpar" o alerta visual do botão
-            if(document.getElementById('container-mensagem').classList.contains('aberto')) {
+            const container = document.getElementById('container-mensagem');
+            container.classList.toggle('aberto');
+            
+            // Se abrir o card, removemos o alerta visual
+            if(container.classList.contains('aberto')) {
                 fecharAvisoResposta();
             }
         }
@@ -332,21 +334,29 @@
             });
         }
 
-        // MONITORAR RESPOSTAS DO ADM
+        // MONITORAR RESPOSTAS DO ADM (Focado no usuário atual)
         db.ref('mensagens_ouvintes').orderByChild('usuario').equalTo(nomeUsuario).on('value', snap => {
-            let ultimaMensagem = null;
+            let temRespostaNaoVista = false;
+            let textoResposta = "";
+
             snap.forEach(child => {
-                ultimaMensagem = child.val();
+                const dados = child.val();
+                if(dados.resposta) {
+                    temRespostaNaoVista = true;
+                    textoResposta = dados.resposta;
+                }
             });
 
-            if(ultimaMensagem && ultimaMensagem.resposta) {
+            if(temRespostaNaoVista) {
                 document.getElementById('bloco-resposta').style.display = "block";
-                document.getElementById('texto-resposta-adm').innerText = ultimaMensagem.resposta;
+                document.getElementById('texto-resposta-adm').innerText = textoResposta;
                 
-                // Alerta Visual no Botão e Barra
-                document.getElementById('btn-abrir-msg').classList.add('tem-resposta');
-                document.getElementById('txt-btn-msg').innerText = "VOCÊ TEM UMA RESPOSTA!";
-                document.getElementById('aviso-resposta').style.display = "block";
+                // Só mostra o alerta se o card estiver fechado
+                if(!document.getElementById('container-mensagem').classList.contains('aberto')) {
+                    document.getElementById('btn-abrir-msg').classList.add('tem-resposta');
+                    document.getElementById('txt-btn-msg').innerText = "VOCÊ TEM UMA RESPOSTA!";
+                    document.getElementById('aviso-resposta').style.display = "block";
+                }
             } else {
                 document.getElementById('bloco-resposta').style.display = "none";
             }
