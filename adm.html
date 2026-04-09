@@ -457,7 +457,7 @@
             });
         });
 
-        // --- MONITOR DE OUVINTES (AJUSTE REALIZADO NO NOME DO OUVINTE) ---
+        // --- MONITOR DE OUVINTES (AJUSTADO PARA MOSTRAR APENAS OUVINTES DA PASTA CONTAS) ---
         function toggleUserDetails(id) {
             const bar = document.getElementById('details-' + id);
             bar.style.display = (bar.style.display === 'block' ? 'none' : 'block');
@@ -465,45 +465,40 @@
 
         function excluirOuvinte(id) {
             if(confirm("Deseja EXCLUIR permanentemente este ouvinte?")) {
-                db.ref('usuarios/' + id).remove().then(() => alert("Ouvinte removido!"));
+                db.ref('contas/' + id).remove().then(() => alert("Ouvinte removido!"));
             }
         }
 
         function resetarSenhaOuvinte(id) {
             if(confirm("Redefinir senha para '0000'?")) {
-                db.ref('usuarios/' + id).update({ senha: "0000" }).then(() => alert("Senha redefinida!"));
+                db.ref('contas/' + id).update({ senha: "0000" }).then(() => alert("Senha redefinida!"));
             }
         }
 
-        db.ref('usuarios').on('value', snap => {
+        db.ref('contas').on('value', snap => {
             const container = document.getElementById('user-list');
             container.innerHTML = "";
             usersDataCache = {};
 
             snap.forEach(c => {
                 const u = c.val(), id = c.key;
-                // Busca o nome, se não tiver 'nome', tenta 'usuario', se não, usa 'SEM NOME'
+                
+                // FILTRO: Se o perfil for 'adm', não aparece na lista de ouvintes
+                const isAdm = (u.perfil === "adm" || u.perfil === "ADM");
+                if (isAdm) return;
+
+                // NOME: Agora busca o campo 'nome' que está no seu Firebase
                 const nomeExibicao = (u.nome || u.usuario || 'SEM NOME').toUpperCase();
                 
                 const lastSeen = parseInt(u.lastSeen || 0);
                 const loginTime = parseInt(u.loginTime || lastSeen);
                 const radioTime = parseInt(u.radioTime || loginTime);
                 const isOnline = (Date.now() - lastSeen < 60000);
-                const isAdm = (u.perfil === "adm" || u.perfil === "ADM");
                 
                 usersDataCache[id] = { loginTime, radioTime, isOnline };
 
-                let colorTheme, labelStatus;
-                if(isAdm) {
-                    colorTheme = "#87CEFA"; 
-                    labelStatus = "ADM";
-                } else if(isOnline) {
-                    colorTheme = "#00ff00"; 
-                    labelStatus = "ON";
-                } else {
-                    colorTheme = "#A020F0"; 
-                    labelStatus = "OFF";
-                }
+                let colorTheme = isOnline ? "#00ff00" : "#A020F0";
+                let labelStatus = isOnline ? "ON" : "OFF";
 
                 const div = document.createElement('div');
                 div.className = "user-item";
@@ -550,10 +545,10 @@
         }
 
         function formatDuration(ms) {
-            if (isNaN(ms) || ms < 0) return "0s";
-            const totalSecs = Math.floor(ms / 1000);
-            const m = Math.floor(totalSecs / 60);
-            const s = totalSecs % 60;
+            if (isNaN(ms) || ms < 0) return "0m 0s";
+            const totalSec = Math.floor(ms / 1000);
+            const m = Math.floor(totalSec / 60);
+            const s = totalSec % 60;
             return `${m}m ${s}s`;
         }
     </script>
