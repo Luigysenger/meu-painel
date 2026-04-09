@@ -457,7 +457,7 @@
             });
         });
 
-        // --- MONITOR DE OUVINTES (AJUSTADO PARA MOSTRAR APENAS OUVINTES DA PASTA CONTAS) ---
+        // --- MONITOR DE OUVINTES ---
         function toggleUserDetails(id) {
             const bar = document.getElementById('details-' + id);
             bar.style.display = (bar.style.display === 'block' ? 'none' : 'block');
@@ -482,14 +482,10 @@
 
             snap.forEach(c => {
                 const u = c.val(), id = c.key;
-                
-                // FILTRO: Se o perfil for 'adm', não aparece na lista de ouvintes
                 const isAdm = (u.perfil === "adm" || u.perfil === "ADM");
                 if (isAdm) return;
 
-                // NOME: Busca o campo 'nome'
                 const nomeExibicao = (u.nome || u.usuario || 'SEM NOME').toUpperCase();
-                
                 const lastSeen = parseInt(u.lastSeen || 0);
                 const loginTime = parseInt(u.loginTime || lastSeen);
                 const radioTime = parseInt(u.radioTime || loginTime);
@@ -497,13 +493,12 @@
                 
                 usersDataCache[id] = { loginTime, radioTime, isOnline };
 
-                // AJUSTE DE CORES E STATUS SOLICITADO
-                let colorTheme = isOnline ? "#00ff00" : "#A020F0"; // Verde se On, Roxo se Off
+                let colorTheme = isOnline ? "#00ff00" : "#A020F0";
                 let labelStatus = isOnline ? "ON" : "OFF";
 
                 const div = document.createElement('div');
                 div.className = "user-item";
-                div.style.borderColor = colorTheme; // Borda colorida
+                div.style.borderColor = colorTheme;
                 
                 div.innerHTML = `
                     <div class="user-row">
@@ -546,10 +541,9 @@
         }
 
         function formatDuration(ms) {
-            if (isNaN(ms) || ms < 0) return "0m 0s";
-            const totalSec = Math.floor(ms / 1000);
-            const m = Math.floor(totalSec / 60);
-            const s = totalSec % 60;
+            const totalSegundos = Math.floor(ms / 1000);
+            const m = Math.floor(totalSegundos / 60);
+            const s = totalSegundos % 60;
             return `${m}m ${s}s`;
         }
     </script>
