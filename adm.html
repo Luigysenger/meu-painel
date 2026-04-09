@@ -108,7 +108,7 @@
         .btn-delete-pub { color: #ff4444; }
         .btn-action-pub:hover { transform: scale(1.2); }
 
-        .user-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; overflow: hidden; }
+        .user-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; overflow: hidden; border: 2px solid transparent; }
         .user-row { display: flex; align-items: center; width: 100%; }
         .user-name-btn { flex: 1; padding: 15px; background: none; border: none; color: white; text-align: left; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .status-on { color: #00ff00; font-weight: 900; font-size: 11px; }
@@ -454,7 +454,7 @@
             });
         });
 
-        // --- MONITOR DE OUVINTES (AJUSTADO PARA CAMINHO 'CONTAS') ---
+        // --- MONITOR DE OUVINTES ---
         function toggleUserDetails(id) {
             const bar = document.getElementById('details-' + id);
             bar.style.display = (bar.style.display === 'block' ? 'none' : 'block');
@@ -462,18 +462,17 @@
 
         function excluirOuvinte(id) {
             if(confirm("Deseja EXCLUIR permanentemente este ouvinte?")) {
-                db.ref('contas/' + id).remove().then(() => alert("Ouvinte removido!"));
+                db.ref('usuarios/' + id).remove().then(() => alert("Ouvinte removido!"));
             }
         }
 
         function resetarSenhaOuvinte(id) {
             if(confirm("Redefinir senha para '0000'?")) {
-                db.ref('contas/' + id).update({ senha: "0000" }).then(() => alert("Senha redefinida!"));
+                db.ref('usuarios/' + id).update({ senha: "0000" }).then(() => alert("Senha redefinida!"));
             }
         }
 
-        // ALTERAÇÃO CRUCIAL AQUI: Mudando de 'usuarios' para 'contas' para bater com o print
-        db.ref('contas').on('value', snap => {
+        db.ref('usuarios').on('value', snap => {
             const container = document.getElementById('user-list');
             container.innerHTML = "";
             usersDataCache = {}; 
@@ -484,25 +483,39 @@
                 const loginTime = parseInt(u.loginTime || lastSeen);
                 const radioTime = parseInt(u.radioTime || loginTime);
                 const isOnline = (Date.now() - lastSeen < 60000);
+                const isAdm = (u.tipo === 'adm'); // Assumindo que você tenha um campo tipo no cadastro
                 
-                // AJUSTE DE NOME: Limpando aspas extras que aparecem no seu Firebase
-                let nomeExibicao = "Ouvinte sem nome";
-                if (u.nome) {
-                    nomeExibicao = u.nome.replace(/"/g, '').trim(); 
-                } else if (u.email) {
-                    nomeExibicao = u.email.split('@')[0].replace(/"/g, '');
-                }
-
                 usersDataCache[id] = { loginTime, radioTime, isOnline };
 
                 const div = document.createElement('div');
                 div.className = "user-item";
-                div.style.borderLeft = `4px solid ${isOnline ? '#00ff00' : '#d1a3ff'}`;
+                
+                // LÓGICA DE CORES DOS CARDS E BORDAS
+                let borderStyle = "";
+                let statusHtml = "";
+                let bgColor = "";
+
+                if (isAdm) {
+                    bgColor = "background: #333;"; // Faixa inteira cinza para ADM
+                    borderStyle = "border-color: #555;";
+                    statusHtml = '<span style="color:#aaa; font-weight:900; font-size:11px;">ADM</span>';
+                } else {
+                    if (isOnline) {
+                        borderStyle = "border-color: #00ff00;"; // Borda verde Online
+                        statusHtml = '<span class="status-on" style="color:#00ff00;">ON</span>';
+                    } else {
+                        borderStyle = "border-color: #d1a3ff;"; // Borda roxa Offline
+                        statusHtml = '<span class="status-off" style="color:#d1a3ff;">OFF</span>';
+                    }
+                }
+
+                div.setAttribute("style", `${bgColor} ${borderStyle}`);
+
                 div.innerHTML = `
                     <div class="user-row">
                         <button class="user-name-btn" onclick="toggleUserDetails('${id}')">
-                            <span>${nomeExibicao}</span> 
-                            ${isOnline ? '<span class="status-on">ON</span>' : '<span class="status-off">OFF</span>'}
+                            <span>${u.nome || 'Ouvinte'}</span> 
+                            ${statusHtml}
                         </button>
                     </div>
                     <div class="user-details-bar" id="details-${id}">
