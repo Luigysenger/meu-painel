@@ -487,7 +487,7 @@
                 const isAdm = (u.perfil === "adm" || u.perfil === "ADM");
                 if (isAdm) return;
 
-                // NOME: Agora busca o campo 'nome' que está no seu Firebase
+                // NOME: Busca o campo 'nome'
                 const nomeExibicao = (u.nome || u.usuario || 'SEM NOME').toUpperCase();
                 
                 const lastSeen = parseInt(u.lastSeen || 0);
@@ -497,12 +497,13 @@
                 
                 usersDataCache[id] = { loginTime, radioTime, isOnline };
 
-                let colorTheme = isOnline ? "#00ff00" : "#A020F0";
+                // AJUSTE DE CORES E STATUS SOLICITADO
+                let colorTheme = isOnline ? "#00ff00" : "#A020F0"; // Verde se On, Roxo se Off
                 let labelStatus = isOnline ? "ON" : "OFF";
 
                 const div = document.createElement('div');
                 div.className = "user-item";
-                div.style.borderColor = colorTheme;
+                div.style.borderColor = colorTheme; // Borda colorida
                 
                 div.innerHTML = `
                     <div class="user-row">
