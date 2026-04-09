@@ -9,83 +9,56 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --primary: #BF40BF; --bg: #0b0b0b; --card: #181818; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
-        .login-container { background: var(--card); padding: 30px; border-radius: 20px; border: 1px solid #333; width: 100%; max-width: 380px; text-align: center; }
-        h2 { color: var(--primary); margin-bottom: 25px; text-transform: uppercase; letter-spacing: 2px; font-size: 1.5rem; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .login-container { background: var(--card); padding: 30px; border-radius: 20px; border: 1px solid #333; width: 90%; max-width: 350px; text-align: center; }
+        h2 { color: var(--primary); margin-bottom: 25px; text-transform: uppercase; letter-spacing: 2px; }
         .input-group { margin-bottom: 15px; text-align: left; }
         label { display: block; font-size: 12px; color: #888; margin-bottom: 5px; margin-left: 5px; }
-        input, select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #333; background: #0b0b0b; color: white; outline: none; box-sizing: border-box; }
+        input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #333; background: #0b0b0b; color: white; outline: none; box-sizing: border-box; }
         input:focus { border-color: var(--primary); }
-        .btn-acao { width: 100%; padding: 12px; border-radius: 10px; border: none; background: var(--primary); color: white; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; text-transform: uppercase; }
+        .btn-acao { width: 100%; padding: 12px; border-radius: 10px; border: none; background: var(--primary); color: white; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
         .btn-acao:hover { opacity: 0.8; }
         .links { margin-top: 20px; font-size: 13px; }
         .links a { color: var(--primary); text-decoration: none; cursor: pointer; display: block; margin-bottom: 8px; }
         .hidden { display: none; }
         #msg-erro { color: #ff4444; font-size: 12px; margin-top: 10px; min-height: 15px; }
-        
-        /* Estilo para as caixinhas de perfil */
-        .perfil-selector { display: flex; justify-content: space-around; background: #0b0b0b; padding: 10px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #333; }
-        .perfil-option { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; }
-        .perfil-option input { width: auto; cursor: pointer; }
+        .perfil-selector { margin-bottom: 15px; display: flex; justify-content: center; gap: 15px; font-size: 14px; }
+        .perfil-selector input { width: auto; }
     </style>
 </head>
 <body>
 
     <div class="login-container" id="box-login">
-        <h2>Acesso ao Painel</h2>
+        <h2>Painel Login</h2>
         
         <div class="perfil-selector">
-            <label class="perfil-option">
-                <input type="radio" name="perfil-login" value="ouvinte" checked> Ouvinte
-            </label>
-            <label class="perfil-option">
-                <input type="radio" name="perfil-login" value="adm"> Administrador
-            </label>
+            <label><input type="radio" name="tipo-perfil" value="ouvinte" checked> Ouvinte</label>
+            <label><input type="radio" name="tipo-perfil" value="adm"> Administrador</label>
         </div>
 
         <div class="input-group">
             <label>E-mail</label>
-            <input type="email" id="login-email" placeholder="seu@email.com">
+            <input type="text" id="login-email" placeholder="seu@email.com">
         </div>
         <div class="input-group">
             <label>Senha</label>
             <input type="password" id="login-senha" placeholder="****">
         </div>
-        <button class="btn-acao" onclick="fazerLogin()">ENTRAR NO SISTEMA</button>
+        <button class="btn-acao" onclick="fazerLogin()">ENTRAR NO PAINEL</button>
         <div id="msg-erro"></div>
+        
         <div class="links">
-            <a onclick="mostrarTela('cadastro')">Não tenho cadastro (Cadastrar-se)</a>
-            <a onclick="mostrarTela('esqueci')">Esqueci minha senha</a>
+            <a onclick="mostrarTela('cadastro')">Não tenho cadastro (Cadastrar)</a>
         </div>
     </div>
 
     <div class="login-container hidden" id="box-cadastro">
         <h2>Novo Cadastro</h2>
         <input type="text" id="cad-nome" placeholder="Nome Completo" style="margin-bottom:10px">
-        <input type="email" id="cad-email" placeholder="E-mail Válido" style="margin-bottom:10px">
-        <input type="text" id="cad-cidade" placeholder="Sua Cidade" style="margin-bottom:10px">
-        <input type="text" id="cad-estado" placeholder="Seu Estado (Ex: PR)" style="margin-bottom:10px">
-        <input type="password" id="cad-senha" placeholder="Crie uma Senha" style="margin-bottom:10px">
-        <input type="password" id="cad-confirma" placeholder="Confirme a Senha" style="margin-bottom:15px">
+        <input type="text" id="cad-email" placeholder="E-mail" style="margin-bottom:10px">
+        <input type="text" id="cad-cidade" placeholder="Cidade" style="margin-bottom:10px">
+        <input type="password" id="cad-senha" placeholder="Senha" style="margin-bottom:15px">
         <button class="btn-acao" onclick="salvarCadastro()">CRIAR MINHA CONTA</button>
-        <div class="links"><a onclick="mostrarTela('login')">Voltar para Login</a></div>
-    </div>
-
-    <div class="login-container hidden" id="box-esqueci">
-        <h2>Recuperar Senha</h2>
-        <div id="etapa-validacao">
-            <p style="font-size: 11px; color: #888; margin-bottom: 15px;">Confirme seus dados para redefinir:</p>
-            <input type="email" id="rec-email" placeholder="E-mail de Cadastro" style="margin-bottom:10px">
-            <input type="text" id="rec-cidade" placeholder="Cidade" style="margin-bottom:10px">
-            <input type="text" id="rec-estado" placeholder="Estado" style="margin-bottom:15px">
-            <button class="btn-acao" onclick="validarRecuperacao()">VERIFICAR DADOS</button>
-        </div>
-
-        <div id="etapa-nova-senha" class="hidden">
-            <input type="password" id="rec-nova-senha" placeholder="Nova Senha" style="margin-bottom:10px">
-            <input type="password" id="rec-confirma-nova" placeholder="Confirme Nova Senha" style="margin-bottom:15px">
-            <button class="btn-acao" onclick="redefinirSenhaFinal()">ATUALIZAR SENHA</button>
-        </div>
         <div class="links"><a onclick="mostrarTela('login')">Voltar para Login</a></div>
     </div>
 
@@ -99,51 +72,48 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let usuarioParaRecuperar = null;
-
         function mostrarTela(tela) {
-            document.querySelectorAll('.login-container').forEach(el => el.classList.add('hidden'));
+            document.getElementById('box-login').classList.add('hidden');
+            document.getElementById('box-cadastro').classList.add('hidden');
             if(tela === 'login') document.getElementById('box-login').classList.remove('hidden');
             if(tela === 'cadastro') document.getElementById('box-cadastro').classList.remove('hidden');
-            if(tela === 'esqueci') {
-                document.getElementById('box-esqueci').classList.remove('hidden');
-                document.getElementById('etapa-validacao').classList.remove('hidden');
-                document.getElementById('etapa-nova-senha').classList.add('hidden');
-            }
         }
 
         function fazerLogin() {
-            const email = document.getElementById('login-email').value.trim().toLowerCase();
-            const senha = document.getElementById('login-senha').value;
-            const perfilSelecionado = document.querySelector('input[name="perfil-login"]:checked').value;
+            const emailDigitado = document.getElementById('login-email').value.trim().toLowerCase();
+            const senhaInput = document.getElementById('login-senha').value.trim();
+            const perfilSelecionado = document.querySelector('input[name="tipo-perfil"]:checked').value;
             const erro = document.getElementById('msg-erro');
-            const pathEmail = email.replace(/\./g, ','); // Firebase não aceita ponto na chave
+            
+            if(!emailDigitado || !senhaInput) {
+                erro.innerText = "Preencha todos os campos!";
+                return;
+            }
 
-            if(!email || !senha) { erro.innerText = "Preencha tudo!"; return; }
+            // Transforma pontos em vírgulas para o Firebase
+            const pathEmail = emailDigitado.replace(/\./g, ',');
 
             db.ref('contas/' + pathEmail).once('value', snap => {
                 const u = snap.val();
-                if(u && u.senha === senha) {
-                    if(u.perfil !== perfilSelecionado) {
-                        erro.innerText = `Esta conta não é de ${perfilSelecionado}!`;
-                        return;
-                    }
+                
+                // Verifica se usuário existe e senha confere
+                if(u && String(u.senha) === String(senhaInput)) {
                     
-                    // Verifica se já está online
-                    if(u.status === "Online") {
-                        erro.innerText = "Usuário já conectado em outro dispositivo!";
+                    // Validação de Perfil: Se escolheu ADM, tem que ser ADM no banco
+                    if(perfilSelecionado === 'adm' && u.perfil !== 'adm') {
+                        erro.innerText = "Você não tem permissão de Administrador!";
                         return;
                     }
 
-                    localStorage.setItem('usuarioNome', u.nome);
-                    localStorage.setItem('usuarioEmail', email);
+                    localStorage.setItem('usuarioNome', u.nome || emailDigitado);
+                    localStorage.setItem('usuarioEmail', emailDigitado);
 
-                    db.ref('contas/' + pathEmail).update({
-                        status: "Online",
-                        lastSeen: Date.now()
-                    }).then(() => {
-                        window.location.href = (u.perfil === 'adm') ? 'adm.html' : 'ouvinte.html';
-                    });
+                    // Redirecionamento
+                    if(u.perfil === 'adm') {
+                        window.location.href = 'adm.html';
+                    } else {
+                        window.location.href = 'ouvinte.html';
+                    }
                 } else {
                     erro.innerText = "E-mail ou Senha incorretos!";
                 }
@@ -153,58 +123,23 @@
         function salvarCadastro() {
             const nome = document.getElementById('cad-nome').value.trim();
             const email = document.getElementById('cad-email').value.trim().toLowerCase();
-            const cid = document.getElementById('cad-cidade').value.trim();
-            const est = document.getElementById('cad-estado').value.trim().toUpperCase();
-            const s1 = document.getElementById('cad-senha').value;
-            const s2 = document.getElementById('cad-confirma').value;
-            const pathEmail = email.replace(/\./g, ',');
+            const cidade = document.getElementById('cad-cidade').value.trim();
+            const senha = document.getElementById('cad-senha').value.trim();
+            
+            if(!nome || !email || !senha) { alert("Preencha os campos obrigatórios!"); return; }
 
-            if(!nome || !email || !cid || !est || !s1) { alert("Preencha todos os campos!"); return; }
-            if(s1 !== s2) { alert("As senhas estão diferentes!"); return; }
+            const pathEmail = email.replace(/\./g, ',');
 
             db.ref('contas/' + pathEmail).set({
                 nome: nome,
                 email: email,
-                cidade: cid,
-                estado: est,
-                senha: s1,
-                perfil: "ouvinte", // Novos cadastros via index são sempre ouvintes
-                status: "Offline"
+                cidade: cidade,
+                senha: senha,
+                perfil: "ouvinte", // Padrão novo usuário
+                status: "Offline",
+                estado: ""
             }).then(() => {
-                alert("Cadastro realizado com sucesso!");
-                mostrarTela('login');
-            });
-        }
-
-        function validarRecuperacao() {
-            const email = document.getElementById('rec-email').value.trim().toLowerCase();
-            const cid = document.getElementById('rec-cidade').value.trim();
-            const est = document.getElementById('rec-estado').value.trim().toUpperCase();
-            const pathEmail = email.replace(/\./g, ',');
-
-            db.ref('contas/' + pathEmail).once('value', snap => {
-                const u = snap.val();
-                if(u && u.cidade === cid && u.estado === est) {
-                    usuarioParaRecuperar = pathEmail;
-                    document.getElementById('etapa-validacao').classList.add('hidden');
-                    document.getElementById('etapa-nova-senha').classList.remove('hidden');
-                } else {
-                    alert("Dados não conferem! Verifique e tente novamente.");
-                }
-            });
-        }
-
-        function redefinirSenhaFinal() {
-            const s1 = document.getElementById('rec-nova-senha').value;
-            const s2 = document.getElementById('rec-confirma-nova').value;
-
-            if(s1.length < 1) { alert("Digite a nova senha"); return; }
-            if(s1 !== s2) { alert("As senhas estão diferentes, tente de volta"); return; }
-
-            db.ref('contas/' + usuarioParaRecuperar).update({
-                senha: s1
-            }).then(() => {
-                alert("Senha atualizada! Faça login.");
+                alert("Cadastro realizado! Faça login.");
                 mostrarTela('login');
             });
         }
