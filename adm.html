@@ -454,7 +454,7 @@
             });
         });
 
-        // --- MONITOR DE OUVINTES (AJUSTADO PARA MOSTRAR NOME) ---
+        // --- MONITOR DE OUVINTES (AJUSTADO PARA CAMINHO 'CONTAS') ---
         function toggleUserDetails(id) {
             const bar = document.getElementById('details-' + id);
             bar.style.display = (bar.style.display === 'block' ? 'none' : 'block');
@@ -462,17 +462,18 @@
 
         function excluirOuvinte(id) {
             if(confirm("Deseja EXCLUIR permanentemente este ouvinte?")) {
-                db.ref('usuarios/' + id).remove().then(() => alert("Ouvinte removido!"));
+                db.ref('contas/' + id).remove().then(() => alert("Ouvinte removido!"));
             }
         }
 
         function resetarSenhaOuvinte(id) {
             if(confirm("Redefinir senha para '0000'?")) {
-                db.ref('usuarios/' + id).update({ senha: "0000" }).then(() => alert("Senha redefinida!"));
+                db.ref('contas/' + id).update({ senha: "0000" }).then(() => alert("Senha redefinida!"));
             }
         }
 
-        db.ref('usuarios').on('value', snap => {
+        // ALTERAÇÃO CRUCIAL AQUI: Mudando de 'usuarios' para 'contas' para bater com o print
+        db.ref('contas').on('value', snap => {
             const container = document.getElementById('user-list');
             container.innerHTML = "";
             usersDataCache = {}; 
@@ -484,8 +485,13 @@
                 const radioTime = parseInt(u.radioTime || loginTime);
                 const isOnline = (Date.now() - lastSeen < 60000);
                 
-                // AJUSTE AQUI: Pega o campo 'nome' que o usuário preencheu no cadastro
-                const nomeExibicao = u.nome ? u.nome : 'Ouvinte sem nome';
+                // AJUSTE DE NOME: Limpando aspas extras que aparecem no seu Firebase
+                let nomeExibicao = "Ouvinte sem nome";
+                if (u.nome) {
+                    nomeExibicao = u.nome.replace(/"/g, '').trim(); 
+                } else if (u.email) {
+                    nomeExibicao = u.email.split('@')[0].replace(/"/g, '');
+                }
 
                 usersDataCache[id] = { loginTime, radioTime, isOnline };
 
