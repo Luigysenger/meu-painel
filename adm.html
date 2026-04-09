@@ -115,6 +115,11 @@
         .status-off { color: #d1a3ff; font-weight: 900; font-size: 11px; }
         .user-details-bar { display: none; padding: 0 15px 15px 15px; font-size: 13px; color: #ccc; border-top: 1px solid #222; }
 
+        .btn-user-action { background: #222; border: 1px solid #333; color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; cursor: pointer; transition: 0.2s; margin-left: 5px; }
+        .btn-user-action:hover { background: #333; border-color: var(--primary); }
+        .btn-user-del { color: #ff4444; }
+        .btn-user-del:hover { background: #442222; }
+
         .player-footer { margin-top: 20px; background: #111; padding: 25px; border-radius: 20px; border: 1px solid #222; text-align: center; }
         .controls-row { display: flex; align-items: center; justify-content: center; gap: 35px; }
         .btn-nav { background: none; border: none; color: #b3b3b3; font-size: 28px; cursor: pointer; transition: 0.3s; }
@@ -455,6 +460,18 @@
             bar.style.display = (bar.style.display === 'block' ? 'none' : 'block');
         }
 
+        function excluirOuvinte(id) {
+            if(confirm("Deseja EXCLUIR permanentemente este ouvinte?")) {
+                db.ref('usuarios/' + id).remove().then(() => alert("Ouvinte removido!"));
+            }
+        }
+
+        function resetarSenhaOuvinte(id) {
+            if(confirm("Redefinir senha para '0000'?")) {
+                db.ref('usuarios/' + id).update({ senha: "0000" }).then(() => alert("Senha redefinida!"));
+            }
+        }
+
         db.ref('usuarios').on('value', snap => {
             const container = document.getElementById('user-list');
             container.innerHTML = "";
@@ -464,7 +481,7 @@
                 const u = c.val(), id = c.key;
                 const lastSeen = parseInt(u.lastSeen || 0);
                 const loginTime = parseInt(u.loginTime || lastSeen);
-                const radioTime = parseInt(u.radioTime || loginTime); // NOVO: Tempo que iniciou na rádio atual
+                const radioTime = parseInt(u.radioTime || loginTime);
                 const isOnline = (Date.now() - lastSeen < 60000);
                 
                 usersDataCache[id] = { loginTime, radioTime, isOnline };
@@ -484,6 +501,10 @@
                         <p>Sessão total: <b id="timer-sessao-${id}">0m 0s</b></p>
                         <p style="color:var(--primary)">TEMPO NESSA RÁDIO: <b id="timer-radio-${id}">0m 0s</b></p>
                         <p>Último sinal: <b>${new Date(lastSeen).toLocaleTimeString()}</b></p>
+                        <div style="margin-top:10px; border-top:1px solid #333; padding-top:10px;">
+                            <button class="btn-user-action" onclick="resetarSenhaOuvinte('${id}')"><i class="fas fa-key"></i> RESETAR SENHA</button>
+                            <button class="btn-user-action btn-user-del" onclick="excluirOuvinte('${id}')"><i class="fas fa-trash"></i> EXCLUIR</button>
+                        </div>
                     </div>`;
                 container.appendChild(div);
             });
@@ -497,11 +518,8 @@
                 const data = usersDataCache[id];
 
                 if (data.isOnline) {
-                    // Cálculo Sessão Total
                     const diffSessao = Date.now() - data.loginTime;
-                    // Cálculo Tempo na Rádio Atual
                     const diffRadio = Date.now() - data.radioTime;
-
                     if (elSessao) elSessao.innerText = formatDuration(diffSessao);
                     if (elRadio) elRadio.innerText = formatDuration(diffRadio);
                 } else {
