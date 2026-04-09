@@ -108,14 +108,10 @@
         .btn-delete-pub { color: #ff4444; }
         .btn-action-pub:hover { transform: scale(1.2); }
 
-        .user-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; overflow: hidden; border: 1px solid transparent; }
+        .user-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; overflow: hidden; border: 1px solid transparent; transition: 0.3s; }
         .user-row { display: flex; align-items: center; width: 100%; }
         .user-name-btn { flex: 1; padding: 15px; background: none; border: none; color: white; text-align: left; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         
-        .status-on { color: #00ff00; font-weight: 900; font-size: 11px; }
-        .status-off { color: #A020F0; font-weight: 900; font-size: 11px; }
-        .status-adm { color: #87CEFA; font-weight: 900; font-size: 11px; }
-
         .user-details-bar { display: none; padding: 0 15px 15px 15px; font-size: 13px; color: #ccc; border-top: 1px solid #222; }
 
         .btn-user-action { background: #222; border: 1px solid #333; color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; cursor: pointer; transition: 0.2s; margin-left: 5px; }
@@ -457,7 +453,7 @@
             });
         });
 
-        // --- MONITOR DE OUVINTES ---
+        // --- MONITOR DE OUVINTES (AGORA BUSCANDO EM 'USUARIOS') ---
         function toggleUserDetails(id) {
             const bar = document.getElementById('details-' + id);
             bar.style.display = (bar.style.display === 'block' ? 'none' : 'block');
@@ -465,40 +461,38 @@
 
         function excluirOuvinte(id) {
             if(confirm("Deseja EXCLUIR permanentemente este ouvinte?")) {
-                db.ref('contas/' + id).remove().then(() => alert("Ouvinte removido!"));
+                db.ref('usuarios/' + id).remove().then(() => alert("Ouvinte removido!"));
             }
         }
 
-        function resetarSenhaOuvinte(id) {
-            if(confirm("Redefinir senha para '0000'?")) {
-                db.ref('contas/' + id).update({ senha: "0000" }).then(() => alert("Senha redefinida!"));
-            }
-        }
-
-        db.ref('contas').on('value', snap => {
+        db.ref('usuarios').on('value', snap => {
             const container = document.getElementById('user-list');
             container.innerHTML = "";
             usersDataCache = {};
 
             snap.forEach(c => {
                 const u = c.val(), id = c.key;
-                const isAdm = (u.perfil === "adm" || u.perfil === "ADM");
-                if (isAdm) return;
-
-                const nomeExibicao = (u.nome || u.usuario || 'SEM NOME').toUpperCase();
+                
+                // Pega o nome do nó ou o campo usuario/nome
+                const nomeExibicao = (u.usuario || u.nome || id).toUpperCase();
+                
+                // Verifica online baseado no lastSeen (1 minuto de tolerância)
                 const lastSeen = parseInt(u.lastSeen || 0);
+                const isOnline = (Date.now() - lastSeen < 60000);
+                
+                // Tempos para os cronômetros
                 const loginTime = parseInt(u.loginTime || lastSeen);
                 const radioTime = parseInt(u.radioTime || loginTime);
-                const isOnline = (Date.now() - lastSeen < 60000);
                 
                 usersDataCache[id] = { loginTime, radioTime, isOnline };
 
-                let colorTheme = isOnline ? "#00ff00" : "#A020F0";
+                // CORES: VERDE (ON) e ROXO (OFF) como solicitado
+                let colorTheme = isOnline ? "#00ff00" : "#A020F0"; 
                 let labelStatus = isOnline ? "ON" : "OFF";
 
                 const div = document.createElement('div');
                 div.className = "user-item";
-                div.style.borderColor = colorTheme;
+                div.style.borderColor = colorTheme; 
                 
                 div.innerHTML = `
                     <div class="user-row">
@@ -511,9 +505,8 @@
                         <p>Ouvindo: <b>${u.radioAtual || 'Nenhuma'}</b></p>
                         <p>Sessão total: <b id="timer-sessao-${id}">0m 0s</b></p>
                         <p style="color:var(--primary)">TEMPO NESSA RÁDIO: <b id="timer-radio-${id}">0m 0s</b></p>
-                        <p>Último sinal: <b>${new Date(lastSeen).toLocaleTimeString()}</b></p>
+                        <p>Último sinal: <b>${lastSeen ? new Date(lastSeen).toLocaleTimeString() : '---'}</b></p>
                         <div style="margin-top:10px; border-top:1px solid #333; padding-top:10px;">
-                            <button class="btn-user-action" onclick="resetarSenhaOuvinte('${id}')"><i class="fas fa-key"></i> RESETAR SENHA</button>
                             <button class="btn-user-action btn-user-del" onclick="excluirOuvinte('${id}')"><i class="fas fa-trash"></i> EXCLUIR</button>
                         </div>
                     </div>`;
@@ -534,13 +527,14 @@
                     if (elSessao) elSessao.innerText = formatDuration(diffSessao);
                     if (elRadio) elRadio.innerText = formatDuration(diffRadio);
                 } else {
-                    if (elSessao) elSessao.innerText = "Sessão encerrada";
+                    if (elSessao) elSessao.innerText = "OFFLINE";
                     if (elRadio) elRadio.innerText = "-";
                 }
             }
         }
 
         function formatDuration(ms) {
+            if (isNaN(ms) || ms < 0) return "0m 0s";
             const totalSegundos = Math.floor(ms / 1000);
             const m = Math.floor(totalSegundos / 60);
             const s = totalSegundos % 60;
