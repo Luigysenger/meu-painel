@@ -23,19 +23,16 @@
         .hidden { display: none; }
         #msg-erro { color: #ff4444; font-size: 12px; margin-top: 10px; min-height: 15px; }
         .perfil-selector { margin-bottom: 15px; display: flex; justify-content: center; gap: 15px; font-size: 14px; }
-        .perfil-selector input { width: auto; }
     </style>
 </head>
 <body>
 
     <div class="login-container" id="box-login">
         <h2>Painel Login</h2>
-        
         <div class="perfil-selector">
             <label><input type="radio" name="tipo-perfil" value="ouvinte" checked> Ouvinte</label>
             <label><input type="radio" name="tipo-perfil" value="adm"> Administrador</label>
         </div>
-
         <div class="input-group">
             <label>E-mail</label>
             <input type="text" id="login-email" placeholder="seu@email.com">
@@ -46,9 +43,9 @@
         </div>
         <button class="btn-acao" onclick="fazerLogin()">ENTRAR NO PAINEL</button>
         <div id="msg-erro"></div>
-        
         <div class="links">
             <a onclick="mostrarTela('cadastro')">Não tenho cadastro (Cadastrar)</a>
+            <a onclick="mostrarTela('esqueci')">Esqueci minha senha</a>
         </div>
     </div>
 
@@ -57,9 +54,27 @@
         <input type="text" id="cad-nome" placeholder="Nome Completo" style="margin-bottom:10px">
         <input type="text" id="cad-email" placeholder="E-mail" style="margin-bottom:10px">
         <input type="text" id="cad-cidade" placeholder="Cidade" style="margin-bottom:10px">
+        <input type="text" id="cad-estado" placeholder="Estado (Ex: PR)" style="margin-bottom:10px">
         <input type="password" id="cad-senha" placeholder="Senha" style="margin-bottom:15px">
         <button class="btn-acao" onclick="salvarCadastro()">CRIAR MINHA CONTA</button>
         <div class="links"><a onclick="mostrarTela('login')">Voltar para Login</a></div>
+    </div>
+
+    <div class="login-container hidden" id="box-esqueci">
+        <h2>Recuperar Acesso</h2>
+        <p style="font-size: 12px; color: #888; margin-bottom: 15px;">Confirme seus dados para redefinir:</p>
+        <input type="text" id="rec-email" placeholder="E-mail cadastrado" style="margin-bottom:10px">
+        <input type="text" id="rec-cidade" placeholder="Cidade cadastrada" style="margin-bottom:10px">
+        <input type="text" id="rec-estado" placeholder="Estado cadastrado" style="margin-bottom:15px">
+        <button class="btn-acao" onclick="validarDadosRecuperacao()">VALIDAR DADOS</button>
+        <div class="links"><a onclick="mostrarTela('login')">Voltar para Login</a></div>
+    </div>
+
+    <div class="login-container hidden" id="box-nova-senha">
+        <h2>Nova Senha</h2>
+        <input type="password" id="nova-senha-1" placeholder="Nova Senha" style="margin-bottom:10px">
+        <input type="password" id="nova-senha-2" placeholder="Confirme a Nova Senha" style="margin-bottom:15px">
+        <button class="btn-acao" onclick="atualizarSenhaNoBanco()">SALVAR NOVA SENHA</button>
     </div>
 
     <script>
@@ -72,11 +87,14 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        let emailParaRecuperar = ""; // Variável temporária
+
         function mostrarTela(tela) {
-            document.getElementById('box-login').classList.add('hidden');
-            document.getElementById('box-cadastro').classList.add('hidden');
+            document.querySelectorAll('.login-container').forEach(c => c.classList.add('hidden'));
             if(tela === 'login') document.getElementById('box-login').classList.remove('hidden');
             if(tela === 'cadastro') document.getElementById('box-cadastro').classList.remove('hidden');
+            if(tela === 'esqueci') document.getElementById('box-esqueci').classList.remove('hidden');
+            if(tela === 'nova-senha') document.getElementById('box-nova-senha').classList.remove('hidden');
         }
 
         function fazerLogin() {
@@ -84,39 +102,15 @@
             const senhaInput = document.getElementById('login-senha').value.trim();
             const perfilSelecionado = document.querySelector('input[name="tipo-perfil"]:checked').value;
             const erro = document.getElementById('msg-erro');
-            
-            if(!emailDigitado || !senhaInput) {
-                erro.innerText = "Preencha todos os campos!";
-                return;
-            }
-
-            // Transforma pontos em vírgulas para o Firebase
+            if(!emailDigitado || !senhaInput) { erro.innerText = "Preencha tudo!"; return; }
             const pathEmail = emailDigitado.replace(/\./g, ',');
-
             db.ref('contas/' + pathEmail).once('value', snap => {
                 const u = snap.val();
-                
-                // Verifica se usuário existe e senha confere
                 if(u && String(u.senha) === String(senhaInput)) {
-                    
-                    // Validação de Perfil: Se escolheu ADM, tem que ser ADM no banco
-                    if(perfilSelecionado === 'adm' && u.perfil !== 'adm') {
-                        erro.innerText = "Você não tem permissão de Administrador!";
-                        return;
-                    }
-
+                    if(perfilSelecionado === 'adm' && u.perfil !== 'adm') { erro.innerText = "Sem permissão ADM!"; return; }
                     localStorage.setItem('usuarioNome', u.nome || emailDigitado);
-                    localStorage.setItem('usuarioEmail', emailDigitado);
-
-                    // Redirecionamento
-                    if(u.perfil === 'adm') {
-                        window.location.href = 'adm.html';
-                    } else {
-                        window.location.href = 'ouvinte.html';
-                    }
-                } else {
-                    erro.innerText = "E-mail ou Senha incorretos!";
-                }
+                    window.location.href = (u.perfil === 'adm') ? 'adm.html' : 'ouvinte.html';
+                } else { erro.innerText = "E-mail ou Senha incorretos!"; }
             });
         }
 
@@ -124,22 +118,42 @@
             const nome = document.getElementById('cad-nome').value.trim();
             const email = document.getElementById('cad-email').value.trim().toLowerCase();
             const cidade = document.getElementById('cad-cidade').value.trim();
+            const estado = document.getElementById('cad-estado').value.trim();
             const senha = document.getElementById('cad-senha').value.trim();
-            
-            if(!nome || !email || !senha) { alert("Preencha os campos obrigatórios!"); return; }
-
+            if(!nome || !email || !cidade || !estado || !senha) { alert("Preencha todos os campos!"); return; }
             const pathEmail = email.replace(/\./g, ',');
-
             db.ref('contas/' + pathEmail).set({
-                nome: nome,
-                email: email,
-                cidade: cidade,
-                senha: senha,
-                perfil: "ouvinte", // Padrão novo usuário
-                status: "Offline",
-                estado: ""
-            }).then(() => {
-                alert("Cadastro realizado! Faça login.");
+                nome, email, cidade, estado, senha, perfil: "ouvinte", status: "Offline"
+            }).then(() => { alert("Cadastrado com sucesso!"); mostrarTela('login'); });
+        }
+
+        function validarDadosRecuperacao() {
+            const email = document.getElementById('rec-email').value.trim().toLowerCase();
+            const cidade = document.getElementById('rec-cidade').value.trim();
+            const estado = document.getElementById('rec-estado').value.trim();
+            if(!email || !cidade || !estado) { alert("Preencha os dados de validação!"); return; }
+            const pathEmail = email.replace(/\./g, ',');
+            db.ref('contas/' + pathEmail).once('value', snap => {
+                const u = snap.val();
+                // Verifica se e-mail existe E se cidade/estado batem exatamente
+                if(u && u.cidade === cidade && u.estado === estado) {
+                    emailParaRecuperar = pathEmail;
+                    mostrarTela('nova-senha');
+                } else {
+                    alert("Dados não conferem com nosso cadastro!");
+                }
+            });
+        }
+
+        function atualizarSenhaNoBanco() {
+            const s1 = document.getElementById('nova-senha-1').value.trim();
+            const s2 = document.getElementById('nova-senha-2').value.trim();
+            if(!s1 || s1.length < 4) { alert("Senha deve ter no mínimo 4 dígitos!"); return; }
+            if(s1 !== s2) { alert("As senhas não conferem!"); return; }
+
+            db.ref('contas/' + emailParaRecuperar).update({ senha: s1 })
+            .then(() => {
+                alert("Senha atualizada! Agora você pode logar.");
                 mostrarTela('login');
             });
         }
