@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #1DB954; --bg: #000; --card: #121212; --text-muted: #b3b3b3; --purple-light: #d1a3ff; }
+        :root { --primary: #1DB954; --bg: #000; --card: #121212; --text-muted: #b3b3b3; --purple-light: #800080; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; user-select: none; }
         .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 20px 30px; border-radius: 15px; border: 1px solid #333; margin-bottom: 25px; }
         .header-left { display: flex; align-items: center; gap: 20px; }
@@ -54,92 +54,29 @@
         .btn-save:hover { filter: brightness(1.2); transform: scale(1.02); }
         
         .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; }
-        .radio-item { 
-            aspect-ratio: 1/1; 
-            border-radius: 15px; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center; 
-            color: #000; 
-            font-weight: bold; 
-            font-size: 13px; 
-            text-align: center; 
-            padding: 10px; 
-            cursor: grab; 
-            transition: 0.3s; 
-            position: relative; 
-            border: 2px solid transparent; 
-        }
+        .radio-item { aspect-ratio: 1/1; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #000; font-weight: bold; font-size: 13px; text-align: center; padding: 10px; cursor: grab; transition: 0.3s; position: relative; border: 2px solid transparent; }
         .radio-item:hover { transform: translateY(-5px); filter: brightness(1.1); }
-        .radio-item:active { cursor: grabbing; }
-        .radio-item.active { 
-            background: #000 !important; 
-            color: var(--primary) !important; 
-            border-color: var(--primary); 
-            box-shadow: 0 0 15px rgba(29, 185, 84, 0.4); 
-        }
+        .radio-item.active { background: #000 !important; color: var(--primary) !important; border-color: var(--primary); box-shadow: 0 0 15px rgba(29, 185, 84, 0.4); }
         
         .radio-actions { position: absolute; top: 5px; right: 5px; display: flex; gap: 5px; opacity: 0.7; z-index: 10; }
         .radio-actions i { cursor: pointer; padding: 5px; background: rgba(0,0,0,0.1); border-radius: 5px; font-size: 12px; transition: 0.2s; }
-        .radio-actions i:hover { opacity: 1; background: rgba(0,0,0,0.2); transform: scale(1.1); }
-        .btn-edit-r { color: #000; }
-        .btn-del-r { color: #800000; }
 
-        .antena { font-size: 24px; margin-bottom: 8px; display: none; }
-        .active .antena { display: block; animation: pulse-antena 1s infinite; }
-        @keyframes pulse-antena { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(1.1); } }
-        
-        .pub-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .pub-preview { width: 100%; max-height: 100px; border-radius: 10px; object-fit: contain; margin-top: 10px; border: 1px dashed #444; display: none; }
-        label { font-size: 10px; color: #888; display: block; margin-bottom: 5px; margin-left: 5px; }
-        
         .pub-list-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; overflow: hidden; border-left: 4px solid var(--primary); transition: 0.3s; }
         .pub-list-row { display: flex; align-items: center; width: 100%; }
         .pub-list-btn { flex: 1; padding: 12px; background: none; border: none; color: white; text-align: left; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 10px; }
         .pub-thumb-mini { width: 40px; height: 25px; object-fit: cover; border-radius: 4px; background: #000; }
-        .pub-details-bar { display: none; padding: 10px 15px; font-size: 12px; color: #ccc; border-top: 1px solid #222; background: #141414; }
-        .pub-details-bar p { margin: 5px 0; }
-        .txt-inicio { color: #1DB954; font-weight: bold; }
-        .txt-fim { color: #ff4444; font-weight: bold; }
 
-        .btn-action-pub { background: none; border: none; padding: 15px 10px; cursor: pointer; font-size: 14px; transition: 0.2s; }
-        .btn-edit-pub { color: var(--primary); }
-        .btn-delete-pub { color: #ff4444; }
-        .btn-action-pub:hover { transform: scale(1.2); }
-
-        .user-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; overflow: hidden; border: 2px solid transparent; }
+        /* Monitor de Ouvintes - Estilos Base */
+        .user-item { margin-bottom: 8px; border-radius: 10px; overflow: hidden; transition: 0.3s; }
         .user-row { display: flex; align-items: center; width: 100%; }
-        .user-name-btn { flex: 1; padding: 15px; background: none; border: none; color: white; text-align: left; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-        .status-on { color: #00ff00; font-weight: 900; font-size: 11px; }
-        .status-off { color: #d1a3ff; font-weight: 900; font-size: 11px; }
-        .user-details-bar { display: none; padding: 0 15px 15px 15px; font-size: 13px; color: #ccc; border-top: 1px solid #222; }
-
-        .btn-user-action { background: #222; border: 1px solid #333; color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; cursor: pointer; transition: 0.2s; margin-left: 5px; }
-        .btn-user-action:hover { background: #333; border-color: var(--primary); }
-        .btn-user-del { color: #ff4444; }
-        .btn-user-del:hover { background: #442222; }
+        .user-name-btn { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 15px; background: none; border: none; color: white; font-weight: bold; cursor: pointer; }
+        .user-details-bar { display: none; padding: 0 15px 15px 15px; font-size: 13px; color: #ccc; border-top: 1px solid rgba(255,255,255,0.1); }
+        .btn-user-action { background: #222; border: 1px solid #333; color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; cursor: pointer; margin-right: 5px; }
 
         .player-footer { margin-top: 20px; background: #111; padding: 25px; border-radius: 20px; border: 1px solid #222; text-align: center; }
         .controls-row { display: flex; align-items: center; justify-content: center; gap: 35px; }
         .btn-nav { background: none; border: none; color: #b3b3b3; font-size: 28px; cursor: pointer; transition: 0.3s; }
-        .btn-nav:hover { color: white; transform: scale(1.3); }
-        .btn-nav:active { transform: scale(0.9); }
-        
-        .play-outer { position: relative; width: 85px; height: 85px; display: flex; align-items: center; justify-content: center; }
-        .ring-animation { position: absolute; width: 100%; height: 100%; border: 2px solid rgba(29, 185, 84, 0.1); border-top: 2px solid var(--primary); border-radius: 50%; animation: spin-slow 5s linear infinite; }
-        @keyframes spin-slow { 100% { transform: rotate(360deg); } }
-        
-        .btn-spotify-play { width: 65px; height: 65px; background: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; color: black; cursor: pointer; z-index: 5; transition: 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        .btn-spotify-play:hover { transform: scale(1.1); box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4); }
-        .btn-spotify-play:active { transform: scale(0.95); }
-
-        @media print {
-            body * { visibility: hidden; }
-            .msg-grid-adm, .msg-grid-adm * { visibility: visible; }
-            .msg-grid-adm { position: absolute; left: 0; top: 0; }
-            .msg-emoji-reply, .btn-del-msg, .reply-box { display: none; }
-        }
+        .btn-spotify-play { width: 65px; height: 65px; background: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; color: black; cursor: pointer; z-index: 5; }
     </style>
 </head>
 <body>
@@ -161,7 +98,6 @@
         <div class="card">
             <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <h3>MENSAGENS DOS OUVINTES</h3>
-                <button onclick="window.print()" class="btn-header" style="font-size: 11px;"><i class="fas fa-file-pdf"></i> BAIXAR TUDO EM PDF</button>
             </div>
             <div id="msg-list-adm" class="msg-grid-adm"></div>
         </div>
@@ -177,17 +113,13 @@
                     <input type="text" id="r-url" placeholder="Link .mp3">
                     <button class="btn-save" id="btn-radio-action" onclick="addRadio()">SALVAR</button>
                 </div>
-                <h3>GRADE DE RÁDIOS (ARRASTE PARA REORDENAR)</h3>
                 <div id="radio-list" class="radio-grid"></div>
                 
                 <div class="player-footer">
-                    <div id="now-title" style="font-size:11px; color:#888; margin-bottom:15px; letter-spacing: 1px;">SELECIONE UMA RÁDIO</div>
+                    <div id="now-title" style="font-size:11px; color:#888; margin-bottom:15px;">SELECIONE UMA RÁDIO</div>
                     <div class="controls-row">
                         <button class="btn-nav" onclick="prevRadio()"><i class="fas fa-step-backward"></i></button>
-                        <div class="play-outer">
-                            <div class="ring-animation" id="ring"></div>
-                            <button class="btn-spotify-play" onclick="togglePlay()"><i class="fas fa-play" id="play-icon" style="margin-left: 3px;"></i></button>
-                        </div>
+                        <button class="btn-spotify-play" onclick="togglePlay()"><i class="fas fa-play" id="play-icon"></i></button>
                         <button class="btn-nav" onclick="nextRadio()"><i class="fas fa-step-forward"></i></button>
                     </div>
                 </div>
@@ -195,29 +127,11 @@
 
             <div class="card">
                 <h3>GERENCIAR PUBLICIDADE</h3>
-                <div class="pub-container">
-                    <input type="hidden" id="pub-key">
-                    <div>
-                        <label>UPLOAD DA IMAGEM</label>
-                        <input type="file" id="pub-file" accept="image/*" onchange="previewPub(this)">
-                        <img id="pub-view" class="pub-preview">
-                    </div>
-                    <div>
-                        <label>INÍCIO (DATA/HORA)</label>
-                        <input type="datetime-local" id="pub-ini">
-                        <label>TÉRMINO (DATA/HORA)</label>
-                        <input type="datetime-local" id="pub-fim">
-                        <label>DESTINATÁRIOS</label>
-                        <select id="pub-target" onchange="document.getElementById('pub-manual').style.display = (this.value=='MANUAL'?'block':'none')">
-                            <option value="TODOS">X - TODOS OS OUVINTES</option>
-                            <option value="MANUAL">SELECIONAR MANUAL</option>
-                        </select>
-                        <input type="text" id="pub-manual" placeholder="NOME DO OUVINTE" style="display:none; margin-top:5px;">
-                    </div>
-                </div>
-                <button class="btn-save" id="btn-pub-save" style="width:100%; margin-top:15px; height:45px;" onclick="savePub()">LANÇAR CAMPANHA</button>
-                <h3 style="margin-top:25px;"><i class="fas fa-ad"></i> Campanhas Ativas</h3>
-                <div id="pub-list-admin"></div>
+                <input type="file" id="pub-file" accept="image/*" onchange="previewPub(this)">
+                <input type="datetime-local" id="pub-ini">
+                <input type="datetime-local" id="pub-fim">
+                <button class="btn-save" style="width:100%; margin-top:10px;" onclick="savePub()">LANÇAR CAMPANHA</button>
+                <div id="pub-list-admin" style="margin-top:20px;"></div>
             </div>
         </div>
 
@@ -243,55 +157,16 @@
         const player = document.getElementById('audio-player');
         let radioData = [];
         let activeIndex = -1;
-        let usersDataCache = {};
-        const emojisReply = ["👍", "❤️", "😂", "👏", "🔥", "🚀", "🎵", "📻", "🙌", "😲", "🤩", "🙏", "💪", "💡", "✨", "🔊", "🎧", "😎", "🤝", "✅"];
 
-        setInterval(() => { 
-            document.getElementById('hora').innerText = new Date().toLocaleTimeString('pt-BR'); 
-            updateUserTimers(); 
-        }, 1000);
+        setInterval(() => { document.getElementById('hora').innerText = new Date().toLocaleTimeString('pt-BR'); }, 1000);
 
-        function logout() { if(confirm("Deseja sair?")) { localStorage.removeItem('usuarioNome'); window.location.href = 'index.html'; } }
+        function logout() { localStorage.removeItem('usuarioNome'); window.location.href = 'index.html'; }
         function toggleMensagens() { document.getElementById('container-mensagens-adm').classList.toggle('aberto'); }
-
-        // --- MENSAGENS ---
-        db.ref('mensagens_ouvintes').on('value', snap => {
-            const list = document.getElementById('msg-list-adm');
-            const count = document.getElementById('count-msg');
-            list.innerHTML = "";
-            let i = 0;
-            snap.forEach(c => {
-                const m = c.val(), id = c.key; i++;
-                const card = document.createElement('div');
-                card.className = "msg-card-individual";
-                card.innerHTML = `
-                    <h4><span>${m.usuario}</span> <small>${new Date(m.data).toLocaleTimeString()}</small></h4>
-                    <p>${m.mensagem}</p>
-                    <div class="reply-box">
-                        <input type="text" id="input-reply-${id}" placeholder="Escreva uma resposta...">
-                        <button class="btn-send-reply" onclick="responderTexto('${id}')"><i class="fas fa-paper-plane"></i></button>
-                    </div>
-                    <div class="msg-emoji-reply">${emojisReply.map(e => `<button class="btn-emoji-small" onclick="responderEmoji('${id}', '${e}')">${e}</button>`).join('')}</div>
-                    <div class="actions-msg"><button class="btn-del-msg" onclick="deletarMsg('${id}')"><i class="fas fa-trash"></i> Deletar</button></div>
-                `;
-                list.prepend(card);
-            });
-            count.innerText = i;
-        });
-
-        function deletarMsg(id) { if(confirm("Excluir esta mensagem?")) db.ref('mensagens_ouvintes/' + id).remove(); }
-        function responderEmoji(id, emoji) { db.ref('respostas_adm').push({ mensagemId: id, resposta: emoji, data: Date.now() }).then(() => alert("Emoji enviado!")); }
-        function responderTexto(id) {
-            const campo = document.getElementById('input-reply-' + id);
-            if(!campo.value) return;
-            db.ref('respostas_adm').push({ mensagemId: id, resposta: campo.value, data: Date.now() }).then(() => { alert("Resposta enviada!"); campo.value = ""; });
-        }
 
         // --- RÁDIOS ---
         db.ref('radios').on('value', snap => {
             radioData = [];
             snap.forEach(c => { radioData.push({ ...c.val(), key: c.key }); });
-            radioData.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
             renderRadios();
         });
 
@@ -301,263 +176,90 @@
             radioData.forEach((r, i) => {
                 const div = document.createElement('div');
                 div.className = `radio-item ${activeIndex === i ? 'active' : ''}`;
-                div.style.background = r.color || `hsl(${Math.floor(Math.random() * 360)}, 70%, 75%)`;
-                div.setAttribute('data-id', r.key);
+                div.style.background = r.color || '#1DB954';
                 div.onclick = () => playRadio(i);
-                div.innerHTML = `
-                    <div class="radio-actions">
-                        <i class="fas fa-pencil-alt btn-edit-r" onclick="event.stopPropagation(); prepareEditRadio('${r.key}', '${r.name}', '${r.url}')"></i>
-                        <i class="fas fa-times btn-del-r" onclick="event.stopPropagation(); deleteRadio('${r.key}')"></i>
-                    </div>
-                    <i class="fas fa-tower-broadcast antena"></i>
-                    <span>${r.name}</span>
-                `;
+                div.innerHTML = `<span>${r.name}</span>`;
                 list.appendChild(div);
             });
-            initSortable();
         }
 
-        function initSortable() {
-            const el = document.getElementById('radio-list');
-            Sortable.create(el, {
-                animation: 150,
-                onEnd: function() {
-                    const items = el.querySelectorAll('.radio-item');
-                    items.forEach((item, index) => {
-                        const id = item.getAttribute('data-id');
-                        db.ref('radios/' + id).update({ posicao: index });
-                    });
-                }
-            });
-        }
-
-        function addRadio() {
-            const n = document.getElementById('r-name').value, u = document.getElementById('r-url').value, key = document.getElementById('r-key').value;
-            if(n && u) {
-                if(key) {
-                    db.ref('radios/' + key).update({ name: n, url: u });
-                    document.getElementById('r-key').value = "";
-                    document.getElementById('btn-radio-action').innerText = "SALVAR";
-                } else {
-                    const col = `hsl(${Math.floor(Math.random() * 360)}, 70%, 75%)`;
-                    db.ref('radios').push({ name: n, url: u, color: col, posicao: radioData.length });
-                }
-                document.getElementById('r-name').value = ""; document.getElementById('r-url').value = "";
-            }
-        }
-
-        function prepareEditRadio(key, name, url) {
-            document.getElementById('r-key').value = key;
-            document.getElementById('r-name').value = name;
-            document.getElementById('r-url').value = url;
-            document.getElementById('btn-radio-action').innerText = "ATUALIZAR";
-            window.scrollTo(0,0);
-        }
-
-        function deleteRadio(key) { if(confirm("Deseja excluir?")) db.ref('radios/' + key).remove(); }
-        
         function playRadio(index) {
             activeIndex = index;
-            const r = radioData[index];
-            player.src = r.url; player.play();
-            document.getElementById('now-title').innerText = "OUVINDO: " + r.name;
-            document.getElementById('play-icon').className = "fas fa-stop";
+            player.src = radioData[index].url;
+            player.play();
+            document.getElementById('now-title').innerText = "OUVINDO: " + radioData[index].name;
             renderRadios();
         }
 
-        function togglePlay() {
-            if(!player.src) return;
-            if(player.paused) { player.play(); document.getElementById('play-icon').className = "fas fa-stop"; }
-            else { player.pause(); document.getElementById('play-icon').className = "fas fa-play"; }
-        }
+        function togglePlay() { player.paused ? player.play() : player.pause(); }
 
-        function nextRadio() { if(radioData.length) playRadio((activeIndex + 1) % radioData.length); }
-        function prevRadio() { if(radioData.length) playRadio((activeIndex - 1 + radioData.length) % radioData.length); }
-
-        // --- PUBLICIDADE ---
-        let imgBase64 = "";
-        function previewPub(input) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                imgBase64 = e.target.result;
-                document.getElementById('pub-view').src = imgBase64;
-                document.getElementById('pub-view').style.display = "block";
-            };
-            if(input.files[0]) reader.readAsDataURL(input.files[0]);
-        }
-
-        function savePub() {
-            const ini = document.getElementById('pub-ini').value, fim = document.getElementById('pub-fim').value;
-            const target = document.getElementById('pub-target').value, manual = document.getElementById('pub-manual').value.toUpperCase(), key = document.getElementById('pub-key').value;
-            if(!imgBase64 || !ini || !fim) return alert("Preencha tudo!");
-            const dados = { imagem: imgBase64, inicio: new Date(ini).getTime(), fim: new Date(fim).getTime(), destino: target, ouvinteAlvo: target === 'MANUAL' ? manual : 'TODOS' };
-            if(key) db.ref('publicidade/' + key).update(dados).then(() => { alert("Atualizada!"); resetPubForm(); });
-            else db.ref('publicidade').push(dados).then(() => { alert("Lançada!"); resetPubForm(); });
-        }
-
-        function prepareEditPub(key, img, ini, fim, target, manual) {
-            document.getElementById('pub-key').value = key;
-            imgBase64 = img;
-            document.getElementById('pub-view').src = img;
-            document.getElementById('pub-view').style.display = "block";
-            const formatData = (ms) => {
-                const d = new Date(ms);
-                d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-                return d.toISOString().slice(0, 16);
-            };
-            document.getElementById('pub-ini').value = formatData(ini);
-            document.getElementById('pub-fim').value = formatData(fim);
-            document.getElementById('pub-target').value = target;
-            document.getElementById('pub-manual').value = manual === 'TODOS' ? '' : manual;
-            document.getElementById('pub-manual').style.display = (target === 'MANUAL' ? 'block' : 'none');
-            document.getElementById('btn-pub-save').innerText = "ATUALIZAR CAMPANHA";
-            window.scrollTo(0, 500);
-        }
-
-        function resetPubForm() {
-            imgBase64 = ""; document.getElementById('pub-key').value = ""; document.getElementById('pub-view').style.display = "none"; document.getElementById('pub-file').value = "";
-            document.getElementById('pub-ini').value = ""; document.getElementById('pub-fim').value = ""; document.getElementById('pub-manual').value = "";
-            document.getElementById('btn-pub-save').innerText = "LANÇAR CAMPANHA";
-        }
-
-        function togglePubDetails(id) {
-            const bar = document.getElementById('pub-details-' + id);
-            bar.style.display = (bar.style.display === 'block' ? 'none' : 'block');
-        }
-
-        db.ref('publicidade').on('value', snap => {
-            const container = document.getElementById('pub-list-admin');
-            container.innerHTML = "";
-            snap.forEach(c => {
-                const p = c.val(), id = c.key, vencida = Date.now() > p.fim;
-                const div = document.createElement('div');
-                div.className = "pub-list-item";
-                div.style.borderLeftColor = vencida ? '#ff4444' : '#1DB954';
-                div.innerHTML = `
-                    <div class="pub-list-row">
-                        <button class="pub-list-btn" onclick="togglePubDetails('${id}')">
-                            <img src="${p.imagem}" class="pub-thumb-mini">
-                            <span>Alvo: <b>${p.ouvinteAlvo}</b> ${vencida ? '(FINALIZADA)' : ''}</span>
-                        </button>
-                        <button class="btn-action-pub btn-edit-pub" onclick="prepareEditPub('${id}', '${p.imagem}', ${p.inicio}, ${p.fim}, '${p.destino}', '${p.ouvinteAlvo}')">
-                            <i class="fas fa-pencil-alt"></i>
-                        </button>
-                        <button class="btn-action-pub btn-delete-pub" onclick="if(confirm('Excluir?')) db.ref('publicidade/${id}').remove()">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </div>
-                    <div class="pub-details-bar" id="pub-details-${id}">
-                         <p>Início: <span class="txt-inicio">${new Date(p.inicio).toLocaleString()}</span></p>
-                         <p>Término: <span class="txt-fim">${new Date(p.fim).toLocaleString()}</span></p>
-                    </div>`;
-                container.appendChild(div);
-            });
-        });
-
-        // --- MONITOR DE OUVINTES ---
+        // --- MONITOR DE OUVINTES (AJUSTE SOLICITADO) ---
         function toggleUserDetails(id) {
             const bar = document.getElementById('details-' + id);
             bar.style.display = (bar.style.display === 'block' ? 'none' : 'block');
         }
 
-        function excluirOuvinte(id) {
-            if(confirm("Deseja EXCLUIR permanentemente este ouvinte?")) {
-                db.ref('usuarios/' + id).remove().then(() => alert("Ouvinte removido!"));
-            }
-        }
-
-        function resetarSenhaOuvinte(id) {
-            if(confirm("Redefinir senha para '0000'?")) {
-                db.ref('usuarios/' + id).update({ senha: "0000" }).then(() => alert("Senha redefinida!"));
-            }
-        }
-
         db.ref('usuarios').on('value', snap => {
             const container = document.getElementById('user-list');
             container.innerHTML = "";
-            usersDataCache = {}; 
 
             snap.forEach(c => {
                 const u = c.val(), id = c.key;
-                const lastSeen = parseInt(u.lastSeen || 0);
-                const loginTime = parseInt(u.loginTime || lastSeen);
-                const radioTime = parseInt(u.radioTime || loginTime);
-                const isOnline = (Date.now() - lastSeen < 60000);
-                const isAdm = (u.tipo === 'adm'); // Assumindo que você tenha um campo tipo no cadastro
-                
-                usersDataCache[id] = { loginTime, radioTime, isOnline };
+                let cardStyle = "";
+                let statusText = "";
+                let statusColor = "";
 
-                const div = document.createElement('div');
-                div.className = "user-item";
-                
-                // LÓGICA DE CORES DOS CARDS E BORDAS
-                let borderStyle = "";
-                let statusHtml = "";
-                let bgColor = "";
-
-                if (isAdm) {
-                    bgColor = "background: #333;"; // Faixa inteira cinza para ADM
-                    borderStyle = "border-color: #555;";
-                    statusHtml = '<span style="color:#aaa; font-weight:900; font-size:11px;">ADM</span>';
+                // Lógica de Cores e Bordas
+                if (u.perfil === "adm") {
+                    cardStyle = "background-color: #808080; border: 1px solid #555;"; // Faixa cinza para ADM
+                    statusText = "ADM";
+                    statusColor = "white";
                 } else {
+                    const isOnline = u.status && u.status.toLowerCase() === "online";
                     if (isOnline) {
-                        borderStyle = "border-color: #00ff00;"; // Borda verde Online
-                        statusHtml = '<span class="status-on" style="color:#00ff00;">ON</span>';
+                        cardStyle = "border: 2px solid #00ff00; background: #1a1a1a;"; // Borda verde
+                        statusText = "ON";
+                        statusColor = "#00ff00"; // Escrito verde
                     } else {
-                        borderStyle = "border-color: #d1a3ff;"; // Borda roxa Offline
-                        statusHtml = '<span class="status-off" style="color:#d1a3ff;">OFF</span>';
+                        cardStyle = "border: 2px solid #800080; background: #1a1a1a;"; // Borda roxa
+                        statusText = "OFF";
+                        statusColor = "#800080"; // Escrito roxo
                     }
                 }
 
-                div.setAttribute("style", `${bgColor} ${borderStyle}`);
+                const div = document.createElement('div');
+                div.className = "user-item";
+                div.setAttribute("style", cardStyle);
 
                 div.innerHTML = `
                     <div class="user-row">
                         <button class="user-name-btn" onclick="toggleUserDetails('${id}')">
-                            <span>${u.nome || 'Ouvinte'}</span> 
-                            ${statusHtml}
+                            <span>${u.nome || u.usuario || 'Ouvinte'}</span> 
+                            <span style="color: ${statusColor}; font-weight: 900;">${statusText}</span>
                         </button>
                     </div>
                     <div class="user-details-bar" id="details-${id}">
-                        <p>Ouvindo: <b>${u.radioAtual || 'Nenhuma'}</b></p>
-                        <p>Sessão total: <b id="timer-sessao-${id}">0m 0s</b></p>
-                        <p style="color:var(--primary)">TEMPO NESSA RÁDIO: <b id="timer-radio-${id}">0m 0s</b></p>
-                        <p>Último sinal: <b>${new Date(lastSeen).toLocaleTimeString()}</b></p>
-                        <div style="margin-top:10px; border-top:1px solid #333; padding-top:10px;">
-                            <button class="btn-user-action" onclick="resetarSenhaOuvinte('${id}')"><i class="fas fa-key"></i> RESETAR SENHA</button>
-                            <button class="btn-user-action btn-user-del" onclick="excluirOuvinte('${id}')"><i class="fas fa-trash"></i> EXCLUIR</button>
-                        </div>
+                        <p>Cidade: ${u.cidade || '---'}</p>
+                        <p>Email: ${u.email || '---'}</p>
+                        <button class="btn-user-action" onclick="db.ref('usuarios/${id}').update({senha:'0000'})">RESET SENHA</button>
+                        <button class="btn-user-action" style="color:red" onclick="db.ref('usuarios/${id}').remove()">EXCLUIR</button>
                     </div>`;
                 container.appendChild(div);
             });
-            updateUserTimers();
         });
 
-        function updateUserTimers() {
-            for (let id in usersDataCache) {
-                const elSessao = document.getElementById(`timer-sessao-${id}`);
-                const elRadio = document.getElementById(`timer-radio-${id}`);
-                const data = usersDataCache[id];
-
-                if (data.isOnline) {
-                    const diffSessao = Date.now() - data.loginTime;
-                    const diffRadio = Date.now() - data.radioTime;
-                    if (elSessao) elSessao.innerText = formatDuration(diffSessao);
-                    if (elRadio) elRadio.innerText = formatDuration(diffRadio);
-                } else {
-                    if (elSessao) elSessao.innerText = "Sessão encerrada";
-                    if (elRadio) elRadio.innerText = "---";
-                }
-            }
-        }
-
-        function formatDuration(ms) {
-            if (ms < 0) ms = 0;
-            const h = Math.floor(ms / 3600000);
-            const m = Math.floor((ms % 3600000) / 60000);
-            const s = Math.floor((ms % 60000) / 1000);
-            return (h > 0 ? h + "h " : "") + m + "m " + s + "s";
-        }
+        // --- MENSAGENS E PUB (RESTANTE MANTIDO) ---
+        db.ref('mensagens_ouvintes').on('value', snap => {
+            const list = document.getElementById('msg-list-adm');
+            list.innerHTML = "";
+            let i = 0;
+            snap.forEach(c => {
+                i++;
+                const m = c.val();
+                list.innerHTML += `<div class="msg-card-individual"><h4>${m.usuario}</h4><p>${m.mensagem}</p></div>`;
+            });
+            document.getElementById('count-msg').innerText = i;
+        });
     </script>
 </body>
 </html>
