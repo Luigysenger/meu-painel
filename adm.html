@@ -482,6 +482,9 @@
 
             snap.forEach(c => {
                 const u = c.val(), id = c.key;
+                // Busca o nome, se não tiver 'nome', tenta 'usuario', se não, usa 'SEM NOME'
+                const nomeExibicao = (u.nome || u.usuario || 'SEM NOME').toUpperCase();
+                
                 const lastSeen = parseInt(u.lastSeen || 0);
                 const loginTime = parseInt(u.loginTime || lastSeen);
                 const radioTime = parseInt(u.radioTime || loginTime);
@@ -509,7 +512,7 @@
                 div.innerHTML = `
                     <div class="user-row">
                         <button class="user-name-btn" onclick="toggleUserDetails('${id}')">
-                            <span style="color: ${colorTheme}">${(u.nome || 'SEM NOME').toUpperCase()}</span>
+                            <span style="color: ${colorTheme}">${nomeExibicao}</span>
                             <span style="color: ${colorTheme}; font-weight: 900; font-size: 11px;">${labelStatus}</span>
                         </button>
                     </div>
@@ -547,10 +550,11 @@
         }
 
         function formatDuration(ms) {
-            const totalSec = Math.floor(ms / 1000);
-            const min = Math.floor(totalSec / 60);
-            const sec = totalSec % 60;
-            return `${min}m ${sec}s`;
+            if (isNaN(ms) || ms < 0) return "0s";
+            const totalSecs = Math.floor(ms / 1000);
+            const m = Math.floor(totalSecs / 60);
+            const s = totalSecs % 60;
+            return `${m}m ${s}s`;
         }
     </script>
 </body>
