@@ -22,17 +22,12 @@
         .links a { color: var(--primary); text-decoration: none; cursor: pointer; display: block; margin-bottom: 8px; }
         .hidden { display: none; }
         #msg-erro { color: #ff4444; font-size: 12px; margin-top: 10px; min-height: 15px; }
-        .perfil-selector { margin-bottom: 15px; display: flex; justify-content: center; gap: 15px; font-size: 14px; }
     </style>
 </head>
 <body>
 
     <div class="login-container" id="box-login">
         <h2>Painel Login</h2>
-        <div class="perfil-selector">
-            <label><input type="radio" name="tipo-perfil" value="ouvinte" checked> Ouvinte</label>
-            <label><input type="radio" name="tipo-perfil" value="adm"> Administrador</label>
-        </div>
         <div class="input-group">
             <label>E-mail</label>
             <input type="text" id="login-email" placeholder="seu@email.com">
@@ -87,7 +82,17 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let emailParaRecuperar = ""; // Variável temporária
+        let emailParaRecuperar = ""; 
+
+        // Função para logar apertando ENTER
+        document.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                const boxLogin = document.getElementById('box-login');
+                if (!boxLogin.classList.contains('hidden')) {
+                    fazerLogin();
+                }
+            }
+        });
 
         function mostrarTela(tela) {
             document.querySelectorAll('.login-container').forEach(c => c.classList.add('hidden'));
@@ -100,17 +105,29 @@
         function fazerLogin() {
             const emailDigitado = document.getElementById('login-email').value.trim().toLowerCase();
             const senhaInput = document.getElementById('login-senha').value.trim();
-            const perfilSelecionado = document.querySelector('input[name="tipo-perfil"]:checked').value;
             const erro = document.getElementById('msg-erro');
+
             if(!emailDigitado || !senhaInput) { erro.innerText = "Preencha tudo!"; return; }
+
             const pathEmail = emailDigitado.replace(/\./g, ',');
+            
             db.ref('contas/' + pathEmail).once('value', snap => {
                 const u = snap.val();
+                
                 if(u && String(u.senha) === String(senhaInput)) {
-                    if(perfilSelecionado === 'adm' && u.perfil !== 'adm') { erro.innerText = "Sem permissão ADM!"; return; }
+                    // Salva dados no navegador para persistência
                     localStorage.setItem('usuarioNome', u.nome || emailDigitado);
-                    window.location.href = (u.perfil === 'adm') ? 'adm.html' : 'ouvinte.html';
-                } else { erro.innerText = "E-mail ou Senha incorretos!"; }
+                    localStorage.setItem('usuarioPerfil', u.perfil || 'ouvinte');
+
+                    // Redirecionamento automático baseado no perfil do banco de dados
+                    if(u.perfil === 'adm') {
+                        window.location.href = 'adm.html';
+                    } else {
+                        window.location.href = 'ouvinte.html';
+                    }
+                } else {
+                    erro.innerText = "E-mail ou Senha incorretos!";
+                }
             });
         }
 
@@ -135,7 +152,6 @@
             const pathEmail = email.replace(/\./g, ',');
             db.ref('contas/' + pathEmail).once('value', snap => {
                 const u = snap.val();
-                // Verifica se e-mail existe E se cidade/estado batem exatamente
                 if(u && u.cidade === cidade && u.estado === estado) {
                     emailParaRecuperar = pathEmail;
                     mostrarTela('nova-senha');
