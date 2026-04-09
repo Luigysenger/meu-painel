@@ -454,7 +454,7 @@
             });
         });
 
-        // --- MONITOR DE OUVINTES ---
+        // --- MONITOR DE OUVINTES (AJUSTADO PARA MOSTRAR NOME) ---
         function toggleUserDetails(id) {
             const bar = document.getElementById('details-' + id);
             bar.style.display = (bar.style.display === 'block' ? 'none' : 'block');
@@ -484,6 +484,9 @@
                 const radioTime = parseInt(u.radioTime || loginTime);
                 const isOnline = (Date.now() - lastSeen < 60000);
                 
+                // AJUSTE AQUI: Pega o campo 'nome' que o usuário preencheu no cadastro
+                const nomeExibicao = u.nome ? u.nome : 'Ouvinte sem nome';
+
                 usersDataCache[id] = { loginTime, radioTime, isOnline };
 
                 const div = document.createElement('div');
@@ -492,7 +495,7 @@
                 div.innerHTML = `
                     <div class="user-row">
                         <button class="user-name-btn" onclick="toggleUserDetails('${id}')">
-                            <span>${u.nome || 'Ouvinte'}</span> 
+                            <span>${nomeExibicao}</span> 
                             ${isOnline ? '<span class="status-on">ON</span>' : '<span class="status-off">OFF</span>'}
                         </button>
                     </div>
