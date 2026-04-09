@@ -108,11 +108,15 @@
         .btn-delete-pub { color: #ff4444; }
         .btn-action-pub:hover { transform: scale(1.2); }
 
-        .user-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; overflow: hidden; }
+        .user-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; overflow: hidden; border: 1px solid transparent; }
         .user-row { display: flex; align-items: center; width: 100%; }
         .user-name-btn { flex: 1; padding: 15px; background: none; border: none; color: white; text-align: left; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        
+        /* Classes de status */
         .status-on { color: #00ff00; font-weight: 900; font-size: 11px; }
-        .status-off { color: #d1a3ff; font-weight: 900; font-size: 11px; }
+        .status-off { color: #A020F0; font-weight: 900; font-size: 11px; }
+        .status-adm { color: #87CEFA; font-weight: 900; font-size: 11px; }
+
         .user-details-bar { display: none; padding: 0 15px 15px 15px; font-size: 13px; color: #ccc; border-top: 1px solid #222; }
 
         .btn-user-action { background: #222; border: 1px solid #333; color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; cursor: pointer; transition: 0.2s; margin-left: 5px; }
@@ -454,7 +458,7 @@
             });
         });
 
-        // --- MONITOR DE OUVINTES (AJUSTE SOLICITADO) ---
+        // --- MONITOR DE OUVINTES (AJUSTE CIRÚRGICO APLICADO AQUI) ---
         function toggleUserDetails(id) {
             const bar = document.getElementById('details-' + id);
             bar.style.display = (bar.style.display === 'block' ? 'none' : 'block');
@@ -483,32 +487,33 @@
                 const loginTime = parseInt(u.loginTime || lastSeen);
                 const radioTime = parseInt(u.radioTime || loginTime);
                 const isOnline = (Date.now() - lastSeen < 60000);
+                const isAdm = (u.perfil === "adm" || u.perfil === "ADM");
                 
                 usersDataCache[id] = { loginTime, radioTime, isOnline };
 
-                // LOGICA DE CORES E NOME
-                let borderColor = isOnline ? '#00ff00' : '#d1a3ff'; // Verde para ON, Roxo para OFF
-                let statusColorClass = isOnline ? 'status-on' : 'status-off';
-                let statusText = isOnline ? 'ON' : 'OFF';
-                
-                // Se for ADM, muda o fundo para cinza
-                let cardStyle = `border-left: 4px solid ${borderColor};`;
-                if (u.perfil === "adm") {
-                    cardStyle += "background: #808080;"; // Fundo cinza para ADM
+                // AJUSTE DE CORES E LABELS
+                let colorTheme, labelStatus;
+                if(isAdm) {
+                    colorTheme = "#87CEFA"; // Azul claro
+                    labelStatus = "ADM";
+                } else if(isOnline) {
+                    colorTheme = "#00ff00"; // Verde
+                    labelStatus = "ON";
+                } else {
+                    colorTheme = "#A020F0"; // Roxo
+                    labelStatus = "OFF";
                 }
 
                 const div = document.createElement('div');
                 div.className = "user-item";
-                div.setAttribute("style", cardStyle);
+                // Aplica a cor na borda do item
+                div.style.borderColor = colorTheme;
                 
-                // PEGA O NOME QUE ESTÁ LOGADO (DO BANCO)
-                const nomeExibicao = u.nome || u.usuario || 'Ouvinte';
-
                 div.innerHTML = `
                     <div class="user-row">
                         <button class="user-name-btn" onclick="toggleUserDetails('${id}')">
-                            <span>${nomeExibicao}</span>
-                            <span class="${statusColorClass}">${statusText}</span>
+                            <span style="color: ${colorTheme}">${(u.nome || 'Ouvinte').toUpperCase()}</span>
+                            <span style="color: ${colorTheme}; font-weight: 900; font-size: 11px;">${labelStatus}</span>
                         </button>
                     </div>
                     <div class="user-details-bar" id="details-${id}">
