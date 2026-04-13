@@ -10,7 +10,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --primary: #A020F0; --bg: #000; --card: #121212; --text-muted: #b3b3b3; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; user-select: none; }
+        
+        /* Ajuste para evitar barras de rolagem indesejadas durante o zoom */
+        html, body { overflow-x: hidden; width: 100%; }
+
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; user-select: none; transition: transform 0.2s ease; transform-origin: top center; }
         
         /* HEADER RESPONSIVO */
         .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 20px 30px; border-radius: 15px; border: 1px solid #333; margin-bottom: 25px; gap: 10px; }
@@ -38,7 +42,7 @@
         .btn-sair:hover { background: #331111; border-color: #ff4444; }
         
         /* ESTRUTURA PRINCIPAL */
-        .main-container { display: grid; grid-template-columns: 180px 1fr 180px; gap: 20px; max-width: 100%; margin: 0 auto; margin-bottom: 150px; align-items: start; }
+        .main-container { display: grid; grid-template-columns: 180px 1fr 180px; gap: 20px; max-width: 1200px; margin: 0 auto; margin-bottom: 150px; align-items: start; }
         .center-content { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; align-items: start; }
         .side-pub { min-height: 400px; display: flex; flex-direction: column; gap: 15px; }
         
@@ -135,6 +139,25 @@
     <audio id="audio-player"></audio>
 
     <script>
+        // --- FUNÇÃO DE AUTO AJUSTE DE TELAS ---
+        function ajustarTela() {
+            const larguraDesejada = 1280; // Largura base para o zoom 1.0
+            const larguraAtual = window.innerWidth;
+            const proporcao = larguraAtual / larguraDesejada;
+
+            if (larguraAtual < larguraDesejada) {
+                document.body.style.transform = `scale(${proporcao})`;
+                document.body.style.width = (100 / proporcao) + "%";
+            } else {
+                document.body.style.transform = "none";
+                document.body.style.width = "100%";
+            }
+        }
+        window.addEventListener('resize', ajustarTela);
+        window.addEventListener('load', ajustarTela);
+        ajustarTela();
+        // --------------------------------------
+
         const firebaseConfig = {
             apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
             authDomain: "meu-painel-f2efe.firebaseapp.com",
@@ -231,7 +254,6 @@
             renderAll();
         }
 
-        // FUNÇÃO DE PLAY ATUALIZADA COM ZERAMENTO DE CRONÔMETRO
         function playRadio(index) {
             const myRadios = mySelectedIds.map(id => allRadios.find(r => r.key === id)).filter(Boolean);
             if (!myRadios[index]) return;
@@ -241,7 +263,7 @@
             player.src = r.url; 
             player.play();
             
-            tempoAcumuladoRadio = 0; // Zera o acumulado pois mudou a estação
+            tempoAcumuladoRadio = 0; 
             const agora = Date.now();
 
             document.getElementById('now-title').innerText = "OUVINTE: " + r.name;
@@ -257,35 +279,28 @@
             renderAll();
         }
 
-        // FUNÇÃO TOGGLE ATUALIZADA COM PAUSA LÓGICA
         function togglePlay() {
             if(!player.src) return;
             const agora = Date.now();
             const refUser = db.ref('usuarios/' + nomeUsuario);
 
             if(player.paused) {
-                // VOLTAR A OUVIR (PLAY)
                 player.play();
                 document.getElementById('play-icon').className = "fas fa-stop";
-                
-                // Reajusta o radioTime para (Agora - que já tinha ouvido) 
-                // para o monitor continuar de onde parou
                 refUser.update({ 
                     radioTime: agora - tempoAcumuladoRadio,
                     status_audio: "ouvindo"
                 });
             } else {
-                // PARAR DE OUVIR (STOP)
                 player.pause();
                 document.getElementById('play-icon').className = "fas fa-play";
-
                 refUser.once('value', snap => {
                     const rTime = snap.val().radioTime || agora;
-                    tempoAcumuladoRadio = agora - rTime; // Guarda o progresso
+                    tempoAcumuladoRadio = agora - rTime; 
                     
                     refUser.update({ 
                         status_audio: "parado",
-                        radioTime: agora - tempoAcumuladoRadio // Trava o tempo no monitor
+                        radioTime: agora - tempoAcumuladoRadio 
                     });
                 });
             }
@@ -328,7 +343,6 @@
             }
         }, 7000);
 
-        // HEARTBEAT OTIMIZADO
         setInterval(() => { 
             if(nomeUsuario) {
                 db.ref('usuarios/' + nomeUsuario).update({ lastSeen: Date.now() });
