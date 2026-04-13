@@ -140,10 +140,10 @@
             .msg-emoji-reply, .btn-del-msg, .reply-box { display: none; }
         }
 
-        /* --- FUNÇÃO DE AJUSTE PARA QUALQUER TELA (ADICIONADO) --- */
+        /* --- FUNÇÃO DE AJUSTE PARA QUALQUER TELA --- */
         @media (max-width: 1024px) {
             body { padding: 10px; }
-            .main-grid { grid-template-columns: 1fr; } /* Transforma as 2 colunas em 1 */
+            .main-grid { grid-template-columns: 1fr; } 
             .header { flex-direction: column; text-align: center; padding: 15px; gap: 15px; }
             .header-left { justify-content: center; width: 100%; }
             .input-group { flex-direction: column; }
@@ -153,7 +153,7 @@
             .btn-nav { font-size: 24px; }
             .play-outer { width: 70px; height: 70px; }
             .btn-spotify-play { width: 55px; height: 55px; font-size: 20px; }
-            .msg-emoji-reply { grid-template-columns: repeat(5, 1fr); } /* Ajusta emojis no celular */
+            .msg-emoji-reply { grid-template-columns: repeat(5, 1fr); } 
         }
     </style>
 </head>
@@ -260,6 +260,9 @@
         let activeIndex = -1;
         let usersDataCache = {};
         const emojisReply = ["👍", "❤️", "😂", "👏", "🔥", "🚀", "🎵", "📻", "🙌", "😲", "🤩", "🙏", "💪", "💡", "✨", "🔊", "🎧", "😎", "🤝", "✅"];
+        
+        // VARIÁVEL DE CONTROLE DO SORTABLE
+        let sortableInstance = null;
 
         setInterval(() => {
             document.getElementById('hora').innerText = new Date().toLocaleTimeString('pt-BR');
@@ -332,10 +335,20 @@
             initSortable();
         }
 
+        // --- FUNÇÃO AJUSTADA PARA MOBILE ---
         function initSortable() {
             const el = document.getElementById('radio-list');
-            Sortable.create(el, {
+            if(!el) return;
+            
+            // Destrói instância anterior se existir para evitar o conflito no celular
+            if (sortableInstance) {
+                sortableInstance.destroy();
+            }
+
+            sortableInstance = Sortable.create(el, {
                 animation: 150,
+                delay: 100,            // Garante que o toque não seja confundido com scroll no celular
+                delayOnTouchOnly: true, 
                 onEnd: function() {
                     const items = el.querySelectorAll('.radio-item');
                     items.forEach((item, index) => {
@@ -469,7 +482,7 @@
             });
         });
 
-        // --- MONITOR DE OUVINTES (AGORA BUSCANDO EM 'USUARIOS') ---
+        // --- MONITOR DE OUVINTES ---
         function toggleUserDetails(id) {
             const bar = document.getElementById('details-' + id);
             bar.style.display = (bar.style.display === 'block' ? 'none' : 'block');
@@ -488,21 +501,14 @@
 
             snap.forEach(c => {
                 const u = c.val(), id = c.key;
-                
-                // Pega o nome do nó ou o campo usuario/nome
                 const nomeExibicao = (u.usuario || u.nome || id).toUpperCase();
-                
-                // Verifica online baseado no lastSeen (1 minuto de tolerância)
                 const lastSeen = parseInt(u.lastSeen || 0);
                 const isOnline = (Date.now() - lastSeen < 60000);
-                
-                // Tempos para os cronômetros
                 const loginTime = parseInt(u.loginTime || lastSeen);
                 const radioTime = parseInt(u.radioTime || loginTime);
                 
                 usersDataCache[id] = { loginTime, radioTime, isOnline };
 
-                // CORES: VERDE (ON) e ROXO (OFF) como solicitado
                 let colorTheme = isOnline ? "#00ff00" : "#A020F0"; 
                 let labelStatus = isOnline ? "ON" : "OFF";
 
@@ -531,6 +537,12 @@
             updateUserTimers();
         });
 
+        function formatDuration(ms) {
+            const s = Math.floor(ms / 1000);
+            const m = Math.floor(s / 60);
+            return m + "m " + (s % 60) + "s";
+        }
+
         function updateUserTimers() {
             for (let id in usersDataCache) {
                 const elSessao = document.getElementById(`timer-sessao-${id}`);
@@ -542,19 +554,8 @@
                     const diffRadio = Date.now() - data.radioTime;
                     if (elSessao) elSessao.innerText = formatDuration(diffSessao);
                     if (elRadio) elRadio.innerText = formatDuration(diffRadio);
-                } else {
-                    if (elSessao) elSessao.innerText = "OFFLINE";
-                    if (elRadio) elRadio.innerText = "-";
                 }
             }
-        }
-
-        function formatDuration(ms) {
-            if (isNaN(ms) || ms < 0) return "0m 0s";
-            const totalSegundos = Math.floor(ms / 1000);
-            const m = Math.floor(totalSegundos / 60);
-            const s = totalSegundos % 60;
-            return `${m}m ${s}s`;
         }
     </script>
 </body>
