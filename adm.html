@@ -53,7 +53,12 @@
         .btn-save { padding: 0 25px; background: var(--primary); border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: black; transition: 0.3s; }
         .btn-save:hover { filter: brightness(1.2); transform: scale(1.02); }
         
-        .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; }
+        .radio-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); 
+            gap: 12px; 
+            touch-action: none; /* CRUCIAL PARA MOBILE */
+        }
         .radio-item {
             aspect-ratio: 1/1;
             border-radius: 15px;
@@ -140,7 +145,6 @@
             .msg-emoji-reply, .btn-del-msg, .reply-box { display: none; }
         }
 
-        /* --- FUNÇÃO DE AJUSTE PARA QUALQUER TELA --- */
         @media (max-width: 1024px) {
             body { padding: 10px; }
             .main-grid { grid-template-columns: 1fr; } 
@@ -261,7 +265,6 @@
         let usersDataCache = {};
         const emojisReply = ["👍", "❤️", "😂", "👏", "🔥", "🚀", "🎵", "📻", "🙌", "😲", "🤩", "🙏", "💪", "💡", "✨", "🔊", "🎧", "😎", "🤝", "✅"];
         
-        // VARIÁVEL DE CONTROLE DO SORTABLE
         let sortableInstance = null;
 
         setInterval(() => {
@@ -272,7 +275,6 @@
         function logout() { if(confirm("Deseja sair?")) { localStorage.removeItem('usuarioNome'); window.location.href = 'index.html'; } }
         function toggleMensagens() { document.getElementById('container-mensagens-adm').classList.toggle('aberto'); }
 
-        // --- MENSAGENS ---
         db.ref('mensagens_ouvintes').on('value', snap => {
             const list = document.getElementById('msg-list-adm');
             const count = document.getElementById('count-msg');
@@ -305,7 +307,6 @@
             db.ref('respostas_adm').push({ mensagemId: id, resposta: campo.value, data: Date.now() }).then(() => { alert("Resposta enviada!"); campo.value = ""; });
         }
 
-        // --- RÁDIOS ---
         db.ref('radios').on('value', snap => {
             radioData = [];
             snap.forEach(c => { radioData.push({ ...c.val(), key: c.key }); });
@@ -335,20 +336,17 @@
             initSortable();
         }
 
-        // --- FUNÇÃO AJUSTADA PARA MOBILE ---
         function initSortable() {
             const el = document.getElementById('radio-list');
             if(!el) return;
-            
-            // Destrói instância anterior se existir para evitar o conflito no celular
-            if (sortableInstance) {
-                sortableInstance.destroy();
-            }
+            if (sortableInstance) sortableInstance.destroy();
 
             sortableInstance = Sortable.create(el, {
                 animation: 150,
-                delay: 100,            // Garante que o toque não seja confundido com scroll no celular
-                delayOnTouchOnly: true, 
+                delay: 200,             // IMPORTANTE: Segure por 200ms para arrastar
+                delayOnTouchOnly: true,
+                forceFallback: true,    // Garante funcionamento em todos browsers mobile
+                fallbackTolerance: 3,
                 onEnd: function() {
                     const items = el.querySelectorAll('.radio-item');
                     items.forEach((item, index) => {
@@ -402,7 +400,6 @@
         function nextRadio() { if(radioData.length) playRadio((activeIndex + 1) % radioData.length); }
         function prevRadio() { if(radioData.length) playRadio((activeIndex - 1 + radioData.length) % radioData.length); }
 
-        // --- PUBLICIDADE ---
         let imgBase64 = "";
         function previewPub(input) {
             const reader = new FileReader();
@@ -482,7 +479,6 @@
             });
         });
 
-        // --- MONITOR DE OUVINTES ---
         function toggleUserDetails(id) {
             const bar = document.getElementById('details-' + id);
             bar.style.display = (bar.style.display === 'block' ? 'none' : 'block');
@@ -498,7 +494,6 @@
             const container = document.getElementById('user-list');
             container.innerHTML = "";
             usersDataCache = {};
-
             snap.forEach(c => {
                 const u = c.val(), id = c.key;
                 const nomeExibicao = (u.usuario || u.nome || id).toUpperCase();
@@ -506,16 +501,12 @@
                 const isOnline = (Date.now() - lastSeen < 60000);
                 const loginTime = parseInt(u.loginTime || lastSeen);
                 const radioTime = parseInt(u.radioTime || loginTime);
-                
                 usersDataCache[id] = { loginTime, radioTime, isOnline };
-
                 let colorTheme = isOnline ? "#00ff00" : "#A020F0"; 
                 let labelStatus = isOnline ? "ON" : "OFF";
-
                 const div = document.createElement('div');
                 div.className = "user-item";
                 div.style.borderColor = colorTheme; 
-                
                 div.innerHTML = `
                     <div class="user-row">
                         <button class="user-name-btn" onclick="toggleUserDetails('${id}')">
@@ -548,12 +539,9 @@
                 const elSessao = document.getElementById(`timer-sessao-${id}`);
                 const elRadio = document.getElementById(`timer-radio-${id}`);
                 const data = usersDataCache[id];
-
                 if (data.isOnline) {
-                    const diffSessao = Date.now() - data.loginTime;
-                    const diffRadio = Date.now() - data.radioTime;
-                    if (elSessao) elSessao.innerText = formatDuration(diffSessao);
-                    if (elRadio) elRadio.innerText = formatDuration(diffRadio);
+                    if(elSessao) elSessao.innerText = formatDuration(Date.now() - data.loginTime);
+                    if(elRadio) elRadio.innerText = formatDuration(Date.now() - data.radioTime);
                 }
             }
         }
