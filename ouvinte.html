@@ -10,79 +10,38 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --primary: #A020F0; --bg: #000; --card: #121212; --text-muted: #b3b3b3; }
-        
-        /* Previne problemas de overflow durante o redimensionamento */
-        html, body { 
-            overflow-x: hidden; 
-            width: 100%; 
-            background: var(--bg); 
-        }
-
-        body { 
-            font-family: 'Segoe UI', sans-serif; 
-            color: white; 
-            margin: 0; 
-            padding: 20px; 
-            user-select: none; 
-            transform-origin: top center; 
-        }
-        
-        /* HEADER RESPONSIVO */
+        html, body { overflow-x: hidden; width: 100%; background: var(--bg); }
+        body { font-family: 'Segoe UI', sans-serif; color: white; margin: 0; padding: 20px; user-select: none; transform-origin: top center; }
         .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 20px 30px; border-radius: 15px; border: 1px solid #333; margin-bottom: 25px; gap: 10px; }
-        
         .header-left { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; flex-shrink: 0; }
         .header h2 { margin: 0; color: var(--primary); font-size: 22px; text-transform: uppercase; line-height: 1; }
-        
         #container-pub { flex: 1; display: flex; justify-content: center; align-items: center; padding: 0 10px; height: 55px; overflow: hidden; }
         #img-publicidade { max-height: 55px; max-width: 100%; border-radius: 8px; display: none; object-fit: contain; transition: opacity 0.5s ease-in-out; }
-        
         .header-right { display: flex; align-items: center; flex-shrink: 0; }
         .datetime-container { display: flex; flex-direction: column; align-items: flex-end; border-left: 1px solid #333; padding-left: 20px; }
-        
         #hora { font-size: 28px; font-weight: 900; line-height: 1; color: white; letter-spacing: -1px; }
         .date-info { font-size: 11px; color: #888; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; margin-top: 4px; }
         .day-highlight { color: var(--primary); }
-
         .btn-header { background: none; border: 1px solid #333; color: white; padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; transition: 0.3s; display: flex; align-items: center; gap: 8px; text-transform: uppercase; font-weight: bold; }
-        .btn-header:hover { background: #222; border-color: var(--primary); }
-        .btn-sair { color: #ff4444; border-color: #442222; padding: 4px 10px; }
-        .btn-sair:hover { background: #331111; border-color: #ff4444; }
-        
-        /* ESTRUTURA PRINCIPAL */
+        .btn-sair { color: #ff4444; border-color: #442222; }
         .main-container { display: grid; grid-template-columns: 180px 1fr 180px; gap: 20px; max-width: 1200px; margin: 0 auto; margin-bottom: 150px; align-items: start; }
         .center-content { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; align-items: start; }
         .side-pub { min-height: 400px; display: flex; flex-direction: column; gap: 15px; }
-        
-        /* MEDIA QUERIES PARA MOBILE */
-        @media (max-width: 1200px) { 
-            .center-content { grid-template-columns: 1fr; } 
-            .main-container { grid-template-columns: 1fr; } 
-            .side-pub { display: none; }
-            body { padding: 10px; }
-            .header { padding: 15px; flex-direction: column; text-align: center; }
-            .datetime-container { border-left: none; padding-left: 0; align-items: center; margin-top: 10px; }
-        }
-
+        @media (max-width: 1200px) { .center-content { grid-template-columns: 1fr; } .main-container { grid-template-columns: 1fr; } .side-pub { display: none; } .header { padding: 15px; flex-direction: column; text-align: center; } .datetime-container { border-left: none; padding-left: 0; align-items: center; margin-top: 10px; } }
         .card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid #282828; }
         h3 { color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; text-align: center; }
-        
         .radio-grid { display: grid; grid-template-columns: repeat(auto-fit, 110px); gap: 15px; justify-content: center; }
         .radio-item { width: 110px; height: 110px; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #000; font-weight: bold; font-size: 10px; text-align: center; padding: 10px; cursor: grab; transition: 0.3s; position: relative; border: 2px solid transparent; box-sizing: border-box; }
-        .radio-item:hover { transform: scale(1.05); filter: brightness(1.1); }
-        .radio-item.active { background: #000 !important; color: var(--primary) !important; border-color: var(--primary); box-shadow: 0 0 15px rgba(160, 32, 240, 0.4); }
-        
+        .radio-item.active { background: #000 !important; color: var(--primary) !important; border-color: var(--primary); }
         .antena { font-size: 20px; margin-bottom: 8px; display: none; }
         .active .antena { display: block; animation: pulse-antena 1s infinite; }
         @keyframes pulse-antena { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(1.1); } }
-        
         .selector-list { display: flex; flex-direction: column; gap: 8px; max-height: 450px; overflow-y: auto; padding-right: 5px; }
-        .selector-item { background: #1a1a1a; padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #333; transition: 0.3s; }
+        .selector-item { background: #1a1a1a; padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #333; }
         .selector-item.selected { border-left-color: var(--primary); background: #222; }
-        .btn-toggle-radio { background: none; border: none; font-size: 18px; cursor: pointer; transition: 0.2s; }
-        
+        .btn-toggle-radio { background: none; border: none; font-size: 18px; cursor: pointer; }
         .player-footer { position: fixed; bottom: 0; left: 0; right: 0; background: #111; padding: 15px 25px 25px 25px; border-top: 2px solid var(--primary); text-align: center; z-index: 100; }
-        .msg-barra { background: #ff0000; color: #fff; font-size: 14px; font-weight: 900; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 2px solid #fff; display: none; width: fit-content; margin: 0 auto; cursor: pointer; animation: piscar-alerta 0.8s infinite alternate; }
-        
+        .msg-barra { background: #ff0000; color: #fff; font-size: 14px; font-weight: 900; padding: 12px; border-radius: 8px; margin-bottom: 15px; display: none; width: fit-content; margin: 0 auto; cursor: pointer; }
         .controls-row { display: flex; align-items: center; justify-content: center; gap: 35px; }
         .btn-nav { background: none; border: none; color: #b3b3b3; font-size: 24px; cursor: pointer; }
         .play-outer { position: relative; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; }
@@ -113,7 +72,7 @@
         <div class="side-pub" id="pub-left"></div>
         <div class="center-content">
             <div class="card">
-                <h3>MINHA GRADE (ARRASTE PARA ORDENAR)</h3>
+                <h3>MINHA GRADE (SEGURE PARA MOVER)</h3>
                 <div id="my-radio-list" class="radio-grid"></div>
             </div>
             <div class="card">
@@ -142,18 +101,23 @@
     <audio id="audio-player"></audio>
 
     <script>
-        // --- FUNÇÃO DE AUTO AJUSTE INTELIGENTE ---
+        // --- BLOQUEIOS DE SEGURANÇA (PARA NÃO COPIAREM) ---
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.onkeydown = function(e) {
+            if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74 || e.keyCode == 67)) || (e.ctrlKey && e.keyCode == 85)) {
+                return false;
+            }
+        };
+
+        // --- LÓGICA DO SISTEMA ---
         function ajustarTela() {
             const larguraAtual = window.innerWidth;
             const larguraDesejada = 1280;
-            
-            // Só aplica o zoom se for PC/Desktop (telas maiores que 1024px)
             if (larguraAtual > 1024 && larguraAtual < larguraDesejada) {
                 const proporcao = larguraAtual / larguraDesejada;
                 document.body.style.transform = `scale(${proporcao})`;
                 document.body.style.width = (100 / proporcao) + "%";
             } else {
-                // No celular ou telas grandes, mantém o padrão sem zoom forçado
                 document.body.style.transform = "none";
                 document.body.style.width = "100%";
             }
@@ -162,7 +126,6 @@
         window.addEventListener('load', ajustarTela);
         ajustarTela();
 
-        // --- RESTANTE DO CÓDIGO (FIREBASE / LÓGICA) MANTIDO INTACTO ---
         const firebaseConfig = {
             apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
             authDomain: "meu-painel-f2efe.firebaseapp.com",
@@ -226,6 +189,9 @@
 
         new Sortable(document.getElementById('my-radio-list'), {
             animation: 150,
+            delay: 500,
+            delayOnTouchOnly: true,
+            touchStartThreshold: 5,
             onEnd: function() {
                 mySelectedIds = Array.from(document.querySelectorAll('#my-radio-list .radio-item')).map(el => el.getAttribute('data-id'));
                 salvarGrade();
@@ -253,15 +219,14 @@
         function togglePlay() {
             if(!player.src) return;
             const agora = Date.now();
-            const refUser = db.ref('usuarios/' + nomeUsuario);
             if(player.paused) {
                 player.play(); document.getElementById('play-icon').className = "fas fa-stop";
-                refUser.update({ radioTime: agora - tempoAcumuladoRadio, status_audio: "ouvindo" });
+                db.ref('usuarios/' + nomeUsuario).update({ radioTime: agora - tempoAcumuladoRadio, status_audio: "ouvindo" });
             } else {
                 player.pause(); document.getElementById('play-icon').className = "fas fa-play";
-                refUser.once('value', snap => {
+                db.ref('usuarios/' + nomeUsuario).once('value', snap => {
                     tempoAcumuladoRadio = agora - (snap.val().radioTime || agora);
-                    refUser.update({ status_audio: "parado", radioTime: agora - tempoAcumuladoRadio });
+                    db.ref('usuarios/' + nomeUsuario).update({ status_audio: "parado", radioTime: agora - tempoAcumuladoRadio });
                 });
             }
         }
