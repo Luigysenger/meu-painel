@@ -11,7 +11,6 @@
     <style>
         :root { --primary: #1DB954; --bg: #000; --card: #121212; --text-muted: #b3b3b3; --purple-light: #d1a3ff; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; user-select: none; }
-        /* O restante do seu CSS continua igual... */
         .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 20px 30px; border-radius: 15px; border: 1px solid #333; margin-bottom: 25px; }
         .header-left { display: flex; align-items: center; gap: 20px; }
         .header h2 { margin: 0; color: var(--primary); font-size: 22px; }
@@ -94,38 +93,19 @@
         .btn-spotify-play:active { transform: scale(0.95); }
     </style>
 </head>
-<body oncontextmenu="return false;"> <script>
-        // --- FERRAMENTA DE PROTEÇÃO ANTI-CÓPIA ---
-        
-        // 1. Bloqueia F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+<body oncontextmenu="return false;">
+
+    <script>
+        // --- PROTEÇÃO ANTI-CÓPIA ATUALIZADA ---
+        document.addEventListener('contextmenu', event => event.preventDefault());
         document.addEventListener('keydown', function(e) {
-            if (
-                e.key === "F12" ||
-                (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J" || e.key === "C")) ||
-                (e.ctrlKey && e.key === "u") ||
-                (e.ctrlKey && e.key === "s")
-            ) {
+            if (e.key === "F12" || (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J" || e.key === "C")) || (e.ctrlKey && e.key === "u")) {
                 e.preventDefault();
-                alert("Ação não permitida para proteção do sistema.");
                 return false;
             }
         });
-
-        // 2. Proteção contra seleção de texto via JS (complementa o CSS)
-        document.onselectstart = () => false;
-
-        // 3. Detector de DevTools (Se a pessoa abrir o console arrastando, o debugger pausa a execução)
-        setInterval(function() {
-            const before = new Date().getTime();
-            debugger;
-            const after = new Date().getTime();
-            if (after - before > 100) {
-                document.body.innerHTML = "<h1 style='color:white; text-align:center; margin-top:20%;'>Acesso Negado por violação de segurança.</h1>";
-                window.location.reload();
-            }
-        }, 1000);
-
-        // --- FIM DA FERRAMENTA DE PROTEÇÃO ---
+        document.ondragstart = () => false;
+        // --- FIM DA PROTEÇÃO ---
 
         const firebaseConfig = {
             apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
@@ -135,8 +115,6 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        
-        // O restante do seu script original continua abaixo...
         const player = document.getElementById('audio-player');
         let radioData = [];
         let activeIndex = -1;
@@ -423,5 +401,6 @@
             }
         }
     </script>
+    <audio id="audio-player"></audio>
 </body>
 </html>
