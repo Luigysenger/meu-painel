@@ -192,7 +192,6 @@
     <audio id="audio-player"></audio>
 
     <script>
-        // Configuração conforme seus prints
         const firebaseConfig = {
             apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
             authDomain: "meu-painel-f2efe.firebaseapp.com",
@@ -208,7 +207,6 @@
         let usersDataCache = {};
         const emojisReply = ["👍", "❤️", "😂", "👏", "🔥", "🚀", "🎵", "📻", "🙌", "✅"];
 
-        // Relógio
         setInterval(() => {
             document.getElementById('hora').innerText = new Date().toLocaleTimeString('pt-BR');
             updateUserTimers();
@@ -247,10 +245,13 @@
             if(c.value) { db.ref('respostas_adm').push({ mensagemId: id, resposta: c.value, data: Date.now() }); c.value = ""; }
         }
 
-        // --- RÁDIOS ---
+        // --- RÁDIOS (CORREÇÃO PARA CARREGAR AS EXISTENTES) ---
         db.ref('radios').on('value', snap => {
             radioData = [];
-            snap.forEach(c => radioData.push({ ...c.val(), key: c.key }));
+            snap.forEach(c => {
+                radioData.push({ ...c.val(), key: c.key });
+            });
+            // Ordena pela posição salva ou por ordem alfabética se não houver posição
             radioData.sort((a,b) => (a.posicao || 0) - (b.posicao || 0));
             renderRadios();
         });
@@ -275,10 +276,15 @@
                 list.appendChild(div);
             });
             
-            if(!window.sortableIniciado) {
-                Sortable.create(list, { animation: 150, onEnd: () => {
-                    list.querySelectorAll('.radio-item').forEach((it, idx) => db.ref('radios/' + it.dataset.id).update({ posicao: idx }));
-                }});
+            if(!window.sortableIniciado && radioData.length > 0) {
+                Sortable.create(list, { 
+                    animation: 150, 
+                    onEnd: () => {
+                        list.querySelectorAll('.radio-item').forEach((it, idx) => {
+                            db.ref('radios/' + it.dataset.id).update({ posicao: idx });
+                        });
+                    }
+                });
                 window.sortableIniciado = true;
             }
         }
@@ -286,9 +292,20 @@
         function addRadio() {
             const n = document.getElementById('r-name').value, u = document.getElementById('r-url').value, k = document.getElementById('r-key').value;
             if(n && u) {
-                if(k) db.ref('radios/'+k).update({name:n, url:u});
-                else db.ref('radios').push({name:n, url:u, color:`hsl(${Math.random()*360},70%,80%)`, posicao:radioData.length});
+                if(k) {
+                    db.ref('radios/'+k).update({name:n, url:u});
+                } else {
+                    const cores = ['#ffccd5', '#d8e2dc', '#ece4db', '#ffead0', '#e2ece9', '#f0efeb'];
+                    const corAleatoria = cores[Math.floor(Math.random() * cores.length)];
+                    db.ref('radios').push({
+                        name: n, 
+                        url: u, 
+                        color: corAleatoria, 
+                        posicao: radioData.length
+                    });
+                }
                 document.getElementById('r-name').value = ""; document.getElementById('r-url').value = ""; document.getElementById('r-key').value = "";
+                document.getElementById('btn-radio-action').innerText = "SALVAR";
             }
         }
 
@@ -320,17 +337,21 @@
         let imgBase64 = "";
         function previewPub(input) {
             const reader = new FileReader();
-            reader.onload = (e) => { imgBase64 = e.target.result; document.getElementById('pub-view').src = imgBase64; document.getElementById('pub-view').style.display = "block"; };
+            reader.onload = (e) => { 
+                imgBase64 = e.target.result; 
+                document.getElementById('pub-view').src = imgBase64; 
+                document.getElementById('pub-view').style.display = "block"; 
+            };
             if(input.files[0]) reader.readAsDataURL(input.files[0]);
         }
 
         function savePub() {
             const ini = document.getElementById('pub-ini').value, fim = document.getElementById('pub-fim').value;
             const target = document.getElementById('pub-target').value, manual = document.getElementById('pub-manual').value.toUpperCase(), k = document.getElementById('pub-key').value;
-            if(!imgBase64 || !ini || !fim) return alert("Preencha tudo!");
+            if(!imgBase64 || !ini || !fim) return alert("Preencha todos os campos da publicidade!");
             const d = { imagem: imgBase64, inicio: new Date(ini).getTime(), fim: new Date(fim).getTime(), destino: target, ouvinteAlvo: target === 'MANUAL' ? manual : 'TODOS' };
             if(k) db.ref('publicidade/'+k).update(d); else db.ref('publicidade').push(d);
-            alert("Campanha Lançada!");
+            alert("Campanha Lançada com Sucesso!");
         }
 
         db.ref('publicidade').on('value', snap => {
@@ -346,7 +367,7 @@
                             <img src="${p.imagem}" class="pub-thumb-mini">
                             <span>ALVO: ${p.ouvinteAlvo}</span>
                         </button>
-                        <button class="btn-action-pub btn-delete-pub" onclick="db.ref('publicidade/${id}').remove()"><i class="fas fa-trash"></i></button>
+                        <button class="btn-action-pub btn-delete-pub" onclick="if(confirm('Remover esta campanha?')) db.ref('publicidade/${id}').remove()"><i class="fas fa-trash"></i></button>
                     </div>
                     <div class="pub-details-bar">
                         <p>Início: ${new Date(p.inicio).toLocaleString()}</p>
@@ -357,12 +378,7 @@
             });
         });
 
-        // --- MONITOR DE OUVINTES (LEITURA DA NÓ 'CONTAS' + NOMES CORRETOS) ---
-        function toggleUserDetails(id) {
-            const bar = document.getElementById('details-' + id);
-            bar.style.display = (bar.style.display === 'block' ? 'none' : 'block');
-        }
-
+        // --- MONITOR DE OUVINTES (RECUPERA NOMES CORRETOS DE 'CONTAS') ---
         db.ref('contas').on('value', snap => {
             const container = document.getElementById('user-list');
             container.innerHTML = ""; 
@@ -370,17 +386,14 @@
             
             snap.forEach(c => {
                 const u = c.val(), id = c.key;
-                // Ignora administradores no monitor
                 if(u.perfil === "adm" || u.tipo === "admin") return;
 
                 const status = u.status || 'offline';
                 const isOnline = (status === 'online');
                 const safeId = id.replace(/[^a-zA-Z0-9]/g, '_');
                 
-                // Dados para o timer em tempo real
                 usersDataCache[safeId] = { 
                     loginTime: u.sessionStart || Date.now(), 
-                    radioTime: u.radioTime || Date.now(), 
                     isOnline: isOnline 
                 };
 
@@ -402,6 +415,11 @@
                 container.appendChild(div);
             });
         });
+
+        function toggleUserDetails(id) {
+            const bar = document.getElementById('details-' + id);
+            bar.style.display = (bar.style.display === 'block' ? 'none' : 'block');
+        }
 
         function updateUserTimers() {
             for (let id in usersDataCache) {
