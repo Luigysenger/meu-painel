@@ -74,18 +74,14 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // AJUSTE REALIZADO AQUI PARA GARANTIR O FUNCIONAMENTO DO ENTER
-        window.addEventListener('keydown', function(e) {
+        // --- AJUSTE DO ENTER (AGORA SEM QUEBRAR O CLIQUE) ---
+        document.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
-                const loginBox = document.getElementById('box-login');
-                const cadastroBox = document.getElementById('box-cadastro');
-                const esqueciBox = document.getElementById('box-esqueci');
-
-                if (!loginBox.classList.contains('hidden')) {
+                if (!document.getElementById('box-login').classList.contains('hidden')) {
                     fazerLogin();
-                } else if (!cadastroBox.classList.contains('hidden')) {
+                } else if (!document.getElementById('box-cadastro').classList.contains('hidden')) {
                     salvarCadastro();
-                } else if (!esqueciBox.classList.contains('hidden')) {
+                } else if (!document.getElementById('box-esqueci').classList.contains('hidden')) {
                     recuperarSenha();
                 }
             }
@@ -105,6 +101,8 @@
             const nomeLimpo = nomeDigitado.toUpperCase();
             const senhaInput = document.getElementById('login-senha').value;
             const erro = document.getElementById('msg-erro');
+
+            if(!nomeDigitado || !senhaInput) return; // Evita erro se vazio
 
             if(nomeDigitado.toLowerCase() === "luigy" && senhaInput === "1045") {
                 localStorage.setItem('usuarioNome', 'LUIGY (ADM)');
