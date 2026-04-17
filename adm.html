@@ -192,6 +192,7 @@
     <audio id="audio-player"></audio>
 
     <script>
+        // Configuração conforme seus prints
         const firebaseConfig = {
             apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
             authDomain: "meu-painel-f2efe.firebaseapp.com",
@@ -201,11 +202,13 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const player = document.getElementById('audio-player');
+        
         let radioData = [];
         let activeIndex = -1;
         let usersDataCache = {};
         const emojisReply = ["👍", "❤️", "😂", "👏", "🔥", "🚀", "🎵", "📻", "🙌", "✅"];
 
+        // Relógio
         setInterval(() => {
             document.getElementById('hora').innerText = new Date().toLocaleTimeString('pt-BR');
             updateUserTimers();
@@ -258,7 +261,7 @@
             radioData.forEach((r, i) => {
                 const div = document.createElement('div');
                 div.className = `radio-item ${activeIndex === i ? 'active' : ''}`;
-                div.style.background = r.color || '#1DB954';
+                div.style.background = r.color || '#f0f0f0';
                 div.setAttribute('data-id', r.key);
                 div.onclick = () => playRadio(i);
                 div.innerHTML = `
@@ -271,18 +274,29 @@
                 `;
                 list.appendChild(div);
             });
-            Sortable.create(list, { animation: 150, onEnd: () => {
-                list.querySelectorAll('.radio-item').forEach((it, idx) => db.ref('radios/' + it.dataset.id).update({ posicao: idx }));
-            }});
+            
+            if(!window.sortableIniciado) {
+                Sortable.create(list, { animation: 150, onEnd: () => {
+                    list.querySelectorAll('.radio-item').forEach((it, idx) => db.ref('radios/' + it.dataset.id).update({ posicao: idx }));
+                }});
+                window.sortableIniciado = true;
+            }
         }
 
         function addRadio() {
             const n = document.getElementById('r-name').value, u = document.getElementById('r-url').value, k = document.getElementById('r-key').value;
             if(n && u) {
                 if(k) db.ref('radios/'+k).update({name:n, url:u});
-                else db.ref('radios').push({name:n, url:u, color:`hsl(${Math.random()*360},70%,75%)`, posicao:radioData.length});
+                else db.ref('radios').push({name:n, url:u, color:`hsl(${Math.random()*360},70%,80%)`, posicao:radioData.length});
                 document.getElementById('r-name').value = ""; document.getElementById('r-url').value = ""; document.getElementById('r-key').value = "";
             }
+        }
+
+        function prepareEditRadio(k, n, u) {
+            document.getElementById('r-key').value = k;
+            document.getElementById('r-name').value = n;
+            document.getElementById('r-url').value = u;
+            document.getElementById('btn-radio-action').innerText = "ATUALIZAR";
         }
 
         function playRadio(idx) {
@@ -313,13 +327,37 @@
         function savePub() {
             const ini = document.getElementById('pub-ini').value, fim = document.getElementById('pub-fim').value;
             const target = document.getElementById('pub-target').value, manual = document.getElementById('pub-manual').value.toUpperCase(), k = document.getElementById('pub-key').value;
-            if(!imgBase64 || !ini || !fim) return alert("Erro!");
+            if(!imgBase64 || !ini || !fim) return alert("Preencha tudo!");
             const d = { imagem: imgBase64, inicio: new Date(ini).getTime(), fim: new Date(fim).getTime(), destino: target, ouvinteAlvo: target === 'MANUAL' ? manual : 'TODOS' };
             if(k) db.ref('publicidade/'+k).update(d); else db.ref('publicidade').push(d);
-            location.reload();
+            alert("Campanha Lançada!");
         }
 
-        // --- MONITOR DE OUVINTES (CORRIGIDO PARA BUSCAR NOMES EM 'CONTAS') ---
+        db.ref('publicidade').on('value', snap => {
+            const list = document.getElementById('pub-list-admin');
+            list.innerHTML = "";
+            snap.forEach(c => {
+                const p = c.val(), id = c.key;
+                const div = document.createElement('div');
+                div.className = "pub-list-item";
+                div.innerHTML = `
+                    <div class="pub-list-row">
+                        <button class="pub-list-btn" onclick="this.parentElement.nextElementSibling.style.display=(this.parentElement.nextElementSibling.style.display=='block'?'none':'block')">
+                            <img src="${p.imagem}" class="pub-thumb-mini">
+                            <span>ALVO: ${p.ouvinteAlvo}</span>
+                        </button>
+                        <button class="btn-action-pub btn-delete-pub" onclick="db.ref('publicidade/${id}').remove()"><i class="fas fa-trash"></i></button>
+                    </div>
+                    <div class="pub-details-bar">
+                        <p>Início: ${new Date(p.inicio).toLocaleString()}</p>
+                        <p>Fim: ${new Date(p.fim).toLocaleString()}</p>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        });
+
+        // --- MONITOR DE OUVINTES (LEITURA DA NÓ 'CONTAS' + NOMES CORRETOS) ---
         function toggleUserDetails(id) {
             const bar = document.getElementById('details-' + id);
             bar.style.display = (bar.style.display === 'block' ? 'none' : 'block');
@@ -327,18 +365,24 @@
 
         db.ref('contas').on('value', snap => {
             const container = document.getElementById('user-list');
-            container.innerHTML = ""; usersDataCache = {};
+            container.innerHTML = ""; 
+            usersDataCache = {};
+            
             snap.forEach(c => {
                 const u = c.val(), id = c.key;
+                // Ignora administradores no monitor
                 if(u.perfil === "adm" || u.tipo === "admin") return;
 
-                const lastSeen = parseInt(u.lastSeen || 0);
-                const loginTime = parseInt(u.sessionStart || lastSeen);
-                const radioTime = parseInt(u.radioTime || loginTime);
-                const isOnline = (Date.now() - lastSeen < 60000);
+                const status = u.status || 'offline';
+                const isOnline = (status === 'online');
                 const safeId = id.replace(/[^a-zA-Z0-9]/g, '_');
                 
-                usersDataCache[safeId] = { loginTime, radioTime, isOnline };
+                // Dados para o timer em tempo real
+                usersDataCache[safeId] = { 
+                    loginTime: u.sessionStart || Date.now(), 
+                    radioTime: u.radioTime || Date.now(), 
+                    isOnline: isOnline 
+                };
 
                 const div = document.createElement('div');
                 div.className = "user-item";
@@ -347,30 +391,24 @@
                     <div class="user-row">
                         <button class="user-name-btn" onclick="toggleUserDetails('${safeId}')">
                             <span>${u.nome ? u.nome.toUpperCase() : 'OUVINTE'}</span>
-                            ${isOnline ? '<span class="status-on">ON</span>' : '<span class="status-off">OFF</span>'}
+                            <span class="${isOnline ? 'status-on' : 'status-off'}">${status.toUpperCase()}</span>
                         </button>
                     </div>
                     <div class="user-details-bar" id="details-${safeId}">
                         <p>E-mail: <b>${u.email || id.replace(/,/g,'.')}</b></p>
-                        <p>Ouvindo: <b>${u.radioAtual || 'Nenhuma'}</b></p>
+                        <p>Local: <b>${u.cidade || 'N/A'} - ${u.estado || ''}</b></p>
                         <p>Sessão: <b id="timer-sessao-${safeId}">0s</b></p>
-                        <p style="color:var(--primary)">Rádio: <b id="timer-radio-${safeId}">0s</b></p>
                     </div>`;
                 container.appendChild(div);
             });
-            updateUserTimers();
         });
 
         function updateUserTimers() {
             for (let id in usersDataCache) {
                 const data = usersDataCache[id];
                 const elS = document.getElementById(`timer-sessao-${id}`);
-                const elR = document.getElementById(`timer-radio-${id}`);
-                if (data.isOnline) {
-                    if(elS) elS.innerText = formatDuration(Date.now() - data.loginTime);
-                    if(elR) elR.innerText = formatDuration(Date.now() - data.radioTime);
-                } else {
-                    if(elS) elS.innerText = "OFF";
+                if (data.isOnline && elS) {
+                    elS.innerText = formatDuration(Date.now() - data.loginTime);
                 }
             }
         }
