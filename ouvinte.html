@@ -28,14 +28,12 @@
         .date-info { font-size: 11px; color: #888; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; margin-top: 4px; }
         .day-highlight { color: var(--primary); }
 
-        /* --- BOTÕES COM EFEITO DE VOLTA --- */
         .btn-header { background: none; border: 1px solid #333; color: white; padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; transition: 0.3s; display: flex; align-items: center; gap: 8px; text-transform: uppercase; font-weight: bold; }
         .btn-header:hover { background: #222; border-color: var(--primary); transform: scale(1.05); filter: brightness(1.2); }
         
         .btn-sair { color: #ff4444; border-color: #442222; padding: 4px 10px; }
         .btn-sair:hover { background: #331111; border-color: #ff4444; }
         
-        /* ESTRUTURA PRINCIPAL */
         .main-container { display: grid; grid-template-columns: 180px 1fr 180px; gap: 20px; max-width: 100%; margin: 0 auto; margin-bottom: 150px; align-items: start; }
         .center-content { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; align-items: start; }
         .side-pub { min-height: 400px; display: flex; flex-direction: column; gap: 15px; }
@@ -45,7 +43,6 @@
         .card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid #282828; }
         h3 { color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; text-align: center; }
         
-        /* GRADE DE RADIOS COM EFEITO */
         .radio-grid { display: grid; grid-template-columns: repeat(4, 110px); gap: 15px; justify-content: center; }
         .radio-item { width: 110px; height: 110px; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #000; font-weight: bold; font-size: 10px; text-align: center; padding: 10px; cursor: grab; transition: 0.3s; position: relative; border: 2px solid transparent; box-sizing: border-box; }
         .radio-item:hover { transform: scale(1.05); filter: brightness(1.1); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
@@ -147,14 +144,12 @@
         const nomeUsuario = localStorage.getItem('usuarioNome') || "OUVINTE";
         document.getElementById('nome-exibicao').innerText = nomeUsuario;
 
-        /* --- LOGAR COM ENTER (APRIMORADO) --- */
+        /* --- AJUSTE DEFINITIVO DA TECLA ENTER PARA LOGIN --- */
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
-                // Tenta encontrar o botão de login por várias possibilidades de classe ou ID
-                const btnEntrar = document.querySelector('button[onclick*="login"], button[onclick*="Login"], .btn-acao');
-                if (btnEntrar) {
-                    btnEntrar.click();
-                }
+                // Tenta achar o botão de login em qualquer lugar da página (index ou painel)
+                const btn = document.querySelector('button.btn-acao, #btn-login, button[onclick*="login"]');
+                if (btn) btn.click();
             }
         });
 
