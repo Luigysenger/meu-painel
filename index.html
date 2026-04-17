@@ -84,7 +84,6 @@
 
         let emailParaRecuperar = ""; 
 
-        // Função para logar apertando ENTER
         document.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 const boxLogin = document.getElementById('box-login');
@@ -115,15 +114,15 @@
                 const u = snap.val();
                 
                 if(u && String(u.senha) === String(senhaInput)) {
-                    // Salva dados no navegador para persistência
-                    localStorage.setItem('usuarioNome', u.nome || emailDigitado);
+                    // Mantém o nome em maiúsculo para o monitor de ouvintes
+                    localStorage.setItem('usuarioNome', (u.nome || emailDigitado).toUpperCase());
                     localStorage.setItem('usuarioPerfil', u.perfil || 'ouvinte');
 
-                    // Redirecionamento automático baseado no perfil do banco de dados
+                    // REDIRECIONAMENTO EM HTML
                     if(u.perfil === 'adm') {
                         window.location.href = 'adm.html';
                     } else {
-                        window.location.href = 'ouvinte.html';
+                        window.location.href = 'painel.html';
                     }
                 } else {
                     erro.innerText = "E-mail ou Senha incorretos!";
