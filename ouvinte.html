@@ -3,33 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PAINEL OUVINTE</title>
+    <title>PAINEL OUVINTE - RÁDIOS</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --primary: #BF40BF; --bg: #0b0b0b; --card: #181818; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
         
         .container { 
             background: var(--card); 
-            padding: 40px 30px; 
+            padding: 30px; 
             border-radius: 20px; 
             border: 1px solid #333; 
             width: 90%; 
-            max-width: 360px; 
+            max-width: 400px; 
             text-align: center; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        h2 { color: var(--primary); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; font-size: 22px; }
-        .user-info { margin-bottom: 25px; font-size: 14px; color: #fff; }
-        #nome-usuario { color: var(--primary); font-weight: bold; text-transform: uppercase; }
+        h2 { color: var(--primary); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px; font-size: 20px; }
+        .user-info { margin-bottom: 20px; font-size: 14px; }
+        #nome-usuario { color: var(--primary); font-weight: bold; }
 
-        /* ESTILO ORIGINAL DOS BOTÕES */
+        /* PLAYER DE RÁDIO */
+        .radio-select { width: 100%; padding: 12px; border-radius: 10px; background: #0b0b0b; color: white; border: 1px solid #333; margin-bottom: 20px; outline: none; }
+        
+        .player-controls { display: flex; justify-content: center; gap: 20px; margin-bottom: 25px; align-items: center; }
+        .btn-control { background: none; border: none; color: white; font-size: 24px; cursor: pointer; transition: 0.3s; }
+        .btn-control:hover { color: var(--primary); transform: scale(1.1); }
+        .btn-play { font-size: 45px; color: var(--primary); }
+
+        /* ESTILO DOS BOTÕES DE AÇÃO */
         .btn-acao { 
             width: 100%; 
-            padding: 15px; 
+            padding: 14px; 
             border-radius: 12px; 
             border: none; 
             background: var(--primary); 
@@ -41,25 +48,15 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
-            font-size: 13px;
             text-transform: uppercase;
-            transition: 0.3s; /* Efeito suave */
+            font-size: 12px;
+            transition: 0.3s; 
         }
 
-        /* EFEITO DE HOVER (PASSAR O MOUSE) */
-        .btn-acao:hover { 
-            filter: brightness(1.1);
-            transform: scale(1.02);
-        }
-
-        /* EFEITO DE CLIQUE */
-        .btn-acao:active {
-            transform: scale(0.98);
-        }
-
-        /* BOTÃO DE SAIR (CINZA ESCURO) */
+        .btn-acao:hover { filter: brightness(1.2); transform: scale(1.02); }
+        .btn-acao:active { transform: scale(0.98); }
         .btn-sair { background: #333; margin-top: 10px; }
-        .btn-sair:hover { background: #444; }
+        .btn-sair:hover { background: #ff4444; }
 
     </style>
 </head>
@@ -68,6 +65,19 @@
     <div class="container">
         <h2>PAINEL OUVINTE</h2>
         <div class="user-info">Olá, <span id="nome-usuario">...</span></div>
+
+        <select id="lista-radios" class="radio-select" onchange="trocarRadio()">
+            <option value="">Selecione uma Rádio</option>
+            <option value="url_radio_1">Rádio Estilo FM</option>
+            <option value="url_radio_2">Rádio Top Mix</option>
+        </select>
+
+        <div class="player-controls">
+            <button class="btn-control" onclick="anteriorRadio()"><i class="fas fa-step-backward"></i></button>
+            <button class="btn-control btn-play" id="play-pause" onclick="togglePlay()"><i class="fas fa-play-circle"></i></button>
+            <button class="btn-control" onclick="pararRadio()"><i class="fas fa-stop"></i></button>
+            <button class="btn-control" onclick="proximaRadio()"><i class="fas fa-step-forward"></i></button>
+        </div>
 
         <button class="btn-acao" onclick="enviarMensagem()">
             <i class="fas fa-comment"></i> ENVIAR MENSAGEM
@@ -83,7 +93,6 @@
     </div>
 
     <script>
-        // Configuração do seu Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
             authDomain: "meu-painel-f2efe.firebaseapp.com",
@@ -91,34 +100,55 @@
             projectId: "meu-painel-f2efe"
         };
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
 
-        // Carregar Nome
         const nome = localStorage.getItem('usuarioNome');
-        if(nome) {
-            document.getElementById('nome-usuario').innerText = nome;
-        } else {
-            window.location.href = 'index.html';
+        document.getElementById('nome-usuario').innerText = nome || "Ouvinte";
+
+        // LÓGICA DO PLAYER (Mantenha suas URLs de streaming aqui)
+        let tocando = false;
+        let audio = new Audio();
+
+        function togglePlay() {
+            const btn = document.getElementById('play-pause').querySelector('i');
+            if (!tocando) {
+                audio.play();
+                btn.classList.replace('fa-play-circle', 'fa-pause-circle');
+                tocando = true;
+            } else {
+                audio.pause();
+                btn.classList.replace('fa-pause-circle', 'fa-play-circle');
+                tocando = false;
+            }
         }
 
-        // Função de Sair
-        function sair() {
-            localStorage.clear();
-            window.location.href = 'index.html';
+        function pararRadio() {
+            audio.pause();
+            audio.currentTime = 0;
+            tocando = false;
+            document.getElementById('play-pause').querySelector('i').classList.replace('fa-pause-circle', 'fa-play-circle');
         }
 
-        // LOGAR AO APERTAR ENTER
-        document.addEventListener('keydown', function(e) {
+        function trocarRadio() {
+            const url = document.getElementById('lista-radios').value;
+            if(url) {
+                audio.src = url;
+                if(tocando) audio.play();
+            }
+        }
+
+        // ENTER PARA LOGAR (Ajustado para o index.html)
+        document.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
-                // Se estiver na tela de login, ele clica no botão entrar automaticamente
-                const btnEntrar = document.querySelector('#box-login:not(.hidden) button');
-                if(btnEntrar) btnEntrar.click();
+                const btnLogin = document.getElementById('btn-entrar'); 
+                if(btnLogin) btnLogin.click();
             }
         });
 
-        // Suas funções de funcionalidade (Mantenha o que já tinha aqui)
-        function enviarMensagem() { console.log("Enviar mensagem clicado"); }
-        function pedirMusica() { console.log("Pedir música clicado"); }
+        function sair() { localStorage.clear(); window.location.href = 'index.html'; }
+        function enviarMensagem() { alert("Abrindo chat..."); }
+        function pedirMusica() { alert("Qual música você quer ouvir?"); }
+        function proximaRadio() { /* lógica para próxima */ }
+        function anteriorRadio() { /* lógica para anterior */ }
     </script>
 </body>
 </html>
