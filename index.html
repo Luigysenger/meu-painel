@@ -11,7 +11,7 @@
         .login-card { background: #121212; padding: 40px; border-radius: 25px; width: 350px; text-align: center; }
         h2 { color: #A020F0; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 2px; font-weight: 900; }
         
-        /* Estilo idêntico à sua foto (azul claro) */
+        /* ESTILO DOS SEUS INPUTS (IGUAL AO PRINT) */
         input { 
             width: 100%; 
             padding: 18px; 
@@ -22,11 +22,10 @@
             color: #000; 
             box-sizing: border-box; 
             font-size: 16px;
-            font-weight: 600;
             outline: none;
         }
         
-        /* Botão Roxo Vibrante da sua foto */
+        /* ESTILO DO SEU BOTÃO (IGUAL AO PRINT) */
         button { 
             width: 100%; 
             padding: 18px; 
@@ -39,10 +38,9 @@
             transition: 0.3s; 
             text-transform: uppercase; 
             font-size: 16px;
-            margin-top: 10px;
         }
         button:hover { filter: brightness(1.2); }
-        .error-msg { color: #ff4444; font-size: 13px; margin-top: 15px; display: none; font-weight: bold; }
+        .error-msg { color: #ff4444; font-size: 13px; margin-top: 15px; display: none; }
     </style>
 </head>
 <body>
@@ -51,12 +49,11 @@
         <h2>ACESSO</h2>
         <input type="text" id="login-user" placeholder="E-mail ou Usuário">
         <input type="password" id="login-pass" placeholder="Senha">
-        <button id="btn-entrar" onclick="fazerLogin()">ENTRAR</button>
+        <button onclick="fazerLogin()">ENTRAR</button>
         <div id="msg-erro" class="error-msg">DADOS INCORRETOS!</div>
     </div>
 
     <script>
-        // Mantenha suas configurações do Firebase aqui
         const firebaseConfig = {
             apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
             authDomain: "meu-painel-f2efe.firebaseapp.com",
@@ -73,8 +70,8 @@
 
             if(!userRaw || !pass) return;
 
-            // Pega o nome antes do @ para o Firebase
-            const user = userRaw.split('@')[0].toLowerCase();
+            // Mantendo sua lógica de login por nó de usuário
+            const user = userRaw.split('@')[0];
 
             db.ref('usuarios/' + user).once('value', snap => {
                 const dados = snap.val();
@@ -88,7 +85,7 @@
             });
         }
 
-        // ESSE É O CÓDIGO DO ENTER QUE NÃO MUDA O VISUAL
+        // --- AS ÚNICAS LINHAS QUE ADICIONEI PARA O ENTER ---
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 fazerLogin();
