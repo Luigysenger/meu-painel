@@ -15,39 +15,25 @@
         /* HEADER RESPONSIVO */
         .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 20px 30px; border-radius: 15px; border: 1px solid #333; margin-bottom: 25px; gap: 10px; }
         
-        /* Ajuste Nome e Sair */
         .header-left { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; flex-shrink: 0; }
         .header h2 { margin: 0; color: var(--primary); font-size: 22px; text-transform: uppercase; line-height: 1; }
         
         #container-pub { flex: 1; display: flex; justify-content: center; align-items: center; padding: 0 10px; height: 55px; overflow: hidden; }
         #img-publicidade { max-height: 55px; max-width: 100%; border-radius: 8px; display: none; object-fit: contain; transition: opacity 0.5s ease-in-out; }
         
-        /* Ajuste Hora e Data */
         .header-right { display: flex; align-items: center; flex-shrink: 0; }
-        
-        /* BLOCO DE DATA E HORA LIMPO */
         .datetime-container { display: flex; flex-direction: column; align-items: flex-end; border-left: 1px solid #333; padding-left: 20px; }
         
         #hora { font-size: 28px; font-weight: 900; line-height: 1; color: white; letter-spacing: -1px; }
         .date-info { font-size: 11px; color: #888; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; margin-top: 4px; }
         .day-highlight { color: var(--primary); }
 
-        .btn-header { background: none; border: 1px solid #333; color: white; padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; transition: 0.3s; display: flex; align-items: center; gap: 8px; text-transform: uppercase; font-weight: bold; }
+        /* --- AJUSTE DE EFEITO NOS BOTÕES DO HEADER --- */
+        .btn-header { background: none; border: 1px solid #333; color: white; padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; transition: 0.3s ease; display: flex; align-items: center; gap: 8px; text-transform: uppercase; font-weight: bold; }
+        .btn-header:hover { background: #222; border-color: var(--primary); transform: scale(1.05); }
         
-        /* EFEITO REATIVADO NO HOVER DOS BOTÕES */
-        .btn-header:hover { 
-            background: #222; 
-            border-color: var(--primary); 
-            transform: scale(1.05); /* Pequeno zoom ao passar o mouse */
-            filter: brightness(1.2);
-        }
-
         .btn-sair { color: #ff4444; border-color: #442222; padding: 4px 10px; }
-        .btn-sair:hover { 
-            background: #331111; 
-            border-color: #ff4444; 
-            box-shadow: 0 0 10px rgba(255, 68, 68, 0.2);
-        }
+        .btn-sair:hover { background: #331111; border-color: #ff4444; }
         
         /* ESTRUTURA PRINCIPAL */
         .main-container { display: grid; grid-template-columns: 180px 1fr 180px; gap: 20px; max-width: 100%; margin: 0 auto; margin-bottom: 150px; align-items: start; }
@@ -59,17 +45,10 @@
         .card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid #282828; }
         h3 { color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; text-align: center; }
         
-        /* AJUSTE FIXO PARA 4 EM 4 RADIOS */
+        /* AJUSTE FIXO PARA 4 EM 4 RADIOS COM EFEITO */
         .radio-grid { display: grid; grid-template-columns: repeat(4, 110px); gap: 15px; justify-content: center; }
-        .radio-item { width: 110px; height: 110px; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #000; font-weight: bold; font-size: 10px; text-align: center; padding: 10px; cursor: grab; transition: 0.3s; position: relative; border: 2px solid transparent; box-sizing: border-box; }
-        
-        /* EFEITO REATIVADO NOS ITENS DA RÁDIO */
-        .radio-item:hover { 
-            transform: scale(1.05); 
-            filter: brightness(1.1);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-        
+        .radio-item { width: 110px; height: 110px; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #000; font-weight: bold; font-size: 10px; text-align: center; padding: 10px; cursor: grab; transition: 0.3s ease; position: relative; border: 2px solid transparent; box-sizing: border-box; }
+        .radio-item:hover { transform: scale(1.05); filter: brightness(1.2); }
         .radio-item.active { background: #000 !important; color: var(--primary) !important; border-color: var(--primary); box-shadow: 0 0 15px rgba(160, 32, 240, 0.4); }
         
         .antena { font-size: 20px; margin-bottom: 8px; display: none; }
@@ -79,11 +58,9 @@
         .selector-list { display: flex; flex-direction: column; gap: 8px; max-height: 450px; overflow-y: auto; padding-right: 5px; }
         .selector-item { background: #1a1a1a; padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #333; transition: 0.3s; }
         .selector-item.selected { border-left-color: var(--primary); background: #222; }
-        
         .btn-toggle-radio { background: none; border: none; font-size: 18px; cursor: pointer; transition: 0.2s; }
         .btn-toggle-radio.add { color: #444; }
         .btn-toggle-radio.remove { color: var(--primary); }
-        .btn-toggle-radio:hover { transform: scale(1.2); }
         
         .player-footer { position: fixed; bottom: 0; left: 0; right: 0; background: #111; padding: 15px 25px 25px 25px; border-top: 2px solid var(--primary); text-align: center; z-index: 100; }
         .msg-barra { background: #ff0000; color: #fff; font-size: 14px; font-weight: 900; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 2px solid #fff; display: none; width: fit-content; margin: 0 auto; cursor: pointer; animation: piscar-alerta 0.8s infinite alternate; }
@@ -95,6 +72,7 @@
         .play-outer { position: relative; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; }
         .ring-animation { position: absolute; width: 100%; height: 100%; border: 2px solid rgba(160, 32, 240, 0.1); border-top: 2px solid var(--primary); border-radius: 50%; animation: spin-slow 5s linear infinite; }
         
+        /* --- EFEITO NO BOTÃO PLAY --- */
         .btn-spotify-play { width: 60px; height: 60px; background: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; color: black; cursor: pointer; z-index: 5; transition: 0.2s; }
         .btn-spotify-play:hover { transform: scale(1.1); background: var(--primary); color: white; }
         
@@ -141,7 +119,7 @@
 
     <div class="player-footer">
         <div id="aviso-novidade" class="msg-barra" onclick="fecharAviso()">
-            <i class="fas fa-bullhorn" style="margin-right:8px;"></i> EI, TEM RADIO NOVA NA AREA, CONFIRA SUA LISTA E MERGULHE NO SOM
+            <i class="fas fa-bullhorn" style="margin-right:8px;"></i> EI, TEM RADIO NOVA NA AREA, CONFIRA SUA LISTA E MERGULHE DO SOM
         </div>
         <div id="now-title" style="font-size:11px; color:#888; margin-bottom:15px; letter-spacing: 1px; text-transform: uppercase;">SELECIONE UMA RÁDIO</div>
         <div class="controls-row">
@@ -169,12 +147,13 @@
         const nomeUsuario = localStorage.getItem('usuarioNome') || "OUVINTE";
         document.getElementById('nome-exibicao').innerText = nomeUsuario;
 
-        // --- FUNÇÃO PARA LOGAR COM ENTER (ADICIONADA) ---
+        // --- FUNÇÃO PARA LOGIN COM ENTER ---
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
-                // Procura o botão de login se estiver no index.html
-                const btnLogin = document.querySelector('.btn-acao'); 
-                if(btnLogin) btnLogin.click();
+                // Se existir a função fazerLogin no escopo global (index.html), ele aciona
+                if (typeof fazerLogin === "function") {
+                    fazerLogin();
+                }
             }
         });
 
