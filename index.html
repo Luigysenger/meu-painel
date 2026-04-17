@@ -50,17 +50,16 @@
         <input type="text" id="cad-email" placeholder="E-mail" style="margin-bottom:10px">
         <input type="text" id="cad-cidade" placeholder="Cidade" style="margin-bottom:10px">
         <input type="text" id="cad-estado" placeholder="Estado (Ex: PR)" style="margin-bottom:10px">
-        <input type="password" id="cad-senha" placeholder="Senha" style="margin-bottom:10px">
-        <input type="password" id="cad-senha2" placeholder="Confirme a Senha" style="margin-bottom:15px">
+        <input type="password" id="cad-senha" placeholder="Senha" style="margin-bottom:15px">
         <button class="btn-acao" onclick="salvarCadastro()">CRIAR MINHA CONTA</button>
         <div class="links"><a onclick="mostrarTela('login')">Voltar para Login</a></div>
     </div>
 
     <div class="login-container hidden" id="box-esqueci">
         <h2>Recuperar Acesso</h2>
-        <input type="text" id="rec-email" placeholder="E-mail cadastrado" style="margin-bottom:10px">
-        <input type="text" id="rec-cidade" placeholder="Cidade cadastrada" style="margin-bottom:10px">
-        <input type="text" id="rec-estado" placeholder="Estado cadastrado" style="margin-bottom:15px">
+        <input type="text" id="rec-email" placeholder="E-mail" style="margin-bottom:10px">
+        <input type="text" id="rec-cidade" placeholder="Cidade" style="margin-bottom:10px">
+        <input type="text" id="rec-estado" placeholder="Estado" style="margin-bottom:15px">
         <button class="btn-acao" onclick="validarDadosRecuperacao()">VALIDAR DADOS</button>
         <div class="links"><a onclick="mostrarTela('login')">Voltar para Login</a></div>
     </div>
@@ -68,11 +67,12 @@
     <div class="login-container hidden" id="box-nova-senha">
         <h2>Nova Senha</h2>
         <input type="password" id="nova-senha-1" placeholder="Nova Senha" style="margin-bottom:10px">
-        <input type="password" id="nova-senha-2" placeholder="Confirme a Nova Senha" style="margin-bottom:15px">
+        <input type="password" id="nova-senha-2" placeholder="Confirme a Senha" style="margin-bottom:15px">
         <button class="btn-acao" onclick="atualizarSenhaNoBanco()">SALVAR NOVA SENHA</button>
     </div>
 
     <script>
+        // Sua configuração Realtime Database
         const firebaseConfig = {
             apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
             authDomain: "meu-painel-f2efe.firebaseapp.com",
@@ -82,6 +82,8 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        let emailParaRecuperar = ""; 
+
         function mostrarTela(tela) {
             document.querySelectorAll('.login-container').forEach(c => c.classList.add('hidden'));
             if(tela === 'login') document.getElementById('box-login').classList.remove('hidden');
@@ -90,54 +92,51 @@
             if(tela === 'nova-senha') document.getElementById('box-nova-senha').classList.remove('hidden');
         }
 
-        function salvarCadastro() {
-            const nome = document.getElementById('cad-nome').value.trim();
-            const email = document.getElementById('cad-email').value.trim().toLowerCase();
-            const cidade = document.getElementById('cad-cidade').value.trim();
-            const estado = document.getElementById('cad-estado').value.trim();
-            const s1 = document.getElementById('cad-senha').value.trim();
-            const s2 = document.getElementById('cad-senha2').value.trim();
-
-            if(!nome || !email || !cidade || !estado || !s1) { alert("Preencha todos os campos!"); return; }
-            if(s1 !== s2) { alert("As senhas não conferem!"); return; }
-
-            const pathEmail = email.replace(/\./g, ',');
-            
-            // Gravação direta no nó 'contas' conforme seu banco
-            db.ref('contas/' + pathEmail).set({
-                nome: nome,
-                email: email,
-                cidade: cidade,
-                estado: estado,
-                senha: s1,
-                perfil: "ouvinte",
-                status: "Offline"
-            }).then(() => { 
-                alert("Cadastrado com sucesso!"); 
-                mostrarTela('login'); 
-            }).catch(e => alert("Erro ao cadastrar: " + e.message));
-        }
-
         function fazerLogin() {
-            const email = document.getElementById('login-email').value.trim().toLowerCase();
-            const senha = document.getElementById('login-senha').value.trim();
+            const emailDigitado = document.getElementById('login-email').value.trim().toLowerCase();
+            const senhaInput = document.getElementById('login-senha').value.trim();
             const erro = document.getElementById('msg-erro');
-            const pathEmail = email.replace(/\./g, ',');
-
+            const pathEmail = emailDigitado.replace(/\./g, ',');
+            
             db.ref('contas/' + pathEmail).once('value', snap => {
                 const u = snap.val();
-                if(u && String(u.senha) === String(senha)) {
-                    localStorage.setItem('usuarioNome', u.nome.toUpperCase());
-                    // Redirecionamento para arquivos .html conforme solicitado
-                    window.location.href = (u.perfil === 'adm') ? 'adm.html' : 'painel.html';
+                if(u && String(u.senha) === String(senhaInput)) {
+                    localStorage.setItem('usuarioNome', (u.nome || emailDigitado).toUpperCase());
+                    localStorage.setItem('usuarioPerfil', u.perfil || 'ouvinte');
+
+                    // REDIRECIONAMENTO CORRIGIDO PARA SEUS ARQUIVOS
+                    if(u.perfil === 'adm') {
+                        window.location.href = 'adm.html';
+                    } else {
+                        window.location.href = 'ouvinte.html';
+                    }
                 } else {
                     erro.innerText = "E-mail ou Senha incorretos!";
                 }
             });
         }
 
-        // Funções de recuperação mantidas iguais às suas
-        let emailParaRecuperar = "";
+        function salvarCadastro() {
+            const nome = document.getElementById('cad-nome').value.trim();
+            const email = document.getElementById('cad-email').value.trim().toLowerCase();
+            const cidade = document.getElementById('cad-cidade').value.trim();
+            const estado = document.getElementById('cad-estado').value.trim();
+            const senha = document.getElementById('cad-senha').value.trim();
+
+            if(!nome || !email || !cidade || !estado || !senha) { alert("Preencha tudo!"); return; }
+
+            const pathEmail = email.replace(/\./g, ',');
+
+            // Salvando no nó 'contas' como no seu Firebase
+            db.ref('contas/' + pathEmail).set({
+                nome: nome, email: email, cidade: cidade, estado: estado, senha: senha,
+                perfil: "ouvinte", status: "Offline"
+            }).then(() => { 
+                alert("Cadastrado com sucesso!"); 
+                mostrarTela('login'); // Isso faz VOLTAR para a tela de login
+            });
+        }
+
         function validarDadosRecuperacao() {
             const email = document.getElementById('rec-email').value.trim().toLowerCase();
             const cidade = document.getElementById('rec-cidade').value.trim();
@@ -148,14 +147,14 @@
                 if(u && u.cidade === cidade && u.estado === estado) {
                     emailParaRecuperar = pathEmail;
                     mostrarTela('nova-senha');
-                } else { alert("Dados não conferem!"); }
+                } else { alert("Dados incorretos!"); }
             });
         }
 
         function atualizarSenhaNoBanco() {
-            const s1 = document.getElementById('nova-senha-1').value.trim();
+            const s1 = document.getElementById('nova-senha-1').value;
             db.ref('contas/' + emailParaRecuperar).update({ senha: s1 }).then(() => {
-                alert("Senha atualizada!");
+                alert("Senha alterada!");
                 mostrarTela('login');
             });
         }
