@@ -11,27 +11,25 @@
         .login-card { background: #121212; padding: 40px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         h2 { color: #A020F0; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 2px; }
         
-        /* Estilo dos inputs brancos como na sua foto */
         input { 
             width: 100%; 
             padding: 15px; 
             margin-bottom: 15px; 
             border-radius: 10px; 
             border: none; 
-            background: #e8f0fe; 
+            background: #e8f0fe; /* Cor clara da sua foto */
             color: #000; 
             box-sizing: border-box; 
             font-size: 14px;
             outline: none;
         }
         
-        /* Botão Roxo */
         button { 
             width: 100%; 
             padding: 15px; 
             border-radius: 10px; 
             border: none; 
-            background: #A020F0; 
+            background: #A020F0; /* Roxo da sua foto */
             color: white; 
             font-weight: bold; 
             cursor: pointer; 
@@ -39,7 +37,7 @@
             text-transform: uppercase; 
             font-size: 14px;
         }
-        button:hover { filter: brightness(1.2); transform: scale(1.02); }
+        button:hover { filter: brightness(1.2); }
         .error-msg { color: #ff4444; font-size: 12px; margin-top: 10px; display: none; }
     </style>
 </head>
@@ -50,7 +48,7 @@
         <input type="text" id="login-user" placeholder="E-mail ou Usuário">
         <input type="password" id="login-pass" placeholder="Senha">
         <button onclick="fazerLogin()">ENTRAR</button>
-        <div id="msg-erro" class="error-msg">Acesso negado. Verifique os dados.</div>
+        <div id="msg-erro" class="error-msg">Acesso negado!</div>
     </div>
 
     <script>
@@ -70,7 +68,7 @@
 
             if(!userRaw || !pass) return;
 
-            // Ajuste para aceitar tanto o e-mail completo quanto apenas o nome antes do @
+            // Pega o nome antes do @ caso digitem o e-mail
             const user = userRaw.split('@')[0];
 
             db.ref('usuarios/' + user).once('value', snap => {
@@ -85,7 +83,7 @@
             });
         }
 
-        // --- ÚNICO AJUSTE SOLICITADO: ACIONAR COM O ENTER ---
+        // AQUI ESTÁ O QUE FALTAVA NO SEU INDEX:
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 fazerLogin();
