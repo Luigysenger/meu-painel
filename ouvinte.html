@@ -3,121 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PAINEL OUVINTE - MEU PAINEL</title>
+    <title>PAINEL OUVINTE</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --primary: #BF40BF; --bg: #0b0b0b; --card: #181818; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
         
-        body { 
-            font-family: 'Segoe UI', sans-serif; 
-            background: var(--bg); 
-            color: white; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            min-height: 100vh; 
-            margin: 0; 
-        }
-
         .container { 
             background: var(--card); 
-            padding: 30px; 
+            padding: 40px 30px; 
             border-radius: 20px; 
             border: 1px solid #333; 
             width: 90%; 
-            max-width: 400px; 
+            max-width: 360px; 
             text-align: center; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        h2 { 
-            color: var(--primary); 
-            margin-bottom: 20px; 
-            text-transform: uppercase; 
-            letter-spacing: 2px; 
-        }
+        h2 { color: var(--primary); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; font-size: 22px; }
+        .user-info { margin-bottom: 25px; font-size: 14px; color: #fff; }
+        #nome-usuario { color: var(--primary); font-weight: bold; text-transform: uppercase; }
 
-        .user-info {
-            margin-bottom: 25px;
-            font-size: 16px;
-            color: #ccc;
-        }
-
-        #nome-usuario {
-            color: var(--primary);
-            font-weight: bold;
-        }
-
-        /* --- ESTILO DOS BOTÕES COM EFEITO REATIVADO --- */
+        /* ESTILO ORIGINAL DOS BOTÕES */
         .btn-acao { 
             width: 100%; 
-            padding: 14px; 
-            border-radius: 10px; 
+            padding: 15px; 
+            border-radius: 12px; 
             border: none; 
             background: var(--primary); 
             color: white; 
             font-weight: bold; 
             cursor: pointer; 
-            margin-bottom: 15px; 
-            transition: all 0.3s ease; /* Efeito de transição suave */
-            text-transform: uppercase;
+            margin-bottom: 12px; 
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
-            font-size: 14px;
+            font-size: 13px;
+            text-transform: uppercase;
+            transition: 0.3s; /* Efeito suave */
         }
 
-        /* Efeito ao passar o mouse */
+        /* EFEITO DE HOVER (PASSAR O MOUSE) */
         .btn-acao:hover { 
-            opacity: 0.9; 
-            transform: translateY(-2px); /* Sobe levemente */
-            box-shadow: 0 5px 15px rgba(191, 64, 191, 0.3); /* Brilho suave */
+            filter: brightness(1.1);
+            transform: scale(1.02);
         }
 
-        /* Efeito ao clicar */
+        /* EFEITO DE CLIQUE */
         .btn-acao:active {
-            transform: translateY(0);
             transform: scale(0.98);
         }
 
-        /* Botão de Sair com cor diferente */
-        .btn-sair {
-            background: #333;
-            margin-top: 10px;
-        }
+        /* BOTÃO DE SAIR (CINZA ESCURO) */
+        .btn-sair { background: #333; margin-top: 10px; }
+        .btn-sair:hover { background: #444; }
 
-        .btn-sair:hover {
-            background: #ff4444;
-            box-shadow: 0 5px 15px rgba(255, 68, 68, 0.3);
-        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h2 id="titulo-painel">Painel Ouvinte</h2>
-        
-        <div class="user-info">
-            Olá, <span id="nome-usuario">Carregando...</span>
-        </div>
+        <h2>PAINEL OUVINTE</h2>
+        <div class="user-info">Olá, <span id="nome-usuario">...</span></div>
 
-        <button class="btn-acao" onclick="abrirModalMensagem()">
-            <i class="fas fa-comment-dots"></i> Enviar Mensagem
+        <button class="btn-acao" onclick="enviarMensagem()">
+            <i class="fas fa-comment"></i> ENVIAR MENSAGEM
         </button>
 
-        <button class="btn-acao" onclick="abrirModalMusica()">
-            <i class="fas fa-music"></i> Pedir Música
+        <button class="btn-acao" onclick="pedirMusica()">
+            <i class="fas fa-music"></i> PEDIR MÚSICA
         </button>
 
-        <button class="btn-acao btn-sair" onclick="deslogar()">
-            <i class="fas fa-sign-out-alt"></i> Sair do Painel
+        <button class="btn-acao btn-sair" onclick="sair()">
+            <i class="fas fa-sign-out-alt"></i> SAIR DO PAINEL
         </button>
     </div>
 
     <script>
-        // Configuração Firebase mantida intacta
+        // Configuração do seu Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
             authDomain: "meu-painel-f2efe.firebaseapp.com",
@@ -127,32 +93,32 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Recupera o nome salvo no login para exibição
-        const nomeGravado = localStorage.getItem('usuarioNome');
-        if (nomeGravado) {
-            document.getElementById('nome-usuario').innerText = nomeGravado;
+        // Carregar Nome
+        const nome = localStorage.getItem('usuarioNome');
+        if(nome) {
+            document.getElementById('nome-usuario').innerText = nome;
         } else {
             window.location.href = 'index.html';
         }
 
-        // --- FUNCIONALIDADES MANTIDAS INTACTAS ---
-
-        function abrirModalMensagem() {
-            // Aqui entra a sua lógica original de abrir o modal ou enviar mensagem
-            console.log("Abrindo mensagens...");
-            alert("Função Enviar Mensagem acionada!");
-        }
-
-        function abrirModalMusica() {
-            // Aqui entra a sua lógica original de pedir música
-            console.log("Pedindo música...");
-            alert("Função Pedir Música acionada!");
-        }
-
-        function deslogar() {
+        // Função de Sair
+        function sair() {
             localStorage.clear();
             window.location.href = 'index.html';
         }
+
+        // LOGAR AO APERTAR ENTER
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                // Se estiver na tela de login, ele clica no botão entrar automaticamente
+                const btnEntrar = document.querySelector('#box-login:not(.hidden) button');
+                if(btnEntrar) btnEntrar.click();
+            }
+        });
+
+        // Suas funções de funcionalidade (Mantenha o que já tinha aqui)
+        function enviarMensagem() { console.log("Enviar mensagem clicado"); }
+        function pedirMusica() { console.log("Pedir música clicado"); }
     </script>
 </body>
 </html>
