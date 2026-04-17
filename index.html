@@ -65,6 +65,7 @@
     </div>
 
     <script>
+        // Configuração Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
             authDomain: "meu-painel-f2efe.firebaseapp.com",
@@ -74,13 +75,12 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // FUNÇÃO PARA DETECTAR O ENTER EM QUALQUER TELA
+        // Atalho Tecla Enter
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 const loginVisible = !document.getElementById('box-login').classList.contains('hidden');
                 const cadastroVisible = !document.getElementById('box-cadastro').classList.contains('hidden');
                 const esqueciVisible = !document.getElementById('box-esqueci').classList.contains('hidden');
-
                 if (loginVisible) fazerLogin();
                 else if (cadastroVisible) salvarCadastro();
                 else if (esqueciVisible) recuperarSenha();
@@ -88,6 +88,7 @@
         });
 
         function mostrarTela(tela) {
+            document.getElementById('msg-erro').innerText = ""; // Limpa erros ao trocar de tela
             document.getElementById('box-login').classList.add('hidden');
             document.getElementById('box-cadastro').classList.add('hidden');
             document.getElementById('box-esqueci').classList.add('hidden');
@@ -102,6 +103,7 @@
             const senhaInput = document.getElementById('login-senha').value;
             const erro = document.getElementById('msg-erro');
 
+            // Login do ADM (Luigy)
             if(nomeDigitado.toLowerCase() === "luigy" && senhaInput === "1045") {
                 localStorage.setItem('usuarioNome', 'LUIGY (ADM)');
                 window.location.href = 'adm.html';
@@ -112,9 +114,10 @@
                 const u = snap.val();
                 if(u && u.senha === senhaInput) {
                     localStorage.setItem('usuarioNome', nomeLimpo);
+                    // Atualiza tempos para o Monitor do ADM
                     db.ref('usuarios/' + nomeLimpo).update({
                         lastSeen: Date.now(),
-                        sessionStart: Date.now()
+                        sessionStart: Date.now() // Define o início da contagem
                     });
                     window.location.href = 'ouvinte.html';
                 } else {
@@ -141,7 +144,8 @@
                 senha: s1,
                 lastSeen: Date.now(),
                 sessionStart: Date.now(),
-                radioAtual: "Recém Chegado"
+                radioAtual: "Recém Chegado",
+                radioTime: Date.now() // Inicializa o tempo de rádio também
             }).then(() => {
                 alert("Cadastro realizado! Faça login.");
                 mostrarTela('login');
@@ -162,7 +166,7 @@
                     alert("Senha alterada com sucesso!");
                     mostrarTela('login');
                 } else {
-                    alert("Usuário não encontrado!");
+                    alert("Usuário não encontrado ou sobrenome incorreto!");
                 }
             });
         }
