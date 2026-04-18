@@ -12,7 +12,6 @@
         :root { --primary: #1DB954; --bg: #000; --card: #121212; --text-muted: #b3b3b3; --purple-light: #d1a3ff; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; user-select: none; }
         
-        /* Ajustes no Header para Celular */
         .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 20px 30px; border-radius: 15px; border: 1px solid #333; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
         .header-left { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
         .header h2 { margin: 0; color: var(--primary); font-size: 22px; }
@@ -47,7 +46,6 @@
         .actions-msg { margin-top: 15px; display: flex; justify-content: space-between; align-items: center; }
         .btn-del-msg { color: #ff4444; background: none; border: none; cursor: pointer; font-size: 12px; }
 
-        /* GRID RESPONSIVO */
         .main-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; max-width: 1400px; margin: 0 auto; }
         
         @media (max-width: 900px) {
@@ -66,7 +64,7 @@
         .btn-save:hover { filter: brightness(1.2); transform: scale(1.02); }
         
         .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; }
-        .radio-item { aspect-ratio: 1/1; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #000; font-weight: bold; font-size: 13px; text-align: center; padding: 10px; cursor: grab; transition: 0.3s; position: relative; border: 2px solid transparent; }
+        .radio-item { aspect-ratio: 1/1; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #000; font-weight: bold; font-size: 13px; text-align: center; padding: 10px; cursor: grab; transition: 0.3s; position: relative; border: 2px solid transparent; touch-action: auto !important; }
         .radio-item:hover { transform: translateY(-5px); filter: brightness(1.1); }
         .radio-item:active { cursor: grabbing; }
         .radio-item.active { background: #000 !important; color: var(--primary) !important; border-color: var(--primary); box-shadow: 0 0 15px rgba(29, 185, 84, 0.4); }
@@ -151,7 +149,7 @@
                     <input type="text" id="r-url" placeholder="Link .mp3">
                     <button class="btn-save" id="btn-radio-action" onclick="addRadio()">SALVAR</button>
                 </div>
-                <h3>GRADE DE RÁDIOS</h3>
+                <h3>GRADE DE RÁDIOS (SEGURE PARA ARRASTAR NO CELULAR)</h3>
                 <div id="radio-list" class="radio-grid"></div>
                 
                 <div class="player-footer">
@@ -286,9 +284,12 @@
                 list.appendChild(div);
             });
             
+            // CONFIGURAÇÃO DO SORTABLE COM PROTEÇÃO PARA CELULAR
             if(!window.sortableIniciado && radioData.length > 0) {
                 Sortable.create(list, { 
-                    animation: 150, 
+                    animation: 150,
+                    delay: 200, // Tempo de espera para celular (0.2 segundos)
+                    delayOnTouchOnly: true, // No computador o arraste continua rápido
                     onEnd: () => {
                         list.querySelectorAll('.radio-item').forEach((it, idx) => {
                             db.ref('radios/' + it.dataset.id).update({ posicao: idx });
