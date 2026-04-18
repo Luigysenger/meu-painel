@@ -3,68 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LOGIN - MEU PAINEL</title>
+    <title>LOGIN - LUIGY PAINEL</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --primary: #BF40BF; --bg: #0b0b0b; --card: #181818; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .login-container { background: var(--card); padding: 30px; border-radius: 20px; border: 1px solid #333; width: 90%; max-width: 350px; text-align: center; }
-        h2 { color: var(--primary); margin-bottom: 25px; text-transform: uppercase; letter-spacing: 2px; }
+        .login-container { background: var(--card); padding: 30px; border-radius: 20px; border: 1px solid #333; width: 90%; max-width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h2 { color: var(--primary); margin-bottom: 25px; text-transform: uppercase; letter-spacing: 2px; font-size: 20px; }
         .input-group { margin-bottom: 15px; text-align: left; }
-        label { display: block; font-size: 12px; color: #888; margin-bottom: 5px; margin-left: 5px; }
-        input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #333; background: #0b0b0b; color: white; outline: none; box-sizing: border-box; }
-        input:focus { border-color: var(--primary); }
-        .btn-acao { width: 100%; padding: 12px; border-radius: 10px; border: none; background: var(--primary); color: white; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
-        .btn-acao:hover { opacity: 0.8; }
-        .links { margin-top: 20px; font-size: 13px; }
-        .links a { color: var(--primary); text-decoration: none; cursor: pointer; display: block; margin-bottom: 8px; }
-        .hidden { display: none; }
-        #msg-erro { color: #ff4444; font-size: 12px; margin-top: 10px; min-height: 15px; }
+        label { display: block; font-size: 11px; color: #888; margin-bottom: 5px; margin-left: 5px; text-transform: uppercase; }
+        input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #333; background: #0b0b0b; color: white; outline: none; box-sizing: border-box; transition: 0.3s; }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 8px rgba(191, 64, 191, 0.3); }
+        .btn-acao { width: 100%; padding: 14px; border-radius: 10px; border: none; background: var(--primary); color: white; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; text-transform: uppercase; }
+        .btn-acao:hover { background: #a332a3; transform: translateY(-2px); }
+        #msg-erro { color: #ff4444; font-size: 12px; margin-top: 15px; font-weight: bold; }
+        .links { margin-top: 20px; font-size: 12px; }
+        .links a { color: var(--primary); text-decoration: none; cursor: pointer; display: block; margin-bottom: 8px; opacity: 0.8; }
+        .links a:hover { opacity: 1; text-decoration: underline; }
     </style>
 </head>
 <body>
 
-    <div class="login-container" id="box-login">
-        <h2>Ouvinte Login</h2>
+    <div class="login-container">
+        <h2>Acesso ao Painel</h2>
         <div class="input-group">
-            <label>Nome / Login</label>
-            <input type="text" id="login-nome" placeholder="Digite seu nome">
+            <label>E-mail ou Login</label>
+            <input type="text" id="login-input" placeholder="exemplo@gmail.com">
         </div>
         <div class="input-group">
             <label>Senha</label>
-            <input type="password" id="login-senha" placeholder="****">
+            <input type="password" id="senha-input" placeholder="****">
         </div>
-        <button class="btn-acao" onclick="fazerLogin()">ENTRAR NO PAINEL</button>
+        <button class="btn-acao" onclick="fazerLogin()">Entrar no Painel</button>
         <div id="msg-erro"></div>
         <div class="links">
-            <a onclick="mostrarTela('cadastro')">Não tenho cadastro (Cadastrar)</a>
-            <a onclick="mostrarTela('esqueci')">Esqueci minha senha</a>
+            <a href="#">Não tenho cadastro</a>
+            <a href="#">Esqueci minha senha</a>
         </div>
-    </div>
-
-    <div class="login-container hidden" id="box-cadastro">
-        <h2>Novo Cadastro</h2>
-        <input type="text" id="cad-nome" placeholder="Nome" style="margin-bottom:10px">
-        <input type="text" id="cad-sobrenome" placeholder="Sobrenome" style="margin-bottom:10px">
-        <input type="text" id="cad-cidade" placeholder="Cidade" style="margin-bottom:10px">
-        <input type="password" id="cad-senha" maxlength="6" placeholder="Senha" style="margin-bottom:10px">
-        <input type="password" id="cad-confirma" maxlength="6" placeholder="Confirmar Senha" style="margin-bottom:15px">
-        <button class="btn-acao" onclick="salvarCadastro()">CRIAR MINHA CONTA</button>
-        <div class="links"><a onclick="mostrarTela('login')">Voltar para Login</a></div>
-    </div>
-
-    <div class="login-container hidden" id="box-esqueci">
-        <h2>Recuperar Senha</h2>
-        <input type="text" id="rec-nome" placeholder="Seu Nome" style="margin-bottom:10px">
-        <input type="text" id="rec-sobrenome" placeholder="Seu Sobrenome" style="margin-bottom:10px">
-        <input type="password" id="rec-nova-senha" maxlength="6" placeholder="Nova Senha" style="margin-bottom:15px">
-        <button class="btn-acao" onclick="recuperarSenha()">REDEFINIR SENHA</button>
-        <div class="links"><a onclick="mostrarTela('login')">Voltar para Login</a></div>
     </div>
 
     <script>
+        // Sua configuração permanece a mesma
         const firebaseConfig = {
             apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
             authDomain: "meu-painel-f2efe.firebaseapp.com",
@@ -74,68 +55,66 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        function mostrarTela(tela) {
-            document.getElementById('box-login').classList.add('hidden');
-            document.getElementById('box-cadastro').classList.add('hidden');
-            document.getElementById('box-esqueci').classList.add('hidden');
-            if(tela === 'login') document.getElementById('box-login').classList.remove('hidden');
-            if(tela === 'cadastro') document.getElementById('box-cadastro').classList.remove('hidden');
-            if(tela === 'esqueci') document.getElementById('box-esqueci').classList.remove('hidden');
-        }
-
         function fazerLogin() {
-            const nomeDigitado = document.getElementById('login-nome').value.trim();
-            const senhaInput = document.getElementById('login-senha').value;
-            const erro = document.getElementById('msg-erro');
+            const loginInformado = document.getElementById('login-input').value.trim();
+            const senhaInformada = document.getElementById('senha-input').value.trim();
+            const erroDiv = document.getElementById('msg-erro');
+            
+            erroDiv.innerText = "Autenticando...";
 
-            // Login ADM
-            if(nomeDigitado.toLowerCase() === "luigy" && senhaInput === "1045") {
-                localStorage.setItem('usuarioNome', 'LUIGY (ADM)');
-                window.location.href = 'adm.html';
-                return;
-            }
+            // O segredo: No Firebase, os pontos viram vírgulas na CHAVE (ID)
+            const idFirebase = loginInformado.replace(/\./g, ',');
 
-            // Login Ouvintes
-            db.ref('contas').once('value', snap => {
-                let encontrado = false;
-                snap.forEach(child => {
-                    const u = child.val();
-                    if((u.nome && u.nome.toUpperCase() === nomeDigitado.toUpperCase()) && u.senha === senhaInput) {
-                        encontrado = true;
-                        // SALVA AS INFORMAÇÕES NECESSÁRIAS PARA O OUVINTE.HTML
-                        localStorage.setItem('usuarioNome', u.nome.toUpperCase());
-                        localStorage.setItem('usuarioKey', child.key); // CHAVE DO FIREBASE
-                        
-                        db.ref('contas/' + child.key).update({ status: "online", lastSeen: Date.now() });
+            // Buscamos diretamente a conta pela CHAVE (E-mail com vírgula)
+            db.ref('contas/' + idFirebase).once('value').then(snap => {
+                const usuario = snap.val();
+
+                if (usuario && String(usuario.senha) === senhaInformada) {
+                    // Login Sucesso!
+                    localStorage.setItem('usuarioNome', usuario.nome);
+                    localStorage.setItem('usuarioKey', idFirebase);
+                    
+                    // Atualiza status no banco
+                    db.ref('contas/' + idFirebase).update({
+                        status: "online",
+                        lastSeen: Date.now()
+                    });
+
+                    // REDIRECIONAMENTO BASEADO NO PERFIL DO BANCO
+                    if (usuario.perfil === "adm") {
+                        window.location.href = 'adm.html';
+                    } else {
                         window.location.href = 'ouvinte.html';
                     }
-                });
-                if(!encontrado) erro.innerText = "Nome ou Senha incorretos!";
+
+                } else {
+                    // Se não achou pela chave, tentamos buscar pelo campo "email" dentro do nó
+                    // Isso serve caso o login digitado não seja exatamente a chave.
+                    verificarBuscaGeral(loginInformado, senhaInformada);
+                }
+            }).catch(e => {
+                erroDiv.innerText = "Erro de conexão!";
+                console.error(e);
             });
         }
 
-        function salvarCadastro() {
-            const n = document.getElementById('cad-nome').value.trim();
-            const sbr = document.getElementById('cad-sobrenome').value.trim();
-            const cid = document.getElementById('cad-cidade').value.trim();
-            const s1 = document.getElementById('cad-senha').value;
-            const s2 = document.getElementById('cad-confirma').value;
-
-            if(!n || !sbr || !cid || s1.length < 4) { alert("Preencha tudo corretamente"); return; }
-            if(s1 !== s2) { alert("As senhas não conferem!"); return; }
-
-            const novoID = n.toLowerCase() + "_" + sbr.toLowerCase() + "@gmail,com"; 
-            db.ref('contas/' + novoID.replace(/\./g, ',')).set({
-                nome: n,
-                sobrenome: sbr,
-                cidade: cid,
-                senha: s1,
-                tipo: "usuario",
-                status: "offline",
-                grade: [] // Começa com grade vazia
-            }).then(() => {
-                alert("Cadastro realizado!");
-                mostrarTela('login');
+        function verificarBuscaGeral(login, senha) {
+            const erroDiv = document.getElementById('msg-erro');
+            db.ref('contas').once('value').then(snap => {
+                let achou = false;
+                snap.forEach(child => {
+                    const u = child.val();
+                    // Compara e-mail ou nome (independente de maiúsculas)
+                    if ((u.email === login || u.nome.toLowerCase() === login.toLowerCase()) && String(u.senha) === senha) {
+                        achou = true;
+                        localStorage.setItem('usuarioNome', u.nome);
+                        localStorage.setItem('usuarioKey', child.key);
+                        
+                        if (u.perfil === "adm") window.location.href = 'adm.html';
+                        else window.location.href = 'ouvinte.html';
+                    }
+                });
+                if (!achou) erroDiv.innerText = "E-mail ou Senha incorretos!";
             });
         }
     </script>
