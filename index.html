@@ -88,23 +88,25 @@
             const senhaInput = document.getElementById('login-senha').value;
             const erro = document.getElementById('msg-erro');
 
-            // Verifica login de Administrador (baseado no seu print da Luigy)
-            if(nomeDigitado.toLowerCase() === "luigy" && senhaInput === "104528") {
+            // Login ADM
+            if(nomeDigitado.toLowerCase() === "luigy" && senhaInput === "1045") {
                 localStorage.setItem('usuarioNome', 'LUIGY (ADM)');
-                window.location.href = 'adm.html'; // Certifique-se que seu painel se chama adm.html
+                window.location.href = 'adm.html';
                 return;
             }
 
-            // Verifica Ouvintes no nó 'contas'
+            // Login Ouvintes
             db.ref('contas').once('value', snap => {
                 let encontrado = false;
                 snap.forEach(child => {
                     const u = child.val();
-                    // Compara nome (ou email se preferir) e senha
                     if((u.nome && u.nome.toUpperCase() === nomeDigitado.toUpperCase()) && u.senha === senhaInput) {
                         encontrado = true;
+                        // SALVA AS INFORMAÇÕES NECESSÁRIAS PARA O OUVINTE.HTML
                         localStorage.setItem('usuarioNome', u.nome.toUpperCase());
-                        db.ref('contas/' + child.key).update({ status: "online" });
+                        localStorage.setItem('usuarioKey', child.key); // CHAVE DO FIREBASE
+                        
+                        db.ref('contas/' + child.key).update({ status: "online", lastSeen: Date.now() });
                         window.location.href = 'ouvinte.html';
                     }
                 });
@@ -122,7 +124,6 @@
             if(!n || !sbr || !cid || s1.length < 4) { alert("Preencha tudo corretamente"); return; }
             if(s1 !== s2) { alert("As senhas não conferem!"); return; }
 
-            // Salva no novo formato do seu banco
             const novoID = n.toLowerCase() + "_" + sbr.toLowerCase() + "@gmail,com"; 
             db.ref('contas/' + novoID.replace(/\./g, ',')).set({
                 nome: n,
@@ -130,7 +131,8 @@
                 cidade: cid,
                 senha: s1,
                 tipo: "usuario",
-                status: "offline"
+                status: "offline",
+                grade: [] // Começa com grade vazia
             }).then(() => {
                 alert("Cadastro realizado!");
                 mostrarTela('login');
