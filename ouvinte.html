@@ -13,19 +13,16 @@
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; user-select: none; }
         
         /* HEADER RESPONSIVO */
-        .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 20px 30px; border-radius: 15px; border: 1px solid #333; margin-bottom: 25px; gap: 10px; }
+        .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 20px 30px; border-radius: 15px; border: 1px solid #333; margin-bottom: 25px; gap: 10px; flex-wrap: wrap; }
         
-        /* Ajuste Nome e Sair */
         .header-left { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; flex-shrink: 0; }
         .header h2 { margin: 0; color: var(--primary); font-size: 22px; text-transform: uppercase; line-height: 1; }
         
-        #container-pub { flex: 1; display: flex; justify-content: center; align-items: center; padding: 0 10px; height: 55px; overflow: hidden; }
+        #container-pub { flex: 1; display: flex; justify-content: center; align-items: center; padding: 0 10px; min-height: 55px; overflow: hidden; }
         #img-publicidade { max-height: 55px; max-width: 100%; border-radius: 8px; display: none; object-fit: contain; transition: opacity 0.5s ease-in-out; }
         
-        /* Ajuste Hora e Data */
         .header-right { display: flex; align-items: center; flex-shrink: 0; }
         
-        /* BLOCO DE DATA E HORA LIMPO */
         .datetime-container { display: flex; flex-direction: column; align-items: flex-end; border-left: 1px solid #333; padding-left: 20px; }
         
         #hora { font-size: 28px; font-weight: 900; line-height: 1; color: white; letter-spacing: -1px; }
@@ -37,20 +34,24 @@
         .btn-sair { color: #ff4444; border-color: #442222; padding: 4px 10px; }
         .btn-sair:hover { background: #331111; border-color: #ff4444; }
         
-        /* ESTRUTURA PRINCIPAL */
+        /* ESTRUTURA PRINCIPAL RESPONSIVA */
         .main-container { display: grid; grid-template-columns: 180px 1fr 180px; gap: 20px; max-width: 100%; margin: 0 auto; margin-bottom: 150px; align-items: start; }
         .center-content { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; align-items: start; }
         .side-pub { min-height: 400px; display: flex; flex-direction: column; gap: 15px; }
         .side-pub img { width: 100%; border-radius: 10px; border: 1px solid #333; }
         
-        @media (max-width: 1200px) { .center-content { grid-template-columns: 1fr; } .main-container { grid-template-columns: 1fr; } .side-pub { display: none; } }
+        @media (max-width: 1200px) { 
+            .center-content { grid-template-columns: 1fr; } 
+            .main-container { grid-template-columns: 1fr; } 
+            .side-pub { display: none; } 
+        }
 
         .card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid #282828; }
         h3 { color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; text-align: center; }
         
-        /* AJUSTE FIXO PARA 4 EM 4 RADIOS */
-        .radio-grid { display: grid; grid-template-columns: repeat(4, 110px); gap: 15px; justify-content: center; }
-        .radio-item { width: 110px; height: 110px; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #000; font-weight: bold; font-size: 10px; text-align: center; padding: 10px; cursor: grab; transition: 0.3s; position: relative; border: 2px solid transparent; box-sizing: border-box; }
+        /* GRADE DE RÁDIOS AUTO-AJUSTÁVEL */
+        .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; justify-content: center; }
+        .radio-item { aspect-ratio: 1/1; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #000; font-weight: bold; font-size: 10px; text-align: center; padding: 10px; cursor: grab; transition: 0.3s; position: relative; border: 2px solid transparent; box-sizing: border-box; touch-action: auto !important; }
         .radio-item:hover { transform: scale(1.05); filter: brightness(1.1); }
         .radio-item.active { background: #000 !important; color: var(--primary) !important; border-color: var(--primary); box-shadow: 0 0 15px rgba(160, 32, 240, 0.4); }
         
@@ -105,7 +106,7 @@
 
         <div class="center-content">
             <div class="card">
-                <h3>MINHA GRADE (ARRASTE PARA ORDENAR)</h3>
+                <h3>MINHA GRADE (SEGURE PARA ARRASTAR)</h3>
                 <div id="my-radio-list" class="radio-grid"></div>
             </div>
 
@@ -204,8 +205,11 @@
             localStorage.setItem('myRadios_' + nomeUsuario, JSON.stringify(mySelectedIds));
         }
 
+        // AJUSTE DE ROLAGEM E ARRASTE NO OUVINTE
         new Sortable(document.getElementById('my-radio-list'), {
             animation: 150,
+            delay: 200, // Precisa segurar 0.2s para mover no celular
+            delayOnTouchOnly: true, // No computador o arraste é instantâneo
             onEnd: function() {
                 const newIds = [];
                 document.querySelectorAll('#my-radio-list .radio-item').forEach(el => { newIds.push(el.getAttribute('data-id')); });
@@ -248,14 +252,13 @@
 
         function logout() { if(confirm("Deseja sair?")) { localStorage.removeItem('usuarioNome'); window.location.href = 'index.html'; } }
 
-        // --- SISTEMA DE PUBLICIDADE AJUSTADO ---
+        // --- SISTEMA DE PUBLICIDADE ---
         let listaPubs = [], idxPub = 0;
         db.ref('publicidade').on('value', snap => {
             listaPubs = [];
             const agora = Date.now();
             snap.forEach(child => {
                 const p = child.val();
-                // Converte as datas para timestamp para comparação precisa
                 const inicio = new Date(p.inicio).getTime();
                 const fim = new Date(p.fim).getTime();
                 const ouvinteNomeLimpo = nomeUsuario.trim().toUpperCase();
@@ -283,14 +286,10 @@
             
             if (listaPubs[idxPub]) {
                 const pub = listaPubs[idxPub];
-                
-                // Atualiza Header
                 imgHeader.src = pub.imagem;
                 imgHeader.style.display = "block";
                 imgHeader.style.opacity = 1;
 
-                // Atualiza Laterais (opcional, se quiser imagens diferentes ou iguais)
-                // Se houver mais de uma pub, podemos distribuir
                 if(listaPubs.length > 1) {
                     containerLeft.innerHTML = `<img src="${listaPubs[(idxPub + 1) % listaPubs.length].imagem}">`;
                     containerRight.innerHTML = `<img src="${listaPubs[(idxPub + 2) % listaPubs.length].imagem || pub.imagem}">`;
@@ -308,7 +307,7 @@
                 img.style.opacity = 0;
                 setTimeout(mostrarPub, 500);
             }
-        }, 10000); // Troca a cada 10 segundos
+        }, 10000);
 
         setInterval(() => {
             if(nomeUsuario) {
