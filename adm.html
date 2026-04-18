@@ -245,13 +245,10 @@
             if(c.value) { db.ref('respostas_adm').push({ mensagemId: id, resposta: c.value, data: Date.now() }); c.value = ""; }
         }
 
-        // --- RÁDIOS (CORREÇÃO PARA CARREGAR AS EXISTENTES) ---
+        // --- RÁDIOS ---
         db.ref('radios').on('value', snap => {
             radioData = [];
-            snap.forEach(c => {
-                radioData.push({ ...c.val(), key: c.key });
-            });
-            // Ordena pela posição salva ou por ordem alfabética se não houver posição
+            snap.forEach(c => { radioData.push({ ...c.val(), key: c.key }); });
             radioData.sort((a,b) => (a.posicao || 0) - (b.posicao || 0));
             renderRadios();
         });
@@ -292,17 +289,11 @@
         function addRadio() {
             const n = document.getElementById('r-name').value, u = document.getElementById('r-url').value, k = document.getElementById('r-key').value;
             if(n && u) {
-                if(k) {
-                    db.ref('radios/'+k).update({name:n, url:u});
-                } else {
+                if(k) { db.ref('radios/'+k).update({name:n, url:u}); } 
+                else {
                     const cores = ['#ffccd5', '#d8e2dc', '#ece4db', '#ffead0', '#e2ece9', '#f0efeb'];
                     const corAleatoria = cores[Math.floor(Math.random() * cores.length)];
-                    db.ref('radios').push({
-                        name: n, 
-                        url: u, 
-                        color: corAleatoria, 
-                        posicao: radioData.length
-                    });
+                    db.ref('radios').push({ name: n, url: u, color: corAleatoria, posicao: radioData.length });
                 }
                 document.getElementById('r-name').value = ""; document.getElementById('r-url').value = ""; document.getElementById('r-key').value = "";
                 document.getElementById('btn-radio-action').innerText = "SALVAR";
@@ -349,9 +340,52 @@
             const ini = document.getElementById('pub-ini').value, fim = document.getElementById('pub-fim').value;
             const target = document.getElementById('pub-target').value, manual = document.getElementById('pub-manual').value.toUpperCase(), k = document.getElementById('pub-key').value;
             if(!imgBase64 || !ini || !fim) return alert("Preencha todos os campos da publicidade!");
+            
             const d = { imagem: imgBase64, inicio: new Date(ini).getTime(), fim: new Date(fim).getTime(), destino: target, ouvinteAlvo: target === 'MANUAL' ? manual : 'TODOS' };
-            if(k) db.ref('publicidade/'+k).update(d); else db.ref('publicidade').push(d);
-            alert("Campanha Lançada com Sucesso!");
+            
+            if(k) {
+                db.ref('publicidade/'+k).update(d).then(() => {
+                    document.getElementById('pub-key').value = "";
+                    document.getElementById('btn-pub-save').innerText = "LANÇAR CAMPANHA";
+                    alert("Campanha Atualizada!");
+                });
+            } else {
+                db.ref('publicidade').push(d);
+                alert("Campanha Lançada com Sucesso!");
+            }
+            limparFormPub();
+        }
+
+        function prepareEditPub(k, img, ini, fim, target, manual) {
+            document.getElementById('pub-key').value = k;
+            imgBase64 = img;
+            document.getElementById('pub-view').src = img;
+            document.getElementById('pub-view').style.display = "block";
+            
+            // Converte timestamp para formato datetime-local (YYYY-MM-DDTHH:MM)
+            const dIni = new Date(ini);
+            dIni.setMinutes(dIni.getMinutes() - dIni.getTimezoneOffset());
+            document.getElementById('pub-ini').value = dIni.toISOString().slice(0, 16);
+            
+            const dFim = new Date(fim);
+            dFim.setMinutes(dFim.getMinutes() - dFim.getTimezoneOffset());
+            document.getElementById('pub-fim').value = dFim.toISOString().slice(0, 16);
+            
+            document.getElementById('pub-target').value = target;
+            document.getElementById('pub-manual').value = manual === 'TODOS' ? '' : manual;
+            document.getElementById('pub-manual').style.display = (target === 'MANUAL' ? 'block' : 'none');
+            
+            document.getElementById('btn-pub-save').innerText = "ATUALIZAR CAMPANHA";
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function limparFormPub() {
+            document.getElementById('pub-ini').value = "";
+            document.getElementById('pub-fim').value = "";
+            document.getElementById('pub-file').value = "";
+            document.getElementById('pub-view').style.display = "none";
+            document.getElementById('pub-manual').value = "";
+            imgBase64 = "";
         }
 
         db.ref('publicidade').on('value', snap => {
@@ -367,6 +401,7 @@
                             <img src="${p.imagem}" class="pub-thumb-mini">
                             <span>ALVO: ${p.ouvinteAlvo}</span>
                         </button>
+                        <button class="btn-action-pub btn-edit-pub" onclick="prepareEditPub('${id}', '${p.imagem}', ${p.inicio}, ${p.fim}, '${p.destino}', '${p.ouvinteAlvo}')"><i class="fas fa-pencil-alt"></i></button>
                         <button class="btn-action-pub btn-delete-pub" onclick="if(confirm('Remover esta campanha?')) db.ref('publicidade/${id}').remove()"><i class="fas fa-trash"></i></button>
                     </div>
                     <div class="pub-details-bar">
@@ -378,25 +413,18 @@
             });
         });
 
-        // --- MONITOR DE OUVINTES (RECUPERA NOMES CORRETOS DE 'CONTAS') ---
+        // --- MONITOR DE OUVINTES ---
         db.ref('contas').on('value', snap => {
             const container = document.getElementById('user-list');
             container.innerHTML = ""; 
             usersDataCache = {};
-            
             snap.forEach(c => {
                 const u = c.val(), id = c.key;
                 if(u.perfil === "adm" || u.tipo === "admin") return;
-
                 const status = u.status || 'offline';
                 const isOnline = (status === 'online');
                 const safeId = id.replace(/[^a-zA-Z0-9]/g, '_');
-                
-                usersDataCache[safeId] = { 
-                    loginTime: u.sessionStart || Date.now(), 
-                    isOnline: isOnline 
-                };
-
+                usersDataCache[safeId] = { loginTime: u.sessionStart || Date.now(), isOnline: isOnline };
                 const div = document.createElement('div');
                 div.className = "user-item";
                 div.style.borderLeft = `4px solid ${isOnline ? '#00ff00' : '#d1a3ff'}`;
@@ -425,9 +453,7 @@
             for (let id in usersDataCache) {
                 const data = usersDataCache[id];
                 const elS = document.getElementById(`timer-sessao-${id}`);
-                if (data.isOnline && elS) {
-                    elS.innerText = formatDuration(Date.now() - data.loginTime);
-                }
+                if (data.isOnline && elS) { elS.innerText = formatDuration(Date.now() - data.loginTime); }
             }
         }
 
