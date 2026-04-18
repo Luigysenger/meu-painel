@@ -2,26 +2,87 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>LOGIN - LUIGY PAINEL</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --primary: #BF40BF; --bg: #0b0b0b; --card: #181818; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .login-container { background: var(--card); padding: 30px; border-radius: 20px; border: 1px solid #333; width: 90%; max-width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        
+        /* Ajuste para centralizar em qualquer tela e permitir rolagem se o teclado abrir */
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: var(--bg); 
+            color: white; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* Container flexível: ocupa 90% no celular e trava em 350px no PC */
+        .login-container { 
+            background: var(--card); 
+            padding: 30px; 
+            border-radius: 20px; 
+            border: 1px solid #333; 
+            width: 100%; 
+            max-width: 350px; 
+            text-align: center; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+            box-sizing: border-box;
+        }
+
         h2 { color: var(--primary); margin-bottom: 25px; text-transform: uppercase; letter-spacing: 2px; font-size: 20px; }
         .input-group { margin-bottom: 15px; text-align: left; }
         label { display: block; font-size: 11px; color: #888; margin-bottom: 5px; margin-left: 5px; text-transform: uppercase; }
-        input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #333; background: #0b0b0b; color: white; outline: none; box-sizing: border-box; transition: 0.3s; }
+        
+        /* Inputs ajustados para não dar zoom automático no iPhone */
+        input { 
+            width: 100%; 
+            padding: 12px; 
+            border-radius: 10px; 
+            border: 1px solid #333; 
+            background: #0b0b0b; 
+            color: white; 
+            outline: none; 
+            box-sizing: border-box; 
+            transition: 0.3s; 
+            font-size: 16px; /* Tamanho ideal para mobile */
+        }
+        
         input:focus { border-color: var(--primary); box-shadow: 0 0 8px rgba(191, 64, 191, 0.3); }
-        .btn-acao { width: 100%; padding: 14px; border-radius: 10px; border: none; background: var(--primary); color: white; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; text-transform: uppercase; }
+        
+        .btn-acao { 
+            width: 100%; 
+            padding: 14px; 
+            border-radius: 10px; 
+            border: none; 
+            background: var(--primary); 
+            color: white; 
+            font-weight: bold; 
+            cursor: pointer; 
+            margin-top: 10px; 
+            transition: 0.3s; 
+            text-transform: uppercase; 
+            font-size: 14px;
+        }
+        
         .btn-acao:hover { background: #a332a3; transform: translateY(-2px); }
         #msg-erro { color: #ff4444; font-size: 12px; margin-top: 15px; font-weight: bold; }
         .links { margin-top: 20px; font-size: 12px; }
         .links a { color: var(--primary); text-decoration: none; cursor: pointer; display: block; margin-bottom: 8px; opacity: 0.8; }
         .links a:hover { opacity: 1; text-decoration: underline; }
+
+        /* Ajuste fino para telas muito pequenas */
+        @media (max-height: 500px) {
+            body { align-items: flex-start; }
+            .login-container { margin-top: 20px; }
+        }
     </style>
 </head>
 <body>
@@ -45,7 +106,6 @@
     </div>
 
     <script>
-        // Sua configuração permanece a mesma
         const firebaseConfig = {
             apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
             authDomain: "meu-painel-f2efe.firebaseapp.com",
@@ -61,35 +121,25 @@
             const erroDiv = document.getElementById('msg-erro');
             
             erroDiv.innerText = "Autenticando...";
-
-            // O segredo: No Firebase, os pontos viram vírgulas na CHAVE (ID)
             const idFirebase = loginInformado.replace(/\./g, ',');
 
-            // Buscamos diretamente a conta pela CHAVE (E-mail com vírgula)
             db.ref('contas/' + idFirebase).once('value').then(snap => {
                 const usuario = snap.val();
-
                 if (usuario && String(usuario.senha) === senhaInformada) {
-                    // Login Sucesso!
                     localStorage.setItem('usuarioNome', usuario.nome);
                     localStorage.setItem('usuarioKey', idFirebase);
                     
-                    // Atualiza status no banco
                     db.ref('contas/' + idFirebase).update({
                         status: "online",
                         lastSeen: Date.now()
                     });
 
-                    // REDIRECIONAMENTO BASEADO NO PERFIL DO BANCO
                     if (usuario.perfil === "adm") {
                         window.location.href = 'adm.html';
                     } else {
                         window.location.href = 'ouvinte.html';
                     }
-
                 } else {
-                    // Se não achou pela chave, tentamos buscar pelo campo "email" dentro do nó
-                    // Isso serve caso o login digitado não seja exatamente a chave.
                     verificarBuscaGeral(loginInformado, senhaInformada);
                 }
             }).catch(e => {
@@ -104,12 +154,10 @@
                 let achou = false;
                 snap.forEach(child => {
                     const u = child.val();
-                    // Compara e-mail ou nome (independente de maiúsculas)
                     if ((u.email === login || u.nome.toLowerCase() === login.toLowerCase()) && String(u.senha) === senha) {
                         achou = true;
                         localStorage.setItem('usuarioNome', u.nome);
                         localStorage.setItem('usuarioKey', child.key);
-                        
                         if (u.perfil === "adm") window.location.href = 'adm.html';
                         else window.location.href = 'ouvinte.html';
                     }
