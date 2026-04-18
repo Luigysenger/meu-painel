@@ -125,19 +125,16 @@
         const db = firebase.database();
         const player = document.getElementById('audio-player');
         
-        // CORREÇÃO: Pega o nome do usuário e a chave salva no login
         const nomeUsuario = localStorage.getItem('usuarioNome') || "OUVINTE";
         const usuarioKey = localStorage.getItem('usuarioKey'); 
         document.getElementById('nome-exibicao').innerText = nomeUsuario;
 
-        // ATUALIZA STATUS NO NÓ 'CONTAS'
         if(usuarioKey) {
             db.ref('contas/' + usuarioKey).update({ status: "online", lastSeen: Date.now() });
         }
 
         let allRadios = [], mySelectedIds = [], activeIndex = -1;
 
-        // DATA E HORA
         setInterval(() => {
             const agora = new Date();
             document.getElementById('hora').innerText = agora.toLocaleTimeString('pt-BR');
@@ -148,7 +145,6 @@
 
         function fecharAviso() { document.getElementById('aviso-novidade').style.display = 'none'; }
 
-        // CARREGA RÁDIOS E GRADE DO USUÁRIO NO NÓ 'CONTAS'
         db.ref('radios').on('value', snap => {
             allRadios = [];
             snap.forEach(c => { allRadios.push({ ...c.val(), key: c.key }); });
@@ -205,6 +201,37 @@
         function prevRadio() { if(activeIndex > 0) playRadio(activeIndex - 1); else playRadio(mySelectedIds.length - 1); }
 
         function logout() { if(confirm("Deseja sair?")) { if(usuarioKey) db.ref('contas/' + usuarioKey).update({ status: "offline" }); localStorage.clear(); window.location.href = 'index.html'; } }
+
+        // --- LÓGICA DE PUBLICIDADE ---
+        function atualizarPublicidade() {
+            const agora = Date.now();
+            db.ref('publicidade').on('value', snap => {
+                const ads = snap.val();
+                if (!ads) return;
+                let adExibir = null;
+                for (let key in ads) {
+                    const ad = ads[key];
+                    const inicio = new Date(ad.inicio).getTime();
+                    const termino = new Date(ad.termino).getTime();
+                    if (agora >= inicio && agora <= termino) {
+                        if (ad.alvo === "todos" || ad.alvo === usuarioKey) {
+                            adExibir = ad;
+                            break; 
+                        }
+                    }
+                }
+                const imgElement = document.getElementById('img-publicidade');
+                if (adExibir) {
+                    imgElement.src = adExibir.url;
+                    imgElement.style.display = 'block';
+                    imgElement.style.opacity = '1';
+                } else {
+                    imgElement.style.display = 'none';
+                }
+            });
+        }
+        atualizarPublicidade();
+        setInterval(atualizarPublicidade, 30000);
 
         // SORTABLE (ARRASTAR)
         new Sortable(document.getElementById('my-radio-list'), {
