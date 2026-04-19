@@ -95,7 +95,7 @@
         .btn-edit-pub { color: var(--primary); }
         .btn-delete-pub { color: #ff4444; }
 
-        .user-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; overflow: hidden; }
+        .user-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; overflow: hidden; transition: 0.3s; border-left: 4px solid #d1a3ff; }
         .user-row { display: flex; align-items: center; width: 100%; }
         .user-name-btn { flex: 1; padding: 15px; background: none; border: none; color: white; text-align: left; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .status-on { color: #00ff00; font-weight: 900; font-size: 11px; }
@@ -226,7 +226,7 @@
         function logout() { if(confirm("Sair?")) { localStorage.removeItem('usuarioNome'); window.location.href = 'index.html'; } }
         function toggleMensagens() { document.getElementById('container-mensagens-adm').classList.toggle('aberto'); }
 
-        // --- MENSAGENS ---
+        // --- MENSAGENS (RESTAURADO COMPLETO) ---
         db.ref('mensagens_ouvintes').on('value', snap => {
             const list = document.getElementById('msg-list-adm');
             const count = document.getElementById('count-msg');
@@ -256,7 +256,7 @@
             if(c.value) { db.ref('respostas_adm').push({ mensagemId: id, resposta: c.value, data: Date.now() }); c.value = ""; }
         }
 
-        // --- RÁDIOS ---
+        // --- RÁDIOS (RESTAURADO COMPLETO COM ÍCONES) ---
         db.ref('radios').on('value', snap => {
             radioData = [];
             snap.forEach(c => { radioData.push({ ...c.val(), key: c.key }); });
@@ -273,6 +273,7 @@
                 div.style.background = r.color || '#f0f0f0';
                 div.setAttribute('data-id', r.key);
                 div.onclick = () => playRadio(i);
+                // ÍCONES DE AÇÃO RESTAURADOS NO DIV DAS RÁDIOS
                 div.innerHTML = `
                     <div class="radio-actions">
                         <i class="fas fa-pencil-alt btn-edit-r" onclick="event.stopPropagation(); prepareEditRadio('${r.key}','${r.name}','${r.url}')"></i>
@@ -284,11 +285,12 @@
                 list.appendChild(div);
             });
             
+            // CONFIGURAÇÃO DO SORTABLE COM PROTEÇÃO PARA CELULAR
             if(!window.sortableIniciado && radioData.length > 0) {
                 Sortable.create(list, { 
                     animation: 150,
-                    delay: 200,
-                    delayOnTouchOnly: true,
+                    delay: 200, // Tempo de espera para celular (0.2 segundos)
+                    delayOnTouchOnly: true, // No computador o arraste continua rápido
                     onEnd: () => {
                         list.querySelectorAll('.radio-item').forEach((it, idx) => {
                             db.ref('radios/' + it.dataset.id).update({ posicao: idx });
@@ -337,7 +339,7 @@
         function nextRadio() { if(radioData.length) playRadio((activeIndex + 1) % radioData.length); }
         function prevRadio() { if(radioData.length) playRadio((activeIndex - 1 + radioData.length) % radioData.length); }
 
-        // --- PUBLICIDADE ---
+        // --- PUBLICIDADE (RESTAURADO COMPLETO) ---
         let imgBase64 = "";
         function previewPub(input) {
             const reader = new FileReader();
@@ -353,7 +355,9 @@
             const ini = document.getElementById('pub-ini').value, fim = document.getElementById('pub-fim').value;
             const target = document.getElementById('pub-target').value, manual = document.getElementById('pub-manual').value.toUpperCase(), k = document.getElementById('pub-key').value;
             if(!imgBase64 || !ini || !fim) return alert("Preencha todos os campos da publicidade!");
+            
             const d = { imagem: imgBase64, inicio: new Date(ini).getTime(), fim: new Date(fim).getTime(), destino: target, ouvinteAlvo: target === 'MANUAL' ? manual : 'TODOS' };
+            
             if(k) {
                 db.ref('publicidade/'+k).update(d).then(() => {
                     document.getElementById('pub-key').value = "";
@@ -372,15 +376,19 @@
             imgBase64 = img;
             document.getElementById('pub-view').src = img;
             document.getElementById('pub-view').style.display = "block";
+            
             const dIni = new Date(ini);
             dIni.setMinutes(dIni.getMinutes() - dIni.getTimezoneOffset());
             document.getElementById('pub-ini').value = dIni.toISOString().slice(0, 16);
+            
             const dFim = new Date(fim);
             dFim.setMinutes(dFim.getMinutes() - dFim.getTimezoneOffset());
             document.getElementById('pub-fim').value = dFim.toISOString().slice(0, 16);
+            
             document.getElementById('pub-target').value = target;
             document.getElementById('pub-manual').value = manual === 'TODOS' ? '' : manual;
             document.getElementById('pub-manual').style.display = (target === 'MANUAL' ? 'block' : 'none');
+            
             document.getElementById('btn-pub-save').innerText = "ATUALIZAR CAMPANHA";
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -419,53 +427,65 @@
             });
         });
 
-        // --- MONITOR DE OUVINTES (LOGICA PARA STATUS E TEMPO REAL) ---
+        // --- MONITOR DE OUVINTES (LOGICA CORRIGIDA COM TRAVA DE STATUS E RESET DE TEMPO DA RADIO) ---
         db.ref('contas').on('value', snap => {
             const container = document.getElementById('user-list');
+            const agora = Date.now();
+            
+            // Guardamos os dados crus do Firebase
+            const firebaseData = snap.val() || {};
+            
             container.innerHTML = ""; 
             
-            snap.forEach(c => {
-                const u = c.val(), id = c.key;
-                if(u.perfil === "adm" || u.tipo === "admin") return;
+            for (let userId in firebaseData) {
+                const u = firebaseData[userId];
+                // Pula ADM
+                if(u.perfil === "adm" || u.tipo === "admin") continue;
+
+                // Formata o ID para CSS
+                const safeId = userId.replace(/[^a-zA-Z0-9]/g, '_');
                 
-                // DETECÇÃO DE STATUS REAL: Borda roxa e Texto roxo se não estiver online
-                const statusReal = (u.status === 'online') ? 'online' : 'offline';
-                const isOnline = (statusReal === 'online');
-                const safeId = id.replace(/[^a-zA-Z0-9]/g, '_');
-                
-                // GERENCIAMENTO DE CACHE PARA CRONÔMETRO
-                if(!usersDataCache[safeId] || usersDataCache[safeId].radioAtual !== u.radioAtual) {
+                // --- TRAVA DE SEGURANÇA DE STATUS (Verifica se está desconectado real) ---
+                // Se a última atividade foi há mais de 30 segundos, consideramos OFFLINE
+                const lastActive = u.lastActive || 0;
+                const tempoSemSinal = agora - lastActive;
+                const estaRealmenteOnline = (u.status === 'online' && tempoSemSinal < 30000);
+
+                // --- LÓGICA DE GERENCIAMENTO DE CACHE PARA CRONÔMETROS ---
+                // Se o ouvinte não existe no cache OU trocou de rádio:
+                if (!usersDataCache[safeId] || usersDataCache[safeId].radioAtual !== u.radioAtual) {
+                    // Atualiza o cache total e ZERA o tempo visual da rádio (começando agora no painel)
                     usersDataCache[safeId] = {
-                        sessionStart: u.sessionStart || Date.now(),
-                        radioTime: Date.now(), // Reseta o tempo localmente no ADM quando a rádio muda
-                        radioAtual: u.radioAtual || 'Nenhuma',
-                        isOnline: isOnline
+                        sessionStart: u.sessionStart || agora,
+                        radioTimeStart: agora, // Reseta o cronômetro visual da rádio no ADM
+                        radioAtual: u.radioAtual || 'Nenhuma'
                     };
-                } else {
-                    usersDataCache[safeId].isOnline = isOnline;
                 }
+                
+                // Sempre atualiza o status de conexão no cache
+                usersDataCache[safeId].isOnline = estaRealmenteOnline;
 
                 const div = document.createElement('div');
                 div.className = "user-item";
-                // Aplica a borda conforme o status (Verde Online / Roxo Offline)
-                div.style.borderLeft = isOnline ? '4px solid #00ff00' : '4px solid #d1a3ff';
                 
+                // Define a cor da borda baseado no status real (Verde Online / Roxo Offline)
+                div.style.borderLeft = estaRealmenteOnline ? '4px solid #00ff00' : '4px solid #d1a3ff';
+
                 div.innerHTML = `
                     <div class="user-row">
                         <button class="user-name-btn" onclick="toggleUserDetails('${safeId}')">
-                            <span>${u.nome ? u.nome.toUpperCase() : 'OUVINTE'}</span>
-                            <span class="${isOnline ? 'status-on' : 'status-off'}">${statusReal.toUpperCase()}</span>
+                            <span style="color:${estaRealmenteOnline ? 'white' : '#d1a3ff'}">${u.nome ? u.nome.toUpperCase() : 'OUVINTE'}</span>
+                            <span class="${estaRealmenteOnline ? 'status-on' : 'status-off'}">${estaRealmenteOnline ? 'ONLINE' : 'OFF'}</span>
                         </button>
                     </div>
                     <div class="user-details-bar" id="details-${safeId}">
-                        <p>E-mail: <b>${u.email || id.replace(/,/g,'.')}</b></p>
-                        <p>Rádio Conectada: <b style="color:var(--primary)">${u.radioAtual || 'Nenhuma'}</b></p>
-                        <p>Tempo de Sessão: <b id="timer-sessao-${safeId}">00:00:00</b></p>
-                        <p>Tempo nesta Rádio: <b id="timer-radio-${safeId}">00:00:00</b></p>
-                        <p>Local: <b>${u.cidade || 'N/A'} - ${u.estado || ''}</b></p>
+                        <p>Rádio Conectada: <b style="color:var(--primary)">${estaRealmenteOnline ? (u.radioAtual || 'Nenhuma') : '---'}</b></p>
+                        <p>Tempo de Seção: <b id="timer-sessao-${safeId}">00:00:00</b></p>
+                        <p>Tempo nessa Rádio: <b id="timer-radio-${safeId}">00:00:00</b></p>
+                        <p>Local: <b>${u.cidade || 'N/A'}</b></p>
                     </div>`;
                 container.appendChild(div);
-            });
+            }
         });
 
         function toggleUserDetails(id) {
@@ -473,21 +493,26 @@
             if(bar) bar.style.display = (bar.style.display === 'block' ? 'none' : 'block');
         }
 
+        // Função que atualiza os cronômetros a cada segundo
         function updateUserTimers() {
             const agora = Date.now();
             for (let id in usersDataCache) {
                 const data = usersDataCache[id];
-                // Só incrementa o cronômetro se o status for estritamente online
+                // Só atualiza os cronômetros se o ouvinte estiver realmente online
                 if (data.isOnline) {
                     const elSessao = document.getElementById(`timer-sessao-${id}`);
                     const elRadio = document.getElementById(`timer-radio-${id}`);
                     
+                    // Atualiza Tempo total de sessão (desde o login)
                     if (elSessao) elSessao.innerText = formatDuration(agora - data.sessionStart);
-                    if (elRadio) elRadio.innerText = formatDuration(agora - data.radioTime);
+                    
+                    // Atualiza Tempo na rádio (zera e recomeça na troca)
+                    if (elRadio) elRadio.innerText = formatDuration(agora - data.radioTimeStart);
                 }
             }
         }
 
+        // Formata milissegundos em HH:MM:SS
         function formatDuration(ms) {
             if (ms < 0) ms = 0;
             const totalSegundos = Math.floor(ms / 1000);
