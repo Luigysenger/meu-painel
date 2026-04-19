@@ -112,17 +112,13 @@
         @keyframes spin-slow { 100% { transform: rotate(360deg); } }
         
         .btn-spotify-play { width: 65px; height: 65px; background: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; color: black; cursor: pointer; z-index: 5; transition: 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        
-        /* ESTILO NOVO PARA OS DETALHES */
-        .info-detalhe { display: block; margin-top: 5px; color: #888; font-size: 11px; }
-        .info-detalhe b { color: var(--primary); }
     </style>
 </head>
 <body>
     <div class="header">
         <div class="header-left">
             <h2><i class="fab fa-spotify"></i> LUIGY ADM</h2>
-            <button class="header-btn" onclick="location.reload()"><i class="fas fa-sync-alt"></i> REINICIAR</button>
+            <button class="btn-header" onclick="location.reload()"><i class="fas fa-sync-alt"></i> REINICIAR</button>
             <button class="btn-header btn-sair" onclick="logout()"><i class="fas fa-sign-out-alt"></i> SAIR</button>
         </div>
         <div class="header-center">
@@ -423,7 +419,7 @@
             });
         });
 
-        // --- MONITOR DE OUVINTES (AJUSTADO COM OS NOVOS DETALHES) ---
+        // --- MONITOR DE OUVINTES ---
         db.ref('contas').on('value', snap => {
             const container = document.getElementById('user-list');
             container.innerHTML = ""; 
@@ -431,14 +427,13 @@
             snap.forEach(c => {
                 const u = c.val(), id = c.key;
                 if(u.perfil === "adm" || u.tipo === "admin") return;
-                
                 const status = u.status || 'offline';
                 const isOnline = (status === 'online');
                 const safeId = id.replace(/[^a-zA-Z0-9]/g, '_');
                 
-                // Cache para cronômetro
+                // Cache de dados para o cronômetro
                 usersDataCache[safeId] = { 
-                    loginTime: u.lastSeen || Date.now(), 
+                    sessionStart: u.sessionStart || Date.now(),
                     radioTime: u.radioTime || 0,
                     isOnline: isOnline 
                 };
@@ -454,10 +449,11 @@
                         </button>
                     </div>
                     <div class="user-details-bar" id="details-${safeId}">
-                        <span class="info-detalhe">E-mail: <b>${u.email || id.replace(/,/g,'.')}</b></span>
-                        <span class="info-detalhe">Rádio: <b>${u.radioAtual || 'Nenhuma'}</b></span>
-                        <span class="info-detalhe">Tempo na Rádio: <b id="timer-radio-${safeId}">00:00:00</b></span>
-                        <span class="info-detalhe">Tempo Sessão: <b id="timer-sessao-${safeId}">00:00:00</b></span>
+                        <p>E-mail: <b>${u.email || id.replace(/,/g,'.')}</b></p>
+                        <p>Rádio Atual: <b style="color:var(--primary)">${u.radioAtual || 'Nenhuma'}</b></p>
+                        <p>Tempo de Sessão: <b id="timer-sessao-${safeId}">00:00:00</b></p>
+                        <p>Tempo nesta Rádio: <b id="timer-radio-${safeId}">00:00:00</b></p>
+                        <p>Local: <b>${u.cidade || 'N/A'} - ${u.estado || ''}</b></p>
                     </div>`;
                 container.appendChild(div);
             });
@@ -473,16 +469,18 @@
             for (let id in usersDataCache) {
                 const data = usersDataCache[id];
                 if (data.isOnline) {
-                    // Atualiza Tempo de Sessão
-                    const elS = document.getElementById(`timer-sessao-${id}`);
-                    if (elS) elS.innerText = formatDuration(agora - data.loginTime);
+                    // Tempo de Sessão (Login)
+                    const elSessao = document.getElementById(`timer-sessao-${id}`);
+                    if (elSessao) elSessao.innerText = formatDuration(agora - data.sessionStart);
                     
-                    // Atualiza Tempo na Rádio
-                    const elR = document.getElementById(`timer-radio-${id}`);
-                    if (elR && data.radioTime > 0) {
-                        elR.innerText = formatDuration(agora - data.radioTime);
-                    } else if(elR) {
-                        elR.innerText = "00:00:00";
+                    // Tempo na Rádio (Zera na troca)
+                    const elRadio = document.getElementById(`timer-radio-${id}`);
+                    if (elRadio) {
+                        if (data.radioTime > 0) {
+                            elRadio.innerText = formatDuration(agora - data.radioTime);
+                        } else {
+                            elRadio.innerText = "00:00:00";
+                        }
                     }
                 }
             }
