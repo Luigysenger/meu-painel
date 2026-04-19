@@ -34,11 +34,11 @@
         <h2>Acesso ao Painel</h2>
         <div class="input-group">
             <label>E-mail ou Login</label>
-            <input type="text" id="login-input" placeholder="exemplo@gmail.com">
+            <input type="text" id="login-input" placeholder="exemplo@gmail.com" onkeypress="handleEnter(event, fazerLogin)">
         </div>
         <div class="input-group">
             <label>Senha</label>
-            <input type="password" id="senha-input" placeholder="****">
+            <input type="password" id="senha-input" placeholder="****" onkeypress="handleEnter(event, fazerLogin)">
         </div>
         <button class="btn-acao" onclick="fazerLogin()">Entrar no Painel</button>
         <div id="msg-erro"></div>
@@ -55,16 +55,16 @@
                 <button class="btn-fechar" onclick="fecharModal('modal-cadastro')">&times;</button>
             </div>
             <div class="input-group">
-                <label>Nome de Usuário (Sem espaços)</label>
-                <input type="text" id="cad-nome" placeholder="Ex: LuigyOuvinte">
+                <label>Seu Nome e Sobrenome</label>
+                <input type="text" id="cad-nome" placeholder="Ex: João Silva" onkeypress="handleEnter(event, registrarUsuario)">
             </div>
             <div class="input-group">
-                <label>Seu E-mail</label>
-                <input type="email" id="cad-email" placeholder="email@exemplo.com">
+                <label>E-mail</label>
+                <input type="email" id="cad-email" placeholder="email@exemplo.com" onkeypress="handleEnter(event, registrarUsuario)">
             </div>
             <div class="input-group">
-                <label>Criar Senha</label>
-                <input type="password" id="cad-senha" placeholder="Sua senha">
+                <label>Senha</label>
+                <input type="password" id="cad-senha" placeholder="Sua senha" onkeypress="handleEnter(event, registrarUsuario)">
             </div>
             <button class="btn-acao" onclick="registrarUsuario()">Cadastrar Agora</button>
         </div>
@@ -76,12 +76,32 @@
                 <h3 style="margin:0; color:var(--primary)">RECUPERAR</h3>
                 <button class="btn-fechar" onclick="fecharModal('modal-esqueci')">&times;</button>
             </div>
-            <p style="font-size:12px; color:#888; text-align:center">Informe seu e-mail cadastrado.</p>
-            <div class="input-group">
-                <label>E-mail Cadastrado</label>
-                <input type="email" id="rec-email" placeholder="email@exemplo.com">
+            
+            <div id="etapa-validar">
+                <p style="font-size:12px; color:#888; text-align:center">Confirme seus dados para alterar a senha.</p>
+                <div class="input-group">
+                    <label>E-mail Cadastrado</label>
+                    <input type="email" id="rec-email" placeholder="email@exemplo.com">
+                </div>
+                <div class="input-group">
+                    <label>Primeiro Nome</label>
+                    <input type="text" id="rec-nome" placeholder="Seu nome">
+                </div>
+                <button class="btn-acao" onclick="validarParaNovaSenha()">Validar Dados</button>
             </div>
-            <button class="btn-acao" onclick="recuperarSenha()">Ver minha senha</button>
+
+            <div id="etapa-nova-senha" style="display:none">
+                <p style="font-size:12px; color:#00ff00; text-align:center">Dados validados! Digite a nova senha.</p>
+                <div class="input-group">
+                    <label>Nova Senha</label>
+                    <input type="password" id="nova-senha" placeholder="****">
+                </div>
+                <div class="input-group">
+                    <label>Confirmar Nova Senha</label>
+                    <input type="password" id="conf-nova-senha" placeholder="****">
+                </div>
+                <button class="btn-acao" onclick="salvarNovaSenha()">Salvar Nova Senha</button>
+            </div>
         </div>
     </div>
 
@@ -95,107 +115,96 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        function abrirModal(id) { document.getElementById(id).style.display = 'flex'; }
+        let usuarioChaveParaRecuperar = null;
+
+        function abrirModal(id) { 
+            document.getElementById(id).style.display = 'flex'; 
+            if(id === 'modal-esqueci') {
+                document.getElementById('etapa-validar').style.display = 'block';
+                document.getElementById('etapa-nova-senha').style.display = 'none';
+            }
+        }
         function fecharModal(id) { document.getElementById(id).style.display = 'none'; }
 
-        // CADASTRO CORRIGIDO
+        // FUNÇÃO PARA O TECLA ENTER
+        function handleEnter(e, func) { if (e.key === 'Enter') { func(); } }
+
         function registrarUsuario() {
             const nomeInput = document.getElementById('cad-nome').value.trim();
             const email = document.getElementById('cad-email').value.trim().toLowerCase();
             const senha = document.getElementById('cad-senha').value.trim();
-            
             if(!nomeInput || !email || !senha) return alert("Preencha todos os campos!");
-            
-            // O ID no Firebase deve ser consistente. Usaremos o e-mail como ID principal.
             const idFirebase = email.replace(/\./g, ','); 
-
             db.ref('contas/' + idFirebase).once('value').then(snap => {
-                if(snap.exists()) {
-                    alert("Este e-mail já possui uma conta!");
-                } else {
+                if(snap.exists()) alert("Este e-mail já possui uma conta!");
+                else {
                     db.ref('contas/' + idFirebase).set({
-                        nome: nomeInput,
-                        email: email,
-                        senha: String(senha), // Salva como string para evitar erro de comparação
-                        perfil: "ouvinte",
-                        status: "offline",
-                        lastSeen: Date.now()
+                        nome: nomeInput, email: email, senha: String(senha),
+                        perfil: "ouvinte", status: "offline", lastSeen: Date.now()
                     }).then(() => {
-                        alert("Sucesso! Agora faça login com seu e-mail.");
+                        alert("Cadastro realizado!");
                         fecharModal('modal-cadastro');
                     });
                 }
             });
         }
 
-        // RECUPERAÇÃO SIMPLIFICADA
-        function recuperarSenha() {
+        // VALIDAÇÃO EM 2 ETAPAS PARA NOVA SENHA
+        function validarParaNovaSenha() {
             const email = document.getElementById('rec-email').value.trim().toLowerCase();
-            if(!email) return alert("Digite seu e-mail!");
+            const primeiroNome = document.getElementById('rec-nome').value.trim().toLowerCase();
+            if(!email || !primeiroNome) return alert("Preencha os campos!");
 
             db.ref('contas').once('value').then(snap => {
                 let achou = false;
                 snap.forEach(child => {
                     const u = child.val();
-                    if(u.email === email) {
+                    const nomeNoBanco = u.nome.split(' ')[0].toLowerCase(); // Pega só o primeiro nome
+                    if(u.email === email && nomeNoBanco === primeiroNome) {
                         achou = true;
-                        alert("Sua senha é: " + u.senha);
-                        fecharModal('modal-esqueci');
+                        usuarioChaveParaRecuperar = child.key;
+                        document.getElementById('etapa-validar').style.display = 'none';
+                        document.getElementById('etapa-nova-senha').style.display = 'block';
                     }
                 });
-                if(!achou) alert("E-mail não encontrado.");
+                if(!achou) alert("E-mail ou nome não conferem!");
             });
         }
 
-        // LOGIN UNIFICADO E ROBUSTO
+        function salvarNovaSenha() {
+            const n1 = document.getElementById('nova-senha').value.trim();
+            const n2 = document.getElementById('conf-nova-senha').value.trim();
+            if(n1.length < 4) return alert("A senha deve ter pelo menos 4 caracteres.");
+            if(n1 !== n2) return alert("As senhas não coincidem!");
+
+            db.ref('contas/' + usuarioChaveParaRecuperar).update({
+                senha: String(n1)
+            }).then(() => {
+                alert("Senha alterada com sucesso! Agora faça login.");
+                fecharModal('modal-esqueci');
+            });
+        }
+
         function fazerLogin() {
             const loginInformado = document.getElementById('login-input').value.trim().toLowerCase();
             const senhaInformada = document.getElementById('senha-input').value.trim();
             const erroDiv = document.getElementById('msg-erro');
-            
-            if(!loginInformado || !senhaInformada) {
-                erroDiv.innerText = "Preencha os campos!";
-                return;
-            }
-
+            if(!loginInformado || !senhaInformada) { erroDiv.innerText = "Preencha os campos!"; return; }
             erroDiv.innerText = "Verificando...";
-
-            // Vamos buscar direto na lista de contas para não ter erro de chave
             db.ref('contas').once('value').then(snap => {
-                let usuarioEncontrado = null;
-                let chaveUsuario = null;
-
+                let usuarioEncontrado = null, chaveUsuario = null;
                 snap.forEach(child => {
                     const u = child.val();
-                    // Verifica se o login bate com E-mail ou com o Nome
                     if ((u.email.toLowerCase() === loginInformado || u.nome.toLowerCase() === loginInformado) && String(u.senha) === String(senhaInformada)) {
-                        usuarioEncontrado = u;
-                        chaveUsuario = child.key;
+                        usuarioEncontrado = u; chaveUsuario = child.key;
                     }
                 });
-
                 if (usuarioEncontrado) {
-                    erroDiv.innerText = "Sucesso! Entrando...";
                     localStorage.setItem('usuarioNome', usuarioEncontrado.nome);
                     localStorage.setItem('usuarioKey', chaveUsuario);
-                    
-                    // Atualiza status e vai para a página correta
-                    db.ref('contas/' + chaveUsuario).update({
-                        status: "online",
-                        lastSeen: Date.now()
-                    }).then(() => {
-                        if (usuarioEncontrado.perfil === "adm") {
-                            window.location.href = 'adm.html';
-                        } else {
-                            window.location.href = 'ouvinte.html';
-                        }
-                    });
-                } else {
-                    erroDiv.innerText = "E-mail ou Senha incorretos!";
-                }
-            }).catch(e => {
-                erroDiv.innerText = "Erro ao conectar ao banco!";
-                console.error(e);
+                    db.ref('contas/' + chaveUsuario).update({ status: "online", lastSeen: Date.now() })
+                    .then(() => { window.location.href = (usuarioEncontrado.perfil === "adm") ? 'adm.html' : 'ouvinte.html'; });
+                } else { erroDiv.innerText = "E-mail ou Senha incorretos!"; }
             });
         }
     </script>
