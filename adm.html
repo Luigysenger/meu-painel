@@ -419,7 +419,7 @@
             });
         });
 
-        // --- MONITOR DE OUVINTES (LOGICA CORRIGIDA) ---
+        // --- MONITOR DE OUVINTES (LOGICA PARA STATUS E TEMPO REAL) ---
         db.ref('contas').on('value', snap => {
             const container = document.getElementById('user-list');
             container.innerHTML = ""; 
@@ -428,15 +428,16 @@
                 const u = c.val(), id = c.key;
                 if(u.perfil === "adm" || u.tipo === "admin") return;
                 
-                const status = u.status || 'offline';
-                const isOnline = (status === 'online');
+                // DETECÇÃO DE STATUS REAL: Borda roxa e Texto roxo se não estiver online
+                const statusReal = (u.status === 'online') ? 'online' : 'offline';
+                const isOnline = (statusReal === 'online');
                 const safeId = id.replace(/[^a-zA-Z0-9]/g, '_');
                 
-                // Se o rádio mudar, o cache local precisa notar para "resetar" a contagem visual
+                // GERENCIAMENTO DE CACHE PARA CRONÔMETRO
                 if(!usersDataCache[safeId] || usersDataCache[safeId].radioAtual !== u.radioAtual) {
                     usersDataCache[safeId] = {
                         sessionStart: u.sessionStart || Date.now(),
-                        radioTime: u.radioTime || Date.now(), // Esse valor vem do app do ouvinte ao trocar rádio
+                        radioTime: Date.now(), // Reseta o tempo localmente no ADM quando a rádio muda
                         radioAtual: u.radioAtual || 'Nenhuma',
                         isOnline: isOnline
                     };
@@ -446,17 +447,19 @@
 
                 const div = document.createElement('div');
                 div.className = "user-item";
-                div.style.borderLeft = `4px solid ${isOnline ? '#00ff00' : '#d1a3ff'}`;
+                // Aplica a borda conforme o status (Verde Online / Roxo Offline)
+                div.style.borderLeft = isOnline ? '4px solid #00ff00' : '4px solid #d1a3ff';
+                
                 div.innerHTML = `
                     <div class="user-row">
                         <button class="user-name-btn" onclick="toggleUserDetails('${safeId}')">
                             <span>${u.nome ? u.nome.toUpperCase() : 'OUVINTE'}</span>
-                            <span class="${isOnline ? 'status-on' : 'status-off'}">${status.toUpperCase()}</span>
+                            <span class="${isOnline ? 'status-on' : 'status-off'}">${statusReal.toUpperCase()}</span>
                         </button>
                     </div>
                     <div class="user-details-bar" id="details-${safeId}">
                         <p>E-mail: <b>${u.email || id.replace(/,/g,'.')}</b></p>
-                        <p>Rádio Conectada: <b style="color:var(--primary)" id="radio-nome-${safeId}">${u.radioAtual || 'Nenhuma'}</b></p>
+                        <p>Rádio Conectada: <b style="color:var(--primary)">${u.radioAtual || 'Nenhuma'}</b></p>
                         <p>Tempo de Sessão: <b id="timer-sessao-${safeId}">00:00:00</b></p>
                         <p>Tempo nesta Rádio: <b id="timer-radio-${safeId}">00:00:00</b></p>
                         <p>Local: <b>${u.cidade || 'N/A'} - ${u.estado || ''}</b></p>
@@ -474,13 +477,12 @@
             const agora = Date.now();
             for (let id in usersDataCache) {
                 const data = usersDataCache[id];
+                // Só incrementa o cronômetro se o status for estritamente online
                 if (data.isOnline) {
-                    // 1. Tempo total de sessão (desde o login)
                     const elSessao = document.getElementById(`timer-sessao-${id}`);
-                    if (elSessao) elSessao.innerText = formatDuration(agora - data.sessionStart);
-                    
-                    // 2. Tempo na rádio atual (reseta se mudar)
                     const elRadio = document.getElementById(`timer-radio-${id}`);
+                    
+                    if (elSessao) elSessao.innerText = formatDuration(agora - data.sessionStart);
                     if (elRadio) elRadio.innerText = formatDuration(agora - data.radioTime);
                 }
             }
