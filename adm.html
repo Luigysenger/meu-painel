@@ -47,7 +47,7 @@
         .active .antena { display: block; animation: pulse 1.5s infinite; }
         @keyframes pulse { 50% { opacity: 0.3; transform: scale(0.9); } }
 
-        /* CONTROLES DO PLAYER (RESTAURADOS) */
+        /* CONTROLES DO PLAYER */
         .player-footer { margin-top: 20px; background: #111; padding: 25px; border-radius: 20px; border: 1px solid #222; text-align: center; }
         .controls-row { display: flex; align-items: center; justify-content: center; gap: 35px; }
         .btn-nav { background: none; border: none; color: #b3b3b3; font-size: 28px; cursor: pointer; transition: 0.3s; }
@@ -69,7 +69,7 @@
         /* MONITOR OUVINTES */
         .user-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; overflow: hidden; transition: 0.3s; border-left: 4px solid #d1a3ff; }
         .user-name-btn { width: 100%; padding: 15px; background: none; border: none; color: white; text-align: left; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-        .status-on { color: #00ff00; font-weight: 900; font-size: 11px; }
+        .status-on { color: #1DB954; font-weight: 900; font-size: 11px; }
         .status-off { color: #d1a3ff; font-weight: 900; font-size: 11px; }
         .user-details-bar { display: none; padding: 0 15px 15px 15px; font-size: 13px; color: #ccc; border-top: 1px solid #222; }
 
@@ -257,7 +257,7 @@
             });
         });
 
-        // --- MONITOR OUVINTES ---
+        // --- AJUSTE CIRÚRGICO NO MONITOR OUVINTES ---
         db.ref('contas').on('value', snap => {
             const container = document.getElementById('user-list');
             const agora = Date.now();
@@ -266,27 +266,28 @@
             for (let uid in data) {
                 const u = data[uid];
                 if(u.perfil === "adm") continue;
+                
                 const safeId = uid.replace(/[^a-zA-Z0-9]/g, '_');
-                const isOnline = (u.status === 'online' && (agora - (u.lastActive || 0) < 30000));
+                
+                // AJUSTE: Verifica lastSeen (sinal de vida) ou lastActive
+                const sinalVida = u.lastSeen || u.lastActive || 0;
+                const isOnline = (u.status === 'online' && (agora - sinalVida < 40000));
 
                 if (!usersDataCache[safeId]) {
                     usersDataCache[safeId] = { sStart: u.sessionStart || agora, rStart: u.radioStart || agora, radioAtual: u.radioAtual };
                 }
-                if (u.radioStart && u.radioStart !== usersDataCache[safeId].rStart) {
-                    usersDataCache[safeId].rStart = u.radioStart;
-                } else if (u.radioAtual !== usersDataCache[safeId].radioAtual) {
-                    usersDataCache[safeId].rStart = agora;
-                }
-                usersDataCache[safeId].radioAtual = u.radioAtual;
+                
                 usersDataCache[safeId].isOnline = isOnline;
 
                 const div = document.createElement('div');
                 div.className = "user-item";
-                div.style.borderLeft = isOnline ? '4px solid #00ff00' : '4px solid #d1a3ff';
+                // Borda verde se online, roxa se offline
+                div.style.borderLeft = isOnline ? '4px solid #1DB954' : '4px solid #d1a3ff';
+                
                 div.innerHTML = `
                     <button class="user-name-btn" onclick="const d=this.nextElementSibling; d.style.display=(d.style.display=='block'?'none':'block')">
                         <span style="color:${isOnline ? 'white' : '#d1a3ff'}">${(u.nome || 'Ouvinte').toUpperCase()}</span>
-                        <span class="${isOnline ? 'status-on' : 'status-off'}">${isOnline ? 'ONLINE' : 'OFF'}</span>
+                        <span class="${isOnline ? 'status-on' : 'status-off'}">${isOnline ? '● ONLINE' : 'OFF'}</span>
                     </button>
                     <div class="user-details-bar">
                         Rádio: <b style="color:var(--primary)">${isOnline ? (u.radioAtual || 'Nenhuma') : '---'}</b><br>
