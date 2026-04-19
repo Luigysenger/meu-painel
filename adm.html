@@ -112,13 +112,17 @@
         @keyframes spin-slow { 100% { transform: rotate(360deg); } }
         
         .btn-spotify-play { width: 65px; height: 65px; background: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; color: black; cursor: pointer; z-index: 5; transition: 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        
+        /* ESTILO NOVO PARA OS DETALHES */
+        .info-detalhe { display: block; margin-top: 5px; color: #888; font-size: 11px; }
+        .info-detalhe b { color: var(--primary); }
     </style>
 </head>
 <body>
     <div class="header">
         <div class="header-left">
             <h2><i class="fab fa-spotify"></i> LUIGY ADM</h2>
-            <button class="btn-header" onclick="location.reload()"><i class="fas fa-sync-alt"></i> REINICIAR</button>
+            <button class="header-btn" onclick="location.reload()"><i class="fas fa-sync-alt"></i> REINICIAR</button>
             <button class="btn-header btn-sair" onclick="logout()"><i class="fas fa-sign-out-alt"></i> SAIR</button>
         </div>
         <div class="header-center">
@@ -284,12 +288,11 @@
                 list.appendChild(div);
             });
             
-            // CONFIGURAÇÃO DO SORTABLE COM PROTEÇÃO PARA CELULAR
             if(!window.sortableIniciado && radioData.length > 0) {
                 Sortable.create(list, { 
                     animation: 150,
-                    delay: 200, // Tempo de espera para celular (0.2 segundos)
-                    delayOnTouchOnly: true, // No computador o arraste continua rápido
+                    delay: 200,
+                    delayOnTouchOnly: true,
                     onEnd: () => {
                         list.querySelectorAll('.radio-item').forEach((it, idx) => {
                             db.ref('radios/' + it.dataset.id).update({ posicao: idx });
@@ -354,9 +357,7 @@
             const ini = document.getElementById('pub-ini').value, fim = document.getElementById('pub-fim').value;
             const target = document.getElementById('pub-target').value, manual = document.getElementById('pub-manual').value.toUpperCase(), k = document.getElementById('pub-key').value;
             if(!imgBase64 || !ini || !fim) return alert("Preencha todos os campos da publicidade!");
-            
             const d = { imagem: imgBase64, inicio: new Date(ini).getTime(), fim: new Date(fim).getTime(), destino: target, ouvinteAlvo: target === 'MANUAL' ? manual : 'TODOS' };
-            
             if(k) {
                 db.ref('publicidade/'+k).update(d).then(() => {
                     document.getElementById('pub-key').value = "";
@@ -375,19 +376,15 @@
             imgBase64 = img;
             document.getElementById('pub-view').src = img;
             document.getElementById('pub-view').style.display = "block";
-            
             const dIni = new Date(ini);
             dIni.setMinutes(dIni.getMinutes() - dIni.getTimezoneOffset());
             document.getElementById('pub-ini').value = dIni.toISOString().slice(0, 16);
-            
             const dFim = new Date(fim);
             dFim.setMinutes(dFim.getMinutes() - dFim.getTimezoneOffset());
             document.getElementById('pub-fim').value = dFim.toISOString().slice(0, 16);
-            
             document.getElementById('pub-target').value = target;
             document.getElementById('pub-manual').value = manual === 'TODOS' ? '' : manual;
             document.getElementById('pub-manual').style.display = (target === 'MANUAL' ? 'block' : 'none');
-            
             document.getElementById('btn-pub-save').innerText = "ATUALIZAR CAMPANHA";
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -426,7 +423,7 @@
             });
         });
 
-        // --- MONITOR DE OUVINTES ---
+        // --- MONITOR DE OUVINTES (AJUSTADO COM OS NOVOS DETALHES) ---
         db.ref('contas').on('value', snap => {
             const container = document.getElementById('user-list');
             container.innerHTML = ""; 
@@ -434,10 +431,18 @@
             snap.forEach(c => {
                 const u = c.val(), id = c.key;
                 if(u.perfil === "adm" || u.tipo === "admin") return;
+                
                 const status = u.status || 'offline';
                 const isOnline = (status === 'online');
                 const safeId = id.replace(/[^a-zA-Z0-9]/g, '_');
-                usersDataCache[safeId] = { loginTime: u.sessionStart || Date.now(), isOnline: isOnline };
+                
+                // Cache para cronômetro
+                usersDataCache[safeId] = { 
+                    loginTime: u.lastSeen || Date.now(), 
+                    radioTime: u.radioTime || 0,
+                    isOnline: isOnline 
+                };
+
                 const div = document.createElement('div');
                 div.className = "user-item";
                 div.style.borderLeft = `4px solid ${isOnline ? '#00ff00' : '#d1a3ff'}`;
@@ -449,9 +454,10 @@
                         </button>
                     </div>
                     <div class="user-details-bar" id="details-${safeId}">
-                        <p>E-mail: <b>${u.email || id.replace(/,/g,'.')}</b></p>
-                        <p>Local: <b>${u.cidade || 'N/A'} - ${u.estado || ''}</b></p>
-                        <p>Sessão: <b id="timer-sessao-${safeId}">0s</b></p>
+                        <span class="info-detalhe">E-mail: <b>${u.email || id.replace(/,/g,'.')}</b></span>
+                        <span class="info-detalhe">Rádio: <b>${u.radioAtual || 'Nenhuma'}</b></span>
+                        <span class="info-detalhe">Tempo na Rádio: <b id="timer-radio-${safeId}">00:00:00</b></span>
+                        <span class="info-detalhe">Tempo Sessão: <b id="timer-sessao-${safeId}">00:00:00</b></span>
                     </div>`;
                 container.appendChild(div);
             });
@@ -463,17 +469,31 @@
         }
 
         function updateUserTimers() {
+            const agora = Date.now();
             for (let id in usersDataCache) {
                 const data = usersDataCache[id];
-                const elS = document.getElementById(`timer-sessao-${id}`);
-                if (data.isOnline && elS) { elS.innerText = formatDuration(Date.now() - data.loginTime); }
+                if (data.isOnline) {
+                    // Atualiza Tempo de Sessão
+                    const elS = document.getElementById(`timer-sessao-${id}`);
+                    if (elS) elS.innerText = formatDuration(agora - data.loginTime);
+                    
+                    // Atualiza Tempo na Rádio
+                    const elR = document.getElementById(`timer-radio-${id}`);
+                    if (elR && data.radioTime > 0) {
+                        elR.innerText = formatDuration(agora - data.radioTime);
+                    } else if(elR) {
+                        elR.innerText = "00:00:00";
+                    }
+                }
             }
         }
 
         function formatDuration(ms) {
+            if (ms < 0) ms = 0;
+            const h = Math.floor(ms / 3600000);
             const m = Math.floor((ms % 3600000) / 60000);
             const s = Math.floor((ms % 60000) / 1000);
-            return m + "m " + s + "s";
+            return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
         }
     </script>
 </body>
