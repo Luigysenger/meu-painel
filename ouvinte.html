@@ -9,13 +9,23 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #A020F0; --bg: #000; --card: #121212; --text-muted: #b3b3b3; }
+        :root { --primary: #A020F0; --bg: #000; --card: #121212; --text-muted: #b3b3b3; --success: #1DB954; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; user-select: none; }
         
-        .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 20px 30px; border-radius: 15px; border: 1px solid #333; margin-bottom: 25px; gap: 10px; flex-wrap: wrap; }
+        /* HEADER RESPONSIVO */
+        .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 20px 30px; border-radius: 15px; border: 1px solid #333; margin-bottom: 25px; gap: 10px; flex-wrap: wrap; transition: 0.3s; }
+        
+        /* AJUSTE CIRÚRGICO: BORDA VERDE QUANDO ONLINE */
+        .header.online { border-color: var(--success); box-shadow: 0 0 10px rgba(29, 185, 84, 0.2); }
+
         .header-left { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; flex-shrink: 0; }
         .header h2 { margin: 0; color: var(--primary); font-size: 22px; text-transform: uppercase; line-height: 1; }
         
+        /* INDICADOR ON */
+        .status-badge { font-size: 10px; background: rgba(29, 185, 84, 0.1); color: var(--success); padding: 2px 8px; border-radius: 20px; border: 1px solid var(--success); font-weight: bold; margin-left: 5px; display: none; }
+        .online .status-badge { display: inline-block; animation: pulse-green 2s infinite; }
+        @keyframes pulse-green { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
         #container-pub { flex: 1; display: flex; justify-content: center; align-items: center; padding: 0 10px; min-height: 55px; overflow: hidden; }
         #img-publicidade { max-height: 55px; max-width: 100%; border-radius: 8px; display: none; object-fit: contain; transition: opacity 0.5s ease-in-out; }
         
@@ -74,12 +84,14 @@
     </style>
 </head>
 <body onclick="fecharAviso()">
-    <div class="header">
+    <div class="header online" id="header-main">
         <div class="header-left">
-            <h2 id="nome-exibicao">CARREGANDO...</h2>
+            <h2><span id="nome-exibicao">OUVINTE</span> <span class="status-badge">ON</span></h2>
             <button class="btn-header btn-sair" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span>SAIR</span></button>
         </div>
+        
         <div id="container-pub"><img id="img-publicidade" src=""></div>
+        
         <div class="header-right">
             <div class="datetime-container">
                 <div id="hora">00:00:00</div>
@@ -131,55 +143,38 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-
-        // --- VERIFICAÇÃO DE LOGIN ---
-        const userId = localStorage.getItem('userId');
-        const nomeUsuario = localStorage.getItem('usuarioNome') || "OUVINTE";
-
-        if (!userId) {
-            window.location.href = "index.html"; 
-        } else {
-            document.getElementById('nome-exibicao').innerText = nomeUsuario;
-        }
-
         const player = document.getElementById('audio-player');
-        const tempoEntrada = Date.now();
 
-        // Envia status para a tabela de contas para o ADM ver
+        const userId = localStorage.getItem('userId') || localStorage.getItem('usuarioKey');
+        const nomeUsuario = localStorage.getItem('usuarioNome') || "OUVINTE";
+        
+        if(!userId) { window.location.href = 'index.html'; }
+        
+        document.getElementById('nome-exibicao').innerText = nomeUsuario;
+
+        // Atualizar status no banco
         db.ref('contas/' + userId).update({
-            lastActive: Date.now(),
-            sessionStart: tempoEntrada,
-            status: "Online"
+            status: "online",
+            lastSeen: Date.now()
         });
 
         let allRadios = [], mySelectedIds = [], activeIndex = -1;
 
-        // Relógio
         setInterval(() => {
             const agora = new Date();
             document.getElementById('hora').innerText = agora.toLocaleTimeString('pt-BR');
-            const dia = String(agora.getDate()).padStart(2, '0');
-            const mes = String(agora.getMonth() + 1).padStart(2, '0');
-            document.getElementById('data-inline').innerText = `${dia}/${mes}/${agora.getFullYear()}`;
+            document.getElementById('data-inline').innerText = agora.toLocaleDateString('pt-BR');
             const diasSemana = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
             document.getElementById('dia-semana').innerText = diasSemana[agora.getDay()];
         }, 1000);
 
         function fecharAviso() { document.getElementById('aviso-novidade').style.display = 'none'; }
 
-        // Carregar Rádios
         db.ref('radios').on('value', snap => {
-            const countAnterior = parseInt(localStorage.getItem('lastRadioCount')) || 0;
             allRadios = [];
             snap.forEach(c => { allRadios.push({ ...c.val(), key: c.key }); });
             allRadios.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
             
-            if (allRadios.length > countAnterior && countAnterior !== 0) { 
-                document.getElementById('aviso-novidade').style.display = 'block'; 
-            }
-            localStorage.setItem('lastRadioCount', allRadios.length);
-
-            // Carrega grade específica do usuário logado
             db.ref('contas/' + userId + '/grade').once('value', userSnap => {
                 mySelectedIds = userSnap.val() || [];
                 renderAll();
@@ -190,11 +185,9 @@
             const myGrid = document.getElementById('my-radio-list'), selector = document.getElementById('selector-list');
             myGrid.innerHTML = ""; selector.innerHTML = "";
             const myRadios = mySelectedIds.map(id => allRadios.find(r => r.key === id)).filter(Boolean);
-            
             myRadios.forEach((r, i) => {
                 myGrid.innerHTML += `<div class="radio-item ${activeIndex === i ? 'active' : ''}" style="background: ${r.color || '#d1a3ff'}" data-id="${r.key}" onclick="playRadio(${i})"><i class="fas fa-tower-broadcast antena"></i><span>${r.name}</span></div>`;
             });
-
             allRadios.forEach(r => {
                 const isSelected = mySelectedIds.includes(r.key);
                 selector.innerHTML += `<div class="selector-item ${isSelected ? 'selected' : ''}"><span style="font-size:13px; font-weight:bold">${r.name}</span><button class="btn-toggle-radio ${isSelected ? 'remove' : 'add'}" onclick="toggleSelection('${r.key}')"><i class="fas ${isSelected ? 'fa-times-circle' : 'fa-plus-circle'}"></i></button></div>`;
@@ -232,11 +225,9 @@
             player.src = r.url; player.play();
             document.getElementById('now-title').innerText = "OUVINTE: " + r.name;
             document.getElementById('play-icon').className = "fas fa-stop";
-            
             db.ref('contas/' + userId).update({
                 radioAtual: r.name,
-                radioStart: Date.now(),
-                lastActive: Date.now()
+                lastSeen: Date.now()
             });
             renderAll();
         }
@@ -250,7 +241,11 @@
         function nextRadio() { if(activeIndex < mySelectedIds.length - 1) playRadio(activeIndex + 1); else playRadio(0); }
         function prevRadio() { if(activeIndex > 0) playRadio(activeIndex - 1); else playRadio(mySelectedIds.length - 1); }
 
-        function logout() { if(confirm("Deseja sair?")) { localStorage.clear(); window.location.href = 'index.html'; } }
+        function logout() { if(confirm("Deseja sair?")) { 
+            db.ref('contas/' + userId).update({ status: "offline" });
+            localStorage.clear(); 
+            window.location.href = 'index.html'; 
+        } }
 
         // --- PUBLICIDADE ---
         let listaPubs = [], idxPub = 0;
@@ -259,17 +254,11 @@
             const agora = Date.now();
             snap.forEach(child => {
                 const p = child.val();
-                const inicio = p.inicio;
-                const fim = p.fim;
-                if ((p.destino === 'TODOS' || p.ouvinteAlvo === nomeUsuario) && (agora >= inicio && agora <= fim)) {
+                if ((p.destino === 'TODOS' || p.ouvinteAlvo === nomeUsuario) && (agora >= p.inicio && agora <= p.fim)) {
                     listaPubs.push(p);
                 }
             });
-            if (listaPubs.length === 0) { 
-                document.getElementById('img-publicidade').style.display = "none";
-                document.getElementById('pub-left').innerHTML = "";
-                document.getElementById('pub-right').innerHTML = "";
-            } else { idxPub = 0; mostrarPub(); }
+            if (listaPubs.length > 0) { idxPub = 0; mostrarPub(); }
         });
 
         function mostrarPub() {
@@ -294,10 +283,7 @@
             }
         }, 10000);
 
-        // Heartbeat para o ADM saber que está online
-        setInterval(() => {
-            if(userId) { db.ref('contas/' + userId).update({ lastActive: Date.now() }); }
-        }, 15000);
+        setInterval(() => { if(userId) db.ref('contas/' + userId).update({ lastSeen: Date.now() }); }, 20000);
     </script>
 </body>
 </html>
