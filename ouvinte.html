@@ -12,9 +12,7 @@
         :root { --primary: #A020F0; --bg: #000; --card: #121212; --text-muted: #b3b3b3; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; user-select: none; }
         
-        /* HEADER RESPONSIVO */
         .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 20px 30px; border-radius: 15px; border: 1px solid #333; margin-bottom: 25px; gap: 10px; flex-wrap: wrap; }
-        
         .header-left { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; flex-shrink: 0; }
         .header h2 { margin: 0; color: var(--primary); font-size: 22px; text-transform: uppercase; line-height: 1; }
         
@@ -22,7 +20,6 @@
         #img-publicidade { max-height: 55px; max-width: 100%; border-radius: 8px; display: none; object-fit: contain; transition: opacity 0.5s ease-in-out; }
         
         .header-right { display: flex; align-items: center; flex-shrink: 0; }
-        
         .datetime-container { display: flex; flex-direction: column; align-items: flex-end; border-left: 1px solid #333; padding-left: 20px; }
         
         #hora { font-size: 28px; font-weight: 900; line-height: 1; color: white; letter-spacing: -1px; }
@@ -34,22 +31,16 @@
         .btn-sair { color: #ff4444; border-color: #442222; padding: 4px 10px; }
         .btn-sair:hover { background: #331111; border-color: #ff4444; }
         
-        /* ESTRUTURA PRINCIPAL RESPONSIVA */
         .main-container { display: grid; grid-template-columns: 180px 1fr 180px; gap: 20px; max-width: 100%; margin: 0 auto; margin-bottom: 150px; align-items: start; }
         .center-content { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; align-items: start; }
         .side-pub { min-height: 400px; display: flex; flex-direction: column; gap: 15px; }
         .side-pub img { width: 100%; border-radius: 10px; border: 1px solid #333; }
         
-        @media (max-width: 1200px) { 
-            .center-content { grid-template-columns: 1fr; } 
-            .main-container { grid-template-columns: 1fr; } 
-            .side-pub { display: none; } 
-        }
+        @media (max-width: 1200px) { .center-content { grid-template-columns: 1fr; } .main-container { grid-template-columns: 1fr; } .side-pub { display: none; } }
 
         .card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid #282828; }
         h3 { color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; text-align: center; }
         
-        /* GRADE DE RÁDIOS AUTO-AJUSTÁVEL */
         .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; justify-content: center; }
         .radio-item { aspect-ratio: 1/1; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #000; font-weight: bold; font-size: 10px; text-align: center; padding: 10px; cursor: grab; transition: 0.3s; position: relative; border: 2px solid transparent; box-sizing: border-box; touch-action: auto !important; }
         .radio-item:hover { transform: scale(1.05); filter: brightness(1.1); }
@@ -85,12 +76,10 @@
 <body onclick="fecharAviso()">
     <div class="header">
         <div class="header-left">
-            <h2 id="nome-exibicao">OUVINTE</h2>
+            <h2 id="nome-exibicao">CARREGANDO...</h2>
             <button class="btn-header btn-sair" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span>SAIR</span></button>
         </div>
-        
         <div id="container-pub"><img id="img-publicidade" src=""></div>
-        
         <div class="header-right">
             <div class="datetime-container">
                 <div id="hora">00:00:00</div>
@@ -103,19 +92,16 @@
 
     <div class="main-container">
         <div class="side-pub" id="pub-left"></div>
-
         <div class="center-content">
             <div class="card">
                 <h3>MINHA GRADE (SEGURE PARA ARRASTAR)</h3>
                 <div id="my-radio-list" class="radio-grid"></div>
             </div>
-
             <div class="card">
                 <h3>SELECIONE AQUI SUA RÁDIO</h3>
                 <div id="selector-list" class="selector-list"></div>
             </div>
         </div>
-
         <div class="side-pub" id="pub-right"></div>
     </div>
 
@@ -145,44 +131,57 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const player = document.getElementById('audio-player');
-        const nomeUsuario = localStorage.getItem('usuarioNome') || "OUVINTE";
-        document.getElementById('nome-exibicao').innerText = nomeUsuario;
 
+        // --- VERIFICAÇÃO DE LOGIN ---
+        const userId = localStorage.getItem('userId');
+        const nomeUsuario = localStorage.getItem('usuarioNome') || "OUVINTE";
+
+        if (!userId) {
+            window.location.href = "index.html"; 
+        } else {
+            document.getElementById('nome-exibicao').innerText = nomeUsuario;
+        }
+
+        const player = document.getElementById('audio-player');
         const tempoEntrada = Date.now();
-        db.ref('usuarios/' + nomeUsuario).update({
-            loginTime: tempoEntrada,
-            radioTime: tempoEntrada,
-            lastSeen: tempoEntrada,
+
+        // Envia status para a tabela de contas para o ADM ver
+        db.ref('contas/' + userId).update({
+            lastActive: Date.now(),
+            sessionStart: tempoEntrada,
             status: "Online"
         });
 
         let allRadios = [], mySelectedIds = [], activeIndex = -1;
 
+        // Relógio
         setInterval(() => {
             const agora = new Date();
             document.getElementById('hora').innerText = agora.toLocaleTimeString('pt-BR');
             const dia = String(agora.getDate()).padStart(2, '0');
             const mes = String(agora.getMonth() + 1).padStart(2, '0');
-            const ano = agora.getFullYear();
-            document.getElementById('data-inline').innerText = `${dia}/${mes}/${ano}`;
+            document.getElementById('data-inline').innerText = `${dia}/${mes}/${agora.getFullYear()}`;
             const diasSemana = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
             document.getElementById('dia-semana').innerText = diasSemana[agora.getDay()];
         }, 1000);
 
         function fecharAviso() { document.getElementById('aviso-novidade').style.display = 'none'; }
 
+        // Carregar Rádios
         db.ref('radios').on('value', snap => {
             const countAnterior = parseInt(localStorage.getItem('lastRadioCount')) || 0;
             allRadios = [];
             snap.forEach(c => { allRadios.push({ ...c.val(), key: c.key }); });
             allRadios.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
-            if (allRadios.length > countAnterior && countAnterior !== 0) { document.getElementById('aviso-novidade').style.display = 'block'; }
+            
+            if (allRadios.length > countAnterior && countAnterior !== 0) { 
+                document.getElementById('aviso-novidade').style.display = 'block'; 
+            }
             localStorage.setItem('lastRadioCount', allRadios.length);
-            db.ref('usuarios/' + nomeUsuario + '/grade').once('value', userSnap => {
-                const gradeSalva = userSnap.val();
-                if (gradeSalva) { mySelectedIds = gradeSalva; }
-                else { mySelectedIds = JSON.parse(localStorage.getItem('myRadios_' + nomeUsuario)) || []; }
+
+            // Carrega grade específica do usuário logado
+            db.ref('contas/' + userId + '/grade').once('value', userSnap => {
+                mySelectedIds = userSnap.val() || [];
                 renderAll();
             });
         });
@@ -191,9 +190,11 @@
             const myGrid = document.getElementById('my-radio-list'), selector = document.getElementById('selector-list');
             myGrid.innerHTML = ""; selector.innerHTML = "";
             const myRadios = mySelectedIds.map(id => allRadios.find(r => r.key === id)).filter(Boolean);
+            
             myRadios.forEach((r, i) => {
                 myGrid.innerHTML += `<div class="radio-item ${activeIndex === i ? 'active' : ''}" style="background: ${r.color || '#d1a3ff'}" data-id="${r.key}" onclick="playRadio(${i})"><i class="fas fa-tower-broadcast antena"></i><span>${r.name}</span></div>`;
             });
+
             allRadios.forEach(r => {
                 const isSelected = mySelectedIds.includes(r.key);
                 selector.innerHTML += `<div class="selector-item ${isSelected ? 'selected' : ''}"><span style="font-size:13px; font-weight:bold">${r.name}</span><button class="btn-toggle-radio ${isSelected ? 'remove' : 'add'}" onclick="toggleSelection('${r.key}')"><i class="fas ${isSelected ? 'fa-times-circle' : 'fa-plus-circle'}"></i></button></div>`;
@@ -201,15 +202,13 @@
         }
 
         function salvarGrade() {
-            db.ref('usuarios/' + nomeUsuario + '/grade').set(mySelectedIds);
-            localStorage.setItem('myRadios_' + nomeUsuario, JSON.stringify(mySelectedIds));
+            db.ref('contas/' + userId + '/grade').set(mySelectedIds);
         }
 
-        // AJUSTE DE ROLAGEM E ARRASTE NO OUVINTE
         new Sortable(document.getElementById('my-radio-list'), {
             animation: 150,
-            delay: 200, // Precisa segurar 0.2s para mover no celular
-            delayOnTouchOnly: true, // No computador o arraste é instantâneo
+            delay: 200,
+            delayOnTouchOnly: true,
             onEnd: function() {
                 const newIds = [];
                 document.querySelectorAll('#my-radio-list .radio-item').forEach(el => { newIds.push(el.getAttribute('data-id')); });
@@ -233,10 +232,11 @@
             player.src = r.url; player.play();
             document.getElementById('now-title').innerText = "OUVINTE: " + r.name;
             document.getElementById('play-icon').className = "fas fa-stop";
-            db.ref('usuarios/' + nomeUsuario).update({
+            
+            db.ref('contas/' + userId).update({
                 radioAtual: r.name,
-                radioTime: Date.now(),
-                lastSeen: Date.now()
+                radioStart: Date.now(),
+                lastActive: Date.now()
             });
             renderAll();
         }
@@ -250,70 +250,54 @@
         function nextRadio() { if(activeIndex < mySelectedIds.length - 1) playRadio(activeIndex + 1); else playRadio(0); }
         function prevRadio() { if(activeIndex > 0) playRadio(activeIndex - 1); else playRadio(mySelectedIds.length - 1); }
 
-        function logout() { if(confirm("Deseja sair?")) { localStorage.removeItem('usuarioNome'); window.location.href = 'index.html'; } }
+        function logout() { if(confirm("Deseja sair?")) { localStorage.clear(); window.location.href = 'index.html'; } }
 
-        // --- SISTEMA DE PUBLICIDADE ---
+        // --- PUBLICIDADE ---
         let listaPubs = [], idxPub = 0;
         db.ref('publicidade').on('value', snap => {
             listaPubs = [];
             const agora = Date.now();
             snap.forEach(child => {
                 const p = child.val();
-                const inicio = new Date(p.inicio).getTime();
-                const fim = new Date(p.fim).getTime();
-                const ouvinteNomeLimpo = nomeUsuario.trim().toUpperCase();
-                const alvoLimpo = (p.ouvinteAlvo || "").trim().toUpperCase();
-
-                if ((p.destino === 'TODOS' || alvoLimpo === ouvinteNomeLimpo) && (agora >= inicio && agora <= fim)) {
+                const inicio = p.inicio;
+                const fim = p.fim;
+                if ((p.destino === 'TODOS' || p.ouvinteAlvo === nomeUsuario) && (agora >= inicio && agora <= fim)) {
                     listaPubs.push(p);
                 }
             });
-
             if (listaPubs.length === 0) { 
                 document.getElementById('img-publicidade').style.display = "none";
                 document.getElementById('pub-left').innerHTML = "";
                 document.getElementById('pub-right').innerHTML = "";
-            } else { 
-                idxPub = 0; 
-                mostrarPub(); 
-            }
+            } else { idxPub = 0; mostrarPub(); }
         });
 
         function mostrarPub() {
             const imgHeader = document.getElementById('img-publicidade');
             const containerLeft = document.getElementById('pub-left');
             const containerRight = document.getElementById('pub-right');
-            
             if (listaPubs[idxPub]) {
                 const pub = listaPubs[idxPub];
                 imgHeader.src = pub.imagem;
                 imgHeader.style.display = "block";
                 imgHeader.style.opacity = 1;
-
-                if(listaPubs.length > 1) {
-                    containerLeft.innerHTML = `<img src="${listaPubs[(idxPub + 1) % listaPubs.length].imagem}">`;
-                    containerRight.innerHTML = `<img src="${listaPubs[(idxPub + 2) % listaPubs.length].imagem || pub.imagem}">`;
-                } else {
-                    containerLeft.innerHTML = `<img src="${pub.imagem}">`;
-                    containerRight.innerHTML = `<img src="${pub.imagem}">`;
-                }
+                containerLeft.innerHTML = `<img src="${pub.imagem}">`;
+                containerRight.innerHTML = `<img src="${listaPubs[(idxPub + 1) % listaPubs.length]?.imagem || pub.imagem}">`;
             }
         }
 
         setInterval(() => {
             if (listaPubs.length > 1) {
                 idxPub = (idxPub + 1) % listaPubs.length;
-                const img = document.getElementById('img-publicidade');
-                img.style.opacity = 0;
+                document.getElementById('img-publicidade').style.opacity = 0;
                 setTimeout(mostrarPub, 500);
             }
         }, 10000);
 
+        // Heartbeat para o ADM saber que está online
         setInterval(() => {
-            if(nomeUsuario) {
-                db.ref('usuarios/' + nomeUsuario).update({ lastSeen: Date.now() });
-            }
-        }, 20000);
+            if(userId) { db.ref('contas/' + userId).update({ lastActive: Date.now() }); }
+        }, 15000);
     </script>
 </body>
 </html>
