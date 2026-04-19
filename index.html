@@ -9,33 +9,23 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --primary: #BF40BF; --bg: #0b0b0b; --card: #181818; }
-        
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
-
         .login-container { background: var(--card); padding: 30px; border-radius: 20px; border: 1px solid #333; width: 100%; max-width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); box-sizing: border-box; }
-
         h2 { color: var(--primary); margin-bottom: 25px; text-transform: uppercase; letter-spacing: 2px; font-size: 20px; }
         .input-group { margin-bottom: 15px; text-align: left; }
         label { display: block; font-size: 11px; color: #888; margin-bottom: 5px; margin-left: 5px; text-transform: uppercase; }
-        
         input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #333; background: #0b0b0b; color: white; outline: none; box-sizing: border-box; transition: 0.3s; font-size: 16px; }
         input:focus { border-color: var(--primary); box-shadow: 0 0 8px rgba(191, 64, 191, 0.3); }
-        
         .btn-acao { width: 100%; padding: 14px; border-radius: 10px; border: none; background: var(--primary); color: white; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; text-transform: uppercase; font-size: 14px; }
         .btn-acao:hover { background: #a332a3; transform: translateY(-2px); }
-        
         #msg-erro { color: #ff4444; font-size: 12px; margin-top: 15px; font-weight: bold; min-height: 15px; }
         .links { margin-top: 20px; font-size: 12px; }
         .links a { color: var(--primary); text-decoration: none; cursor: pointer; display: block; margin-bottom: 8px; opacity: 0.8; }
         .links a:hover { opacity: 1; text-decoration: underline; }
-
-        /* ESTILO DOS MODAIS */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; padding: 20px; }
         .modal-content { background: var(--card); border: 1px solid var(--primary); padding: 30px; border-radius: 20px; width: 100%; max-width: 350px; box-sizing: border-box; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .btn-fechar { background: none; border: none; color: white; font-size: 20px; cursor: pointer; }
-
-        @media (max-height: 500px) { body { align-items: flex-start; } .login-container { margin-top: 20px; } }
     </style>
 </head>
 <body>
@@ -65,8 +55,8 @@
                 <button class="btn-fechar" onclick="fecharModal('modal-cadastro')">&times;</button>
             </div>
             <div class="input-group">
-                <label>Seu Nome Completo</label>
-                <input type="text" id="cad-nome" placeholder="Nome">
+                <label>Nome de Usuário (Sem espaços)</label>
+                <input type="text" id="cad-nome" placeholder="Ex: LuigyOuvinte">
             </div>
             <div class="input-group">
                 <label>Seu E-mail</label>
@@ -74,7 +64,7 @@
             </div>
             <div class="input-group">
                 <label>Criar Senha</label>
-                <input type="password" id="cad-senha" placeholder="Mínimo 4 caracteres">
+                <input type="password" id="cad-senha" placeholder="Sua senha">
             </div>
             <button class="btn-acao" onclick="registrarUsuario()">Cadastrar Agora</button>
         </div>
@@ -86,14 +76,10 @@
                 <h3 style="margin:0; color:var(--primary)">RECUPERAR</h3>
                 <button class="btn-fechar" onclick="fecharModal('modal-esqueci')">&times;</button>
             </div>
-            <p style="font-size:12px; color:#888; text-align:center">Confirme seus dados para ver sua senha.</p>
+            <p style="font-size:12px; color:#888; text-align:center">Informe seu e-mail cadastrado.</p>
             <div class="input-group">
                 <label>E-mail Cadastrado</label>
                 <input type="email" id="rec-email" placeholder="email@exemplo.com">
-            </div>
-            <div class="input-group">
-                <label>Seu Nome</label>
-                <input type="text" id="rec-nome" placeholder="Nome Exato">
             </div>
             <button class="btn-acao" onclick="recuperarSenha()">Ver minha senha</button>
         </div>
@@ -109,105 +95,107 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // FUNÇÕES DE MODAL
         function abrirModal(id) { document.getElementById(id).style.display = 'flex'; }
         function fecharModal(id) { document.getElementById(id).style.display = 'none'; }
 
-        // CADASTRO DE NOVO USUÁRIO
+        // CADASTRO CORRIGIDO
         function registrarUsuario() {
-            const nome = document.getElementById('cad-nome').value.trim();
-            const email = document.getElementById('cad-email').value.trim();
+            const nomeInput = document.getElementById('cad-nome').value.trim();
+            const email = document.getElementById('cad-email').value.trim().toLowerCase();
             const senha = document.getElementById('cad-senha').value.trim();
             
-            if(!nome || !email || !senha) return alert("Preencha todos os campos!");
+            if(!nomeInput || !email || !senha) return alert("Preencha todos os campos!");
             
-            const idFirebase = email.replace(/\./g, ','); // Formata e-mail para o Firebase
+            // O ID no Firebase deve ser consistente. Usaremos o e-mail como ID principal.
+            const idFirebase = email.replace(/\./g, ','); 
 
             db.ref('contas/' + idFirebase).once('value').then(snap => {
                 if(snap.exists()) {
-                    alert("Este e-mail já está cadastrado!");
+                    alert("Este e-mail já possui uma conta!");
                 } else {
                     db.ref('contas/' + idFirebase).set({
-                        nome: nome,
+                        nome: nomeInput,
                         email: email,
-                        senha: senha,
+                        senha: String(senha), // Salva como string para evitar erro de comparação
                         perfil: "ouvinte",
                         status: "offline",
-                        sessionStart: Date.now()
+                        lastSeen: Date.now()
                     }).then(() => {
-                        alert("Cadastro realizado! Agora faça seu login.");
+                        alert("Sucesso! Agora faça login com seu e-mail.");
                         fecharModal('modal-cadastro');
                     });
                 }
             });
         }
 
-        // RECUPERAÇÃO DE SENHA (BUSCA NO BANCO)
+        // RECUPERAÇÃO SIMPLIFICADA
         function recuperarSenha() {
-            const email = document.getElementById('rec-email').value.trim();
-            const nome = document.getElementById('rec-nome').value.trim().toLowerCase();
-            
-            if(!email || !nome) return alert("Preencha os campos para validar!");
+            const email = document.getElementById('rec-email').value.trim().toLowerCase();
+            if(!email) return alert("Digite seu e-mail!");
 
             db.ref('contas').once('value').then(snap => {
                 let achou = false;
                 snap.forEach(child => {
                     const u = child.val();
-                    if(u.email === email && u.nome.toLowerCase() === nome) {
+                    if(u.email === email) {
                         achou = true;
-                        alert("Olá " + u.nome + "! Sua senha é: " + u.senha);
+                        alert("Sua senha é: " + u.senha);
                         fecharModal('modal-esqueci');
                     }
                 });
-                if(!achou) alert("Dados não conferem em nosso sistema.");
+                if(!achou) alert("E-mail não encontrado.");
             });
         }
 
-        // LOGIN (ORIGINAL MANTIDO COM MELHORIAS)
+        // LOGIN UNIFICADO E ROBUSTO
         function fazerLogin() {
-            const loginInformado = document.getElementById('login-input').value.trim();
+            const loginInformado = document.getElementById('login-input').value.trim().toLowerCase();
             const senhaInformada = document.getElementById('senha-input').value.trim();
             const erroDiv = document.getElementById('msg-erro');
             
             if(!loginInformado || !senhaInformada) {
-                erroDiv.innerText = "Informe login e senha!";
+                erroDiv.innerText = "Preencha os campos!";
                 return;
             }
 
-            erroDiv.innerText = "Autenticando...";
-            const idFirebase = loginInformado.replace(/\./g, ',');
+            erroDiv.innerText = "Verificando...";
 
-            db.ref('contas/' + idFirebase).once('value').then(snap => {
-                const usuario = snap.val();
-                if (usuario && String(usuario.senha) === senhaInformada) {
-                    logarSucesso(usuario, idFirebase);
-                } else {
-                    verificarBuscaGeral(loginInformado, senhaInformada);
-                }
-            }).catch(e => {
-                erroDiv.innerText = "Erro de conexão!";
-            });
-        }
-
-        function logarSucesso(usuario, key) {
-            localStorage.setItem('usuarioNome', usuario.nome);
-            localStorage.setItem('usuarioKey', key);
-            db.ref('contas/' + key).update({ status: "online", lastSeen: Date.now(), sessionStart: Date.now() });
-            window.location.href = (usuario.perfil === "adm") ? 'adm.html' : 'ouvinte.html';
-        }
-
-        function verificarBuscaGeral(login, senha) {
-            const erroDiv = document.getElementById('msg-erro');
+            // Vamos buscar direto na lista de contas para não ter erro de chave
             db.ref('contas').once('value').then(snap => {
-                let achou = false;
+                let usuarioEncontrado = null;
+                let chaveUsuario = null;
+
                 snap.forEach(child => {
                     const u = child.val();
-                    if ((u.email === login || u.nome.toLowerCase() === login.toLowerCase()) && String(u.senha) === senha) {
-                        achou = true;
-                        logarSucesso(u, child.key);
+                    // Verifica se o login bate com E-mail ou com o Nome
+                    if ((u.email.toLowerCase() === loginInformado || u.nome.toLowerCase() === loginInformado) && String(u.senha) === String(senhaInformada)) {
+                        usuarioEncontrado = u;
+                        chaveUsuario = child.key;
                     }
                 });
-                if (!achou) erroDiv.innerText = "E-mail ou Senha incorretos!";
+
+                if (usuarioEncontrado) {
+                    erroDiv.innerText = "Sucesso! Entrando...";
+                    localStorage.setItem('usuarioNome', usuarioEncontrado.nome);
+                    localStorage.setItem('usuarioKey', chaveUsuario);
+                    
+                    // Atualiza status e vai para a página correta
+                    db.ref('contas/' + chaveUsuario).update({
+                        status: "online",
+                        lastSeen: Date.now()
+                    }).then(() => {
+                        if (usuarioEncontrado.perfil === "adm") {
+                            window.location.href = 'adm.html';
+                        } else {
+                            window.location.href = 'ouvinte.html';
+                        }
+                    });
+                } else {
+                    erroDiv.innerText = "E-mail ou Senha incorretos!";
+                }
+            }).catch(e => {
+                erroDiv.innerText = "Erro ao conectar ao banco!";
+                console.error(e);
             });
         }
     </script>
