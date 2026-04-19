@@ -419,24 +419,30 @@
             });
         });
 
-        // --- MONITOR DE OUVINTES ---
+        // --- MONITOR DE OUVINTES (LOGICA CORRIGIDA) ---
         db.ref('contas').on('value', snap => {
             const container = document.getElementById('user-list');
             container.innerHTML = ""; 
-            usersDataCache = {};
+            
             snap.forEach(c => {
                 const u = c.val(), id = c.key;
                 if(u.perfil === "adm" || u.tipo === "admin") return;
+                
                 const status = u.status || 'offline';
                 const isOnline = (status === 'online');
                 const safeId = id.replace(/[^a-zA-Z0-9]/g, '_');
                 
-                // Cache de dados para o cronômetro
-                usersDataCache[safeId] = { 
-                    sessionStart: u.sessionStart || Date.now(),
-                    radioTime: u.radioTime || 0,
-                    isOnline: isOnline 
-                };
+                // Se o rádio mudar, o cache local precisa notar para "resetar" a contagem visual
+                if(!usersDataCache[safeId] || usersDataCache[safeId].radioAtual !== u.radioAtual) {
+                    usersDataCache[safeId] = {
+                        sessionStart: u.sessionStart || Date.now(),
+                        radioTime: u.radioTime || Date.now(), // Esse valor vem do app do ouvinte ao trocar rádio
+                        radioAtual: u.radioAtual || 'Nenhuma',
+                        isOnline: isOnline
+                    };
+                } else {
+                    usersDataCache[safeId].isOnline = isOnline;
+                }
 
                 const div = document.createElement('div');
                 div.className = "user-item";
@@ -450,7 +456,7 @@
                     </div>
                     <div class="user-details-bar" id="details-${safeId}">
                         <p>E-mail: <b>${u.email || id.replace(/,/g,'.')}</b></p>
-                        <p>Rádio Atual: <b style="color:var(--primary)">${u.radioAtual || 'Nenhuma'}</b></p>
+                        <p>Rádio Conectada: <b style="color:var(--primary)" id="radio-nome-${safeId}">${u.radioAtual || 'Nenhuma'}</b></p>
                         <p>Tempo de Sessão: <b id="timer-sessao-${safeId}">00:00:00</b></p>
                         <p>Tempo nesta Rádio: <b id="timer-radio-${safeId}">00:00:00</b></p>
                         <p>Local: <b>${u.cidade || 'N/A'} - ${u.estado || ''}</b></p>
@@ -461,7 +467,7 @@
 
         function toggleUserDetails(id) {
             const bar = document.getElementById('details-' + id);
-            bar.style.display = (bar.style.display === 'block' ? 'none' : 'block');
+            if(bar) bar.style.display = (bar.style.display === 'block' ? 'none' : 'block');
         }
 
         function updateUserTimers() {
@@ -469,28 +475,23 @@
             for (let id in usersDataCache) {
                 const data = usersDataCache[id];
                 if (data.isOnline) {
-                    // Tempo de Sessão (Login)
+                    // 1. Tempo total de sessão (desde o login)
                     const elSessao = document.getElementById(`timer-sessao-${id}`);
                     if (elSessao) elSessao.innerText = formatDuration(agora - data.sessionStart);
                     
-                    // Tempo na Rádio (Zera na troca)
+                    // 2. Tempo na rádio atual (reseta se mudar)
                     const elRadio = document.getElementById(`timer-radio-${id}`);
-                    if (elRadio) {
-                        if (data.radioTime > 0) {
-                            elRadio.innerText = formatDuration(agora - data.radioTime);
-                        } else {
-                            elRadio.innerText = "00:00:00";
-                        }
-                    }
+                    if (elRadio) elRadio.innerText = formatDuration(agora - data.radioTime);
                 }
             }
         }
 
         function formatDuration(ms) {
             if (ms < 0) ms = 0;
-            const h = Math.floor(ms / 3600000);
-            const m = Math.floor((ms % 3600000) / 60000);
-            const s = Math.floor((ms % 60000) / 1000);
+            const totalSegundos = Math.floor(ms / 1000);
+            const h = Math.floor(totalSegundos / 3600);
+            const m = Math.floor((totalSegundos % 3600) / 60);
+            const s = totalSegundos % 60;
             return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
         }
     </script>
