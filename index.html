@@ -76,7 +76,6 @@
                 <h3 style="margin:0; color:var(--primary)">RECUPERAR</h3>
                 <button class="btn-fechar" onclick="fecharModal('modal-esqueci')">&times;</button>
             </div>
-            
             <div id="etapa-validar">
                 <p style="font-size:12px; color:#888; text-align:center">Confirme seus dados para alterar a senha.</p>
                 <div class="input-group">
@@ -89,7 +88,6 @@
                 </div>
                 <button class="btn-acao" onclick="validarParaNovaSenha()">Validar Dados</button>
             </div>
-
             <div id="etapa-nova-senha" style="display:none">
                 <p style="font-size:12px; color:#00ff00; text-align:center">Dados validados! Digite a nova senha.</p>
                 <div class="input-group">
@@ -125,8 +123,6 @@
             }
         }
         function fecharModal(id) { document.getElementById(id).style.display = 'none'; }
-
-        // FUNÇÃO PARA O TECLA ENTER
         function handleEnter(e, func) { if (e.key === 'Enter') { func(); } }
 
         function registrarUsuario() {
@@ -139,7 +135,7 @@
                 if(snap.exists()) alert("Este e-mail já possui uma conta!");
                 else {
                     db.ref('contas/' + idFirebase).set({
-                        nome: nomeInput, email: email, senha: String(senha),
+                        nome: nomeInput, email: email, login: email, senha: String(senha),
                         perfil: "ouvinte", status: "offline", lastSeen: Date.now()
                     }).then(() => {
                         alert("Cadastro realizado!");
@@ -149,17 +145,15 @@
             });
         }
 
-        // VALIDAÇÃO EM 2 ETAPAS PARA NOVA SENHA
         function validarParaNovaSenha() {
             const email = document.getElementById('rec-email').value.trim().toLowerCase();
             const primeiroNome = document.getElementById('rec-nome').value.trim().toLowerCase();
             if(!email || !primeiroNome) return alert("Preencha os campos!");
-
             db.ref('contas').once('value').then(snap => {
                 let achou = false;
                 snap.forEach(child => {
                     const u = child.val();
-                    const nomeNoBanco = u.nome.split(' ')[0].toLowerCase(); // Pega só o primeiro nome
+                    const nomeNoBanco = u.nome.split(' ')[0].toLowerCase();
                     if(u.email === email && nomeNoBanco === primeiroNome) {
                         achou = true;
                         usuarioChaveParaRecuperar = child.key;
@@ -176,11 +170,8 @@
             const n2 = document.getElementById('conf-nova-senha').value.trim();
             if(n1.length < 4) return alert("A senha deve ter pelo menos 4 caracteres.");
             if(n1 !== n2) return alert("As senhas não coincidem!");
-
-            db.ref('contas/' + usuarioChaveParaRecuperar).update({
-                senha: String(n1)
-            }).then(() => {
-                alert("Senha alterada com sucesso! Agora faça login.");
+            db.ref('contas/' + usuarioChaveParaRecuperar).update({ senha: String(n1) }).then(() => {
+                alert("Senha alterada com sucesso!");
                 fecharModal('modal-esqueci');
             });
         }
@@ -189,22 +180,41 @@
             const loginInformado = document.getElementById('login-input').value.trim().toLowerCase();
             const senhaInformada = document.getElementById('senha-input').value.trim();
             const erroDiv = document.getElementById('msg-erro');
+
             if(!loginInformado || !senhaInformada) { erroDiv.innerText = "Preencha os campos!"; return; }
+            
             erroDiv.innerText = "Verificando...";
+            
             db.ref('contas').once('value').then(snap => {
-                let usuarioEncontrado = null, chaveUsuario = null;
+                let usuarioEncontrado = null;
+                let chaveUsuario = null;
+
                 snap.forEach(child => {
                     const u = child.val();
-                    if ((u.email.toLowerCase() === loginInformado || u.nome.toLowerCase() === loginInformado) && String(u.senha) === String(senhaInformada)) {
-                        usuarioEncontrado = u; chaveUsuario = child.key;
+                    // Ajuste cirúrgico: Garante que ambos sejam strings e compara email ou nome
+                    if ((String(u.email).toLowerCase() === loginInformado || String(u.nome).toLowerCase() === loginInformado || String(u.login).toLowerCase() === loginInformado) && String(u.senha) === String(senhaInformada)) {
+                        usuarioEncontrado = u;
+                        chaveUsuario = child.key;
                     }
                 });
+
                 if (usuarioEncontrado) {
-                    localStorage.setItem('usuarioNome', usuarioEncontrado.nome);
+                    // Salva as chaves necessárias para o ouvinte.html e adm.html
+                    localStorage.setItem('userId', chaveUsuario);
                     localStorage.setItem('usuarioKey', chaveUsuario);
+                    localStorage.setItem('usuarioNome', usuarioEncontrado.nome);
+                    localStorage.setItem('usuarioPerfil', usuarioEncontrado.perfil);
+
                     db.ref('contas/' + chaveUsuario).update({ status: "online", lastSeen: Date.now() })
-                    .then(() => { window.location.href = (usuarioEncontrado.perfil === "adm") ? 'adm.html' : 'ouvinte.html'; });
-                } else { erroDiv.innerText = "E-mail ou Senha incorretos!"; }
+                    .then(() => { 
+                        window.location.href = (usuarioEncontrado.perfil === "adm") ? 'adm.html' : 'ouvinte.html'; 
+                    });
+                } else { 
+                    erroDiv.innerText = "E-mail ou Senha incorretos!"; 
+                }
+            }).catch(e => {
+                erroDiv.innerText = "Erro ao conectar!";
+                console.log(e);
             });
         }
     </script>
