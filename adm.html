@@ -51,14 +51,10 @@
         .radio-actions { position: absolute; top: 5px; right: 5px; display: flex; gap: 5px; z-index: 10; }
         .radio-actions i { cursor: pointer; padding: 4px; background: rgba(0,0,0,0.1); border-radius: 4px; font-size: 11px; }
 
-        /* ANTENA PISCANDO - AJUSTE CIRÚRGICO */
+        /* ANTENA PISCANDO */
         .antena { font-size: 24px; margin-bottom: 8px; display: none; color: var(--primary); }
         .active .antena { display: block !important; animation: antenaPisca 0.8s infinite alternate !important; }
-        
-        @keyframes antenaPisca { 
-            from { opacity: 1; transform: scale(1.1); } 
-            to { opacity: 0.1; transform: scale(0.9); } 
-        }
+        @keyframes antenaPisca { from { opacity: 1; transform: scale(1.1); } to { opacity: 0.1; transform: scale(0.9); } }
 
         /* CONTROLES DO PLAYER */
         .player-footer { margin-top: 20px; background: #111; padding: 20px; border-radius: 20px; border: 1px solid #222; text-align: center; }
@@ -206,12 +202,8 @@
             });
             if(!window.sortInit && radioData.length > 0) {
                 Sortable.create(list, { 
-                    animation: 150, 
-                    delay: 500,
-                    delayOnTouchOnly: true,
-                    onEnd: () => {
-                        list.querySelectorAll('.radio-item').forEach((it, idx) => { db.ref('radios/' + it.dataset.id).update({ posicao: idx }); });
-                    }
+                    animation: 150, delay: 500, delayOnTouchOnly: true,
+                    onEnd: () => { list.querySelectorAll('.radio-item').forEach((it, idx) => { db.ref('radios/' + it.dataset.id).update({ posicao: idx }); }); }
                 }); window.sortInit = true;
             }
         });
@@ -220,13 +212,8 @@
             activeIndex = idx; const r = radioData[idx]; player.src = r.url; player.play();
             document.getElementById('now-title').innerText = "OUVINDO: " + r.name;
             document.getElementById('play-icon').className = "fas fa-stop";
-            
-            // Força a atualização da grade para aplicar a classe active e disparar a antena
             const items = document.querySelectorAll('.radio-item');
-            items.forEach((item, i) => {
-                if(i === idx) item.classList.add('active');
-                else item.classList.remove('active');
-            });
+            items.forEach((item, i) => { if(i === idx) item.classList.add('active'); else item.classList.remove('active'); });
         }
         function togglePlay() { 
             if(player.paused) { player.play(); document.getElementById('play-icon').className = "fas fa-stop"; } 
@@ -278,6 +265,7 @@
             });
         });
 
+        // AJUSTE CIRÚRGICO NO MONITOR DE OUVINTES PARA CRONÔMETRO PRECISO
         db.ref('contas').on('value', snap => {
             const container = document.getElementById('user-list'); if(!container) return;
             const agora = Date.now();
@@ -288,11 +276,18 @@
                 if(u.perfil === "adm") continue;
                 const safeId = uid.replace(/[^a-zA-Z0-9]/g, '_');
                 const sinalVida = u.lastSeen || u.lastActive || 0;
-                const isOnline = (u.status === 'online' && (agora - sinalVida < 40000));
-                if (!usersDataCache[safeId]) {
-                    usersDataCache[safeId] = { sStart: u.sessionStart || agora, rStart: u.radioStart || agora, radioAtual: u.radioAtual };
+                const isOnline = (u.status === 'online' && (agora - sinalVida < 45000));
+                
+                // Sincroniza o cache local com os dados reais do Firebase para o cronômetro
+                if (!usersDataCache[safeId] || usersDataCache[safeId].radioAtual !== u.radioAtual) {
+                    usersDataCache[safeId] = { 
+                        sStart: u.sessionStart || agora, 
+                        rStart: u.radioStart || agora, 
+                        radioAtual: u.radioAtual 
+                    };
                 }
                 usersDataCache[safeId].isOnline = isOnline;
+                
                 const div = document.createElement('div');
                 div.className = "user-item";
                 div.style.borderLeft = isOnline ? '4px solid #1DB954' : '4px solid #d1a3ff';
@@ -326,6 +321,7 @@
             }
         }
         function format(ms) {
+            if(ms < 0) ms = 0;
             const s = Math.floor(ms/1000), h = Math.floor(s/3600), m = Math.floor((s%3600)/60), seg = s%60;
             return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${seg.toString().padStart(2,'0')}`;
         }
