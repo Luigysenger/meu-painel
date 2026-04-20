@@ -152,10 +152,11 @@
         
         document.getElementById('nome-exibicao').innerText = nomeUsuario;
 
-        // Atualizar status no banco
+        // AJUSTE CIRÚRGICO: Registrar início da sessão e status online com timestamp do servidor
         db.ref('contas/' + userId).update({
             status: "online",
-            lastSeen: Date.now()
+            lastSeen: firebase.database.ServerValue.TIMESTAMP,
+            sessionStart: firebase.database.ServerValue.TIMESTAMP // ADICIONADO PARA O CRONÔMETRO DE SESSÃO
         });
 
         let allRadios = [], mySelectedIds = [], activeIndex = -1;
@@ -225,9 +226,12 @@
             player.src = r.url; player.play();
             document.getElementById('now-title').innerText = "OUVINTE: " + r.name;
             document.getElementById('play-icon').className = "fas fa-stop";
+            
+            // AJUSTE CIRÚRGICO: Atualizar timestamp de início desta rádio específica para o cronômetro do ADM
             db.ref('contas/' + userId).update({
                 radioAtual: r.name,
-                lastSeen: Date.now()
+                radioStart: firebase.database.ServerValue.TIMESTAMP, // ZERA O CRONÔMETRO NO ADM
+                lastSeen: firebase.database.ServerValue.TIMESTAMP
             });
             renderAll();
         }
@@ -283,7 +287,15 @@
             }
         }, 10000);
 
-        setInterval(() => { if(userId) db.ref('contas/' + userId).update({ lastSeen: Date.now() }); }, 20000);
+        // AJUSTE CIRÚRGICO: Heartbeat (Sinal de vida) mais frequente para o ADM monitorar
+        setInterval(() => { 
+            if(userId) {
+                db.ref('contas/' + userId).update({ 
+                    lastSeen: firebase.database.ServerValue.TIMESTAMP,
+                    status: "online"
+                }); 
+            }
+        }, 15000); 
     </script>
 </body>
 </html>
