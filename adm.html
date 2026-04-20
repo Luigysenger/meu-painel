@@ -12,18 +12,18 @@
         :root { --primary: #1DB954; --bg: #000; --card: #121212; --text-muted: #b3b3b3; --purple-light: #d1a3ff; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 10px; user-select: none; }
         
-        /* CABEÇALHO RESPONSIVO */
+        /* CABEÇALHO */
         .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 15px 20px; border-radius: 15px; border: 1px solid #333; margin-bottom: 20px; gap: 15px; }
         .header-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
         .header h2 { margin: 0; color: var(--primary); font-size: 18px; white-space: nowrap; }
         .btn-msg-notif { background: #ff4444; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; font-size: 13px; }
-        .btn-msg-notif span { background: white; color: #ff4444; padding: 2px 6px; border-radius: 50%; font-size: 11px; }
+        .btn-msg-notif span { background: white; color: #ff4444; padding: 2px 6px; border-radius: 50%; font-size: 12px; }
         .btn-header { background: none; border: 1px solid #333; color: white; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 5px; }
         .btn-sair { color: #ff4444; border-color: #442222; }
         #hora { font-size: 20px; font-weight: 900; min-width: 80px; text-align: right; }
 
         @media (max-width: 600px) {
-            .header { flex-direction: column; text-align: center; justify-content: center; }
+            .header { flex-direction: column; text-align: center; }
             .header-left { justify-content: center; }
             #hora { text-align: center; font-size: 24px; }
         }
@@ -36,22 +36,29 @@
         .msg-card-individual h4 { margin: 0 0 5px 0; color: var(--primary); font-size: 14px; display: flex; justify-content: space-between; }
         .msg-card-individual p { font-size: 13px; margin: 10px 0; line-height: 1.4; color: #eee; background: #222; padding: 8px; border-radius: 5px; }
 
-        /* GRID PRINCIPAL RESPONSIVO */
+        /* GRID PRINCIPAL */
         .main-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; max-width: 1400px; margin: 0 auto; }
         @media (max-width: 1024px) { .main-grid { grid-template-columns: 1fr; } }
-        
         .card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid #282828; margin-bottom: 20px; }
         h3 { color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; }
 
-        /* RADIOS E GRADE */
-        .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 12px; }
-        .radio-item { aspect-ratio: 1/1; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #000; font-weight: bold; font-size: 12px; text-align: center; padding: 10px; cursor: grab; transition: 0.3s; position: relative; border: 2px solid transparent; }
+        /* RADIOS */
+        .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+        @media (max-width: 480px) { .radio-grid { grid-template-columns: repeat(2, 1fr); } }
+
+        .radio-item { aspect-ratio: 1/1; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #000; font-weight: bold; font-size: 12px; text-align: center; padding: 10px; cursor: pointer; transition: 0.3s; position: relative; border: 2px solid transparent; -webkit-tap-highlight-color: transparent; }
         .radio-item.active { background: #000 !important; color: var(--primary) !important; border-color: var(--primary); box-shadow: 0 0 15px rgba(29, 185, 84, 0.3); }
         .radio-actions { position: absolute; top: 5px; right: 5px; display: flex; gap: 5px; z-index: 10; }
         .radio-actions i { cursor: pointer; padding: 4px; background: rgba(0,0,0,0.1); border-radius: 4px; font-size: 11px; }
-        .antena { font-size: 20px; margin-bottom: 8px; display: none; }
-        .active .antena { display: block; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 50% { opacity: 0.3; transform: scale(0.9); } }
+
+        /* ANTENA PISCANDO - AJUSTE CIRÚRGICO */
+        .antena { font-size: 24px; margin-bottom: 8px; display: none; color: var(--primary); }
+        .active .antena { display: block !important; animation: antenaPisca 0.8s infinite alternate !important; }
+        
+        @keyframes antenaPisca { 
+            from { opacity: 1; transform: scale(1.1); } 
+            to { opacity: 0.1; transform: scale(0.9); } 
+        }
 
         /* CONTROLES DO PLAYER */
         .player-footer { margin-top: 20px; background: #111; padding: 20px; border-radius: 20px; border: 1px solid #222; text-align: center; }
@@ -59,14 +66,13 @@
         .btn-nav { background: none; border: none; color: #b3b3b3; font-size: 24px; cursor: pointer; }
         .btn-spotify-play { width: 55px; height: 55px; background: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: black; cursor: pointer; }
 
-        /* PUBLICIDADE RESPONSIVA */
+        /* PUBLICIDADE */
         .pub-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
         @media (max-width: 600px) { .pub-container { grid-template-columns: 1fr; } }
         .pub-preview { width: 100%; max-height: 120px; object-fit: contain; margin-top: 10px; border-radius: 10px; border: 1px dashed #444; display: none; }
         .pub-list-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; overflow: hidden; border-left: 4px solid var(--primary); }
         .pub-list-row { display: flex; align-items: center; width: 100%; }
         .pub-list-btn { flex: 1; padding: 12px; background: none; border: none; color: white; text-align: left; display: flex; align-items: center; gap: 10px; cursor: pointer; min-width: 0; }
-        .pub-list-btn span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .pub-thumb-mini { width: 40px; height: 25px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
 
         /* MONITOR OUVINTES */
@@ -74,10 +80,10 @@
         .user-name-btn { width: 100%; padding: 15px; background: none; border: none; color: white; text-align: left; font-weight: bold; font-size: 13px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .status-on { color: #1DB954; font-weight: 900; font-size: 10px; }
         .status-off { color: #d1a3ff; font-weight: 900; font-size: 10px; }
-        .user-details-bar { display: none; padding: 0 15px 15px 15px; font-size: 12px; color: #ccc; border-top: 1px solid #222; line-height: 1.6; }
+        .user-details-bar { display: none; padding: 0 15px 15px 15px; font-size: 12px; color: #ccc; border-top: 1px solid #222; }
 
         input, select { padding: 12px; background: #2a2a2a; border: none; color: white; border-radius: 8px; margin-bottom: 10px; width: -webkit-fill-available; outline: none; font-size: 14px; }
-        .btn-save { padding: 12px; background: var(--primary); border: none; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+        .btn-save { padding: 12px; background: var(--primary); border: none; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; }
     </style>
 </head>
 <body>
@@ -199,9 +205,14 @@
                 list.appendChild(div);
             });
             if(!window.sortInit && radioData.length > 0) {
-                Sortable.create(list, { animation: 150, onEnd: () => {
-                    list.querySelectorAll('.radio-item').forEach((it, idx) => { db.ref('radios/' + it.dataset.id).update({ posicao: idx }); });
-                }}); window.sortInit = true;
+                Sortable.create(list, { 
+                    animation: 150, 
+                    delay: 500,
+                    delayOnTouchOnly: true,
+                    onEnd: () => {
+                        list.querySelectorAll('.radio-item').forEach((it, idx) => { db.ref('radios/' + it.dataset.id).update({ posicao: idx }); });
+                    }
+                }); window.sortInit = true;
             }
         });
 
@@ -209,6 +220,13 @@
             activeIndex = idx; const r = radioData[idx]; player.src = r.url; player.play();
             document.getElementById('now-title').innerText = "OUVINDO: " + r.name;
             document.getElementById('play-icon').className = "fas fa-stop";
+            
+            // Força a atualização da grade para aplicar a classe active e disparar a antena
+            const items = document.querySelectorAll('.radio-item');
+            items.forEach((item, i) => {
+                if(i === idx) item.classList.add('active');
+                else item.classList.remove('active');
+            });
         }
         function togglePlay() { 
             if(player.paused) { player.play(); document.getElementById('play-icon').className = "fas fa-stop"; } 
