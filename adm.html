@@ -110,10 +110,10 @@
         /* LAYOUT PRINCIPAL */
         .main-container {
             display: grid;
-            grid-template-columns: 1fr 400px;
+            grid-template-columns: 1fr 420px;
             gap: 20px;
             padding: 20px;
-            max-width: 1600px;
+            max-width: 1650px;
             margin: 0 auto;
             width: 100%;
         }
@@ -263,12 +263,12 @@
             cursor: pointer;
         }
 
-        /* ESTILOS DO MONITOR DE OUVINTES (AJUSTADO E APERFEIÇOADO) */
+        /* MONITOR DE OUVINTES */
         .user-list {
             display: flex;
             flex-direction: column;
             gap: 12px;
-            max-height: 75vh;
+            max-height: 78vh;
             overflow-y: auto;
         }
 
@@ -276,7 +276,7 @@
             background: #202026;
             border-radius: 8px;
             padding: 12px 15px;
-            border-left: 4px solid var(--text-dim);
+            border-left: 4px solid #d1a3ff;
             transition: all 0.3s ease;
         }
 
@@ -332,31 +332,34 @@
             margin-left: 10px;
         }
 
-        /* GRÁFICO DE PRÉDIOS (BARRAS POR RÁDIO ESCUTADA) */
+        /* GRÁFICO DE PRÉDIOS (BARRAS DE TEMPO POR RÁDIO) */
         .building-chart-container {
-            margin-top: 10px;
-            padding-top: 8px;
-            border-top: 1px solid #333;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #2e2e38;
         }
 
         .building-chart-title {
             font-size: 10px;
             text-transform: uppercase;
-            color: #888;
+            color: var(--primary);
+            font-weight: bold;
             margin-bottom: 8px;
             display: flex;
-            justify-content: space-between;
+            align-items: center;
+            gap: 5px;
         }
 
         .building-chart {
             display: flex;
             align-items: flex-end;
             gap: 8px;
-            height: 65px;
+            height: 80px;
             background: #141418;
-            padding: 8px 10px 2px 10px;
+            padding: 12px 10px 6px 10px;
             border-radius: 6px;
             overflow-x: auto;
+            border: 1px solid #282828;
         }
 
         .building-bar-wrapper {
@@ -365,45 +368,45 @@
             align-items: center;
             height: 100%;
             justify-content: flex-end;
-            min-width: 38px;
+            min-width: 45px;
+            flex: 1;
         }
 
         .building-bar {
             width: 100%;
-            background: linear-gradient(180deg, #1DB954 0%, #0d5c29 100%);
-            border-radius: 3px 3px 0 0;
-            min-height: 4px;
-            transition: height 0.4s ease;
+            max-width: 28px;
+            background: linear-gradient(180deg, #1DB954 0%, #0a401d 100%);
+            border-radius: 4px 4px 0 0;
+            min-height: 6px;
+            transition: height 0.3s ease;
             position: relative;
+            box-shadow: 0 0 10px rgba(29, 185, 84, 0.2);
         }
 
-        .building-bar:hover::after {
-            content: attr(data-time);
-            position: absolute;
-            top: -20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #000;
-            color: #fff;
-            padding: 2px 4px;
+        .building-bar.active-bar {
+            background: linear-gradient(180deg, #00ff62 0%, #1DB954 100%);
+            box-shadow: 0 0 12px rgba(0, 255, 98, 0.5);
+        }
+
+        .building-time-tag {
             font-size: 9px;
-            border-radius: 3px;
-            white-space: nowrap;
-            z-index: 10;
+            color: #fff;
+            font-weight: bold;
+            margin-bottom: 3px;
         }
 
         .building-label {
             font-size: 8px;
             color: #aaa;
-            margin-top: 4px;
+            margin-top: 5px;
             width: 100%;
             text-align: center;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            font-weight: 600;
         }
 
-        /* Scrollbar customizada */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #121212; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
@@ -458,22 +461,21 @@
 
         </div>
 
-        <!-- PAINEL DIREITO: MONITOR DE OUVINTES COM ESTATÍSTICAS E PRÉDIOS -->
+        <!-- PAINEL DIREITO: MONITOR DE OUVINTES COM CRONÔMETRO E PRÉDIOS EM TEMPO REAL -->
         <div class="panel-box">
             <div class="panel-title"><i class="fas fa-users"></i> Monitor de Ouvintes</div>
             <div class="user-list" id="user-list">
-                <!-- Ouvintes inseridos dinamicamente aqui -->
+                <!-- Lista de ouvintes gerada dinamicamente -->
             </div>
         </div>
 
     </div>
 
-    <!-- ÁUDIO PLAYER (INVISÍVEL) -->
+    <!-- ÁUDIO PLAYER -->
     <audio id="audio-player" style="display:none;"></audio>
 
-    <!-- SCRIPT DE LÓGICA INTEGRA -->
+    <!-- SCRIPT DA APLICAÇÃO -->
     <script>
-        // Configuração Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
             authDomain: "meu-painel-f2efe.firebaseapp.com",
@@ -486,14 +488,13 @@
 
         let radioData = [], activeIndex = -1, usersDataCache = {};
 
-        // Escapar código HTML nocivo
         function escapeHtml(str) {
             return String(str || '').replace(/[&<>"']/g, function(m) {
                 return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
             });
         }
 
-        // Relógio & Atualização de Cronômetros Globais
+        // Relógio & Atualização constante de tempos e prédios
         setInterval(() => {
             const hElement = document.getElementById('hora');
             if(hElement) hElement.innerText = new Date().toLocaleTimeString('pt-BR');
@@ -507,9 +508,7 @@
             } 
         }
 
-        function toggleMensagens() { 
-            alert("Caixa de mensagens em desenvolvimento.");
-        }
+        function toggleMensagens() { alert("Caixa de mensagens em desenvolvimento."); }
 
         // --- GERENCIAMENTO DE RÁDIOS ---
         db.ref('radios').on('value', snap => {
@@ -616,7 +615,7 @@
         function prevRadio() { if(radioData.length) playRadio((activeIndex - 1 + radioData.length) % radioData.length); }
 
 
-        // --- MONITOR DE OUVINTES COM CRONÔMETRO REQUISITADO E GRÁFICO DE PRÉDIOS ---
+        // --- MONITOR DE OUVINTES COM PRÉDIOS E HISTÓRICO GARANTIDO ---
         db.ref('contas').on('value', snap => {
             const container = document.getElementById('user-list'); 
             if(!container) return;
@@ -635,21 +634,20 @@
                 const sinalVida = u.lastSeen || u.lastActive || 0;
                 const isOnline = (u.status === 'online' && (agora - sinalVida < 45000)); 
 
-                // Guardar referências de tempo e histórico de rádios no cache
+                // Extrai ou inicializa objeto de histórico
+                let historicoObj = u.historicoRadios || {};
+                
                 usersDataCache[safeId] = { 
                     loginStart: u.sessionStart || u.loginTime || agora, 
                     radioStart: u.radioStart || agora, 
-                    radioAtual: u.radioAtual || 'Nenhuma',
-                    historicoRadios: u.historicoRadios || {}, // Guarda acumulado { "ANTENA 1": ms, "JOVEM PAM": ms }
+                    radioAtual: u.radioAtual || '',
+                    historicoRadios: historicoObj,
                     isOnline: isOnline
                 };
                 
                 const div = document.createElement('div');
                 div.className = `user-card ${isOnline ? 'online' : ''}`;
                 
-                // Constrói visual do gráfico de prédios para o histórico do ouvinte
-                let prediosHtml = renderBuildingChart(usersDataCache[safeId]);
-
                 div.innerHTML = `
                     <div class="user-card-header">
                         <span class="user-name" style="color:${isOnline ? '#fff' : '#d1a3ff'}">${escapeHtml(u.nome || 'Ouvinte')}</span>
@@ -659,73 +657,83 @@
                         </div>
                     </div>
                     <div class="user-info-body">
-                        <div>Rádio: <span class="radio-highlight">${isOnline ? escapeHtml(u.radioAtual || 'Nenhuma') : '---'}</span></div>
+                        <div>Rádio: <span class="radio-highlight" id="rname-${safeId}">${isOnline && u.radioAtual ? escapeHtml(u.radioAtual) : '---'}</span></div>
                         <div>Sessão (Login): <b id="ts-${safeId}">00:00:00</b></div>
-                        <div>Tempo nesta Rádio: <b id="tr-${safeId}">00:00:00</b></div>
+                        <div>Nesta Rádio: <b id="tr-${safeId}">00:00:00</b></div>
                     </div>
-                    ${prediosHtml}
+                    <div class="building-chart-container">
+                        <div class="building-chart-title"><i class="fas fa-city"></i> Tempo Conectado por Rádio</div>
+                        <div class="building-chart" id="chart-${safeId}">
+                            <!-- Prédios gerados dinamicamente via JS -->
+                        </div>
+                    </div>
                 `;
                 container.appendChild(div);
             }
+
+            // Atualiza de imediato após renderizar
+            updateUserTimers();
         });
 
-        // Função que gera os "prédios" (barras de tempo escutado)
-        function renderBuildingChart(userData) {
-            const hist = userData.historicoRadios || {};
-            
-            // Adiciona/Atualiza tempo da rádio atual no cálculo do gráfico
-            const histCompleto = { ...hist };
-            if(userData.isOnline && userData.radioAtual && userData.radioAtual !== 'Nenhuma') {
-                const tempoAtualMs = Date.now() - userData.radioStart;
-                histCompleto[userData.radioAtual] = (histCompleto[userData.radioAtual] || 0) + tempoAtualMs;
-            }
-
-            const keys = Object.keys(histCompleto);
-            if(keys.length === 0) return '';
-
-            // Achar o tempo máximo para definir a altura de 100% dos prédios
-            let maxTempo = 1;
-            keys.forEach(k => { if(histCompleto[k] > maxTempo) maxTempo = histCompleto[k]; });
-
-            let barsHtml = '';
-            keys.forEach(radioName => {
-                const ms = histCompleto[radioName];
-                const heightPercent = Math.max(10, Math.min(100, (ms / maxTempo) * 100)); // Min 10% de altura para visualização
-                const tempoFormatado = formatMs(ms);
-
-                barsHtml += `
-                    <div class="building-bar-wrapper">
-                        <div class="building-bar" style="height: ${heightPercent}%;" data-time="${tempoFormatado}"></div>
-                        <div class="building-label" title="${escapeHtml(radioName)}">${escapeHtml(radioName)}</div>
-                    </div>
-                `;
-            });
-
-            return `
-                <div class="building-chart-container">
-                    <div class="building-chart-title"><span><i class="fas fa-chart-bar"></i> Tempo por Emissora</span></div>
-                    <div class="building-chart">
-                        ${barsHtml}
-                    </div>
-                </div>
-            `;
-        }
-
-        // Atualização em tempo real sem recarregar o DOM
+        // Função que calcula e desenha/atualiza os prédios segundo a segundo
         function updateUserTimers() {
             const agora = Date.now();
-            for (let id in usersDataCache) {
-                const d = usersDataCache[id];
+
+            for (let safeId in usersDataCache) {
+                const d = usersDataCache[safeId];
+                
+                // Elementos no DOM
+                const elSessao = document.getElementById(`ts-${safeId}`);
+                const elRadio = document.getElementById(`tr-${safeId}`);
+                const chartBox = document.getElementById(`chart-${safeId}`);
+
                 if (d.isOnline) {
-                    const s = document.getElementById(`ts-${id}`);
-                    const r = document.getElementById(`tr-${id}`);
+                    if (elSessao) elSessao.innerText = formatMs(agora - d.loginStart);
+                    if (elRadio) elRadio.innerText = d.radioAtual ? formatMs(agora - d.radioStart) : "00:00:00";
+                }
+
+                // --- MONTAGEM DOS PRÉDIOS DA AUDIÊNCIA ---
+                if (chartBox) {
+                    const tempMap = { ...d.historicoRadios };
                     
-                    if(s) s.innerText = formatMs(agora - d.loginStart);
-                    if(r) r.innerText = formatMs(agora - d.radioStart);
+                    // Se estiver ouvindo uma rádio agora, soma o tempo em tempo real
+                    if (d.isOnline && d.radioAtual) {
+                        const tempoAtualMs = Math.max(0, agora - d.radioStart);
+                        tempMap[d.radioAtual] = (tempMap[d.radioAtual] || 0) + tempoAtualMs;
+                    }
+
+                    const radiosList = Object.keys(tempMap);
+
+                    if (radiosList.length === 0) {
+                        chartBox.innerHTML = `<span style="font-size:10px; color:#666; width:100%; text-align:center; margin-auto;">Aguardando ouvinte iniciar uma rádio...</span>`;
+                        continue;
+                    }
+
+                    // Encontra o maior tempo para ser o prédio mais alto (100%)
+                    let maxTime = 1;
+                    radiosList.forEach(r => { if(tempMap[r] > maxTime) maxTime = tempMap[r]; });
+
+                    let htmlPredios = '';
+                    radiosList.forEach(radioName => {
+                        const ms = tempMap[radioName];
+                        const heightPct = Math.max(15, Math.min(100, (ms / maxTime) * 100));
+                        const isCurrent = (d.isOnline && d.radioAtual === radioName);
+
+                        htmlPredios += `
+                            <div class="building-bar-wrapper">
+                                <span class="building-time-tag">${formatMsCurto(ms)}</span>
+                                <div class="building-bar ${isCurrent ? 'active-bar' : ''}" style="height: ${heightPct}%;"></div>
+                                <div class="building-label" title="${escapeHtml(radioName)}">${escapeHtml(radioName)}</div>
+                            </div>
+                        `;
+                    });
+
+                    chartBox.innerHTML = htmlPredios;
                 }
             }
         }
 
+        // Formato para dentro do Card (HH:MM:SS)
         function formatMs(ms) {
             if(ms < 0 || isNaN(ms)) ms = 0;
             const totalSeg = Math.floor(ms / 1000);
@@ -733,6 +741,19 @@
             const m = Math.floor((totalSeg % 3600) / 60);
             const s = totalSeg % 60;
             return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        }
+
+        // Formato resumido para ficar em cima do prédio (ex: 05m 20s ou 01h 10m)
+        function formatMsCurto(ms) {
+            if(ms < 0 || isNaN(ms)) ms = 0;
+            const totalSeg = Math.floor(ms / 1000);
+            const h = Math.floor(totalSeg / 3600);
+            const m = Math.floor((totalSeg % 3600) / 60);
+            const s = totalSeg % 60;
+
+            if (h > 0) return `${h}h${m}m`;
+            if (m > 0) return `${m}m${s}s`;
+            return `${s}s`;
         }
 
         function deleteUser(uid) {
