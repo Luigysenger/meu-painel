@@ -1,168 +1,479 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PAINEL ADM SUPREMO - LUIGY</title>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    
+    <!-- CSS / Fonts / Sortable -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root { --primary: #1DB954; --bg: #000; --card: #121212; --text-muted: #b3b3b3; --purple-light: #d1a3ff; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 10px; user-select: none; }
-        
-        /* CABEÇALHO */
-        .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 15px 20px; border-radius: 15px; border: 1px solid #333; margin-bottom: 20px; gap: 15px; }
-        .header-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        .header h2 { margin: 0; color: var(--primary); font-size: 18px; white-space: nowrap; }
-        .btn-msg-notif { background: #ff4444; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; font-size: 13px; }
-        .btn-msg-notif span { background: white; color: #ff4444; padding: 2px 6px; border-radius: 50%; font-size: 12px; }
-        .btn-header { background: none; border: 1px solid #333; color: white; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 5px; }
-        .btn-sair { color: #ff4444; border-color: #442222; }
-        #hora { font-size: 20px; font-weight: 900; min-width: 80px; text-align: right; }
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-        @media (max-width: 600px) {
-            .header { flex-direction: column; text-align: center; }
-            .header-left { justify-content: center; }
-            #hora { text-align: center; font-size: 24px; }
+    <style>
+        :root {
+            --primary: #1DB954;
+            --bg-dark: #0f0f12;
+            --card-bg: #18181c;
+            --text-light: #ffffff;
+            --text-dim: #b3b3b3;
         }
 
-        /* MENSAGENS */
-        #container-mensagens-adm { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out; }
-        #container-mensagens-adm.aberto { max-height: 2000px; margin-bottom: 25px; }
-        .msg-grid-adm { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; padding: 10px; background: #080808; border-radius: 15px; border: 1px solid #222; }
-        .msg-card-individual { background: #181818; border: 1px solid #333; border-radius: 12px; padding: 15px; position: relative; }
-        .msg-card-individual h4 { margin: 0 0 5px 0; color: var(--primary); font-size: 14px; display: flex; justify-content: space-between; }
-        .msg-card-individual p { font-size: 13px; margin: 10px 0; line-height: 1.4; color: #eee; background: #222; padding: 8px; border-radius: 5px; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-        /* GRID PRINCIPAL */
-        .main-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; max-width: 1400px; margin: 0 auto; }
-        @media (max-width: 1024px) { .main-grid { grid-template-columns: 1fr; } }
-        .card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid #282828; margin-bottom: 20px; }
-        h3 { color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; }
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
 
-        /* RADIOS */
-        .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
-        @media (max-width: 480px) { .radio-grid { grid-template-columns: repeat(2, 1fr); } }
+        /* HEADER */
+        header {
+            background-color: #000;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #282828;
+        }
 
-        .radio-item { aspect-ratio: 1/1; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #000; font-weight: bold; font-size: 12px; text-align: center; padding: 10px; cursor: pointer; transition: 0.3s; position: relative; border: 2px solid transparent; -webkit-tap-highlight-color: transparent; }
-        .radio-item.active { background: #000 !important; color: var(--primary) !important; border-color: var(--primary); box-shadow: 0 0 15px rgba(29, 185, 84, 0.3); }
-        .radio-actions { position: absolute; top: 5px; right: 5px; display: flex; gap: 5px; z-index: 10; }
-        .radio-actions i { cursor: pointer; padding: 4px; background: rgba(0,0,0,0.1); border-radius: 4px; font-size: 11px; }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
 
-        /* ANTENA PISCANDO */
-        .antena { font-size: 24px; margin-bottom: 8px; display: none; color: var(--primary); }
-        .active .antena { display: block !important; animation: antenaPisca 0.8s infinite alternate !important; }
-        @keyframes antenaPisca { from { opacity: 1; transform: scale(1.1); } to { opacity: 0.1; transform: scale(0.9); } }
+        .header-left h1 {
+            font-size: 18px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 1px;
+        }
 
-        /* CONTROLES DO PLAYER */
-        .player-footer { margin-top: 20px; background: #111; padding: 20px; border-radius: 20px; border: 1px solid #222; text-align: center; }
-        .controls-row { display: flex; align-items: center; justify-content: center; gap: 25px; }
-        .btn-nav { background: none; border: none; color: #b3b3b3; font-size: 24px; cursor: pointer; }
-        .btn-spotify-play { width: 55px; height: 55px; background: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: black; cursor: pointer; }
+        .btn-header {
+            background: #282828;
+            color: #fff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
 
-        /* PUBLICIDADE */
-        .pub-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
-        @media (max-width: 600px) { .pub-container { grid-template-columns: 1fr; } }
-        .pub-preview { width: 100%; max-height: 120px; object-fit: contain; margin-top: 10px; border-radius: 10px; border: 1px dashed #444; display: none; }
-        .pub-list-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; overflow: hidden; border-left: 4px solid var(--primary); }
-        .pub-list-row { display: flex; align-items: center; width: 100%; }
-        .pub-list-btn { flex: 1; padding: 12px; background: none; border: none; color: white; text-align: left; display: flex; align-items: center; gap: 10px; cursor: pointer; min-width: 0; }
-        .pub-thumb-mini { width: 40px; height: 25px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
+        .btn-header.sair {
+            background: #e50914;
+        }
 
-        /* MONITOR OUVINTES */
-        .user-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; overflow: hidden; border-left: 4px solid #d1a3ff; }
-        .user-name-btn { width: 100%; padding: 15px; background: none; border: none; color: white; text-align: left; font-weight: bold; font-size: 13px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-        .status-on { color: #1DB954; font-weight: 900; font-size: 10px; }
-        .status-off { color: #d1a3ff; font-weight: 900; font-size: 10px; }
-        .user-details-bar { display: none; padding: 0 15px 15px 15px; font-size: 12px; color: #ccc; border-top: 1px solid #222; }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
 
-        input, select { padding: 12px; background: #2a2a2a; border: none; color: white; border-radius: 8px; margin-bottom: 10px; width: -webkit-fill-available; outline: none; font-size: 14px; }
-        .btn-save { padding: 12px; background: var(--primary); border: none; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; }
+        .btn-mensagens {
+            background: #ff4b4b;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+        }
+
+        .relogio {
+            font-size: 20px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        /* LAYOUT PRINCIPAL */
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .panel-box {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #282828;
+        }
+
+        .panel-title {
+            font-size: 13px;
+            color: var(--primary);
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* GERENCIAR EMISSORA FORM */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .input-dark {
+            background: #282828;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .btn-salvar {
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* GRADE DE RÁDIOS */
+        .radio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .radio-card {
+            aspect-ratio: 1;
+            border-radius: 10px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: #000;
+            font-weight: bold;
+            font-size: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            user-select: none;
+        }
+
+        .radio-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+
+        .radio-card.active {
+            outline: 3px solid #fff;
+        }
+
+        .radio-card-actions {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            display: flex;
+            gap: 5px;
+        }
+
+        .radio-card-actions i {
+            background: rgba(255,255,255,0.8);
+            padding: 3px 5px;
+            border-radius: 3px;
+            font-size: 10px;
+            cursor: pointer;
+        }
+
+        /* PLAYER RODAPÉ PAINEL */
+        .player-bar {
+            background: #000;
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid #282828;
+        }
+
+        .player-subtext {
+            font-size: 11px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+
+        .player-controls {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .btn-player-action {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .btn-play-main {
+            background: #fff;
+            color: #000;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        /* ESTILOS DO MONITOR DE OUVINTES (AJUSTADO E APERFEIÇOADO) */
+        .user-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 75vh;
+            overflow-y: auto;
+        }
+
+        .user-card {
+            background: #202026;
+            border-radius: 8px;
+            padding: 12px 15px;
+            border-left: 4px solid var(--text-dim);
+            transition: all 0.3s ease;
+        }
+
+        .user-card.online {
+            border-left-color: var(--primary);
+        }
+
+        .user-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .user-name {
+            font-weight: bold;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        .status-badge {
+            font-size: 10px;
+            font-weight: 900;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .status-badge.on {
+            color: var(--primary);
+        }
+
+        .status-badge.off {
+            color: #d1a3ff;
+        }
+
+        .user-info-body {
+            font-size: 12px;
+            color: var(--text-dim);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .radio-highlight {
+            color: var(--primary) !important;
+            font-weight: bold;
+        }
+
+        .user-action-delete {
+            color: #ff4444;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+
+        /* GRÁFICO DE PRÉDIOS (BARRAS POR RÁDIO ESCUTADA) */
+        .building-chart-container {
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px solid #333;
+        }
+
+        .building-chart-title {
+            font-size: 10px;
+            text-transform: uppercase;
+            color: #888;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .building-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            height: 65px;
+            background: #141418;
+            padding: 8px 10px 2px 10px;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+
+        .building-bar-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            justify-content: flex-end;
+            min-width: 38px;
+        }
+
+        .building-bar {
+            width: 100%;
+            background: linear-gradient(180deg, #1DB954 0%, #0d5c29 100%);
+            border-radius: 3px 3px 0 0;
+            min-height: 4px;
+            transition: height 0.4s ease;
+            position: relative;
+        }
+
+        .building-bar:hover::after {
+            content: attr(data-time);
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #000;
+            color: #fff;
+            padding: 2px 4px;
+            font-size: 9px;
+            border-radius: 3px;
+            white-space: nowrap;
+            z-index: 10;
+        }
+
+        .building-label {
+            font-size: 8px;
+            color: #aaa;
+            margin-top: 4px;
+            width: 100%;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Scrollbar customizada */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #121212; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
     </style>
 </head>
 <body>
-    <div class="header">
+
+    <!-- HEADER -->
+    <header>
         <div class="header-left">
-            <h2><i class="fab fa-spotify"></i> LUIGY ADM</h2>
+            <h1><i class="fab font-awesome-flag"></i> LUIGY ADM</h1>
             <button class="btn-header" onclick="location.reload()"><i class="fas fa-sync-alt"></i> REINICIAR</button>
-            <button class="btn-header btn-sair" onclick="logout()"><i class="fas fa-sign-out-alt"></i> SAIR</button>
+            <button class="btn-header sair" onclick="logout()"><i class="fas fa-sign-out-alt"></i> SAIR</button>
         </div>
-        <div class="header-center">
-            <button class="btn-msg-notif" onclick="toggleMensagens()">
-                <i class="fas fa-envelope"></i> MENSAGENS <span id="count-msg">0</span>
+        <div class="header-right">
+            <button class="btn-mensagens" onclick="toggleMensagens()">
+                <i class="fas fa-envelope"></i> MENSAGENS <span id="msg-count">0</span>
             </button>
+            <div class="relogio" id="hora">00:00:00</div>
         </div>
-        <div id="hora">00:00:00</div>
-    </div>
+    </header>
 
-    <div id="container-mensagens-adm">
-        <div class="card">
-            <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h3>MENSAGENS DOS OUVINTES</h3>
-                <button onclick="window.print()" class="btn-header" style="font-size: 11px;"><i class="fas fa-file-pdf"></i> PDF</button>
-            </div>
-            <div id="msg-list-adm" class="msg-grid-adm"></div>
-        </div>
-    </div>
-
-    <div class="main-grid">
-        <div class="col-left">
-            <div class="card">
-                <h3>GERENCIAR EMISSORA</h3>
-                <div class="input-group">
+    <!-- CONTAINER PRINCIPAL -->
+    <div class="main-container">
+        
+        <!-- PAINEL ESQUERDO: EMISSORAS E PLAYER -->
+        <div class="left-column" style="display:flex; flex-direction:column; gap:20px;">
+            
+            <div class="panel-box">
+                <div class="panel-title"><i class="fas fa-broadcast-tower"></i> Gerenciar Emissora</div>
+                <div class="form-group">
                     <input type="hidden" id="r-key">
-                    <input type="text" id="r-name" placeholder="Nome da Rádio">
-                    <input type="text" id="r-url" placeholder="Link .mp3">
-                    <button class="btn-save" id="btn-radio-action" onclick="addRadio()">SALVAR</button>
+                    <input type="text" id="r-name" class="input-dark" placeholder="Nome da Rádio">
+                    <input type="text" id="r-url" class="input-dark" placeholder="Link .mp3">
+                    <button class="btn-salvar" id="btn-radio-action" onclick="addRadio()">SALVAR</button>
                 </div>
-                <h3>GRADE DE RÁDIOS</h3>
-                <div id="radio-list" class="radio-grid"></div>
-                <div class="player-footer">
-                    <div id="now-title" style="font-size:10px; color:#888; margin-bottom:15px;">SELECIONE UMA RÁDIO</div>
-                    <div class="controls-row">
-                        <button class="btn-nav" onclick="prevRadio()"><i class="fas fa-step-backward"></i></button>
-                        <button class="btn-spotify-play" onclick="togglePlay()"><i class="fas fa-play" id="play-icon"></i></button>
-                        <button class="btn-nav" onclick="nextRadio()"><i class="fas fa-step-forward"></i></button>
+
+                <div class="panel-title"><i class="fas fa-th"></i> Grade de Rádios</div>
+                <div class="radio-grid" id="radio-list">
+                    <!-- Rádios inseridas via JS -->
+                </div>
+
+                <div class="player-bar">
+                    <span class="player-subtext" id="now-title">SELECIONE UMA RÁDIO</span>
+                    <div class="player-controls">
+                        <button class="btn-player-action" onclick="prevRadio()"><i class="fas fa-step-backward"></i></button>
+                        <div class="btn-play-main" onclick="togglePlay()"><i class="fas fa-play" id="play-icon"></i></div>
+                        <button class="btn-player-action" onclick="nextRadio()"><i class="fas fa-step-forward"></i></button>
                     </div>
                 </div>
             </div>
 
-            <div class="card">
-                <h3>GERENCIAR PUBLICIDADE</h3>
-                <div class="pub-container">
-                    <input type="hidden" id="pub-key">
-                    <div>
-                        <input type="file" id="pub-file" accept="image/*" onchange="previewPub(this)">
-                        <img id="pub-view" class="pub-preview">
-                    </div>
-                    <div>
-                        <input type="datetime-local" id="pub-ini">
-                        <input type="datetime-local" id="pub-fim">
-                        <select id="pub-target" onchange="document.getElementById('pub-manual').style.display = (this.value=='MANUAL'?'block':'none')">
-                            <option value="TODOS">TODOS OS OUVINTES</option>
-                            <option value="MANUAL">SELECIONAR MANUAL</option>
-                        </select>
-                        <input type="text" id="pub-manual" placeholder="NOME DO OUVINTE" style="display:none;">
-                    </div>
-                </div>
-                <button class="btn-save" id="btn-pub-action" onclick="savePub()">LANÇAR CAMPANHA</button>
-                <div id="pub-list-admin" style="margin-top:20px;"></div>
+        </div>
+
+        <!-- PAINEL DIREITO: MONITOR DE OUVINTES COM ESTATÍSTICAS E PRÉDIOS -->
+        <div class="panel-box">
+            <div class="panel-title"><i class="fas fa-users"></i> Monitor de Ouvintes</div>
+            <div class="user-list" id="user-list">
+                <!-- Ouvintes inseridos dinamicamente aqui -->
             </div>
         </div>
 
-        <div class="col-right">
-            <div class="card">
-                <h3><i class="fas fa-users"></i> MONITOR DE OUVINTES</h3>
-                <div id="user-list"></div>
-            </div>
-        </div>
     </div>
 
-    <audio id="audio-player"></audio>
+    <!-- ÁUDIO PLAYER (INVISÍVEL) -->
+    <audio id="audio-player" style="display:none;"></audio>
 
+    <!-- SCRIPT DE LÓGICA INTEGRA -->
     <script>
+        // Configuração Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
             authDomain: "meu-painel-f2efe.firebaseapp.com",
@@ -172,158 +483,262 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const player = document.getElementById('audio-player');
-        let radioData = [], activeIndex = -1, usersDataCache = {}, imgBase64 = "";
 
+        let radioData = [], activeIndex = -1, usersDataCache = {};
+
+        // Escapar código HTML nocivo
+        function escapeHtml(str) {
+            return String(str || '').replace(/[&<>"']/g, function(m) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+            });
+        }
+
+        // Relógio & Atualização de Cronômetros Globais
         setInterval(() => {
             const hElement = document.getElementById('hora');
             if(hElement) hElement.innerText = new Date().toLocaleTimeString('pt-BR');
             updateUserTimers();
         }, 1000);
 
-        function logout() { if(confirm("Sair?")) { localStorage.removeItem('usuarioNome'); window.location.href = 'index.html'; } }
-        function toggleMensagens() { document.getElementById('container-mensagens-adm').classList.toggle('aberto'); }
+        function logout() { 
+            if(confirm("Deseja realmente encerrar a sessão ADM?")) { 
+                localStorage.removeItem('usuarioNome'); 
+                window.location.href = 'index.html'; 
+            } 
+        }
 
+        function toggleMensagens() { 
+            alert("Caixa de mensagens em desenvolvimento.");
+        }
+
+        // --- GERENCIAMENTO DE RÁDIOS ---
         db.ref('radios').on('value', snap => {
-            radioData = []; snap.forEach(c => { radioData.push({ ...c.val(), key: c.key }); });
+            radioData = []; 
+            snap.forEach(c => { radioData.push({ ...c.val(), key: c.key }); });
             radioData.sort((a,b) => (a.posicao || 0) - (b.posicao || 0));
-            const list = document.getElementById('radio-list'); if(!list) return;
+            
+            const list = document.getElementById('radio-list'); 
+            if(!list) return;
             list.innerHTML = "";
+
             radioData.forEach((r, i) => {
                 const div = document.createElement('div');
-                div.className = `radio-item ${activeIndex === i ? 'active' : ''}`;
-                div.style.background = r.color || '#ece4db';
+                div.className = `radio-card ${activeIndex === i ? 'active' : ''}`;
+                div.style.background = r.color || '#f3e1b7';
                 div.setAttribute('data-id', r.key);
                 div.onclick = () => playRadio(i);
-                div.innerHTML = `<div class="radio-actions">
-                    <i class="fas fa-pencil-alt" onclick="event.stopPropagation(); prepareEditRadio('${r.key}','${r.name}','${r.url}')"></i>
-                    <i class="fas fa-times" onclick="event.stopPropagation(); if(confirm('Excluir?')) db.ref('radios/${r.key}').remove()"></i>
-                </div><i class="fas fa-tower-broadcast antena"></i><span>${r.name}</span>`;
+                
+                div.innerHTML = `
+                    <div class="radio-card-actions">
+                        <i class="fas fa-pencil-alt" title="Editar" onclick="event.stopPropagation(); prepareEditRadio('${r.key}','${escapeHtml(r.name)}','${escapeHtml(r.url)}')"></i>
+                        <i class="fas fa-times" title="Excluir" onclick="event.stopPropagation(); deleteRadio('${r.key}')"></i>
+                    </div>
+                    <span>${escapeHtml(r.name)}</span>`;
                 list.appendChild(div);
             });
+
             if(!window.sortInit && radioData.length > 0) {
                 Sortable.create(list, { 
-                    animation: 150, delay: 500, delayOnTouchOnly: true,
-                    onEnd: () => { list.querySelectorAll('.radio-item').forEach((it, idx) => { db.ref('radios/' + it.dataset.id).update({ posicao: idx }); }); }
-                }); window.sortInit = true;
+                    animation: 150, delay: 300, delayOnTouchOnly: true,
+                    onEnd: () => { 
+                        list.querySelectorAll('.radio-card').forEach((it, idx) => { 
+                            db.ref('radios/' + it.dataset.id).update({ posicao: idx }); 
+                        }); 
+                    }
+                }); 
+                window.sortInit = true;
             }
         });
 
+        function addRadio() {
+            const n = document.getElementById('r-name').value.trim();
+            const u = document.getElementById('r-url').value.trim();
+            const k = document.getElementById('r-key').value;
+
+            if(!n || !u) return alert("Preencha o Nome e a URL da Rádio!");
+
+            if(k) {
+                db.ref('radios/'+k).update({ name: n, url: u });
+            } else {
+                const cores = ['#fff0b3', '#e1d5e7', '#d5e8d4', '#ffe6cc', '#f8cecc'];
+                const corSorteada = cores[Math.floor(Math.random() * cores.length)];
+                db.ref('radios').push({ name: n, url: u, color: corSorteada, posicao: radioData.length });
+            }
+
+            document.getElementById('r-name').value = ""; 
+            document.getElementById('r-url').value = ""; 
+            document.getElementById('r-key').value = "";
+            document.getElementById('btn-radio-action').innerText = "SALVAR";
+        }
+
+        function prepareEditRadio(k, n, u) { 
+            document.getElementById('r-key').value = k; 
+            document.getElementById('r-name').value = n; 
+            document.getElementById('r-url').value = u; 
+            document.getElementById('btn-radio-action').innerText = "ATUALIZAR"; 
+        }
+
+        function deleteRadio(key) {
+            if(confirm('Deseja excluir esta rádio?')) db.ref(`radios/${key}`).remove();
+        }
+
+        // --- CONTROLE DE ÁUDIO DO ADM ---
         function playRadio(idx) {
-            activeIndex = idx; const r = radioData[idx]; player.src = r.url; player.play();
+            if (!radioData[idx]) return;
+            activeIndex = idx; 
+            const r = radioData[idx]; 
+            
+            player.src = r.url; 
+            player.play().catch(e => console.log("Erro de reprodução:", e));
+
             document.getElementById('now-title').innerText = "OUVINDO: " + r.name;
             document.getElementById('play-icon').className = "fas fa-stop";
-            const items = document.querySelectorAll('.radio-item');
-            items.forEach((item, i) => { if(i === idx) item.classList.add('active'); else item.classList.remove('active'); });
+            
+            const items = document.querySelectorAll('.radio-card');
+            items.forEach((item, i) => { 
+                if(i === idx) item.classList.add('active'); 
+                else item.classList.remove('active'); 
+            });
         }
+
         function togglePlay() { 
-            if(player.paused) { player.play(); document.getElementById('play-icon').className = "fas fa-stop"; } 
-            else { player.pause(); document.getElementById('play-icon').className = "fas fa-play"; } 
+            if(!player.src) return;
+            if(player.paused) { 
+                player.play(); 
+                document.getElementById('play-icon').className = "fas fa-stop"; 
+            } else { 
+                player.pause(); 
+                document.getElementById('play-icon').className = "fas fa-play"; 
+            } 
         }
+
         function nextRadio() { if(radioData.length) playRadio((activeIndex + 1) % radioData.length); }
         function prevRadio() { if(radioData.length) playRadio((activeIndex - 1 + radioData.length) % radioData.length); }
-        function addRadio() {
-            const n = document.getElementById('r-name').value, u = document.getElementById('r-url').value, k = document.getElementById('r-key').value;
-            if(n && u) {
-                if(k) db.ref('radios/'+k).update({name:n, url:u});
-                else db.ref('radios').push({ name: n, url: u, color: '#ece4db', posicao: radioData.length });
-                document.getElementById('r-name').value = ""; document.getElementById('r-url').value = ""; document.getElementById('r-key').value = "";
-                document.getElementById('btn-radio-action').innerText = "SALVAR";
-            }
-        }
-        function prepareEditRadio(k, n, u) { document.getElementById('r-key').value = k; document.getElementById('r-name').value = n; document.getElementById('r-url').value = u; document.getElementById('btn-radio-action').innerText = "ATUALIZAR"; }
 
-        function previewPub(input) {
-            const reader = new FileReader();
-            reader.onload=(e)=>{imgBase64=e.target.result;document.getElementById('pub-view').src=imgBase64;document.getElementById('pub-view').style.display="block"};
-            if(input.files[0])reader.readAsDataURL(input.files[0]);
-        }
-        function savePub() {
-            const i=document.getElementById('pub-ini').value, f=document.getElementById('pub-fim').value, k=document.getElementById('pub-key').value;
-            if(!imgBase64 || !i) return;
-            const d = { imagem: imgBase64, inicio: new Date(i).getTime(), fim: new Date(f).getTime(), destino: document.getElementById('pub-target').value, ouvinteAlvo: document.getElementById('pub-manual').value || 'TODOS' };
-            if(k) db.ref('publicidade/'+k).update(d); else db.ref('publicidade').push(d);
-            document.getElementById('pub-key').value = ""; document.getElementById('pub-view').style.display="none"; alert("OK");
-        }
-        function prepareEditPub(id, img, ini, fim, target, manual) {
-            document.getElementById('pub-key').value = id; imgBase64 = img;
-            document.getElementById('pub-view').src = img; document.getElementById('pub-view').style.display = "block";
-            document.getElementById('pub-ini').value = new Date(ini).toISOString().slice(0,16);
-            document.getElementById('pub-fim').value = new Date(fim).toISOString().slice(0,16);
-            document.getElementById('pub-target').value = target; document.getElementById('pub-manual').value = manual;
-            document.getElementById('btn-pub-action').innerText = "ATUALIZAR";
-        }
-        db.ref('publicidade').on('value', snap => {
-            const list = document.getElementById('pub-list-admin'); if(!list) return;
-            list.innerHTML = "";
-            snap.forEach(c => {
-                const p = c.val(), id = c.key;
-                const div = document.createElement('div'); div.className = "pub-list-item";
-                div.innerHTML = `<div class="pub-list-row"><button class="pub-list-btn"><img src="${p.imagem}" class="pub-thumb-mini"><span>${p.ouvinteAlvo}</span></button>
-                    <i class="fas fa-pencil-alt" style="padding:15px; cursor:pointer; color:var(--primary)" onclick="prepareEditPub('${id}','${p.imagem}',${p.inicio},${p.fim},'${p.destino}','${p.ouvinteAlvo}')"></i>
-                    <i class="fas fa-trash" style="padding:15px; cursor:pointer; color:red" onclick="db.ref('publicidade/${id}').remove()"></i></div>`;
-                list.appendChild(div);
-            });
-        });
 
-        // AJUSTE CIRÚRGICO NO MONITOR DE OUVINTES PARA CRONÔMETRO PRECISO
+        // --- MONITOR DE OUVINTES COM CRONÔMETRO REQUISITADO E GRÁFICO DE PRÉDIOS ---
         db.ref('contas').on('value', snap => {
-            const container = document.getElementById('user-list'); if(!container) return;
+            const container = document.getElementById('user-list'); 
+            if(!container) return;
+
             const agora = Date.now();
             const data = snap.val() || {};
+            
             container.innerHTML = ""; 
+            usersDataCache = {}; 
+
             for (let uid in data) {
                 const u = data[uid];
                 if(u.perfil === "adm") continue;
+
                 const safeId = uid.replace(/[^a-zA-Z0-9]/g, '_');
                 const sinalVida = u.lastSeen || u.lastActive || 0;
-                const isOnline = (u.status === 'online' && (agora - sinalVida < 45000));
-                
-                // Sincroniza o cache local com os dados reais do Firebase para o cronômetro
-                if (!usersDataCache[safeId] || usersDataCache[safeId].radioAtual !== u.radioAtual) {
-                    usersDataCache[safeId] = { 
-                        sStart: u.sessionStart || agora, 
-                        rStart: u.radioStart || agora, 
-                        radioAtual: u.radioAtual 
-                    };
-                }
-                usersDataCache[safeId].isOnline = isOnline;
+                const isOnline = (u.status === 'online' && (agora - sinalVida < 45000)); 
+
+                // Guardar referências de tempo e histórico de rádios no cache
+                usersDataCache[safeId] = { 
+                    loginStart: u.sessionStart || u.loginTime || agora, 
+                    radioStart: u.radioStart || agora, 
+                    radioAtual: u.radioAtual || 'Nenhuma',
+                    historicoRadios: u.historicoRadios || {}, // Guarda acumulado { "ANTENA 1": ms, "JOVEM PAM": ms }
+                    isOnline: isOnline
+                };
                 
                 const div = document.createElement('div');
-                div.className = "user-item";
-                div.style.borderLeft = isOnline ? '4px solid #1DB954' : '4px solid #d1a3ff';
+                div.className = `user-card ${isOnline ? 'online' : ''}`;
+                
+                // Constrói visual do gráfico de prédios para o histórico do ouvinte
+                let prediosHtml = renderBuildingChart(usersDataCache[safeId]);
+
                 div.innerHTML = `
-                    <div style="display: flex; align-items: center; background: none;">
-                        <button class="user-name-btn" style="flex: 1;" onclick="const d=this.parentElement.nextElementSibling; d.style.display=(d.style.display=='block'?'none':'block')">
-                            <span style="color:${isOnline ? 'white' : '#d1a3ff'}">${(u.nome || 'Ouvinte').toUpperCase()}</span>
-                            <span class="${isOnline ? 'status-on' : 'status-off'}">${isOnline ? '● ONLINE' : 'OFF'}</span>
-                        </button>
-                        <i class="fas fa-trash-alt" style="color: #ff4444; padding: 15px; cursor: pointer; font-size: 14px; opacity: 0.7;" 
-                           onclick="if(confirm('Deseja excluir este ouvinte permanentemente?')) db.ref('contas/${uid}').remove()"></i>
+                    <div class="user-card-header">
+                        <span class="user-name" style="color:${isOnline ? '#fff' : '#d1a3ff'}">${escapeHtml(u.nome || 'Ouvinte')}</span>
+                        <div>
+                            <span class="status-badge ${isOnline ? 'on' : 'off'}">${isOnline ? '● ONLINE' : 'OFF'}</span>
+                            <i class="fas fa-trash-alt user-action-delete" title="Excluir Ouvinte" onclick="deleteUser('${uid}')"></i>
+                        </div>
                     </div>
-                    <div class="user-details-bar">
-                        Rádio: <b style="color:var(--primary)">${isOnline ? (u.radioAtual || 'Nenhuma') : '---'}</b><br>
-                        Sessão: <b id="ts-${safeId}">00:00:00</b><br>
-                        Nesta Rádio: <b id="tr-${safeId}">00:00:00</b>
-                    </div>`;
+                    <div class="user-info-body">
+                        <div>Rádio: <span class="radio-highlight">${isOnline ? escapeHtml(u.radioAtual || 'Nenhuma') : '---'}</span></div>
+                        <div>Sessão (Login): <b id="ts-${safeId}">00:00:00</b></div>
+                        <div>Tempo nesta Rádio: <b id="tr-${safeId}">00:00:00</b></div>
+                    </div>
+                    ${prediosHtml}
+                `;
                 container.appendChild(div);
             }
         });
 
+        // Função que gera os "prédios" (barras de tempo escutado)
+        function renderBuildingChart(userData) {
+            const hist = userData.historicoRadios || {};
+            
+            // Adiciona/Atualiza tempo da rádio atual no cálculo do gráfico
+            const histCompleto = { ...hist };
+            if(userData.isOnline && userData.radioAtual && userData.radioAtual !== 'Nenhuma') {
+                const tempoAtualMs = Date.now() - userData.radioStart;
+                histCompleto[userData.radioAtual] = (histCompleto[userData.radioAtual] || 0) + tempoAtualMs;
+            }
+
+            const keys = Object.keys(histCompleto);
+            if(keys.length === 0) return '';
+
+            // Achar o tempo máximo para definir a altura de 100% dos prédios
+            let maxTempo = 1;
+            keys.forEach(k => { if(histCompleto[k] > maxTempo) maxTempo = histCompleto[k]; });
+
+            let barsHtml = '';
+            keys.forEach(radioName => {
+                const ms = histCompleto[radioName];
+                const heightPercent = Math.max(10, Math.min(100, (ms / maxTempo) * 100)); // Min 10% de altura para visualização
+                const tempoFormatado = formatMs(ms);
+
+                barsHtml += `
+                    <div class="building-bar-wrapper">
+                        <div class="building-bar" style="height: ${heightPercent}%;" data-time="${tempoFormatado}"></div>
+                        <div class="building-label" title="${escapeHtml(radioName)}">${escapeHtml(radioName)}</div>
+                    </div>
+                `;
+            });
+
+            return `
+                <div class="building-chart-container">
+                    <div class="building-chart-title"><span><i class="fas fa-chart-bar"></i> Tempo por Emissora</span></div>
+                    <div class="building-chart">
+                        ${barsHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Atualização em tempo real sem recarregar o DOM
         function updateUserTimers() {
             const agora = Date.now();
             for (let id in usersDataCache) {
                 const d = usersDataCache[id];
                 if (d.isOnline) {
-                    const s = document.getElementById(`ts-${id}`), r = document.getElementById(`tr-${id}`);
-                    if(s) s.innerText = format(agora - d.sStart);
-                    if(r) r.innerText = format(agora - d.rStart);
+                    const s = document.getElementById(`ts-${id}`);
+                    const r = document.getElementById(`tr-${id}`);
+                    
+                    if(s) s.innerText = formatMs(agora - d.loginStart);
+                    if(r) r.innerText = formatMs(agora - d.radioStart);
                 }
             }
         }
-        function format(ms) {
-            if(ms < 0) ms = 0;
-            const s = Math.floor(ms/1000), h = Math.floor(s/3600), m = Math.floor((s%3600)/60), seg = s%60;
-            return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${seg.toString().padStart(2,'0')}`;
+
+        function formatMs(ms) {
+            if(ms < 0 || isNaN(ms)) ms = 0;
+            const totalSeg = Math.floor(ms / 1000);
+            const h = Math.floor(totalSeg / 3600);
+            const m = Math.floor((totalSeg % 3600) / 60);
+            const s = totalSeg % 60;
+            return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        }
+
+        function deleteUser(uid) {
+            if(confirm("Deseja realmente remover este ouvinte?")) {
+                db.ref(`contas/${uid}`).remove();
+            }
         }
     </script>
 </body>
