@@ -197,7 +197,7 @@
             border: 1px solid #282828;
         }
 
-        /* MONITOR DE OUVINTES COM EXPANSÃO CIRÚRGICA */
+        /* MONITOR DE OUVINTES - COMPACTO E DESLIZANTE NO CLIQUE */
         .user-list {
             display: flex;
             flex-direction: column;
@@ -210,20 +210,12 @@
             padding: 12px 15px;
             border-left: 4px solid var(--purple-off);
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            transition: all 0.35s ease-in-out;
             overflow: hidden;
         }
 
         .user-card.online {
             border-left-color: var(--primary);
-        }
-
-        /* Estilo quando expandido no clique */
-        .user-card.expanded {
-            background: #22222a;
-            padding: 18px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.7);
-            border-left-width: 6px;
         }
 
         .user-card-header {
@@ -257,13 +249,29 @@
             font-size: 11px;
         }
 
+        /* ÁREA ENCOLHIDA QUE DESLIZA AO CLICAR */
+        .expandable-content {
+            max-height: 0;
+            opacity: 0;
+            transition: max-height 0.4s ease, opacity 0.3s ease, margin-top 0.3s ease;
+            pointer-events: none;
+        }
+
+        .user-card.expanded .expandable-content {
+            max-height: 350px;
+            opacity: 1;
+            margin-top: 12px;
+            pointer-events: auto;
+        }
+
         .user-details {
-            margin-top: 8px;
             font-size: 11px;
             color: #aaa;
             display: flex;
             flex-direction: column;
-            gap: 3px;
+            gap: 4px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #2a2a32;
         }
 
         .user-details .radio-live {
@@ -271,16 +279,14 @@
             font-weight: bold;
         }
 
-        /* ÁREA DE GRÁFICO EM ESTILO PRÉDIOS */
-        .building-container {
-            margin-top: 15px;
-            padding-top: 12px;
-            border-top: 1px solid #333;
-            display: none; /* Oculto por padrão, expande no clique */
+        .user-details .date-log {
+            color: #d1a3ff;
+            font-weight: bold;
         }
 
-        .user-card.expanded .building-container {
-            display: block;
+        /* ÁREA DO GRÁFICO EM PORCENTAGEM */
+        .building-container {
+            padding-top: 10px;
         }
 
         .building-title {
@@ -290,17 +296,21 @@
             font-weight: bold;
             margin-bottom: 10px;
             letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
         .building-chart {
             display: flex;
             align-items: flex-end;
             gap: 10px;
-            height: 90px;
+            height: 100px;
             background: #101014;
             padding: 10px;
             border-radius: 6px;
             overflow-x: auto;
+            border: 1px solid #222;
         }
 
         .building-wrapper {
@@ -309,35 +319,37 @@
             align-items: center;
             height: 100%;
             justify-content: flex-end;
-            min-width: 50px;
+            min-width: 55px;
             flex: 1;
         }
 
-        .building-time {
-            font-size: 9px;
-            color: #fff;
+        .building-pct {
+            font-size: 10px;
+            color: #ffffff;
             margin-bottom: 4px;
-            font-weight: bold;
+            font-weight: 800;
         }
 
         .building-bar {
             width: 100%;
-            max-width: 24px;
+            max-width: 26px;
             background: linear-gradient(180deg, #1DB954 0%, #09401b 100%);
-            border-radius: 3px 3px 0 0;
+            border-radius: 4px 4px 0 0;
             min-height: 4px;
             transition: height 0.4s ease;
+            box-shadow: 0 0 8px rgba(29, 185, 84, 0.3);
         }
 
         .building-name {
             font-size: 8px;
-            color: #888;
+            color: #aaa;
             margin-top: 6px;
             text-align: center;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             width: 100%;
+            font-weight: 600;
         }
     </style>
 </head>
@@ -380,7 +392,7 @@
             </div>
         </div>
 
-        <!-- MONITOR DE OUVINTES ORIGINAL E EXPANSÍVEL -->
+        <!-- MONITOR DE OUVINTES ENCOLHIDO COM DESLIZE AO CLICAR -->
         <div class="panel-box">
             <div class="panel-title">MONITOR DE OUVINTES</div>
             <div class="user-list" id="user-list"></div>
@@ -412,7 +424,7 @@
             window.location.href = 'index.html';
         }
 
-        // CARREGAR GRADE DE RÁDIOS
+        // GRADE DE RÁDIOS
         db.ref('radios').on('value', snap => {
             radioData = [];
             snap.forEach(c => { radioData.push({ ...c.val(), key: c.key }); });
@@ -458,7 +470,7 @@
         function nextRadio() { if(radioData.length) playRadio((activeIndex+1)%radioData.length); }
         function prevRadio() { if(radioData.length) playRadio((activeIndex-1+radioData.length)%radioData.length); }
 
-        // MONITOR DE OUVINTES - LÓGICA MASTER DE HISTÓRICO E PRÉDIOS
+        // LÓGICA DE AUDIÊNCIA EM PORCENTAGEM E SLIDE EXPANSÍVEL
         db.ref('contas').on('value', snap => {
             const container = document.getElementById('user-list');
             container.innerHTML = "";
@@ -472,6 +484,9 @@
                 const safeId = uid.replace(/[^a-zA-Z0-9]/g, '_');
                 const isOnline = (u.status === 'online' && (agora - (u.lastSeen||0) < 45000));
                 const isExpanded = !!expandedCards[safeId];
+                
+                // Formatação de data do visto por último
+                const dataFormatada = u.lastSeen ? new Date(u.lastSeen).toLocaleString('pt-BR') : '---';
 
                 const div = document.createElement('div');
                 div.className = `user-card ${isOnline ? 'online' : ''} ${isExpanded ? 'expanded' : ''}`;
@@ -485,16 +500,20 @@
                             <i class="fas fa-trash-alt user-action-delete" onclick="event.stopPropagation(); deleteUser('${uid}')"></i>
                         </div>
                     </div>
-                    ${isOnline ? `
+                    
+                    <div class="expandable-content">
                         <div class="user-details">
-                            <div>Rádio: <span class="radio-live">${u.radioAtual || '---'}</span></div>
-                            <div>Sessão: <b id="ts-${safeId}">00:00:00</b></div>
+                            <div>Acesso em: <span class="date-log">${dataFormatada}</span></div>
+                            <div>Rádio Atual: <span class="radio-live">${isOnline && u.radioAtual ? u.radioAtual : '---'}</span></div>
+                            <div>Tempo de Sessão: <b id="ts-${safeId}">00:00:00</b></div>
                             <div>Nesta Rádio: <b id="tr-${safeId}">00:00:00</b></div>
                         </div>
-                    ` : ''}
-                    <div class="building-container">
-                        <div class="building-title"><i class="fas fa-chart-bar"></i> Audiência por Emissora</div>
-                        <div class="building-chart" id="chart-${safeId}"></div>
+                        <div class="building-container">
+                            <div class="building-title">
+                                <span><i class="fas fa-chart-bar"></i> % Tempo em Cada Rádio</span>
+                            </div>
+                            <div class="building-chart" id="chart-${safeId}"></div>
+                        </div>
                     </div>
                 `;
                 container.appendChild(div);
@@ -504,7 +523,8 @@
 
         function toggleExpand(safeId) {
             expandedCards[safeId] = !expandedCards[safeId];
-            db.ref('contas').once('value', () => {}); // Forçar re-renderização simples
+            const cards = document.querySelectorAll('.user-card');
+            db.ref('contas').once('value', () => {}); // Atualização em tempo real da visualização
         }
 
         function updateTimers() {
@@ -523,7 +543,7 @@
                         if(elR) elR.innerText = fmtMs(agora - (u.radioStart || agora));
                     }
 
-                    // Renderizar Prédios do Histórico Salvo
+                    // MONTAGEM DOS PRÉDIOS EM PORCENTAGEM (%)
                     const chartBox = document.getElementById(`chart-${safeId}`);
                     if (chartBox) {
                         const hist = u.historicoRadios || {};
@@ -539,18 +559,22 @@
                             continue;
                         }
 
-                        let maxMs = 1;
-                        keys.forEach(k => { if(copyHist[k] > maxMs) maxMs = copyHist[k]; });
+                        // Cálculo do Tempo Total acumulado em todas as rádios para extrair 100%
+                        let tempoTotalMs = 0;
+                        keys.forEach(k => { tempoTotalMs += copyHist[k]; });
+                        if (tempoTotalMs <= 0) tempoTotalMs = 1;
 
                         let html = '';
                         keys.forEach(rName => {
                             const ms = copyHist[rName];
-                            const pct = Math.max(12, Math.min(100, (ms / maxMs) * 100));
+                            const pct = Math.round((ms / tempoTotalMs) * 100); // Cálculo da porcentagem real
+                            const heightPct = Math.max(15, pct); // Mínimo de 15% para visualização da barra
+
                             html += `
                                 <div class="building-wrapper">
-                                    <span class="building-time">${fmtMsCurto(ms)}</span>
-                                    <div class="building-bar" style="height:${pct}%"></div>
-                                    <span class="building-name">${rName}</span>
+                                    <span class="building-pct">${pct}%</span>
+                                    <div class="building-bar" style="height:${heightPct}%"></div>
+                                    <span class="building-name" title="${rName}">${rName}</span>
                                 </div>
                             `;
                         });
@@ -563,11 +587,6 @@
         function fmtMs(ms) {
             const s = Math.floor(ms/1000)%60, m = Math.floor(ms/60000)%60, h = Math.floor(ms/3600000);
             return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-        }
-
-        function fmtMsCurto(ms) {
-            const m = Math.floor(ms/60000), s = Math.floor(ms/1000)%60;
-            return m > 0 ? `${m}m` : `${s}s`;
         }
 
         function deleteUser(uid) { db.ref('contas/'+uid).remove(); }
