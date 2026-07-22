@@ -9,13 +9,12 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #A020F0; --bg: #000; --card: #121212; --text-muted: #b3b3b3; --success: #1DB954; }
+        :root { --primary: #A020F0; --pink-light: #FFB6C1; --bg: #000; --card: #121212; --text-muted: #b3b3b3; --success: #1DB954; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; user-select: none; }
         
         /* HEADER RESPONSIVO */
         .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 20px 30px; border-radius: 15px; border: 1px solid #333; margin-bottom: 25px; gap: 10px; flex-wrap: wrap; transition: 0.3s; }
         
-        /* AJUSTE CIRÚRGICO: BORDA VERDE QUANDO ONLINE */
         .header.online { border-color: var(--success); box-shadow: 0 0 10px rgba(29, 185, 84, 0.2); }
 
         .header-left { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; flex-shrink: 0; }
@@ -67,6 +66,33 @@
         .btn-toggle-radio.add { color: #444; }
         .btn-toggle-radio.remove { color: var(--primary); }
         
+        /* ESTILO ROSA CLARO EM DESTAQUE E FONTE MAIOR */
+        .btn-pedir-radio {
+            width: 100%;
+            background: rgba(255, 182, 193, 0.12);
+            color: var(--pink-light);
+            border: 2px solid var(--pink-light);
+            padding: 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 800;
+            text-transform: uppercase;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 0 15px rgba(255, 182, 193, 0.25);
+            line-height: 1.3;
+        }
+        .btn-pedir-radio:hover {
+            background: var(--pink-light);
+            color: #000;
+            box-shadow: 0 0 22px rgba(255, 182, 193, 0.7);
+            transform: scale(1.02);
+        }
+
         .player-footer { position: fixed; bottom: 0; left: 0; right: 0; background: #111; padding: 15px 25px 25px 25px; border-top: 2px solid var(--primary); text-align: center; z-index: 100; }
         .msg-barra { background: #ff0000; color: #fff; font-size: 14px; font-weight: 900; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 2px solid #fff; display: none; width: fit-content; margin: 0 auto; cursor: pointer; animation: piscar-alerta 0.8s infinite alternate; }
         @keyframes piscar-alerta { 0% { opacity: 1; transform: scale(1); background: #ff0000; } 100% { opacity: 0.7; transform: scale(1.05); background: var(--primary); } }
@@ -113,15 +139,16 @@
                 <h3>SELECIONE AQUI SUA RÁDIO</h3>
                 <div id="selector-list" class="selector-list"></div>
 
-                <!-- AJUSTE CIRÚRGICO: BOTÃO E CAMPO PARA ENVIAR MENSAGEM AO ADM -->
-                <div style="margin-top: 15px; border-top: 1px solid #282828; padding-top: 15px;">
-                    <button type="button" onclick="toggleFormRadio()" style="width: 100%; background: #1a1a1a; color: #fff; border: 1px solid var(--primary); padding: 12px; border-radius: 10px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                        <i class="fas fa-paper-plane" style="color: var(--primary); font-size: 14px;"></i>
+                <!-- BOTÃO EM ROSA CLARO E FONTE MAIOR PARA ATENÇÃO -->
+                <div style="margin-top: 18px; border-top: 1px solid #282828; padding-top: 18px;">
+                    <button type="button" class="btn-pedir-radio" onclick="toggleFormRadio()">
+                        <i class="fas fa-paper-plane" style="font-size: 16px;"></i>
                         <span>ENVIE UMA MENSAGEM PARA O NOSSO ADM PEDINDO PARA INCLUIR A SUA RÁDIO PREFERIDA</span>
                     </button>
+                    
                     <div id="form-pedir-radio" style="display: none; margin-top: 12px; flex-direction: column; gap: 10px;">
-                        <textarea id="msg-radio-input" placeholder="Escreva o nome da rádio ou sua mensagem para o adm..." style="width: 100%; height: 75px; background: #0a0a0a; border: 1px solid #333; border-radius: 8px; color: #fff; padding: 10px; font-family: inherit; font-size: 12px; resize: none; box-sizing: border-box; outline: none;"></textarea>
-                        <button type="button" onclick="enviarMensagemAdm()" style="width: 100%; background: var(--primary); color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 11px; text-transform: uppercase;">ENVIAR MENSAGEM</button>
+                        <textarea id="msg-radio-input" placeholder="Escreva o nome da rádio ou sua mensagem para o adm..." style="width: 100%; height: 80px; background: #0a0a0a; border: 1px solid var(--pink-light); border-radius: 8px; color: #fff; padding: 12px; font-family: inherit; font-size: 13px; resize: none; box-sizing: border-box; outline: none;"></textarea>
+                        <button type="button" onclick="enviarMensagemAdm()" style="width: 100%; background: var(--pink-light); color: #000; border: none; padding: 12px; border-radius: 8px; font-weight: 900; cursor: pointer; font-size: 12px; text-transform: uppercase; transition: 0.2s;">ENVIAR MENSAGEM</button>
                     </div>
                 </div>
 
@@ -165,11 +192,11 @@
         
         document.getElementById('nome-exibicao').innerText = nomeUsuario;
 
-        // AJUSTE CIRÚRGICO: Registrar início da sessão e status online com timestamp do servidor
+        // Registrar início da sessão e status online
         db.ref('contas/' + userId).update({
             status: "online",
             lastSeen: firebase.database.ServerValue.TIMESTAMP,
-            sessionStart: firebase.database.ServerValue.TIMESTAMP // ADICIONADO PARA O CRONÔMETRO DE SESSÃO
+            sessionStart: firebase.database.ServerValue.TIMESTAMP
         });
 
         let allRadios = [], mySelectedIds = [], activeIndex = -1;
@@ -231,7 +258,6 @@
             renderAll();
         }
 
-        /* AJUSTE CIRÚRGICO: EXIBIÇÃO E ENVIO DE MENSAGEM */
         function toggleFormRadio() {
             const form = document.getElementById('form-pedir-radio');
             if (form.style.display === 'none' || form.style.display === '') {
@@ -241,6 +267,7 @@
             }
         }
 
+        /* AJUSTE CIRÚRGICO CRUCIAL: Apontado para 'mensagens_ouvintes' para corresponder às regras do Firebase */
         function enviarMensagemAdm() {
             const txtInput = document.getElementById('msg-radio-input');
             const mensagem = txtInput.value.trim();
@@ -250,7 +277,7 @@
                 return;
             }
 
-            db.ref('mensagens').push({
+            db.ref('mensagens_ouvintes').push({
                 ouvinteId: userId,
                 ouvinteNome: nomeUsuario,
                 mensagem: mensagem,
@@ -273,10 +300,9 @@
             document.getElementById('now-title').innerText = "OUVINTE: " + r.name;
             document.getElementById('play-icon').className = "fas fa-stop";
             
-            // AJUSTE CIRÚRGICO: Atualizar timestamp de início desta rádio específica para o cronômetro do ADM
             db.ref('contas/' + userId).update({
                 radioAtual: r.name,
-                radioStart: firebase.database.ServerValue.TIMESTAMP, // ZERA O CRONÔMETRO NO ADM
+                radioStart: firebase.database.ServerValue.TIMESTAMP,
                 lastSeen: firebase.database.ServerValue.TIMESTAMP
             });
             renderAll();
@@ -333,7 +359,6 @@
             }
         }, 10000);
 
-        // AJUSTE CIRÚRGICO: Heartbeat (Sinal de vida) mais frequente para o ADM monitorar
         setInterval(() => { 
             if(userId) {
                 db.ref('contas/' + userId).update({ 
