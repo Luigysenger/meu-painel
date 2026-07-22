@@ -38,13 +38,28 @@
             #hora { text-align: center; font-size: 24px; }
         }
 
-        /* MENSAGENS */
+        /* MENSAGENS E CARDS COM BOLINHAS DE CORES */
         #container-mensagens-adm { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out; }
         #container-mensagens-adm.aberto { max-height: 2000px; margin-bottom: 25px; }
         .msg-grid-adm { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; padding: 10px; background: #080808; border-radius: 15px; border: 1px solid #222; }
-        .msg-card-individual { background: #181818; border: 1px solid #333; border-radius: 12px; padding: 15px; position: relative; }
-        .msg-card-individual h4 { margin: 0 0 5px 0; color: var(--primary); font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+        .msg-card-individual { background: #181818; border: 1px solid #333; border-radius: 12px; padding: 15px; position: relative; transition: border-color 0.3s ease; }
+        .msg-card-individual.card-verde { border: 2px solid #1DB954 !important; }
+        .msg-card-individual.card-amarelo { border: 2px solid #ffbb00 !important; }
+        .msg-card-individual.card-vermelho { border: 2px solid #ff4444 !important; }
+
+        .msg-card-individual h4 { margin: 0 0 10px 0; color: var(--primary); font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
         .msg-card-individual p { font-size: 13px; margin: 10px 0; line-height: 1.4; color: #eee; background: #222; padding: 8px; border-radius: 5px; word-break: break-word; }
+        
+        .color-dots { display: flex; gap: 6px; align-items: center; }
+        .dot { width: 14px; height: 14px; border-radius: 50%; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); display: inline-block; transition: transform 0.2s; }
+        .dot:hover { transform: scale(1.2); }
+        .dot-verde { background: #1DB954; }
+        .dot-amarelo { background: #ffbb00; }
+        .dot-vermelho { background: #ff4444; }
+
+        .msg-card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 10px; color: #777; }
+        .btn-responder-adm { background: #1DB954; color: black; border: none; padding: 5px 10px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 11px; display: flex; align-items: center; gap: 4px; }
+        .btn-responder-adm:hover { background: #1ed760; }
 
         /* GRID PRINCIPAL */
         .main-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; max-width: 1400px; margin: 0 auto; }
@@ -81,12 +96,11 @@
         .pub-list-btn { flex: 1; padding: 12px; background: none; border: none; color: white; text-align: left; display: flex; align-items: center; gap: 10px; cursor: pointer; min-width: 0; }
         .pub-thumb-mini { width: 40px; height: 25px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
 
-        /* MONITOR OUVINTES (AJUSTES DE ANIMAÇÃO E ÍCONE) */
+        /* MONITOR OUVINTES */
         .user-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; overflow: hidden; border-left: 4px solid #d1a3ff; transition: border-color 0.3s ease; }
         .user-name-btn { width: 100%; padding: 15px; background: none; border: none; color: white; text-align: left; font-weight: bold; font-size: 13px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .user-name-left { display: flex; align-items: center; gap: 10px; }
         
-        /* Ícone de Alto-falante Piscando/Pulsando */
         .speaker-icon { color: var(--primary); font-size: 14px; animation: speakerPulse 0.8s infinite alternate; }
         @keyframes speakerPulse {
             from { opacity: 0.3; transform: scale(0.85); }
@@ -96,7 +110,6 @@
         .status-on { color: #1DB954; font-weight: 900; font-size: 10px; }
         .status-off { color: #d1a3ff; font-weight: 900; font-size: 10px; }
         
-        /* Efeito Deslizar para Baixo (Smooth Slide Down) */
         .user-details-bar { 
             max-height: 0; 
             opacity: 0;
@@ -220,7 +233,25 @@
         function logout() { if(confirm("Sair?")) { localStorage.removeItem('usuarioNome'); window.location.href = 'index.html'; } }
         function toggleMensagens() { document.getElementById('container-mensagens-adm').classList.toggle('aberto'); }
 
-        /* MONITOR DE MENSAGENS DOS OUVINTES COM EFEITO PISCANDO */
+        /* ALTERAÇÃO DA COR DO CARD DE MENSAGEM NO FIREBASE */
+        function setCardColor(msgId, cor) {
+            db.ref('mensagens_ouvintes/' + msgId).update({ cor: cor });
+        }
+
+        /* RESPONDER OUVINTE DENTRO DO APP */
+        function responderOuvinte(nomeOuvinte) {
+            const msgPadrao = `Sua rádio/música pedida já foi adicionada! Obrigado por ouvir!`;
+            const resposta = prompt(`Enviar resposta para ${nomeOuvinte}:`, msgPadrao);
+            if(resposta) {
+                db.ref('respostas_ouvintes').push({
+                    ouvinte: nomeOuvinte,
+                    resposta: resposta,
+                    dataHora: new Date().toLocaleString('pt-BR')
+                }).then(() => alert('Resposta enviada com sucesso ao ouvinte!'));
+            }
+        }
+
+        /* MONITOR DE MENSAGENS DOS OUVINTES COM LIXEIRA, BOLINHAS E BOTÃO DE RESPOSTA */
         db.ref('mensagens_ouvintes').on('value', snap => {
             const container = document.getElementById('msg-list-adm');
             const btnNotif = document.getElementById('btn-msg-notif');
@@ -244,15 +275,29 @@
             for (let id in data) {
                 const m = data[id];
                 const dataHora = m.dataHora || (m.data ? `${m.data} ${m.hora||''}` : 'Agora');
+                const corCard = m.cor ? `card-${m.cor}` : '';
+                
                 const div = document.createElement('div');
-                div.className = "msg-card-individual";
+                div.className = `msg-card-individual ${corCard}`;
                 div.innerHTML = `
                     <h4>
                         <span><i class="fas fa-user" style="color:var(--primary)"></i> ${m.nome || 'Ouvinte'}</span>
-                        <i class="fas fa-trash-alt" style="color:#ff4444; cursor:pointer;" onclick="if(confirm('Excluir mensagem?')) db.ref('mensagens_ouvintes/${id}').remove()"></i>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <div class="color-dots">
+                                <span class="dot dot-verde" title="Atendido / Adicionado" onclick="setCardColor('${id}', 'verde')"></span>
+                                <span class="dot dot-amarelo" title="Em Análise" onclick="setCardColor('${id}', 'amarelo')"></span>
+                                <span class="dot dot-vermelho" title="Pendente / Urgente" onclick="setCardColor('${id}', 'vermelho')"></span>
+                            </div>
+                            <i class="fas fa-trash-alt" style="color:#ff4444; cursor:pointer;" title="Excluir Mensagem" onclick="if(confirm('Excluir mensagem?')) db.ref('mensagens_ouvintes/${id}').remove()"></i>
+                        </div>
                     </h4>
                     <p>${m.mensagem || m.texto || ''}</p>
-                    <div style="font-size:10px; color:#777; text-align:right;"><i class="far fa-clock"></i> ${dataHora}</div>
+                    <div class="msg-card-footer">
+                        <span><i class="far fa-clock"></i> ${dataHora}</span>
+                        <button class="btn-responder-adm" onclick="responderOuvinte('${m.nome || 'Ouvinte'}')">
+                            <i class="fas fa-reply"></i> RESPONDER
+                        </button>
+                    </div>
                 `;
                 container.appendChild(div);
             }
@@ -340,13 +385,12 @@
             });
         });
 
-        // MONITOR DE OUVINTES (COM ANIMAÇÃO DE DESLIZE E ÍCONE DE ALTO-FALANTE PISCANDO)
+        // MONITOR DE OUVINTES
         db.ref('contas').on('value', snap => {
             const container = document.getElementById('user-list'); if(!container) return;
             const agora = Date.now();
             const data = snap.val() || {};
             
-            // Mantém os painéis abertos salvos durante atualizações em tempo real
             const abasAbertas = {};
             document.querySelectorAll('.user-item').forEach(item => {
                 const id = item.getAttribute('data-id');
@@ -378,8 +422,6 @@
                 div.style.borderLeft = isOnline ? '4px solid #1DB954' : '4px solid #d1a3ff';
                 
                 const estaAberto = abasAbertas[safeId] ? 'aberto' : '';
-
-                // Ícone do alto-falante piscando (apenas se online)
                 const speakerHtml = isOnline ? `<i class="fas fa-volume-up speaker-icon"></i>` : '';
 
                 div.innerHTML = `
@@ -404,7 +446,6 @@
             updateUserTimers();
         });
 
-        // Abertura / Fechamento com efeito Deslize para Baixo (Smooth Accordion)
         function toggleDetallesBar(btn) {
             const details = btn.parentElement.nextElementSibling;
             if(details) {
