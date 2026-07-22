@@ -67,6 +67,18 @@
         .btn-toggle-radio.add { color: #444; }
         .btn-toggle-radio.remove { color: var(--primary); }
         
+        /* AJUSTE CIRÚRGICO: ESTILOS DA SEÇÃO PEDIR RÁDIO */
+        .pedir-radio-container { margin-top: 15px; border-top: 1px solid #282828; padding-top: 15px; }
+        .btn-pedir-radio { width: 100%; background: #1e1e1e; color: #fff; border: 1px solid var(--primary); padding: 12px; border-radius: 10px; cursor: pointer; font-size: 11px; font-weight: bold; text-transform: uppercase; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-pedir-radio:hover { background: var(--primary); color: #fff; box-shadow: 0 0 10px rgba(160, 32, 240, 0.4); }
+        
+        .form-pedir-radio { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-in-out, margin-top 0.4s ease-in-out; margin-top: 0; display: flex; flex-direction: column; gap: 10px; }
+        .form-pedir-radio.open { max-height: 200px; margin-top: 12px; }
+        .form-pedir-radio textarea { width: 100%; height: 70px; background: #0a0a0a; border: 1px solid #333; border-radius: 8px; color: #fff; padding: 10px; font-family: inherit; font-size: 12px; resize: none; box-sizing: border-box; outline: none; }
+        .form-pedir-radio textarea:focus { border-color: var(--primary); }
+        .btn-enviar-msg { background: var(--primary); color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 11px; text-transform: uppercase; transition: 0.2s; }
+        .btn-enviar-msg:hover { background: #8000d0; }
+
         .player-footer { position: fixed; bottom: 0; left: 0; right: 0; background: #111; padding: 15px 25px 25px 25px; border-top: 2px solid var(--primary); text-align: center; z-index: 100; }
         .msg-barra { background: #ff0000; color: #fff; font-size: 14px; font-weight: 900; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 2px solid #fff; display: none; width: fit-content; margin: 0 auto; cursor: pointer; animation: piscar-alerta 0.8s infinite alternate; }
         @keyframes piscar-alerta { 0% { opacity: 1; transform: scale(1); background: #ff0000; } 100% { opacity: 0.7; transform: scale(1.05); background: var(--primary); } }
@@ -112,6 +124,18 @@
             <div class="card">
                 <h3>SELECIONE AQUI SUA RÁDIO</h3>
                 <div id="selector-list" class="selector-list"></div>
+
+                <!-- AJUSTE CIRÚRGICO: ÁREA DO BOTÃO PEDIR RÁDIO AO ADM -->
+                <div class="pedir-radio-container">
+                    <button class="btn-pedir-radio" onclick="toggleFormRadio()">
+                        <i class="fas fa-paper-plane"></i> ENVIE UMA MENSAGEM PARA O NOSSO ADM PEDINDO PARA INCLUIR A SUA RÁDIO PREFERIDA
+                    </button>
+                    <div id="form-pedir-radio" class="form-pedir-radio">
+                        <textarea id="msg-radio-input" placeholder="Escreva o nome da rádio ou sua mensagem para o adm..."></textarea>
+                        <button class="btn-enviar-msg" onclick="enviarMensagemAdm()">ENVIAR MENSAGEM</button>
+                    </div>
+                </div>
+
             </div>
         </div>
         <div class="side-pub" id="pub-right"></div>
@@ -216,6 +240,35 @@
             if (index > -1) mySelectedIds.splice(index, 1); else mySelectedIds.push(id);
             salvarGrade();
             renderAll();
+        }
+
+        /* AJUSTE CIRÚRGICO: FUNÇÕES DO BOTÃO E ENVIO DE MENSAGEM */
+        function toggleFormRadio() {
+            const form = document.getElementById('form-pedir-radio');
+            form.classList.toggle('open');
+        }
+
+        function enviarMensagemAdm() {
+            const txtInput = document.getElementById('msg-radio-input');
+            const mensagem = txtInput.value.trim();
+
+            if(!mensagem) {
+                alert("Por favor, digite sua mensagem antes de enviar!");
+                return;
+            }
+
+            db.ref('mensagens').push({
+                ouvinteId: userId,
+                ouvinteNome: nomeUsuario,
+                mensagem: mensagem,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            }).then(() => {
+                alert("Mensagem enviada com sucesso para o Administrador!");
+                txtInput.value = "";
+                toggleFormRadio();
+            }).catch(err => {
+                alert("Erro ao enviar mensagem: " + err.message);
+            });
         }
 
         function playRadio(index) {
