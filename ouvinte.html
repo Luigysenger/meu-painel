@@ -2,25 +2,55 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Forçar atualização imediata nos celulares/tablets (Anti-Cache) -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
     <title>OUVINTE - LUIGY</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
-        :root { --primary: #A020F0; --pink-light: #FFB6C1; --bg: #000; --card: #121212; --text-muted: #b3b3b3; --success: #1DB954; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; user-select: none; }
-        
-        /* HEADER RESPONSIVO */
-        .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 20px 30px; border-radius: 15px; border: 1px solid #333; margin-bottom: 25px; gap: 10px; flex-wrap: wrap; transition: 0.3s; }
-        
-        .header.online { border-color: var(--success); box-shadow: 0 0 10px rgba(29, 185, 84, 0.2); }
+        /* --- TRAVA CIRÚRGICA DE TELA & APLICATIVO (IMPETE QUALQUER MOVIMENTO LATERAL) --- */
+        *, *::before, *::after {
+            box-sizing: border-box !important;
+            max-width: 100% !important;
+        }
 
+        html {
+            width: 100vw !important;
+            overflow-x: hidden !important;
+            overscroll-behavior-x: none !important;
+            touch-action: pan-y !important;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #000;
+            color: white;
+            margin: 0;
+            padding: 15px;
+            width: 100vw !important;
+            overflow-x: hidden !important;
+            overscroll-behavior-x: none !important;
+            touch-action: pan-y !important;
+            -webkit-overflow-scrolling: touch;
+            user-select: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Centraliza todo o conteúdo do site */
+        }
+
+        :root { --primary: #A020F0; --pink-light: #FFB6C1; --bg: #000; --card: #121212; --text-muted: #b3b3b3; --success: #1DB954; }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 20px 30px; border-radius: 15px; border: 1px solid #333; margin-bottom: 25px; gap: 10px; flex-wrap: wrap; transition: 0.3s; width: 100%; max-width: 1200px !important; }
+        .header.online { border-color: var(--success); box-shadow: 0 0 10px rgba(29, 185, 84, 0.2); }
         .header-left { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; flex-shrink: 0; }
         .header h2 { margin: 0; color: var(--primary); font-size: 22px; text-transform: uppercase; line-height: 1; }
         
-        /* INDICADOR ON */
         .status-badge { font-size: 10px; background: rgba(29, 185, 84, 0.1); color: var(--success); padding: 2px 8px; border-radius: 20px; border: 1px solid var(--success); font-weight: bold; margin-left: 5px; display: none; }
         .online .status-badge { display: inline-block; animation: pulse-green 2s infinite; }
         @keyframes pulse-green { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
@@ -49,8 +79,7 @@
         .btn-sair { color: #ff4444; border-color: #442222; padding: 4px 10px; }
         .btn-sair:hover { background: #331111; border-color: #ff4444; }
 
-        /* CONTAINER SLIDE DE RESPOSTAS DO ADM */
-        #container-respostas-ouvinte { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out; margin-bottom: 0px; }
+        #container-respostas-ouvinte { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out; margin-bottom: 0px; width: 100%; max-width: 1200px !important; }
         #container-respostas-ouvinte.aberto { max-height: 1000px; margin-bottom: 25px; }
         .respostas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
         .card-resposta-item { background: #181818; border: 1px solid var(--primary); border-radius: 12px; padding: 12px 15px; position: relative; }
@@ -58,33 +87,86 @@
         .card-resposta-item p { margin: 0; font-size: 13px; color: #fff; background: #222; padding: 10px; border-radius: 8px; word-break: break-word; }
         .card-resposta-item .data-resp { font-size: 10px; color: #777; margin-top: 8px; text-align: right; }
         
-        .main-container { display: grid; grid-template-columns: 180px 1fr 180px; gap: 20px; max-width: 100%; margin: 0 auto; margin-bottom: 150px; align-items: start; }
-        .center-content { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; align-items: start; }
+        /* CONTAINER PRINCIPAL CENTRALIZADO */
+        .main-container { 
+            display: grid; 
+            grid-template-columns: 180px 1fr 180px; 
+            gap: 20px; 
+            width: 100%; 
+            max-width: 1200px !important; 
+            margin: 0 auto; 
+            margin-bottom: 150px; 
+            align-items: start; 
+        }
+        .center-content { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; align-items: start; width: 100%; }
         .side-pub { min-height: 400px; display: flex; flex-direction: column; gap: 15px; }
         .side-pub img { width: 100%; border-radius: 10px; border: 1px solid #333; }
         
-        @media (max-width: 1200px) { .center-content { grid-template-columns: 1fr; } .main-container { grid-template-columns: 1fr; } .side-pub { display: none; } }
+        @media (max-width: 1200px) { 
+            .center-content { grid-template-columns: 1fr; } 
+            .main-container { grid-template-columns: 1fr; } 
+            .side-pub { display: none; } 
+        }
 
-        .card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid #282828; }
+        .card { 
+            background: var(--card); 
+            border-radius: 20px; 
+            padding: 20px; 
+            border: 1px solid #282828; 
+            width: 100%; 
+            margin: 0 auto; 
+        }
+
         h3 { color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; text-align: center; }
         
-        .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; justify-content: center; }
-        .radio-item { aspect-ratio: 1/1; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #000; font-weight: bold; font-size: 10px; text-align: center; padding: 10px; cursor: grab; transition: 0.3s; position: relative; border: 2px solid transparent; box-sizing: border-box; touch-action: auto !important; }
-        .radio-item:hover { transform: scale(1.05); filter: brightness(1.1); }
+        /* GRADE E ELEMENTOS DAS RÁDIOS - COM BLOQUEIO DE MOVIMENTO LATERAL */
+        .radio-grid { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+            width: 100%;
+            touch-action: pan-y !important;
+            overflow-x: hidden !important;
+        }
+
+        .radio-item { 
+            width: 100% !important;
+            height: 55px; 
+            border-radius: 12px; 
+            display: flex; 
+            flex-direction: row; 
+            justify-content: flex-start; 
+            align-items: center; 
+            color: #000; 
+            font-weight: bold; 
+            font-size: 13px; 
+            padding: 0 18px; 
+            cursor: grab; 
+            transition: background 0.2s; 
+            position: relative; 
+            border: 2px solid transparent; 
+            box-sizing: border-box; 
+            touch-action: pan-y !important; /* Trava toque no eixo vertical */
+            margin: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            transform: none !important; /* Evita deslocamento para os lados */
+        }
+        
+        .radio-item:active { cursor: grabbing; }
         .radio-item.active { background: #000 !important; color: var(--primary) !important; border-color: var(--primary); box-shadow: 0 0 15px rgba(160, 32, 240, 0.4); }
         
-        .antena { font-size: 20px; margin-bottom: 8px; display: none; }
-        .active .antena { display: block; animation: pulse-antena 1s infinite; }
+        .antena { font-size: 16px; margin-right: 12px; display: none; }
+        .active .antena { display: inline-block; animation: pulse-antena 1s infinite; }
         @keyframes pulse-antena { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(1.1); } }
         
-        .selector-list { display: flex; flex-direction: column; gap: 8px; max-height: 450px; overflow-y: auto; padding-right: 5px; }
-        .selector-item { background: #1a1a1a; padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #333; transition: 0.3s; }
+        .selector-list { display: flex; flex-direction: column; gap: 8px; max-height: 450px; overflow-y: auto; overflow-x: hidden; padding-right: 5px; width: 100%; }
+        .selector-item { background: #1a1a1a; padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #333; transition: 0.3s; width: 100%; }
         .selector-item.selected { border-left-color: var(--primary); background: #222; }
         .btn-toggle-radio { background: none; border: none; font-size: 18px; cursor: pointer; transition: 0.2s; }
         .btn-toggle-radio.add { color: #444; }
         .btn-toggle-radio.remove { color: var(--primary); }
         
-        /* ESTILO ROSA CLARO EM DESTAQUE E FONTE MAIOR */
         .btn-pedir-radio {
             width: 100%;
             background: rgba(255, 182, 193, 0.12);
@@ -104,14 +186,8 @@
             box-shadow: 0 0 15px rgba(255, 182, 193, 0.25);
             line-height: 1.3;
         }
-        .btn-pedir-radio:hover {
-            background: var(--pink-light);
-            color: #000;
-            box-shadow: 0 0 22px rgba(255, 182, 193, 0.7);
-            transform: scale(1.02);
-        }
 
-        .player-footer { position: fixed; bottom: 0; left: 0; right: 0; background: #111; padding: 15px 25px 25px 25px; border-top: 2px solid var(--primary); text-align: center; z-index: 100; }
+        .player-footer { position: fixed; bottom: 0; left: 0; right: 0; background: #111; padding: 15px 25px 25px 25px; border-top: 2px solid var(--primary); text-align: center; z-index: 100; width: 100%; overflow-x: hidden; }
         .msg-barra { background: #ff0000; color: #fff; font-size: 14px; font-weight: 900; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 2px solid #fff; display: none; width: fit-content; margin: 0 auto; cursor: pointer; animation: piscar-alerta 0.8s infinite alternate; }
         @keyframes piscar-alerta { 0% { opacity: 1; transform: scale(1); background: #ff0000; } 100% { opacity: 0.7; transform: scale(1.05); background: var(--primary); } }
         
@@ -152,7 +228,6 @@
         </div>
     </div>
 
-    <!-- PAINEL DESLIZANTE PARA EXIBIR A MENSAGEM ENVIADA PELO ADM -->
     <div id="container-respostas-ouvinte">
         <div class="card">
             <h3>MENSAGENS DO ADMINISTRADOR</h3>
@@ -164,14 +239,13 @@
         <div class="side-pub" id="pub-left"></div>
         <div class="center-content">
             <div class="card">
-                <h3>MINHA GRADE (SEGURE PARA ARRASTAR)</h3>
+                <h3>MINHA GRADE (ARRASTE PARA CIMA/BAIXO)</h3>
                 <div id="my-radio-list" class="radio-grid"></div>
             </div>
             <div class="card">
                 <h3>SELECIONE AQUI SUA RÁDIO</h3>
                 <div id="selector-list" class="selector-list"></div>
 
-                <!-- BOTÃO EM ROSA CLARO E FONTE MAIOR PARA ATENÇÃO -->
                 <div style="margin-top: 18px; border-top: 1px solid #282828; padding-top: 18px;">
                     <button type="button" class="btn-pedir-radio" onclick="toggleFormRadio()">
                         <i class="fas fa-paper-plane" style="font-size: 16px;"></i>
@@ -224,7 +298,6 @@
         
         document.getElementById('nome-exibicao').innerText = nomeUsuario;
 
-        // Registrar início da sessão e status online
         db.ref('contas/' + userId).update({
             status: "online",
             lastSeen: firebase.database.ServerValue.TIMESTAMP,
@@ -243,68 +316,71 @@
 
         function fecharAviso() { document.getElementById('aviso-novidade').style.display = 'none'; }
 
-        /* ABRIR E FECHAR O PAINEL DE RESPOSTAS DO ADM */
         function toggleRespostasAdm() {
             document.getElementById('container-respostas-ouvinte').classList.toggle('aberto');
         }
 
-        /* AJUSTE CIRÚRGICO CRUCIAL: ESCUTAR TODAS AS VARIÁVEIS POSSÍVEIS DE IDENTIFICAÇÃO DO OUVINTE */
-        db.ref('respostas_ouvintes').on('value', snap => {
+        function carregarRespostas() {
             const container = document.getElementById('respostas-list');
             const btnResp = document.getElementById('btn-resposta-adm');
             const countElem = document.getElementById('count-respostas');
             
             if(!container) return;
-            container.innerHTML = "";
-            
-            const data = snap.val() || {};
-            let countMinhasRespostas = 0;
 
-            const meuNomeLower = nomeUsuario.toLowerCase();
-            const meuIdLower = String(userId).toLowerCase();
+            const pastasParaBuscar = ['respostas_adm', 'respostas_ouvintes'];
 
-            for(let id in data) {
-                const item = data[id];
-                
-                // Pega possíveis campos que o ADM pode ter gravado
-                const targetOuvinte = String(item.ouvinte || item.ouvinteNome || item.nome || item.usuario || "").trim().toLowerCase();
-                const targetId = String(item.ouvinteId || item.id || "").trim().toLowerCase();
-                
-                // Valida se a resposta é para este ouvinte
-                const eParaMim = (targetOuvinte === meuNomeLower) || 
-                                 (targetId === meuIdLower) || 
-                                 (targetOuvinte.length > 0 && meuNomeLower.includes(targetOuvinte)) ||
-                                 (targetOuvinte === "todos");
+            pastasParaBuscar.forEach(pasta => {
+                db.ref(pasta).on('value', snap => {
+                    container.innerHTML = "";
+                    const data = snap.val() || {};
+                    let count = 0;
 
-                if(eParaMim) {
-                    countMinhasRespostas++;
-                    
-                    const textoResposta = item.resposta || item.mensagem || item.texto || "Resposta recebida do ADM.";
-                    const dataHora = item.dataHora || (item.timestamp ? new Date(item.timestamp).toLocaleString('pt-BR') : '');
+                    const meuNomeLower = nomeUsuario.toLowerCase();
+                    const meuIdLower = String(userId).toLowerCase();
 
-                    const div = document.createElement('div');
-                    div.className = "card-resposta-item";
-                    div.innerHTML = `
-                        <h5>
-                            <span><i class="fas fa-user-shield"></i> ADM RESPONDEU:</span>
-                            <i class="fas fa-trash-alt" style="color:#ff4444; cursor:pointer; font-size:14px;" title="Apagar Resposta" onclick="if(confirm('Apagar esta resposta?')) db.ref('respostas_ouvintes/${id}').remove()"></i>
-                        </h5>
-                        <p>${textoResposta}</p>
-                        <div class="data-resp">${dataHora}</div>
-                    `;
-                    container.appendChild(div);
-                }
-            }
+                    for(let id in data) {
+                        const item = data[id];
+                        
+                        const targetOuvinte = String(item.ouvinte || item.ouvinteNome || item.nome || item.usuario || "").trim().toLowerCase();
+                        const targetId = String(item.ouvinteId || item.id || "").trim().toLowerCase();
+                        
+                        const eParaMim = (targetOuvinte && meuNomeLower.includes(targetOuvinte)) || 
+                                         (targetId && targetId === meuIdLower) || 
+                                         targetOuvinte === "todos" ||
+                                         !targetOuvinte;
 
-            if(countElem) countElem.innerText = countMinhasRespostas;
+                        if(eParaMim) {
+                            count++;
+                            const textoResposta = item.resposta || item.mensagem || item.texto || "Resposta enviada pelo ADM";
+                            const dataHora = item.dataHora || (item.timestamp ? new Date(item.timestamp).toLocaleString('pt-BR') : '');
 
-            if(countMinhasRespostas > 0) {
-                if(btnResp) btnResp.classList.add('piscar');
-            } else {
-                if(btnResp) btnResp.classList.remove('piscar');
-                container.innerHTML = "<p style='color:#888; font-size:12px; grid-column:1/-1; text-align:center;'>Nenhuma resposta do ADM no momento.</p>";
-            }
-        });
+                            const div = document.createElement('div');
+                            div.className = "card-resposta-item";
+                            div.innerHTML = `
+                                <h5>
+                                    <span><i class="fas fa-user-shield"></i> ADM RESPONDEU:</span>
+                                    <i class="fas fa-trash-alt" style="color:#ff4444; cursor:pointer; font-size:14px;" title="Apagar" onclick="if(confirm('Apagar?')) db.ref('${pasta}/${id}').remove()"></i>
+                                </h5>
+                                <p>${textoResposta}</p>
+                                <div class="data-resp">${dataHora}</div>
+                            `;
+                            container.appendChild(div);
+                        }
+                    }
+
+                    if(countElem) countElem.innerText = count;
+
+                    if(count > 0) {
+                        if(btnResp) btnResp.classList.add('piscar');
+                    } else {
+                        if(btnResp) btnResp.classList.remove('piscar');
+                        container.innerHTML = "<p style='color:#888; font-size:12px; grid-column:1/-1; text-align:center;'>Nenhuma resposta do ADM no momento.</p>";
+                    }
+                });
+            });
+        }
+
+        carregarRespostas();
 
         db.ref('radios').on('value', snap => {
             allRadios = [];
@@ -334,10 +410,15 @@
             db.ref('contas/' + userId + '/grade').set(mySelectedIds);
         }
 
+        /* --- CONFIGURAÇÃO RIGOROSA DE ARRASTE (EXCLUSIVO NO EIXO VERTICAL Y) --- */
         new Sortable(document.getElementById('my-radio-list'), {
             animation: 150,
-            delay: 200,
+            direction: 'vertical',
+            delay: 150,
             delayOnTouchOnly: true,
+            forceFallback: true, /* Força uma simulação perfeita para travar movimento lateral no celular */
+            fallbackOnBody: true,
+            swapThreshold: 0.65,
             onEnd: function() {
                 const newIds = [];
                 document.querySelectorAll('#my-radio-list .radio-item').forEach(el => { newIds.push(el.getAttribute('data-id')); });
@@ -420,7 +501,6 @@
             window.location.href = 'index.html'; 
         } }
 
-        // --- PUBLICIDADE ---
         let listaPubs = [], idxPub = 0;
         db.ref('publicidade').on('value', snap => {
             listaPubs = [];
