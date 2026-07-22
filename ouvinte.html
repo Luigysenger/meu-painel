@@ -218,7 +218,7 @@
         const player = document.getElementById('audio-player');
 
         const userId = localStorage.getItem('userId') || localStorage.getItem('usuarioKey');
-        const nomeUsuario = localStorage.getItem('usuarioNome') || "OUVINTE";
+        const nomeUsuario = (localStorage.getItem('usuarioNome') || "OUVINTE").trim();
         
         if(!userId) { window.location.href = 'index.html'; }
         
@@ -248,7 +248,7 @@
             document.getElementById('container-respostas-ouvinte').classList.toggle('aberto');
         }
 
-        /* ESCUTAR RESPOSTAS DO ADM DESTINADAS A ESTE OUVINTE */
+        /* AJUSTE CIRÚRGICO CRUCIAL: ESCUTAR TODAS AS VARIÁVEIS POSSÍVEIS DE IDENTIFICAÇÃO DO OUVINTE */
         db.ref('respostas_ouvintes').on('value', snap => {
             const container = document.getElementById('respostas-list');
             const btnResp = document.getElementById('btn-resposta-adm');
@@ -260,12 +260,28 @@
             const data = snap.val() || {};
             let countMinhasRespostas = 0;
 
+            const meuNomeLower = nomeUsuario.toLowerCase();
+            const meuIdLower = String(userId).toLowerCase();
+
             for(let id in data) {
                 const item = data[id];
-                // Verifica se a resposta pertence ao ouvinte pelo nome
-                if(item.ouvinte && item.ouvinte.toLowerCase() === nomeUsuario.toLowerCase()) {
+                
+                // Pega possíveis campos que o ADM pode ter gravado
+                const targetOuvinte = String(item.ouvinte || item.ouvinteNome || item.nome || item.usuario || "").trim().toLowerCase();
+                const targetId = String(item.ouvinteId || item.id || "").trim().toLowerCase();
+                
+                // Valida se a resposta é para este ouvinte
+                const eParaMim = (targetOuvinte === meuNomeLower) || 
+                                 (targetId === meuIdLower) || 
+                                 (targetOuvinte.length > 0 && meuNomeLower.includes(targetOuvinte)) ||
+                                 (targetOuvinte === "todos");
+
+                if(eParaMim) {
                     countMinhasRespostas++;
                     
+                    const textoResposta = item.resposta || item.mensagem || item.texto || "Resposta recebida do ADM.";
+                    const dataHora = item.dataHora || (item.timestamp ? new Date(item.timestamp).toLocaleString('pt-BR') : '');
+
                     const div = document.createElement('div');
                     div.className = "card-resposta-item";
                     div.innerHTML = `
@@ -273,8 +289,8 @@
                             <span><i class="fas fa-user-shield"></i> ADM RESPONDEU:</span>
                             <i class="fas fa-trash-alt" style="color:#ff4444; cursor:pointer; font-size:14px;" title="Apagar Resposta" onclick="if(confirm('Apagar esta resposta?')) db.ref('respostas_ouvintes/${id}').remove()"></i>
                         </h5>
-                        <p>${item.resposta}</p>
-                        <div class="data-resp">${item.dataHora || ''}</div>
+                        <p>${textoResposta}</p>
+                        <div class="data-resp">${dataHora}</div>
                     `;
                     container.appendChild(div);
                 }
@@ -346,7 +362,6 @@
             }
         }
 
-        /* AJUSTE CIRÚRGICO CRUCIAL: Apontado para 'mensagens_ouvintes' para corresponder às regras do Firebase */
         function enviarMensagemAdm() {
             const txtInput = document.getElementById('msg-radio-input');
             const mensagem = txtInput.value.trim();
@@ -359,6 +374,7 @@
             db.ref('mensagens_ouvintes').push({
                 ouvinteId: userId,
                 ouvinte: nomeUsuario,
+                ouvinteNome: nomeUsuario,
                 nome: nomeUsuario,
                 mensagem: mensagem,
                 dataHora: new Date().toLocaleString('pt-BR'),
