@@ -16,8 +16,18 @@
         .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 15px 20px; border-radius: 15px; border: 1px solid #333; margin-bottom: 20px; gap: 15px; }
         .header-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
         .header h2 { margin: 0; color: var(--primary); font-size: 18px; white-space: nowrap; }
-        .btn-msg-notif { background: #ff4444; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; font-size: 13px; }
+        .btn-msg-notif { background: #ff4444; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; font-size: 13px; transition: transform 0.2s ease; }
         .btn-msg-notif span { background: white; color: #ff4444; padding: 2px 6px; border-radius: 50%; font-size: 12px; }
+        
+        /* ANIMAÇÃO PISCANTE PARA O BOTÃO MENSAGENS QUANDO HOUVER MENSAGENS */
+        .btn-msg-notif.piscar {
+            animation: btnMsgPisca 0.8s infinite alternate;
+        }
+        @keyframes btnMsgPisca {
+            from { opacity: 1; transform: scale(1); box-shadow: 0 0 5px #ff4444; }
+            to { opacity: 0.3; transform: scale(1.05); box-shadow: 0 0 18px #ff0000; }
+        }
+
         .btn-header { background: none; border: 1px solid #333; color: white; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 5px; }
         .btn-sair { color: #ff4444; border-color: #442222; }
         #hora { font-size: 20px; font-weight: 900; min-width: 80px; text-align: right; }
@@ -33,8 +43,8 @@
         #container-mensagens-adm.aberto { max-height: 2000px; margin-bottom: 25px; }
         .msg-grid-adm { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; padding: 10px; background: #080808; border-radius: 15px; border: 1px solid #222; }
         .msg-card-individual { background: #181818; border: 1px solid #333; border-radius: 12px; padding: 15px; position: relative; }
-        .msg-card-individual h4 { margin: 0 0 5px 0; color: var(--primary); font-size: 14px; display: flex; justify-content: space-between; }
-        .msg-card-individual p { font-size: 13px; margin: 10px 0; line-height: 1.4; color: #eee; background: #222; padding: 8px; border-radius: 5px; }
+        .msg-card-individual h4 { margin: 0 0 5px 0; color: var(--primary); font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+        .msg-card-individual p { font-size: 13px; margin: 10px 0; line-height: 1.4; color: #eee; background: #222; padding: 8px; border-radius: 5px; word-break: break-word; }
 
         /* GRID PRINCIPAL */
         .main-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; max-width: 1400px; margin: 0 auto; }
@@ -117,7 +127,7 @@
             <button class="btn-header btn-sair" onclick="logout()"><i class="fas fa-sign-out-alt"></i> SAIR</button>
         </div>
         <div class="header-center">
-            <button class="btn-msg-notif" onclick="toggleMensagens()">
+            <button id="btn-msg-notif" class="btn-msg-notif" onclick="toggleMensagens()">
                 <i class="fas fa-envelope"></i> MENSAGENS <span id="count-msg">0</span>
             </button>
         </div>
@@ -209,6 +219,44 @@
 
         function logout() { if(confirm("Sair?")) { localStorage.removeItem('usuarioNome'); window.location.href = 'index.html'; } }
         function toggleMensagens() { document.getElementById('container-mensagens-adm').classList.toggle('aberto'); }
+
+        /* MONITOR DE MENSAGENS DOS OUVINTES COM EFEITO PISCANDO */
+        db.ref('mensagens_ouvintes').on('value', snap => {
+            const container = document.getElementById('msg-list-adm');
+            const btnNotif = document.getElementById('btn-msg-notif');
+            const countElem = document.getElementById('count-msg');
+            
+            if(!container) return;
+            container.innerHTML = "";
+            
+            const data = snap.val() || {};
+            const totalMsg = Object.keys(data).length;
+            
+            if(countElem) countElem.innerText = totalMsg;
+            
+            if(totalMsg > 0) {
+                if(btnNotif) btnNotif.classList.add('piscar');
+            } else {
+                if(btnNotif) btnNotif.classList.remove('piscar');
+                container.innerHTML = "<p style='color:#888; font-size:12px; grid-column:1/-1; text-align:center;'>Nenhuma mensagem recebida.</p>";
+            }
+
+            for (let id in data) {
+                const m = data[id];
+                const dataHora = m.dataHora || (m.data ? `${m.data} ${m.hora||''}` : 'Agora');
+                const div = document.createElement('div');
+                div.className = "msg-card-individual";
+                div.innerHTML = `
+                    <h4>
+                        <span><i class="fas fa-user" style="color:var(--primary)"></i> ${m.nome || 'Ouvinte'}</span>
+                        <i class="fas fa-trash-alt" style="color:#ff4444; cursor:pointer;" onclick="if(confirm('Excluir mensagem?')) db.ref('mensagens_ouvintes/${id}').remove()"></i>
+                    </h4>
+                    <p>${m.mensagem || m.texto || ''}</p>
+                    <div style="font-size:10px; color:#777; text-align:right;"><i class="far fa-clock"></i> ${dataHora}</div>
+                `;
+                container.appendChild(div);
+            }
+        });
 
         db.ref('radios').on('value', snap => {
             radioData = []; snap.forEach(c => { radioData.push({ ...c.val(), key: c.key }); });
