@@ -28,6 +28,15 @@
         #container-pub { flex: 1; display: flex; justify-content: center; align-items: center; padding: 0 10px; min-height: 55px; overflow: hidden; }
         #img-publicidade { max-height: 55px; max-width: 100%; border-radius: 8px; display: none; object-fit: contain; transition: opacity 0.5s ease-in-out; }
         
+        .header-center-resp { display: flex; justify-content: center; align-items: center; margin: 0 10px; }
+        .btn-resposta-adm { background: #A020F0; color: white; border: none; padding: 8px 14px; border-radius: 20px; font-weight: 800; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 8px; text-transform: uppercase; transition: transform 0.2s, box-shadow 0.2s; }
+        .btn-resposta-adm span { background: white; color: #A020F0; padding: 2px 6px; border-radius: 50%; font-size: 11px; font-weight: 900; }
+        .btn-resposta-adm.piscar { animation: btnRespPisca 0.8s infinite alternate; }
+        @keyframes btnRespPisca {
+            from { opacity: 1; transform: scale(1); box-shadow: 0 0 5px #A020F0; }
+            to { opacity: 0.4; transform: scale(1.05); box-shadow: 0 0 18px #FFB6C1; }
+        }
+
         .header-right { display: flex; align-items: center; flex-shrink: 0; }
         .datetime-container { display: flex; flex-direction: column; align-items: flex-end; border-left: 1px solid #333; padding-left: 20px; }
         
@@ -39,6 +48,15 @@
         .btn-header:hover { background: #222; border-color: var(--primary); }
         .btn-sair { color: #ff4444; border-color: #442222; padding: 4px 10px; }
         .btn-sair:hover { background: #331111; border-color: #ff4444; }
+
+        /* CONTAINER SLIDE DE RESPOSTAS DO ADM */
+        #container-respostas-ouvinte { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out; margin-bottom: 0px; }
+        #container-respostas-ouvinte.aberto { max-height: 1000px; margin-bottom: 25px; }
+        .respostas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+        .card-resposta-item { background: #181818; border: 1px solid var(--primary); border-radius: 12px; padding: 12px 15px; position: relative; }
+        .card-resposta-item h5 { margin: 0 0 8px 0; color: var(--pink-light); font-size: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .card-resposta-item p { margin: 0; font-size: 13px; color: #fff; background: #222; padding: 10px; border-radius: 8px; word-break: break-word; }
+        .card-resposta-item .data-resp { font-size: 10px; color: #777; margin-top: 8px; text-align: right; }
         
         .main-container { display: grid; grid-template-columns: 180px 1fr 180px; gap: 20px; max-width: 100%; margin: 0 auto; margin-bottom: 150px; align-items: start; }
         .center-content { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; align-items: start; }
@@ -118,6 +136,12 @@
         
         <div id="container-pub"><img id="img-publicidade" src=""></div>
         
+        <div class="header-center-resp">
+            <button id="btn-resposta-adm" class="btn-resposta-adm" onclick="toggleRespostasAdm()">
+                <i class="fas fa-comment-dots"></i> RESPOSTA DO ADM <span id="count-respostas">0</span>
+            </button>
+        </div>
+        
         <div class="header-right">
             <div class="datetime-container">
                 <div id="hora">00:00:00</div>
@@ -125,6 +149,14 @@
                     <span id="data-inline">00/00/0000</span> — <span id="dia-semana" class="day-highlight">...</span>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- PAINEL DESLIZANTE PARA EXIBIR A MENSAGEM ENVIADA PELO ADM -->
+    <div id="container-respostas-ouvinte">
+        <div class="card">
+            <h3>MENSAGENS DO ADMINISTRADOR</h3>
+            <div id="respostas-list" class="respostas-grid"></div>
         </div>
     </div>
 
@@ -211,6 +243,53 @@
 
         function fecharAviso() { document.getElementById('aviso-novidade').style.display = 'none'; }
 
+        /* ABRIR E FECHAR O PAINEL DE RESPOSTAS DO ADM */
+        function toggleRespostasAdm() {
+            document.getElementById('container-respostas-ouvinte').classList.toggle('aberto');
+        }
+
+        /* ESCUTAR RESPOSTAS DO ADM DESTINADAS A ESTE OUVINTE */
+        db.ref('respostas_ouvintes').on('value', snap => {
+            const container = document.getElementById('respostas-list');
+            const btnResp = document.getElementById('btn-resposta-adm');
+            const countElem = document.getElementById('count-respostas');
+            
+            if(!container) return;
+            container.innerHTML = "";
+            
+            const data = snap.val() || {};
+            let countMinhasRespostas = 0;
+
+            for(let id in data) {
+                const item = data[id];
+                // Verifica se a resposta pertence ao ouvinte pelo nome
+                if(item.ouvinte && item.ouvinte.toLowerCase() === nomeUsuario.toLowerCase()) {
+                    countMinhasRespostas++;
+                    
+                    const div = document.createElement('div');
+                    div.className = "card-resposta-item";
+                    div.innerHTML = `
+                        <h5>
+                            <span><i class="fas fa-user-shield"></i> ADM RESPONDEU:</span>
+                            <i class="fas fa-trash-alt" style="color:#ff4444; cursor:pointer; font-size:14px;" title="Apagar Resposta" onclick="if(confirm('Apagar esta resposta?')) db.ref('respostas_ouvintes/${id}').remove()"></i>
+                        </h5>
+                        <p>${item.resposta}</p>
+                        <div class="data-resp">${item.dataHora || ''}</div>
+                    `;
+                    container.appendChild(div);
+                }
+            }
+
+            if(countElem) countElem.innerText = countMinhasRespostas;
+
+            if(countMinhasRespostas > 0) {
+                if(btnResp) btnResp.classList.add('piscar');
+            } else {
+                if(btnResp) btnResp.classList.remove('piscar');
+                container.innerHTML = "<p style='color:#888; font-size:12px; grid-column:1/-1; text-align:center;'>Nenhuma resposta do ADM no momento.</p>";
+            }
+        });
+
         db.ref('radios').on('value', snap => {
             allRadios = [];
             snap.forEach(c => { allRadios.push({ ...c.val(), key: c.key }); });
@@ -279,8 +358,10 @@
 
             db.ref('mensagens_ouvintes').push({
                 ouvinteId: userId,
-                ouvinteNome: nomeUsuario,
+                ouvinte: nomeUsuario,
+                nome: nomeUsuario,
                 mensagem: mensagem,
+                dataHora: new Date().toLocaleString('pt-BR'),
                 timestamp: firebase.database.ServerValue.TIMESTAMP
             }).then(() => {
                 alert("Mensagem enviada com sucesso para o Administrador!");
