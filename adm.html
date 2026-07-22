@@ -42,6 +42,7 @@
         #container-mensagens-adm { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out; }
         #container-mensagens-adm.aberto { max-height: 2000px; margin-bottom: 25px; }
         .msg-grid-adm { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; padding: 10px; background: #080808; border-radius: 15px; border: 1px solid #222; }
+        
         .msg-card-individual { background: #181818; border: 1px solid #333; border-radius: 12px; padding: 15px; position: relative; transition: border-color 0.3s ease; }
         .msg-card-individual.card-verde { border: 2px solid #1DB954 !important; }
         .msg-card-individual.card-amarelo { border: 2px solid #ffbb00 !important; }
@@ -50,15 +51,15 @@
         .msg-card-individual h4 { margin: 0 0 10px 0; color: var(--primary); font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
         .msg-card-individual p { font-size: 13px; margin: 10px 0; line-height: 1.4; color: #eee; background: #222; padding: 8px; border-radius: 5px; word-break: break-word; }
         
-        .color-dots { display: flex; gap: 6px; align-items: center; }
-        .dot { width: 14px; height: 14px; border-radius: 50%; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); display: inline-block; transition: transform 0.2s; }
-        .dot:hover { transform: scale(1.2); }
+        .color-dots { display: flex; gap: 8px; align-items: center; }
+        .dot { width: 14px; height: 14px; border-radius: 50%; cursor: pointer; border: 1px solid rgba(255,255,255,0.3); display: inline-block; transition: transform 0.2s; }
+        .dot:hover { transform: scale(1.3); }
         .dot-verde { background: #1DB954; }
         .dot-amarelo { background: #ffbb00; }
         .dot-vermelho { background: #ff4444; }
 
         .msg-card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 10px; color: #777; }
-        .btn-responder-adm { background: #1DB954; color: black; border: none; padding: 5px 10px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 11px; display: flex; align-items: center; gap: 4px; }
+        .btn-responder-adm { background: #1DB954; color: black; border: none; padding: 6px 12px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 11px; display: flex; align-items: center; gap: 5px; }
         .btn-responder-adm:hover { background: #1ed760; }
 
         /* GRID PRINCIPAL */
@@ -247,11 +248,11 @@
                     ouvinte: nomeOuvinte,
                     resposta: resposta,
                     dataHora: new Date().toLocaleString('pt-BR')
-                }).then(() => alert('Resposta enviada com sucesso ao ouvinte!'));
+                }).then(() => alert('Resposta enviada com sucesso para ' + nomeOuvinte + '!'));
             }
         }
 
-        /* MONITOR DE MENSAGENS DOS OUVINTES COM LIXEIRA, BOLINHAS E BOTÃO DE RESPOSTA */
+        /* MONITOR DE MENSAGENS DOS OUVINTES COM NOME REAL, LIXEIRA, BOLINHAS E BOTÃO DE RESPOSTA */
         db.ref('mensagens_ouvintes').on('value', snap => {
             const container = document.getElementById('msg-list-adm');
             const btnNotif = document.getElementById('btn-msg-notif');
@@ -274,27 +275,30 @@
 
             for (let id in data) {
                 const m = data[id];
+                // Pega o nome real do ouvinte (ex: Laisa), se não encontrar usa 'Anônimo'
+                const nomeRealOuvinte = m.nome || m.ouvinte || m.usuario || 'Anônimo';
                 const dataHora = m.dataHora || (m.data ? `${m.data} ${m.hora||''}` : 'Agora');
                 const corCard = m.cor ? `card-${m.cor}` : '';
+                const textoMensagem = m.mensagem || m.texto || m.pedido || '';
                 
                 const div = document.createElement('div');
                 div.className = `msg-card-individual ${corCard}`;
                 div.innerHTML = `
                     <h4>
-                        <span><i class="fas fa-user" style="color:var(--primary)"></i> ${m.nome || 'Ouvinte'}</span>
-                        <div style="display:flex; align-items:center; gap:10px;">
+                        <span><i class="fas fa-user" style="color:var(--primary)"></i> ${nomeRealOuvinte}</span>
+                        <div style="display:flex; align-items:center; gap:12px;">
                             <div class="color-dots">
                                 <span class="dot dot-verde" title="Atendido / Adicionado" onclick="setCardColor('${id}', 'verde')"></span>
                                 <span class="dot dot-amarelo" title="Em Análise" onclick="setCardColor('${id}', 'amarelo')"></span>
                                 <span class="dot dot-vermelho" title="Pendente / Urgente" onclick="setCardColor('${id}', 'vermelho')"></span>
                             </div>
-                            <i class="fas fa-trash-alt" style="color:#ff4444; cursor:pointer;" title="Excluir Mensagem" onclick="if(confirm('Excluir mensagem?')) db.ref('mensagens_ouvintes/${id}').remove()"></i>
+                            <i class="fas fa-trash-alt" style="color:#ff4444; cursor:pointer; font-size:14px;" title="Excluir Mensagem" onclick="if(confirm('Excluir mensagem de ${nomeRealOuvinte}?')) db.ref('mensagens_ouvintes/${id}').remove()"></i>
                         </div>
                     </h4>
-                    <p>${m.mensagem || m.texto || ''}</p>
+                    <p>${textoMensagem}</p>
                     <div class="msg-card-footer">
                         <span><i class="far fa-clock"></i> ${dataHora}</span>
-                        <button class="btn-responder-adm" onclick="responderOuvinte('${m.nome || 'Ouvinte'}')">
+                        <button class="btn-responder-adm" onclick="responderOuvinte('${nomeRealOuvinte}')">
                             <i class="fas fa-reply"></i> RESPONDER
                         </button>
                     </div>
