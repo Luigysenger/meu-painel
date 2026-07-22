@@ -67,18 +67,6 @@
         .btn-toggle-radio.add { color: #444; }
         .btn-toggle-radio.remove { color: var(--primary); }
         
-        /* AJUSTE CIRÚRGICO: ESTILOS DA SEÇÃO PEDIR RÁDIO */
-        .pedir-radio-container { margin-top: 15px; border-top: 1px solid #282828; padding-top: 15px; }
-        .btn-pedir-radio { width: 100%; background: #1e1e1e; color: #fff; border: 1px solid var(--primary); padding: 12px; border-radius: 10px; cursor: pointer; font-size: 11px; font-weight: bold; text-transform: uppercase; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-pedir-radio:hover { background: var(--primary); color: #fff; box-shadow: 0 0 10px rgba(160, 32, 240, 0.4); }
-        
-        .form-pedir-radio { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-in-out, margin-top 0.4s ease-in-out; margin-top: 0; display: flex; flex-direction: column; gap: 10px; }
-        .form-pedir-radio.open { max-height: 200px; margin-top: 12px; }
-        .form-pedir-radio textarea { width: 100%; height: 70px; background: #0a0a0a; border: 1px solid #333; border-radius: 8px; color: #fff; padding: 10px; font-family: inherit; font-size: 12px; resize: none; box-sizing: border-box; outline: none; }
-        .form-pedir-radio textarea:focus { border-color: var(--primary); }
-        .btn-enviar-msg { background: var(--primary); color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 11px; text-transform: uppercase; transition: 0.2s; }
-        .btn-enviar-msg:hover { background: #8000d0; }
-
         .player-footer { position: fixed; bottom: 0; left: 0; right: 0; background: #111; padding: 15px 25px 25px 25px; border-top: 2px solid var(--primary); text-align: center; z-index: 100; }
         .msg-barra { background: #ff0000; color: #fff; font-size: 14px; font-weight: 900; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 2px solid #fff; display: none; width: fit-content; margin: 0 auto; cursor: pointer; animation: piscar-alerta 0.8s infinite alternate; }
         @keyframes piscar-alerta { 0% { opacity: 1; transform: scale(1); background: #ff0000; } 100% { opacity: 0.7; transform: scale(1.05); background: var(--primary); } }
@@ -125,14 +113,15 @@
                 <h3>SELECIONE AQUI SUA RÁDIO</h3>
                 <div id="selector-list" class="selector-list"></div>
 
-                <!-- AJUSTE CIRÚRGICO: ÁREA DO BOTÃO PEDIR RÁDIO AO ADM -->
-                <div class="pedir-radio-container">
-                    <button class="btn-pedir-radio" onclick="toggleFormRadio()">
-                        <i class="fas fa-paper-plane"></i> ENVIE UMA MENSAGEM PARA O NOSSO ADM PEDINDO PARA INCLUIR A SUA RÁDIO PREFERIDA
+                <!-- AJUSTE CIRÚRGICO: BOTÃO E CAMPO PARA ENVIAR MENSAGEM AO ADM -->
+                <div style="margin-top: 15px; border-top: 1px solid #282828; padding-top: 15px;">
+                    <button type="button" onclick="toggleFormRadio()" style="width: 100%; background: #1a1a1a; color: #fff; border: 1px solid var(--primary); padding: 12px; border-radius: 10px; cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <i class="fas fa-paper-plane" style="color: var(--primary); font-size: 14px;"></i>
+                        <span>ENVIE UMA MENSAGEM PARA O NOSSO ADM PEDINDO PARA INCLUIR A SUA RÁDIO PREFERIDA</span>
                     </button>
-                    <div id="form-pedir-radio" class="form-pedir-radio">
-                        <textarea id="msg-radio-input" placeholder="Escreva o nome da rádio ou sua mensagem para o adm..."></textarea>
-                        <button class="btn-enviar-msg" onclick="enviarMensagemAdm()">ENVIAR MENSAGEM</button>
+                    <div id="form-pedir-radio" style="display: none; margin-top: 12px; flex-direction: column; gap: 10px;">
+                        <textarea id="msg-radio-input" placeholder="Escreva o nome da rádio ou sua mensagem para o adm..." style="width: 100%; height: 75px; background: #0a0a0a; border: 1px solid #333; border-radius: 8px; color: #fff; padding: 10px; font-family: inherit; font-size: 12px; resize: none; box-sizing: border-box; outline: none;"></textarea>
+                        <button type="button" onclick="enviarMensagemAdm()" style="width: 100%; background: var(--primary); color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 11px; text-transform: uppercase;">ENVIAR MENSAGEM</button>
                     </div>
                 </div>
 
@@ -242,10 +231,14 @@
             renderAll();
         }
 
-        /* AJUSTE CIRÚRGICO: FUNÇÕES DO BOTÃO E ENVIO DE MENSAGEM */
+        /* AJUSTE CIRÚRGICO: EXIBIÇÃO E ENVIO DE MENSAGEM */
         function toggleFormRadio() {
             const form = document.getElementById('form-pedir-radio');
-            form.classList.toggle('open');
+            if (form.style.display === 'none' || form.style.display === '') {
+                form.style.display = 'flex';
+            } else {
+                form.style.display = 'none';
+            }
         }
 
         function enviarMensagemAdm() {
