@@ -139,12 +139,8 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // VALIDAR ACESSO ADM DE FORMA SEGURA
-        const sessaoId = localStorage.getItem('userId');
-        if(!sessaoId || (sessaoId !== 'admin' && sessaoId !== 'ouvinte_admin')) {
-            // PERMITIR ACESSO DIRETO COM CREDENCIAL
-            localStorage.setItem('userId', 'admin');
-        }
+        // DEFINIR SESSÃO COMO ADMIN
+        localStorage.setItem('userId', 'admin');
 
         // CARREGAR LISTA DE RÁDIOS
         db.ref('radios').on('value', snap => {
@@ -179,7 +175,7 @@
             if(confirm("Excluir esta rádio?")) db.ref('radios/' + key).remove();
         }
 
-        // CONFIGURAÇÃO DO ARRASTE SOMENTE VERTICAL (SEM MOVER PARA OS LADOS)
+        // CONFIGURAÇÃO DO ARRASTE SOMENTE VERTICAL
         new Sortable(document.getElementById('lista-radios-adm'), {
             animation: 150,
             direction: 'vertical',
