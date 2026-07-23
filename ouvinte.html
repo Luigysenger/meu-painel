@@ -82,11 +82,12 @@
 
         .main-container { 
             display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); 
             gap: 20px; 
             width: 100%; 
             max-width: 1200px; 
             margin-bottom: 140px; 
+            align-items: start;
         }
 
         .card-box { 
@@ -107,23 +108,90 @@
             line-height: 1.4;
         }
 
-        /* --- GRADE DE CARDS QUADRADOS --- */
-        .radio-grid-ouvinte {
+        /* BANNER DE AVISO COM FUNDO CLARO E FONTE MAIOR */
+        .banner-destaque-adm {
+            background: #f0e6ff;
+            color: #2a004f;
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            padding: 15px;
+            font-size: 14px;
+            font-weight: 900;
+            text-transform: uppercase;
+            text-align: center;
+            letter-spacing: 1px;
+            line-height: 1.4;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(160, 32, 240, 0.3);
+        }
+
+        /* SEÇÃO RÁDIOS - DISPOSIÇÃO DUPLA (ESQUERDA CATÁLOGO / DIREITA PLAYLIST) */
+        .radios-section-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            grid-template-columns: 1fr 1fr;
             gap: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .radios-section-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* BARRAS DE RÁDIO DO CATÁLOGO (LADO ESQUERDO) */
+        .catalogo-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .bar-radio-catalogo {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: 0.3s;
+            color: #fff;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        /* SELECIONADO: FUNDO ROXO CLARO */
+        .bar-radio-catalogo.adicionada {
+            background: #d8b4fe !important;
+            color: #2e0054 !important;
+            border-color: #a855f7 !important;
+        }
+
+        .bar-radio-catalogo .btn-add-icon {
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* CARDS QUADRADOS DA PLAYLIST (LADO DIREITO) */
+        .playlist-grid-ouvinte {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 10px;
             width: 100%;
+            min-height: 120px;
         }
 
         .radio-card-quadrado {
             aspect-ratio: 1 / 1;
-            border-radius: 16px;
+            border-radius: 14px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 12px;
+            padding: 10px;
             cursor: grab;
             color: #000;
             font-weight: bold;
@@ -137,7 +205,6 @@
             cursor: grabbing;
         }
 
-        /* ESTILO QUANDO A RÁDIO ESTÁ SELECIONADA/TOCANDO */
         .radio-card-quadrado.playing {
             background: #151515 !important;
             color: #fff !important;
@@ -146,14 +213,13 @@
         }
 
         .radio-card-quadrado i.icon-radio {
-            font-size: 30px;
-            margin-bottom: 8px;
+            font-size: 26px;
+            margin-bottom: 6px;
         }
 
-        /* ÍCONE DE ANTENA VERDE PISCANDO */
         .antena-piscando {
             color: #00ff66;
-            font-size: 26px !important;
+            font-size: 24px !important;
             animation: piscar 1s infinite alternate;
         }
 
@@ -163,14 +229,14 @@
         }
 
         .radio-card-quadrado .radio-name {
-            font-size: 13px;
+            font-size: 11px;
             text-transform: uppercase;
             font-weight: 900;
             line-height: 1.2;
             word-break: break-word;
         }
 
-        /* --- MENSAGENS DO OUVINTE --- */
+        /* FORMULÁRIO E MENSAGENS */
         .input-msg { 
             width: 100%; 
             background: #0a0a0a; 
@@ -230,7 +296,7 @@
             border-left: 3px solid var(--pink-light);
         }
 
-        /* --- PLAYER FOOTER FLUTUANTE COM CONTROLES --- */
+        /* PLAYER FOOTER FLUTUANTE */
         .player-footer { 
             position: fixed; 
             bottom: 0; 
@@ -246,9 +312,7 @@
             gap: 8px;
         }
 
-        .player-info {
-            text-align: center;
-        }
+        .player-info { text-align: center; }
 
         .player-controls {
             display: flex;
@@ -308,16 +372,33 @@
 
     <div class="main-container">
 
-        <!-- CARDS QUADRADOS DAS RÁDIOS -->
+        <!-- SEÇÃO DE SELEÇÃO E PLAYLIST DE RÁDIOS -->
         <div class="card-box">
-            <h3>SELECIONE UMA RÁDIO PARA OUVIR (ARRASTE PARA ORDENAR)</h3>
-            <div id="grid-radios" class="radio-grid-ouvinte"></div>
+            <h3>GERENCIAR SUAS RÁDIOS PREFERIDAS</h3>
+            
+            <div class="radios-section-container">
+                <!-- LADO ESQUERDO: CATÁLOGO GERAL DE RÁDIOS -->
+                <div>
+                    <h3 style="font-size: 10px; text-align: left; color: #aaa;">1. ADICIONE RÁDIOS</h3>
+                    <div id="catalogo-radios" class="catalogo-list"></div>
+                </div>
+
+                <!-- LADO DIREITO: SUA PLAYLIST (REORDENÁVEL COM ARRASTE) -->
+                <div>
+                    <h3 style="font-size: 10px; text-align: left; color: #aaa;">2. SUA PLAYLIST (ARRASTE)</h3>
+                    <div id="grid-playlist" class="playlist-grid-ouvinte"></div>
+                </div>
+            </div>
         </div>
 
-        <!-- ENVIAR MENSAGENS E VER RESPOSTAS -->
+        <!-- ENVIAR MENSAGENS E VER RESPOSTAS DO ADM -->
         <div class="card-box">
-            <h3>MANDE MENSAGEM PARA O ADM PARA PEDIR PARA ADICIONAR UMA RADIO QUE VC GOSTE</h3>
-            <textarea id="texto-mensagem" class="input-msg" rows="3" placeholder="Escreva sua mensagem aqui..."></textarea>
+            <!-- BANNER EM DESTAQUE COM FUNDO CLARO E FONTE MAIOR -->
+            <div class="banner-destaque-adm">
+                MANDE MENSAGEM PARA O ADM PARA PEDIR PARA ADICIONAR UMA RADIO QUE VC GOSTE
+            </div>
+
+            <textarea id="texto-mensagem" class="input-msg" rows="3" placeholder="Escreva seu recado ou pedido de rádio aqui..."></textarea>
             <button class="btn-enviar" onclick="enviarMensagem()">Enviar Mensagem</button>
 
             <h3 style="margin-top: 25px;">SUAS MENSAGENS E RESPOSTAS</h3>
@@ -326,24 +407,21 @@
 
     </div>
 
-    <!-- PLAYER FOOTER CENTRALIZADO COM AVANÇAR E VOLTAR -->
+    <!-- PLAYER FOOTER CENTRALIZADO -->
     <div class="player-footer">
         <div class="player-info">
             <div id="player-title" style="font-size: 13px; font-weight: bold; color: #fff;">Nenhuma rádio selecionada</div>
         </div>
         
         <div class="player-controls">
-            <!-- BOTÃO ANTERIOR -->
             <button class="btn-control-step" title="Rádio Anterior" onclick="mudarRadio(-1)">
                 <i class="fas fa-step-backward"></i>
             </button>
             
-            <!-- BOTÃO PLAY / PAUSE -->
             <button id="btn-play" class="btn-play" onclick="togglePlay()">
                 <i class="fas fa-play"></i>
             </button>
             
-            <!-- BOTÃO PRÓXIMO -->
             <button class="btn-control-step" title="Próxima Rádio" onclick="mudarRadio(1)">
                 <i class="fas fa-step-forward"></i>
             </button>
@@ -368,48 +446,79 @@
 
         document.getElementById('nome-ouvinte-display').innerText = "Olá, " + ouvinteNome;
 
-        let radiosArray = [];
-        let radioTocandoIndex = -1;
+        let todasRadios = [];
+        let playlistKeys = JSON.parse(localStorage.getItem('playlist_keys_ouvinte') || '[]');
+        let radioTocandoKey = null;
 
-        // CARREGAR RÁDIOS E RENDERIZAR
+        // CARREGAR RÁDIOS DO BANCO
         db.ref('radios').on('value', snap => {
-            let tempArray = [];
+            todasRadios = [];
             snap.forEach(child => {
-                tempArray.push({ key: child.key, ...child.val() });
+                todasRadios.push({ key: child.key, ...child.val() });
             });
 
-            // Ordenação padrão por posição
-            tempArray.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
+            todasRadios.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
 
-            // RESTAURAR A ORDEM SALVA LOCALMENTE PELO OUVINTE (SE EXISTIR)
-            const ordemSalva = JSON.parse(localStorage.getItem('ordem_radios_ouvinte') || '[]');
-            if (ordemSalva.length > 0) {
-                tempArray.sort((a, b) => {
-                    let indexA = ordemSalva.indexOf(a.key);
-                    let indexB = ordemSalva.indexOf(b.key);
-                    if (indexA === -1) indexA = 999;
-                    if (indexB === -1) indexB = 999;
-                    return indexA - indexB;
-                });
+            // Se for o primeiro acesso do ouvinte, seleciona todas por padrão
+            if (!localStorage.getItem('playlist_iniciada')) {
+                playlistKeys = todasRadios.map(r => r.key);
+                localStorage.setItem('playlist_keys_ouvinte', JSON.stringify(playlistKeys));
+                localStorage.setItem('playlist_iniciada', 'true');
             }
 
-            radiosArray = tempArray;
-            renderizarRadios();
+            renderizarPainelRadios();
         });
 
-        function renderizarRadios() {
-            const container = document.getElementById('grid-radios');
+        function renderizarPainelRadios() {
+            renderizarCatologoEsquerda();
+            renderizarPlaylistDireita();
+        }
+
+        // RENDERIZA O CATÁLOGO GERAL DA ESQUERDA
+        function renderizarCatologoEsquerda() {
+            const container = document.getElementById('catalogo-radios');
             container.innerHTML = "";
 
-            radiosArray.forEach((r, index) => {
-                const isPlaying = (radioTocandoIndex === index);
+            if (todasRadios.length === 0) {
+                container.innerHTML = "<p style='color:#666; font-size:11px;'>Nenhuma rádio cadastrada.</p>";
+                return;
+            }
+
+            todasRadios.forEach(r => {
+                const estaNaPlaylist = playlistKeys.includes(r.key);
+
+                container.innerHTML += `
+                    <div class="bar-radio-catalogo ${estaNaPlaylist ? 'adicionada' : ''}" onclick="togglePlaylistRadio('${r.key}')">
+                        <span class="btn-add-icon"><i class="fas ${estaNaPlaylist ? 'fa-check' : 'fa-plus'}"></i></span>
+                        <span>${r.name}</span>
+                    </div>
+                `;
+            });
+        }
+
+        // RENDERIZA A PLAYLIST DO CANTO DIREITO (CARDS QUADRADOS)
+        function renderizarPlaylistDireita() {
+            const container = document.getElementById('grid-playlist');
+            container.innerHTML = "";
+
+            const radiosPlaylist = playlistKeys
+                .map(key => todasRadios.find(r => r.key === key))
+                .filter(Boolean);
+
+            if (radiosPlaylist.length === 0) {
+                container.innerHTML = "<p style='color:#666; font-size:11px; grid-column: 1/-1; text-align:center; padding: 20px;'>Clique no '+' ao lado para montar sua playlist!</p>";
+                return;
+            }
+
+            radiosPlaylist.forEach((r, idx) => {
+                const isPlaying = (radioTocandoKey === r.key);
                 const cardColor = r.color || '#d1a3ff';
 
                 container.innerHTML += `
                     <div class="radio-card-quadrado ${isPlaying ? 'playing' : ''}" 
                          style="background: ${cardColor};" 
                          data-key="${r.key}"
-                         onclick="tocarRadioPorIndex(${index})">
+                         onclick="tocarRadioPorKey('${r.key}')">
                         <i class="fas ${isPlaying ? 'fa-tower-broadcast antena-piscando' : 'fa-radio'} icon-radio"></i>
                         <span class="radio-name">${r.name}</span>
                     </div>
@@ -417,58 +526,66 @@
             });
         }
 
-        // HABILITAR ORDENAÇÃO POR ARRASTE (SORTABLE)
-        new Sortable(document.getElementById('grid-radios'), {
+        // ADICIONAR / REMOVER RÁDIO DA PLAYLIST DO OUVINTE
+        function togglePlaylistRadio(key) {
+            const index = playlistKeys.indexOf(key);
+            if (index > -1) {
+                playlistKeys.splice(index, 1);
+            } else {
+                playlistKeys.push(key);
+            }
+
+            localStorage.setItem('playlist_keys_ouvinte', JSON.stringify(playlistKeys));
+            renderizarPainelRadios();
+        }
+
+        // HABILITAR ORDENAÇÃO POR ARRASTE APENAS NA PLAYLIST DIREITA
+        new Sortable(document.getElementById('grid-playlist'), {
             animation: 150,
             delay: 100,
             delayOnTouchOnly: true,
             onEnd: function() {
-                const novaOrdemKeys = [];
-                document.querySelectorAll('#grid-radios .radio-card-quadrado').forEach(el => {
-                    novaOrdemKeys.push(el.getAttribute('data-key'));
+                const novaOrdem = [];
+                document.querySelectorAll('#grid-playlist .radio-card-quadrado').forEach(el => {
+                    novaOrdem.push(el.getAttribute('data-key'));
                 });
 
-                // Atualiza array em memória mantendo tocando a certa
-                let radioAtualKey = (radioTocandoIndex >= 0 && radiosArray[radioTocandoIndex]) ? radiosArray[radioTocandoIndex].key : null;
-                
-                radiosArray.sort((a, b) => novaOrdemKeys.indexOf(a.key) - novaOrdemKeys.indexOf(b.key));
-                
-                if (radioAtualKey) {
-                    radioTocandoIndex = radiosArray.findIndex(r => r.key === radioAtualKey);
-                }
-
-                // Salva a preferência de ordem no navegador do ouvinte
-                localStorage.setItem('ordem_radios_ouvinte', JSON.stringify(novaOrdemKeys));
+                playlistKeys = novaOrdem;
+                localStorage.setItem('playlist_keys_ouvinte', JSON.stringify(playlistKeys));
             }
         });
 
-        // TOCAR RÁDIO POR ÍNDICE
-        function tocarRadioPorIndex(index) {
-            if (index < 0 || index >= radiosArray.length) return;
+        // PLAYER DE ÁUDIO
+        function tocarRadioPorKey(key) {
+            const radio = todasRadios.find(r => r.key === key);
+            if (!radio) return;
 
-            const radio = radiosArray[index];
-
-            if (radioTocandoIndex === index) {
+            if (radioTocandoKey === key) {
                 togglePlay();
             } else {
-                radioTocandoIndex = index;
+                radioTocandoKey = key;
                 player.src = radio.url;
                 player.play().catch(() => {});
                 document.getElementById('player-title').innerText = radio.name;
                 document.getElementById('btn-play').innerHTML = '<i class="fas fa-pause"></i>';
-                renderizarRadios();
+                renderizarPlaylistDireita();
             }
         }
 
-        // BOTÕES PRÓXIMO E ANTERIOR
         function mudarRadio(direcao) {
-            if (radiosArray.length === 0) return;
-            
-            let novoIndex = radioTocandoIndex + direcao;
-            if (novoIndex >= radiosArray.length) novoIndex = 0;
-            if (novoIndex < 0) novoIndex = radiosArray.length - 1;
+            const radiosPlaylist = playlistKeys
+                .map(key => todasRadios.find(r => r.key === key))
+                .filter(Boolean);
 
-            tocarRadioPorIndex(novoIndex);
+            if (radiosPlaylist.length === 0) return;
+
+            let currentIndex = radiosPlaylist.findIndex(r => r.key === radioTocandoKey);
+            let nextIndex = currentIndex + direcao;
+
+            if (nextIndex >= radiosPlaylist.length) nextIndex = 0;
+            if (nextIndex < 0) nextIndex = radiosPlaylist.length - 1;
+
+            tocarRadioPorKey(radiosPlaylist[nextIndex].key);
         }
 
         function togglePlay() {
@@ -482,7 +599,7 @@
             }
         }
 
-        // ENVIAR MENSAGEM
+        // MENSAGENS DO OUVINTE
         function enviarMensagem() {
             const texto = document.getElementById('texto-mensagem').value.trim();
             if (!texto) return alert("Digite sua mensagem!");
@@ -499,14 +616,13 @@
             });
         }
 
-        // DELETAR MENSAGEM DO OUVINTE
         function deletarMensagem(msgKey) {
             if (confirm("Deseja apagar esta mensagem?")) {
                 db.ref('mensagens_ouvintes/' + msgKey).remove();
             }
         }
 
-        // CARREGAR MENSAGENS E RESPOSTAS COM ÍCONE DE DELETAR
+        // LISTAR MENSAGENS E RESPOSTAS COM LIXEIRA
         db.ref('respostas_adm').on('value', snapResps => {
             const respostas = snapResps.val() || {};
 
@@ -530,7 +646,6 @@
                                 <div style="font-size:13px; padding-right: 25px;">${m.mensagem}</div>
                         `;
 
-                        // Procura respostas do ADM associadas
                         for (let rId in respostas) {
                             const r = respostas[rId];
                             if (r.ouvinteId === ouvinteId || r.ouvinte === ouvinteNome) {
