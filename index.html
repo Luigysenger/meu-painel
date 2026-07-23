@@ -6,7 +6,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LOGIN - PAINEL LUIGY</title>
+    <title>LOGIN - LUIGY</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -31,7 +31,7 @@
             border-radius: 20px;
             padding: 30px;
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             text-align: center;
         }
@@ -102,15 +102,33 @@
             background: #b23bf2;
             box-shadow: 0 0 15px rgba(160, 32, 240, 0.5);
         }
+
+        .toggle-link {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        .toggle-link span {
+            color: #FFB6C1;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
 
     <div class="login-card">
-        <h2>BEM-VINDO</h2>
-        <p class="sub">Informe seus dados para acessar o painel</p>
+        <h2 id="titulo-form">BEM-VINDO</h2>
+        <p class="sub" id="sub-form">Informe seus dados para acessar o painel</p>
 
-        <form id="form-login" onsubmit="realizarLogin(event)">
+        <form id="form-login" onsubmit="processarAcao(event)">
+            <div class="field-group" id="group-nome" style="display: none;">
+                <label>SEU NOME COMPLETO</label>
+                <input type="text" id="nome-cadastro" class="input-login" placeholder="Ex: João Silva">
+            </div>
+
             <div class="field-group">
                 <label>NOME DE USUÁRIO / E-MAIL</label>
                 <input type="text" id="usuario" class="input-login" placeholder="Digite seu usuário ou e-mail" required>
@@ -121,8 +139,12 @@
                 <input type="password" id="senha" class="input-login" placeholder="••••••" required>
             </div>
 
-            <button type="submit" class="btn-entrar">ENTRAR NO PAINEL</button>
+            <button type="submit" id="btn-submit" class="btn-entrar">ENTRAR NO PAINEL</button>
         </form>
+
+        <div class="toggle-link" id="box-toggle">
+            Não tem uma conta? <span onclick="mudarModo('cadastro')">Criar nova conta</span>
+        </div>
     </div>
 
     <script>
@@ -135,28 +157,61 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        function realizarLogin(event) {
+        let modoAtual = 'login';
+
+        function mudarModo(modo) {
+            modoAtual = modo;
+            if (modo === 'cadastro') {
+                document.getElementById('titulo-form').innerText = "CRIAR CONTA";
+                document.getElementById('sub-form').innerText = "Preencha os dados abaixo para se cadastrar";
+                document.getElementById('group-nome').style.display = "block";
+                document.getElementById('btn-submit').innerText = "CRIAR MINHA CONTA";
+                document.getElementById('box-toggle').innerHTML = 'Já possui uma conta? <span onclick="mudarModo(\'login\')">Fazer Login</span>';
+            } else {
+                document.getElementById('titulo-form').innerText = "BEM-VINDO";
+                document.getElementById('sub-form').innerText = "Informe seus dados para acessar o painel";
+                document.getElementById('group-nome').style.display = "none";
+                document.getElementById('btn-submit').innerText = "ENTRAR NO PAINEL";
+                document.getElementById('box-toggle').innerHTML = 'Não tem uma conta? <span onclick="mudarModo(\'cadastro\')">Criar nova conta</span>';
+            }
+        }
+
+        function processarAcao(event) {
             event.preventDefault();
 
             const usuarioInput = document.getElementById('usuario').value.trim();
             const senhaInput = document.getElementById('senha').value.trim();
-
-            if (!usuarioInput || !senhaInput) {
-                alert("Preencha todos os campos!");
-                return;
-            }
-
+            const nomeInput = document.getElementById('nome-cadastro').value.trim();
             const userLower = usuarioInput.toLowerCase();
 
-            // VERIFICAÇÃO SE É O ADMINISTRADOR
+            // ROTA DE ENTRADA DO ADMINISTRADOR
             if (userLower === 'admin' || userLower === 'senger.luigy@gmail.com') {
                 localStorage.setItem('userId', 'admin');
                 localStorage.setItem('usuarioNome', 'ADMINISTRADOR');
                 window.location.href = 'adm.html';
+                return;
+            }
+
+            // MODO DE CADASTRO DE OUVINTE
+            if (modoAtual === 'cadastro') {
+                if (!nomeInput) return alert("Por favor, digite seu nome!");
+
+                const idUser = 'ouvinte_' + Date.now();
+                db.ref('contas/' + idUser).set({
+                    nome: nomeInput,
+                    usuario: usuarioInput,
+                    senha: senhaInput,
+                    status: "online",
+                    criadoEm: new Date().toLocaleString('pt-BR')
+                }).then(() => {
+                    localStorage.setItem('userId', idUser);
+                    localStorage.setItem('usuarioNome', nomeInput);
+                    window.location.href = 'ouvinte.html';
+                });
             } else {
-                // ENTRADA COMO OUVINTE
-                const idFormatado = userLower.replace(/[^a-z0-9]/g, '_');
-                localStorage.setItem('userId', idFormatado);
+                // MODO DE LOGIN DE OUVINTE
+                const idUser = userLower.replace(/[^a-z0-9]/g, '_');
+                localStorage.setItem('userId', idUser);
                 localStorage.setItem('usuarioNome', usuarioInput);
                 window.location.href = 'ouvinte.html';
             }
