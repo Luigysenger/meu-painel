@@ -62,7 +62,6 @@
             max-width: 1200px; 
         }
 
-        /* FONTE AUMENTADA DO PAINEL DO OUVINTE */
         .header h2 { 
             margin: 0; 
             color: var(--primary); 
@@ -72,36 +71,68 @@
             letter-spacing: 1px;
         }
 
+        /* NOME DO USUÁRIO COM FONTE MAIOR */
+        .user-name-title {
+            font-size: 16px !important;
+            font-weight: bold;
+            color: #ddd;
+            margin-top: 4px;
+            display: block;
+        }
+
+        /* CONTAINER DOS WIDGETS DO HEADER */
         .header-widgets {
             display: flex;
             align-items: center;
             gap: 15px;
-            font-size: 13px;
             color: #ccc;
         }
 
         .widget-item {
             background: #1e1e1e;
-            padding: 6px 12px;
-            border-radius: 8px;
+            padding: 8px 15px;
+            border-radius: 10px;
             border: 1px solid #333;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
         }
 
+        /* RELÓGIO COM FONTE AUMENTADA */
+        .relogio-box {
+            font-size: 18px !important;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        /* CLIMA COM FONTE AUMENTADA */
+        .clima-box {
+            font-size: 16px !important;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        /* BOTÃO SAIR AUMENTADO */
         .btn-sair { 
-            background: none; 
-            border: 1px solid #442222; 
+            background: rgba(255, 68, 68, 0.1); 
+            border: 2px solid #ff4444; 
             color: #ff4444; 
-            padding: 6px 12px; 
-            border-radius: 8px; 
+            padding: 10px 18px !important; 
+            border-radius: 10px; 
             cursor: pointer; 
-            font-size: 12px; 
-            font-weight: bold; 
+            font-size: 14px !important; 
+            font-weight: 900; 
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        /* TÍTULO NO MEIO DA TELA */
+        .btn-sair:hover {
+            background: #ff4444;
+            color: #fff;
+        }
+
         .frase-centro-playlist {
             text-align: center;
             font-size: 22px;
@@ -173,8 +204,12 @@
             }
             .header {
                 flex-direction: column;
-                gap: 12px;
+                gap: 15px;
                 text-align: center;
+            }
+            .header-widgets {
+                flex-wrap: wrap;
+                justify-content: center;
             }
         }
 
@@ -400,24 +435,28 @@
     <div class="header">
         <div>
             <h2>PAINEL DO OUVINTE</h2>
-            <span id="nome-ouvinte-display" style="font-size: 13px; color: #aaa;"></span>
+            <span id="nome-ouvinte-display" class="user-name-title"></span>
         </div>
 
-        <!-- CLIMA E HORA -->
+        <!-- CLIMA E HORA AUMENTADOS E DINÂMICOS -->
         <div class="header-widgets">
             <div class="widget-item">
-                <i class="far fa-clock" style="color: var(--primary);"></i>
-                <span id="relogio-digital">00:00:00</span>
+                <i class="far fa-clock" style="color: var(--primary); font-size: 20px;"></i>
+                <span id="relogio-digital" class="relogio-box">00:00:00</span>
             </div>
+            
             <div class="widget-item">
-                <i class="fas fa-temperature-high" style="color: #ff9900;"></i>
-                <span id="clima-cidade">Carregando clima...</span>
+                <span id="icone-clima-dinamico"><i class="fas fa-sun" style="color: #ffcc00; font-size: 20px;"></i></span>
+                <span id="clima-cidade" class="clima-box">Carregando clima...</span>
             </div>
-            <button class="btn-sair" onclick="logout()"><i class="fas fa-sign-out-alt"></i> SAIR</button>
+            
+            <button class="btn-sair" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> SAIR
+            </button>
         </div>
     </div>
 
-    <!-- FRASE NO MEIO DA TELA -->
+    <!-- FRASE CENTRO -->
     <div class="frase-centro-playlist">
         curta sua playliste de radio
     </div>
@@ -492,14 +531,13 @@
 
         const ouvinteId = localStorage.getItem('userId') || ('ouvinte_' + Date.now());
         
-        // APENAS NOME DO USUÁRIO (NÃO EXIBE E-MAIL)
         let ouvinteNome = localStorage.getItem('usuarioNome') || localStorage.getItem('usuarioEmail') || 'Ouvinte Anônimo';
         if (ouvinteNome.includes('@')) {
             ouvinteNome = ouvinteNome.split('@')[0];
         }
         document.getElementById('nome-ouvinte-display').innerText = "Olá, " + ouvinteNome;
 
-        // RELÓGIO EM TEMPO REAL
+        // RELÓGIO DIGITAL
         function atualizarRelogio() {
             const agora = new Date();
             document.getElementById('relogio-digital').innerText = agora.toLocaleTimeString('pt-BR');
@@ -507,7 +545,7 @@
         setInterval(atualizarRelogio, 1000);
         atualizarRelogio();
 
-        // OBTER CLIMA E CIDADE POR IP
+        // OBTER CLIMA E CIDADE POR IP COM ÍCONES DINÂMICOS
         async function carregarClimaPorIP() {
             try {
                 const resGeo = await fetch('https://ipapi.co/json/');
@@ -516,20 +554,40 @@
                 if (geoData.latitude && geoData.longitude) {
                     const lat = geoData.latitude;
                     const lon = geoData.longitude;
-                    const cidade = geoData.city || 'Sua Região';
+                    const cidade = geoData.city || 'Sua Cidade';
 
                     const resClima = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
                     const climaData = await resClima.json();
                     
                     if (climaData.current_weather) {
                         const temp = Math.round(climaData.current_weather.temperature);
+                        const code = climaData.current_weather.weathercode;
+
+                        // SELEÇÃO DO ÍCONE COM BASE NO CÓDIGO METEOROLÓGICO
+                        let iconeHTML = '<i class="fas fa-sun" style="color: #ffcc00; font-size: 20px;"></i>'; // Sol padrão
+
+                        if (code === 0 || code === 1) {
+                            // Ensolarado / Céu Limpo
+                            iconeHTML = '<i class="fas fa-sun" style="color: #ffcc00; font-size: 20px;"></i>';
+                        } else if (code === 2 || code === 3) {
+                            // Parcialmente Nublado / Sol com Nuvem
+                            iconeHTML = '<i class="fas fa-cloud-sun" style="color: #ffbb00; font-size: 20px;"></i>';
+                        } else if (code >= 51 && code <= 99) {
+                            // Chuva / Garoa / Tempestade
+                            iconeHTML = '<i class="fas fa-cloud-showers-heavy" style="color: #00ccff; font-size: 20px;"></i>';
+                        } else if (code === 45 || code === 48) {
+                            // Nevoeiro / Nublado Denso
+                            iconeHTML = '<i class="fas fa-cloud" style="color: #aaaaaa; font-size: 20px;"></i>';
+                        }
+
+                        document.getElementById('icone-clima-dinamico').innerHTML = iconeHTML;
                         document.getElementById('clima-cidade').innerText = `${cidade}: ${temp}°C`;
                     }
                 } else {
-                    document.getElementById('clima-cidade').innerText = "Clima indisponível";
+                    document.getElementById('clima-cidade').innerText = "Indisponível";
                 }
             } catch (e) {
-                document.getElementById('clima-cidade').innerText = "Brasil";
+                document.getElementById('clima-cidade').innerText = "Clima indisponível";
             }
         }
         carregarClimaPorIP();
@@ -538,7 +596,7 @@
         let playlistKeys = JSON.parse(localStorage.getItem('playlist_keys_ouvinte') || '[]');
         let radioTocandoKey = null;
 
-        // CARREGAR RÁDIOS DO BANCO
+        // CARREGAR RÁDIOS DO FIREBASE
         db.ref('radios').on('value', snap => {
             todasRadios = [];
             snap.forEach(child => {
