@@ -2,6 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <!-- Anti-Cache para atualizar em dispositivos móveis e desktops -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -13,7 +14,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        /* --- TRAVA CIRÚRGICA DE TELA & APLICATIVO --- */
+        /* --- TRAVA CIRÚRGICA DE TELA (IMPEDE MOVIMENTO LATERAL) --- */
         *, *::before, *::after {
             box-sizing: border-box !important;
             max-width: 100% !important;
@@ -54,37 +55,67 @@
         .btn-sair { color: #ff4444; border-color: #442222; padding: 4px 10px; }
         .btn-sair:hover { background: #331111; border-color: #ff4444; }
 
-        .main-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; width: 100%; max-width: 1200px; align-items: start; }
+        .main-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; width: 100%; max-width: 1200px; align-items: start; margin-bottom: 120px; }
 
         .card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid #282828; width: 100%; }
         h3 { color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; text-align: center; }
 
-        /* TRAVA DE ARRASTE VERTICAL */
+        /* GRADE E CARDS COLORIDOS DE RÁDIO COM TRAVA LATERAL */
         .radio-grid-adm { 
             display: flex; 
             flex-direction: column; 
-            gap: 10px; 
+            gap: 12px; 
             width: 100%;
             touch-action: pan-y !important;
             overflow-x: hidden !important;
         }
 
-        .radio-item-adm { 
+        .radio-card-adm { 
             width: 100% !important;
-            background: #1a1a1a; 
-            border: 1px solid #333; 
-            border-radius: 10px; 
-            padding: 12px; 
+            min-height: 75px; 
+            border-radius: 12px; 
             display: flex; 
+            flex-direction: column; 
             justify-content: space-between; 
-            align-items: center; 
-            touch-action: pan-y !important; 
+            color: #000; 
+            font-weight: bold; 
+            padding: 12px 16px; 
+            cursor: grab; 
+            transition: transform 0.2s, box-shadow 0.2s; 
+            position: relative; 
+            border: 2px solid transparent; 
+            box-sizing: border-box; 
+            touch-action: pan-y !important;
             margin: 0 !important;
             transform: none !important;
         }
 
+        .radio-card-adm:active { cursor: grabbing; }
+        .radio-card-adm.playing { border-color: #fff; box-shadow: 0 0 15px rgba(255, 255, 255, 0.6); }
+
+        .card-top { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        .card-title { font-size: 15px; text-transform: uppercase; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+        
+        .card-bottom { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 10px; padding-top: 6px; border-top: 1px solid rgba(0,0,0,0.15); }
+        
+        .btn-card-action {
+            background: rgba(0,0,0,0.2);
+            border: none;
+            color: #000;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+        .btn-card-action:hover { background: rgba(0,0,0,0.4); color: #fff; }
+
         .input-adm { width: 100%; background: #0a0a0a; border: 1px solid #333; border-radius: 8px; color: #fff; padding: 10px; margin-bottom: 10px; outline: none; }
-        .btn-adm { background: var(--primary); color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; text-transform: uppercase; }
+        .btn-adm { background: var(--primary); color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; text-transform: uppercase; }
         
         .msg-box-item {
             background: #181818;
@@ -93,7 +124,14 @@
             margin-bottom: 12px;
             border-left: 3px solid var(--primary);
         }
-        
+
+        /* MODAL DE EDIÇÃO */
+        .modal { display: none; position: fixed; z-index: 200; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: #121212; border: 1px solid var(--primary); border-radius: 15px; padding: 20px; width: 100%; max-width: 400px; }
+
+        /* PLAYER FIXO ADM */
+        .player-footer-adm { position: fixed; bottom: 0; left: 0; right: 0; background: #111; padding: 15px; border-top: 2px solid var(--primary); text-align: center; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 15px 30px; }
+
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
     </style>
@@ -109,15 +147,18 @@
 
     <div class="main-container">
         
-        <!-- GERENCIAR RÁDIOS -->
+        <!-- GERENCIAR E OUVIR RÁDIOS (EM CARDS) -->
         <div class="card">
-            <h3>CADASTRAR RÁDIO</h3>
+            <h3>CADASTRAR NOVA RÁDIO</h3>
             <input type="text" id="nome-radio" class="input-adm" placeholder="Nome da Rádio">
             <input type="text" id="url-radio" class="input-adm" placeholder="URL do Stream">
-            <input type="color" id="cor-radio" class="input-adm" value="#A020F0" style="height: 40px;">
-            <button class="btn-adm" onclick="salvarRadio()">Salvar Rádio</button>
+            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                <label style="font-size: 11px; color: #aaa;">COR DO CARD:</label>
+                <input type="color" id="cor-radio" class="input-adm" value="#d1a3ff" style="height: 40px; padding: 2px; cursor: pointer;">
+            </div>
+            <button class="btn-adm" onclick="salvarRadio()">CADASTRAR RÁDIO</button>
 
-            <h3 style="margin-top: 25px;">ORDENAR RÁDIOS (ARRASTE VERTICAL)</h3>
+            <h3 style="margin-top: 30px;">GRADE DE RÁDIOS (ARRASTE PARA REORDENAR)</h3>
             <div id="lista-radios-adm" class="radio-grid-adm"></div>
         </div>
 
@@ -129,6 +170,32 @@
 
     </div>
 
+    <!-- MODAL DE EDIÇÃO DE RÁDIO -->
+    <div id="modal-edit" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-top:0;">EDITAR RÁDIO</h3>
+            <input type="hidden" id="edit-key">
+            <label style="font-size:10px; color:#aaa;">NOME DA RÁDIO</label>
+            <input type="text" id="edit-nome" class="input-adm">
+            <label style="font-size:10px; color:#aaa;">URL DO STREAM</label>
+            <input type="text" id="edit-url" class="input-adm">
+            <label style="font-size:10px; color:#aaa;">COR DO CARD</label>
+            <input type="color" id="edit-cor" class="input-adm" style="height: 40px; padding: 2px; cursor: pointer;">
+            <div style="display:flex; gap:10px; margin-top:10px;">
+                <button class="btn-adm" onclick="confirmarEdicao()">SALVAR</button>
+                <button class="btn-adm" style="background:#444;" onclick="fecharModal()">CANCELAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PLAYER FOOTER PARA O ADM OUVIR AS RÁDIOS -->
+    <div class="player-footer-adm">
+        <div id="player-title" style="font-size: 12px; font-weight: bold; color: #fff;">Nenhuma rádio tocando no momento</div>
+        <button id="btn-play-adm" class="btn-card-action" style="background: var(--primary); color: #fff; width: 40px; height: 40px;" onclick="togglePlay()"><i class="fas fa-play"></i></button>
+    </div>
+
+    <audio id="audio-adm"></audio>
+
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
@@ -138,44 +205,142 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+        const player = document.getElementById('audio-adm');
 
-        // DEFINIR SESSÃO COMO ADMIN
         localStorage.setItem('userId', 'admin');
 
-        // CARREGAR LISTA DE RÁDIOS
+        let radiosArray = [];
+        let radioTocandoKey = null;
+
+        // CARREGAR E RENDERIZAR RÁDIOS EM CARDS COLORIDOS
         db.ref('radios').on('value', snap => {
+            radiosArray = [];
+            snap.forEach(child => {
+                radiosArray.push({ key: child.key, ...child.val() });
+            });
+
+            // ORDENAR COM BASE NA POSIÇÃO SALVA
+            radiosArray.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
+
             const container = document.getElementById('lista-radios-adm');
             container.innerHTML = "";
-            snap.forEach(child => {
-                const r = child.val();
-                const key = child.key;
+
+            radiosArray.forEach((r, idx) => {
+                const isPlaying = radioTocandoKey === r.key;
+                const cardColor = r.color || '#d1a3ff';
+
                 container.innerHTML += `
-                    <div class="radio-item-adm" data-id="${key}">
-                        <span><i class="fas fa-bars" style="margin-right: 8px; color: #666;"></i> ${r.name}</span>
-                        <i class="fas fa-trash" style="color: #ff4444; cursor: pointer;" onclick="excluirRadio('${key}')"></i>
+                    <div class="radio-card-adm ${isPlaying ? 'playing' : ''}" style="background: ${cardColor};" data-id="${r.key}" onclick="ouvirRadio('${r.key}')">
+                        <div class="card-top">
+                            <span class="card-title">
+                                <i class="fas fa-bars" style="opacity:0.5; cursor:grab;"></i>
+                                <i class="fas ${isPlaying ? 'fa-volume-high' : 'fa-radio'}"></i>
+                                ${r.name}
+                            </span>
+                        </div>
+                        <div class="card-bottom" onclick="event.stopPropagation()">
+                            <button class="btn-card-action" title="Editar Rádio" onclick="abrirEdicao('${r.key}')">
+                                <i class="fas fa-pencil-alt"></i>
+                            </button>
+                            <button class="btn-card-action" title="Excluir Rádio" onclick="excluirRadio('${r.key}')">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
                     </div>
                 `;
             });
         });
 
+        // TOCAR/PAUSAR RÁDIO NO PAINEL ADM
+        function ouvirRadio(key) {
+            const radio = radiosArray.find(r => r.key === key);
+            if(!radio) return;
+
+            if(radioTocandoKey === key) {
+                togglePlay();
+            } else {
+                radioTocandoKey = key;
+                player.src = radio.url;
+                player.play();
+                document.getElementById('player-title').innerText = "TOCANDO ADM: " + radio.name;
+                document.getElementById('btn-play-adm').innerHTML = '<i class="fas fa-pause"></i>';
+                db.ref('radios').off('value'); // Atualização de estado leve
+            }
+        }
+
+        function togglePlay() {
+            if(!player.src) return;
+            if(player.paused) {
+                player.play();
+                document.getElementById('btn-play-adm').innerHTML = '<i class="fas fa-pause"></i>';
+            } else {
+                player.pause();
+                document.getElementById('btn-play-adm').innerHTML = '<i class="fas fa-play"></i>';
+            }
+        }
+
+        // SALVAR NOVA RÁDIO
         function salvarRadio() {
             const nome = document.getElementById('nome-radio').value.trim();
             const url = document.getElementById('url-radio').value.trim();
             const cor = document.getElementById('cor-radio').value;
 
-            if(!nome || !url) return alert("Preencha nome e URL!");
+            if(!nome || !url) return alert("Preencha o nome e a URL da rádio!");
 
-            db.ref('radios').push({ name: nome, url: url, color: cor }).then(() => {
+            const novaPosicao = radiosArray.length;
+
+            db.ref('radios').push({ 
+                name: nome, 
+                url: url, 
+                color: cor,
+                posicao: novaPosicao 
+            }).then(() => {
                 document.getElementById('nome-radio').value = "";
                 document.getElementById('url-radio').value = "";
             });
         }
 
-        function excluirRadio(key) {
-            if(confirm("Excluir esta rádio?")) db.ref('radios/' + key).remove();
+        // EDITAR RÁDIO
+        function abrirEdicao(key) {
+            const r = radiosArray.find(item => item.key === key);
+            if(!r) return;
+
+            document.getElementById('edit-key').value = key;
+            document.getElementById('edit-nome').value = r.name;
+            document.getElementById('edit-url').value = r.url;
+            document.getElementById('edit-cor').value = r.color || '#d1a3ff';
+            document.getElementById('modal-edit').style.display = 'flex';
         }
 
-        // CONFIGURAÇÃO DO ARRASTE SOMENTE VERTICAL
+        function fecharModal() {
+            document.getElementById('modal-edit').style.display = 'none';
+        }
+
+        function confirmarEdicao() {
+            const key = document.getElementById('edit-key').value;
+            const nome = document.getElementById('edit-nome').value.trim();
+            const url = document.getElementById('edit-url').value.trim();
+            const cor = document.getElementById('edit-cor').value;
+
+            if(!nome || !url) return alert("Preencha todos os campos!");
+
+            db.ref('radios/' + key).update({
+                name: nome,
+                url: url,
+                color: cor
+            }).then(() => {
+                fecharModal();
+            });
+        }
+
+        // EXCLUIR RÁDIO
+        function excluirRadio(key) {
+            if(confirm("Tem certeza que deseja excluir esta rádio?")) {
+                db.ref('radios/' + key).remove();
+            }
+        }
+
+        // ARRASTAR E ORDENAR OS CARDS (EXCLUSIVO NO EIXO VERTICAL - Y)
         new Sortable(document.getElementById('lista-radios-adm'), {
             animation: 150,
             direction: 'vertical',
@@ -184,10 +349,9 @@
             forceFallback: true,
             fallbackOnBody: true,
             onEnd: function() {
-                let index = 0;
-                document.querySelectorAll('#lista-radios-adm .radio-item-adm').forEach(el => {
+                document.querySelectorAll('#lista-radios-adm .radio-card-adm').forEach((el, index) => {
                     const key = el.getAttribute('data-id');
-                    db.ref('radios/' + key).update({ posicao: index++ });
+                    db.ref('radios/' + key).update({ posicao: index });
                 });
             }
         });
