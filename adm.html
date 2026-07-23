@@ -36,7 +36,6 @@
         .msg-card-individual h4 { margin: 0 0 5px 0; color: var(--primary); font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
         .msg-card-individual p { font-size: 13px; margin: 10px 0; line-height: 1.4; color: #eee; background: #222; padding: 8px; border-radius: 5px; }
         
-        /* ESTILO DOS CAMPOS DE RESPOSTA DO ADM */
         .msg-card-individual textarea { width: 100%; background: #111; border: 1px solid #444; border-radius: 6px; color: #fff; padding: 8px; font-size: 12px; margin-top: 8px; resize: none; box-sizing: border-box; }
         .msg-card-individual .btn-resp-adm { background: var(--primary); color: #000; border: none; padding: 6px 12px; border-radius: 5px; font-weight: bold; font-size: 11px; cursor: pointer; margin-top: 6px; width: 100%; text-transform: uppercase; }
 
@@ -187,47 +186,6 @@
         function logout() { if(confirm("Sair?")) { localStorage.removeItem('usuarioNome'); window.location.href = 'index.html'; } }
         function toggleMensagens() { document.getElementById('container-mensagens-adm').classList.toggle('aberto'); }
 
-        // ======================================================
-        // EXTRATOR EXCLUSIVO PARA EXTRAIR APENAS O NOME DO OUVINTE
-        // ======================================================
-        function extrairApenasNome(u) {
-            // Procura todos os campos possíveis em ordem de prioridade
-            let candidatos = [
-                u.nomeOuvinte,
-                u.nomeCadastro,
-                u.nomeCompleto,
-                u.nome,
-                u.ouvinte,
-                u.usuario,
-                u.login
-            ];
-
-            let nomeFinal = "";
-
-            // Encontra o primeiro campo preenchido que NÃO seja um e-mail completo
-            for (let item of candidatos) {
-                if (item && typeof item === 'string' && item.trim() !== '') {
-                    if (!item.includes('@')) {
-                        nomeFinal = item;
-                        break;
-                    }
-                }
-            }
-
-            // Se ainda não encontrou nada sem @ (ou seja, se só existir o e-mail no banco)
-            if (!nomeFinal) {
-                for (let item of candidatos) {
-                    if (item && typeof item === 'string' && item.includes('@')) {
-                        nomeFinal = item.split('@')[0]; // Pega somente o nome antes do @
-                        nomeFinal = nomeFinal.replace(/[._-]/g, ' '); // Troca pontos e traços por espaços
-                        break;
-                    }
-                }
-            }
-
-            return (nomeFinal || 'OUVINTE').trim().toUpperCase();
-        }
-
         // ==========================================
         // LEITURA E RESPOSTA DE MENSAGENS DOS OUVINTES
         // ==========================================
@@ -243,7 +201,7 @@
             for(let key in msgs) {
                 total++;
                 const m = msgs[key];
-                const nomeExibicao = extrairApenasNome(m);
+                const nomeExibicao = m.ouvinte || m.nome || m.nomeOuvinte || 'Ouvinte';
                 
                 const card = document.createElement('div');
                 card.className = "msg-card-individual";
@@ -381,22 +339,23 @@
         });
 
         // ==========================================
-        // MONITOR DE OUVINTES (SOMENTE NOME DO OUVINTE)
+        // MONITOR DE OUVINTES (PUXANDO DO NÓ "usuarios")
         // ==========================================
-        db.ref('contas').on('value', snap => {
+        db.ref('usuarios').on('value', snap => {
             const container = document.getElementById('user-list'); if(!container) return;
             const agora = Date.now();
             const data = snap.val() || {};
             container.innerHTML = ""; 
-            for (let uid in data) {
-                const u = data[uid];
-                if(u.perfil === "adm") continue;
-                const safeId = uid.replace(/[^a-zA-Z0-9]/g, '_');
+
+            for (let nomeKey in data) {
+                const u = data[nomeKey] || {};
+                
+                // O nome exato que está no banco de dados
+                const nomeExibicao = u.nome || u.nomeCadastrado || nomeKey;
+                
+                const safeId = nomeKey.replace(/[^a-zA-Z0-9]/g, '_');
                 const sinalVida = u.lastSeen || u.lastActive || 0;
                 const isOnline = (u.status === 'online' && (agora - sinalVida < 45000));
-                
-                // Extração garantida apenas do nome
-                const nomeExibicao = extrairApenasNome(u);
 
                 if (!usersDataCache[safeId] || usersDataCache[safeId].radioAtual !== u.radioAtual) {
                     usersDataCache[safeId] = { 
@@ -417,7 +376,7 @@
                             <span class="${isOnline ? 'status-on' : 'status-off'}">${isOnline ? '● ONLINE' : 'OFF'}</span>
                         </button>
                         <i class="fas fa-trash-alt" style="color: #ff4444; padding: 15px; cursor: pointer; font-size: 14px; opacity: 0.7;" 
-                           onclick="if(confirm('Deseja excluir este ouvinte permanentemente?')) db.ref('contas/${uid}').remove()"></i>
+                           onclick="if(confirm('Deseja excluir este ouvinte permanentemente?')) db.ref('usuarios/${nomeKey}').remove()"></i>
                     </div>
                     <div class="user-details-bar">
                         Rádio: <b style="color:var(--primary)">${isOnline ? (u.radioAtual || 'Nenhuma') : '---'}</b><br>
