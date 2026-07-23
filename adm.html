@@ -2,117 +2,105 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <!-- Forçar atualização imediata nos celulares/tablets (Anti-Cache) -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PAINEL ADM - LUIGY</title>
+    <title>LOGIN - LUIGY PAINEL</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
     <style>
-        /* --- TRAVA CIRÚRGICA DE TELA & APLICATIVO --- */
-        *, *::before, *::after {
-            box-sizing: border-box !important;
-            max-width: 100% !important;
-        }
-
-        html {
-            width: 100vw !important;
-            overflow-x: hidden !important;
-            overscroll-behavior-x: none !important;
-            touch-action: pan-y !important;
-        }
-
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: #000;
-            color: white;
-            margin: 0;
-            padding: 20px;
-            width: 100vw !important;
-            overflow-x: hidden !important;
-            overscroll-behavior-x: none !important;
-            touch-action: pan-y !important;
-            -webkit-overflow-scrolling: touch;
-            user-select: none;
-        }
-
-        :root { --primary: #A020F0; --pink-light: #FFB6C1; --bg: #000; --card: #121212; --text-muted: #b3b3b3; --success: #1DB954; }
-        
-        .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 20px 30px; border-radius: 15px; border: 1px solid #333; margin-bottom: 25px; gap: 10px; flex-wrap: wrap; transition: 0.3s; width: 100%; }
-        .header-left { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; flex-shrink: 0; }
-        .header h2 { margin: 0; color: var(--primary); font-size: 22px; text-transform: uppercase; line-height: 1; }
-
-        .btn-header { background: none; border: 1px solid #333; color: white; padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; transition: 0.3s; display: flex; align-items: center; gap: 8px; text-transform: uppercase; font-weight: bold; }
-        .btn-header:hover { background: #222; border-color: var(--primary); }
-        .btn-sair { color: #ff4444; border-color: #442222; padding: 4px 10px; }
-        .btn-sair:hover { background: #331111; border-color: #ff4444; }
-
-        .main-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; width: 100%; margin: 0 auto; align-items: start; }
-
-        .card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid #282828; width: 100%; }
-        h3 { color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; text-align: center; }
-
-        /* TRAVA DE ARRASTE VERTICAL */
-        .radio-grid-adm { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 10px; 
-            width: 100%;
-            touch-action: pan-y !important;
-        }
-
-        .radio-item-adm { 
-            width: 100%;
-            background: #1a1a1a; 
-            border: 1px solid #333; 
-            border-radius: 10px; 
-            padding: 12px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            touch-action: pan-y !important; 
-        }
-
-        .input-adm { width: 100%; background: #0a0a0a; border: 1px solid #333; border-radius: 8px; color: #fff; padding: 10px; margin-bottom: 10px; outline: none; }
-        .btn-adm { background: var(--primary); color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; text-transform: uppercase; }
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        :root { --primary: #BF40BF; --bg: #0b0b0b; --card: #181818; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+        .login-container { background: var(--card); padding: 30px; border-radius: 20px; border: 1px solid #333; width: 100%; max-width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); box-sizing: border-box; }
+        h2 { color: var(--primary); margin-bottom: 25px; text-transform: uppercase; letter-spacing: 2px; font-size: 20px; }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        label { display: block; font-size: 11px; color: #888; margin-bottom: 5px; margin-left: 5px; text-transform: uppercase; }
+        input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #333; background: #0b0b0b; color: white; outline: none; box-sizing: border-box; transition: 0.3s; font-size: 16px; }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 8px rgba(191, 64, 191, 0.3); }
+        .btn-acao { width: 100%; padding: 14px; border-radius: 10px; border: none; background: var(--primary); color: white; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; text-transform: uppercase; font-size: 14px; }
+        .btn-acao:hover { background: #a332a3; transform: translateY(-2px); }
+        #msg-erro { color: #ff4444; font-size: 12px; margin-top: 15px; font-weight: bold; min-height: 15px; }
+        .links { margin-top: 20px; font-size: 12px; }
+        .links a { color: var(--primary); text-decoration: none; cursor: pointer; display: block; margin-bottom: 8px; opacity: 0.8; }
+        .links a:hover { opacity: 1; text-decoration: underline; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: var(--card); border: 1px solid var(--primary); padding: 30px; border-radius: 20px; width: 100%; max-width: 350px; box-sizing: border-box; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .btn-fechar { background: none; border: none; color: white; font-size: 20px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div class="header-left">
-            <h2>PAINEL DO ADMINISTRADOR</h2>
-            <button class="btn-header btn-sair" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span>SAIR</span></button>
+    <div class="login-container">
+        <h2>Acesso ao Painel</h2>
+        <div class="input-group">
+            <label>E-mail ou Login</label>
+            <input type="text" id="login-input" placeholder="exemplo@gmail.com" onkeypress="handleEnter(event, fazerLogin)">
+        </div>
+        <div class="input-group">
+            <label>Senha</label>
+            <input type="password" id="senha-input" placeholder="****" onkeypress="handleEnter(event, fazerLogin)">
+        </div>
+        <button class="btn-acao" onclick="fazerLogin()">Entrar no Painel</button>
+        <div id="msg-erro"></div>
+        <div class="links">
+            <a onclick="abrirModal('modal-cadastro')">Não tenho cadastro</a>
+            <a onclick="abrirModal('modal-esqueci')">Esqueci minha senha</a>
         </div>
     </div>
 
-    <div class="main-container">
-        
-        <!-- GERENCIAR RÁDIOS -->
-        <div class="card">
-            <h3>CADASTRAR RÁDIO</h3>
-            <input type="text" id="nome-radio" class="input-adm" placeholder="Nome da Rádio">
-            <input type="text" id="url-radio" class="input-adm" placeholder="URL do Stream">
-            <input type="color" id="cor-radio" class="input-adm" value="#A020F0" style="height: 40px;">
-            <button class="btn-adm" onclick="salvarRadio()">Salvar Rádio</button>
-
-            <h3 style="margin-top: 25px;">ORDENAR RÁDIOS (ARRASTE VERTICAL)</h3>
-            <div id="lista-radios-adm" class="radio-grid-adm"></div>
+    <div id="modal-cadastro" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 style="margin:0; color:var(--primary)">CRIAR CONTA</h3>
+                <button class="btn-fechar" onclick="fecharModal('modal-cadastro')">&times;</button>
+            </div>
+            <div class="input-group">
+                <label>Seu Nome e Sobrenome</label>
+                <input type="text" id="cad-nome" placeholder="Ex: João Silva" onkeypress="handleEnter(event, registrarUsuario)">
+            </div>
+            <div class="input-group">
+                <label>E-mail</label>
+                <input type="email" id="cad-email" placeholder="email@exemplo.com" onkeypress="handleEnter(event, registrarUsuario)">
+            </div>
+            <div class="input-group">
+                <label>Senha</label>
+                <input type="password" id="cad-senha" placeholder="Sua senha" onkeypress="handleEnter(event, registrarUsuario)">
+            </div>
+            <button class="btn-acao" onclick="registrarUsuario()">Cadastrar Agora</button>
         </div>
+    </div>
 
-        <!-- MENSAGENS RECEBIDAS E RESPOSTAS -->
-        <div class="card">
-            <h3>MENSAGENS DOS OUVINTES</h3>
-            <div id="lista-mensagens-ouvintes"></div>
+    <div id="modal-esqueci" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 style="margin:0; color:var(--primary)">RECUPERAR</h3>
+                <button class="btn-fechar" onclick="fecharModal('modal-esqueci')">&times;</button>
+            </div>
+            <div id="etapa-validar">
+                <p style="font-size:12px; color:#888; text-align:center">Confirme seus dados para alterar a senha.</p>
+                <div class="input-group">
+                    <label>E-mail Cadastrado</label>
+                    <input type="email" id="rec-email" placeholder="email@exemplo.com">
+                </div>
+                <div class="input-group">
+                    <label>Primeiro Nome</label>
+                    <input type="text" id="rec-nome" placeholder="Seu nome">
+                </div>
+                <button class="btn-acao" onclick="validarParaNovaSenha()">Validar Dados</button>
+            </div>
+            <div id="etapa-nova-senha" style="display:none">
+                <p style="font-size:12px; color:#00ff00; text-align:center">Dados validados! Digite a nova senha.</p>
+                <div class="input-group">
+                    <label>Nova Senha</label>
+                    <input type="password" id="nova-senha" placeholder="****">
+                </div>
+                <div class="input-group">
+                    <label>Confirmar Nova Senha</label>
+                    <input type="password" id="conf-nova-senha" placeholder="****">
+                </div>
+                <button class="btn-acao" onclick="salvarNovaSenha()">Salvar Nova Senha</button>
+            </div>
         </div>
-
     </div>
 
     <script>
@@ -125,100 +113,109 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Verificar permissão
-        if(localStorage.getItem('userId') !== 'admin') {
-            window.location.href = 'index.html';
+        let usuarioChaveParaRecuperar = null;
+
+        function abrirModal(id) { 
+            document.getElementById(id).style.display = 'flex'; 
+            if(id === 'modal-esqueci') {
+                document.getElementById('etapa-validar').style.display = 'block';
+                document.getElementById('etapa-nova-senha').style.display = 'none';
+            }
         }
+        function fecharModal(id) { document.getElementById(id).style.display = 'none'; }
+        function handleEnter(e, func) { if (e.key === 'Enter') { func(); } }
 
-        // CARREGAR RÁDIOS
-        db.ref('radios').on('value', snap => {
-            const container = document.getElementById('lista-radios-adm');
-            container.innerHTML = "";
-            snap.forEach(child => {
-                const r = child.val();
-                const key = child.key;
-                container.innerHTML += `
-                    <div class="radio-item-adm" data-id="${key}">
-                        <span><i class="fas fa-bars" style="margin-right: 8px; color: #666;"></i> ${r.name}</span>
-                        <i class="fas fa-trash" style="color: #ff4444; cursor: pointer;" onclick="excluirRadio('${key}')"></i>
-                    </div>
-                `;
-            });
-        });
-
-        function salvarRadio() {
-            const nome = document.getElementById('nome-radio').value.trim();
-            const url = document.getElementById('url-radio').value.trim();
-            const cor = document.getElementById('cor-radio').value;
-
-            if(!nome || !url) return alert("Preencha nome e URL!");
-
-            db.ref('radios').push({ name: nome, url: url, color: cor }).then(() => {
-                document.getElementById('nome-radio').value = "";
-                document.getElementById('url-radio').value = "";
+        function registrarUsuario() {
+            const nomeInput = document.getElementById('cad-nome').value.trim();
+            const email = document.getElementById('cad-email').value.trim().toLowerCase();
+            const senha = document.getElementById('cad-senha').value.trim();
+            if(!nomeInput || !email || !senha) return alert("Preencha todos os campos!");
+            const idFirebase = email.replace(/\./g, ','); 
+            db.ref('contas/' + idFirebase).once('value').then(snap => {
+                if(snap.exists()) alert("Este e-mail já possui uma conta!");
+                else {
+                    db.ref('contas/' + idFirebase).set({
+                        nome: nomeInput, email: email, login: email, senha: String(senha),
+                        perfil: "ouvinte", status: "offline", lastSeen: Date.now()
+                    }).then(() => {
+                        alert("Cadastro realizado!");
+                        fecharModal('modal-cadastro');
+                    });
+                }
             });
         }
 
-        function excluirRadio(key) {
-            if(confirm("Excluir esta rádio?")) db.ref('radios/' + key).remove();
-        }
-
-        // ARRASTE VERTICAL NO ADM
-        new Sortable(document.getElementById('lista-radios-adm'), {
-            animation: 150,
-            direction: 'vertical',
-            delay: 100,
-            delayOnTouchOnly: true,
-            onEnd: function() {
-                let index = 0;
-                document.querySelectorAll('#lista-radios-adm .radio-item-adm').forEach(el => {
-                    const key = el.getAttribute('data-id');
-                    db.ref('radios/' + key).update({ posicao: index++ });
+        function validarParaNovaSenha() {
+            const email = document.getElementById('rec-email').value.trim().toLowerCase();
+            const primeiroNome = document.getElementById('rec-nome').value.trim().toLowerCase();
+            if(!email || !primeiroNome) return alert("Preencha os campos!");
+            db.ref('contas').once('value').then(snap => {
+                let achou = false;
+                snap.forEach(child => {
+                    const u = child.val();
+                    const nomeNoBanco = u.nome.split(' ')[0].toLowerCase();
+                    if(u.email === email && nomeNoBanco === primeiroNome) {
+                        achou = true;
+                        usuarioChaveParaRecuperar = child.key;
+                        document.getElementById('etapa-validar').style.display = 'none';
+                        document.getElementById('etapa-nova-senha').style.display = 'block';
+                    }
                 });
-            }
-        });
-
-        // CARREGAR MENSAGENS DOS OUVINTES
-        db.ref('mensagens_ouvintes').on('value', snap => {
-            const container = document.getElementById('lista-mensagens-ouvintes');
-            container.innerHTML = "";
-            const data = snap.val() || {};
-
-            for(let id in data) {
-                const m = data[id];
-                container.innerHTML += `
-                    <div style="background: #181818; padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 3px solid var(--primary);">
-                        <strong style="color: var(--pink-light);">${m.ouvinte || m.nome}</strong>: ${m.mensagem}
-                        <div style="margin-top: 8px; display: flex; gap: 5px;">
-                            <input type="text" id="resp-${id}" class="input-adm" placeholder="Responder ouvinte..." style="margin: 0; font-size: 11px;">
-                            <button class="btn-adm" style="width: auto; padding: 0 12px; font-size: 11px;" onclick="responderOuvinte('${id}', '${m.ouvinte || m.nome}', '${m.ouvinteId || ''}')">Enviar</button>
-                        </div>
-                    </div>
-                `;
-            }
-        });
-
-        function responderOuvinte(msgId, ouvinteNome, ouvinteId) {
-            const input = document.getElementById(`resp-${msgId}`);
-            const resposta = input.value.trim();
-
-            if(!resposta) return alert("Digite uma resposta!");
-
-            db.ref('respostas_adm').push({
-                ouvinte: ouvinteNome,
-                ouvinteId: ouvinteId,
-                resposta: resposta,
-                dataHora: new Date().toLocaleString('pt-BR'),
-                timestamp: firebase.database.ServerValue.TIMESTAMP
-            }).then(() => {
-                alert("Resposta enviada com sucesso!");
-                input.value = "";
+                if(!achou) alert("E-mail ou nome não conferem!");
             });
         }
 
-        function logout() {
-            localStorage.clear();
-            window.location.href = 'index.html';
+        function salvarNovaSenha() {
+            const n1 = document.getElementById('nova-senha').value.trim();
+            const n2 = document.getElementById('conf-nova-senha').value.trim();
+            if(n1.length < 4) return alert("A senha deve ter pelo menos 4 caracteres.");
+            if(n1 !== n2) return alert("As senhas não coincidem!");
+            db.ref('contas/' + usuarioChaveParaRecuperar).update({ senha: String(n1) }).then(() => {
+                alert("Senha alterada com sucesso!");
+                fecharModal('modal-esqueci');
+            });
+        }
+
+        function fazerLogin() {
+            const loginInformado = document.getElementById('login-input').value.trim().toLowerCase();
+            const senhaInformada = document.getElementById('senha-input').value.trim();
+            const erroDiv = document.getElementById('msg-erro');
+
+            if(!loginInformado || !senhaInformada) { erroDiv.innerText = "Preencha os campos!"; return; }
+            
+            erroDiv.innerText = "Verificando...";
+            
+            db.ref('contas').once('value').then(snap => {
+                let usuarioEncontrado = null;
+                let chaveUsuario = null;
+
+                snap.forEach(child => {
+                    const u = child.val();
+                    // Ajuste cirúrgico: Garante que ambos sejam strings e compara email ou nome
+                    if ((String(u.email).toLowerCase() === loginInformado || String(u.nome).toLowerCase() === loginInformado || String(u.login).toLowerCase() === loginInformado) && String(u.senha) === String(senhaInformada)) {
+                        usuarioEncontrado = u;
+                        chaveUsuario = child.key;
+                    }
+                });
+
+                if (usuarioEncontrado) {
+                    // Salva as chaves necessárias para o ouvinte.html e adm.html
+                    localStorage.setItem('userId', chaveUsuario);
+                    localStorage.setItem('usuarioKey', chaveUsuario);
+                    localStorage.setItem('usuarioNome', usuarioEncontrado.nome);
+                    localStorage.setItem('usuarioPerfil', usuarioEncontrado.perfil);
+
+                    db.ref('contas/' + chaveUsuario).update({ status: "online", lastSeen: Date.now() })
+                    .then(() => { 
+                        window.location.href = (usuarioEncontrado.perfil === "adm") ? 'adm.html' : 'ouvinte.html'; 
+                    });
+                } else { 
+                    erroDiv.innerText = "E-mail ou Senha incorretos!"; 
+                }
+            }).catch(e => {
+                erroDiv.innerText = "Erro ao conectar!";
+                console.log(e);
+            });
         }
     </script>
 </body>
