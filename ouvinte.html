@@ -2,19 +2,16 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <!-- Forçar atualização imediata nos celulares/tablets (Anti-Cache) -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
-    <title>OUVINTE - LUIGY</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PAINEL OUVINTE - LUIGY</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        /* --- TRAVA CIRÚRGICA DE TELA & APLICATIVO (IMPETE QUALQUER MOVIMENTO LATERAL) --- */
         *, *::before, *::after {
             box-sizing: border-box !important;
             max-width: 100% !important;
@@ -32,7 +29,7 @@
             background: #000;
             color: white;
             margin: 0;
-            padding: 15px;
+            padding: 20px;
             width: 100vw !important;
             overflow-x: hidden !important;
             overscroll-behavior-x: none !important;
@@ -41,244 +38,236 @@
             user-select: none;
             display: flex;
             flex-direction: column;
-            align-items: center; /* Centraliza todo o conteúdo do site */
+            align-items: center;
         }
 
-        :root { --primary: #A020F0; --pink-light: #FFB6C1; --bg: #000; --card: #121212; --text-muted: #b3b3b3; --success: #1DB954; }
+        :root { 
+            --primary: #A020F0; 
+            --pink-light: #FFB6C1; 
+            --bg: #000; 
+            --card: #121212; 
+        }
         
-        .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 20px 30px; border-radius: 15px; border: 1px solid #333; margin-bottom: 25px; gap: 10px; flex-wrap: wrap; transition: 0.3s; width: 100%; max-width: 1200px !important; }
-        .header.online { border-color: var(--success); box-shadow: 0 0 10px rgba(29, 185, 84, 0.2); }
-        .header-left { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; flex-shrink: 0; }
-        .header h2 { margin: 0; color: var(--primary); font-size: 22px; text-transform: uppercase; line-height: 1; }
-        
-        .status-badge { font-size: 10px; background: rgba(29, 185, 84, 0.1); color: var(--success); padding: 2px 8px; border-radius: 20px; border: 1px solid var(--success); font-weight: bold; margin-left: 5px; display: none; }
-        .online .status-badge { display: inline-block; animation: pulse-green 2s infinite; }
-        @keyframes pulse-green { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-
-        #container-pub { flex: 1; display: flex; justify-content: center; align-items: center; padding: 0 10px; min-height: 55px; overflow: hidden; }
-        #img-publicidade { max-height: 55px; max-width: 100%; border-radius: 8px; display: none; object-fit: contain; transition: opacity 0.5s ease-in-out; }
-        
-        .header-center-resp { display: flex; justify-content: center; align-items: center; margin: 0 10px; }
-        .btn-resposta-adm { background: #A020F0; color: white; border: none; padding: 8px 14px; border-radius: 20px; font-weight: 800; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 8px; text-transform: uppercase; transition: transform 0.2s, box-shadow 0.2s; }
-        .btn-resposta-adm span { background: white; color: #A020F0; padding: 2px 6px; border-radius: 50%; font-size: 11px; font-weight: 900; }
-        .btn-resposta-adm.piscar { animation: btnRespPisca 0.8s infinite alternate; }
-        @keyframes btnRespPisca {
-            from { opacity: 1; transform: scale(1); box-shadow: 0 0 5px #A020F0; }
-            to { opacity: 0.4; transform: scale(1.05); box-shadow: 0 0 18px #FFB6C1; }
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            background: #121212; 
+            padding: 20px; 
+            border-radius: 15px; 
+            border: 1px solid #333; 
+            margin-bottom: 25px; 
+            width: 100%; 
+            max-width: 1200px; 
         }
 
-        .header-right { display: flex; align-items: center; flex-shrink: 0; }
-        .datetime-container { display: flex; flex-direction: column; align-items: flex-end; border-left: 1px solid #333; padding-left: 20px; }
-        
-        #hora { font-size: 28px; font-weight: 900; line-height: 1; color: white; letter-spacing: -1px; }
-        .date-info { font-size: 11px; color: #888; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; margin-top: 4px; }
-        .day-highlight { color: var(--primary); }
+        .header h2 { 
+            margin: 0; 
+            color: var(--primary); 
+            font-size: 18px; 
+            text-transform: uppercase; 
+        }
 
-        .btn-header { background: none; border: 1px solid #333; color: white; padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; transition: 0.3s; display: flex; align-items: center; gap: 8px; text-transform: uppercase; font-weight: bold; }
-        .btn-header:hover { background: #222; border-color: var(--primary); }
-        .btn-sair { color: #ff4444; border-color: #442222; padding: 4px 10px; }
-        .btn-sair:hover { background: #331111; border-color: #ff4444; }
+        .btn-sair { 
+            background: none; 
+            border: 1px solid #442222; 
+            color: #ff4444; 
+            padding: 6px 12px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 12px; 
+            font-weight: bold; 
+        }
 
-        #container-respostas-ouvinte { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out; margin-bottom: 0px; width: 100%; max-width: 1200px !important; }
-        #container-respostas-ouvinte.aberto { max-height: 1000px; margin-bottom: 25px; }
-        .respostas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
-        .card-resposta-item { background: #181818; border: 1px solid var(--primary); border-radius: 12px; padding: 12px 15px; position: relative; }
-        .card-resposta-item h5 { margin: 0 0 8px 0; color: var(--pink-light); font-size: 12px; display: flex; justify-content: space-between; align-items: center; }
-        .card-resposta-item p { margin: 0; font-size: 13px; color: #fff; background: #222; padding: 10px; border-radius: 8px; word-break: break-word; }
-        .card-resposta-item .data-resp { font-size: 10px; color: #777; margin-top: 8px; text-align: right; }
-        
-        /* CONTAINER PRINCIPAL CENTRALIZADO */
         .main-container { 
             display: grid; 
-            grid-template-columns: 180px 1fr 180px; 
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
             gap: 20px; 
             width: 100%; 
-            max-width: 1200px !important; 
-            margin: 0 auto; 
-            margin-bottom: 150px; 
-            align-items: start; 
-        }
-        .center-content { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; align-items: start; width: 100%; }
-        .side-pub { min-height: 400px; display: flex; flex-direction: column; gap: 15px; }
-        .side-pub img { width: 100%; border-radius: 10px; border: 1px solid #333; }
-        
-        @media (max-width: 1200px) { 
-            .center-content { grid-template-columns: 1fr; } 
-            .main-container { grid-template-columns: 1fr; } 
-            .side-pub { display: none; } 
+            max-width: 1200px; 
+            margin-bottom: 120px; 
         }
 
-        .card { 
+        .card-box { 
             background: var(--card); 
             border-radius: 20px; 
             padding: 20px; 
             border: 1px solid #282828; 
             width: 100%; 
-            margin: 0 auto; 
         }
 
-        h3 { color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; text-align: center; }
-        
-        /* GRADE E ELEMENTOS DAS RÁDIOS - COM BLOQUEIO DE MOVIMENTO LATERAL */
-        .radio-grid { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 12px; 
-            width: 100%;
-            touch-action: pan-y !important;
-            overflow-x: hidden !important;
+        h3 { 
+            color: var(--primary); 
+            font-size: 12px; 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            margin-bottom: 20px; 
+            text-align: center; 
         }
 
-        .radio-item { 
-            width: 100% !important;
-            height: 55px; 
-            border-radius: 12px; 
-            display: flex; 
-            flex-direction: row; 
-            justify-content: flex-start; 
-            align-items: center; 
-            color: #000; 
-            font-weight: bold; 
-            font-size: 13px; 
-            padding: 0 18px; 
-            cursor: grab; 
-            transition: background 0.2s; 
-            position: relative; 
-            border: 2px solid transparent; 
-            box-sizing: border-box; 
-            touch-action: pan-y !important; /* Trava toque no eixo vertical */
-            margin: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            transform: none !important; /* Evita deslocamento para os lados */
-        }
-        
-        .radio-item:active { cursor: grabbing; }
-        .radio-item.active { background: #000 !important; color: var(--primary) !important; border-color: var(--primary); box-shadow: 0 0 15px rgba(160, 32, 240, 0.4); }
-        
-        .antena { font-size: 16px; margin-right: 12px; display: none; }
-        .active .antena { display: inline-block; animation: pulse-antena 1s infinite; }
-        @keyframes pulse-antena { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(1.1); } }
-        
-        .selector-list { display: flex; flex-direction: column; gap: 8px; max-height: 450px; overflow-y: auto; overflow-x: hidden; padding-right: 5px; width: 100%; }
-        .selector-item { background: #1a1a1a; padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #333; transition: 0.3s; width: 100%; }
-        .selector-item.selected { border-left-color: var(--primary); background: #222; }
-        .btn-toggle-radio { background: none; border: none; font-size: 18px; cursor: pointer; transition: 0.2s; }
-        .btn-toggle-radio.add { color: #444; }
-        .btn-toggle-radio.remove { color: var(--primary); }
-        
-        .btn-pedir-radio {
+        /* --- GRADE DE CARDS QUADRADOS LADO A LADO --- */
+        .radio-grid-ouvinte {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 15px;
             width: 100%;
-            background: rgba(255, 182, 193, 0.12);
-            color: var(--pink-light);
-            border: 2px solid var(--pink-light);
-            padding: 14px;
-            border-radius: 12px;
+        }
+
+        .radio-card-quadrado {
+            aspect-ratio: 1 / 1;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 12px;
             cursor: pointer;
+            color: #000;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            border: 3px solid transparent;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .radio-card-quadrado:hover {
+            transform: translateY(-3px);
+        }
+
+        .radio-card-quadrado.playing {
+            border-color: #fff;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+            transform: scale(1.03);
+        }
+
+        .radio-card-quadrado i.icon-radio {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .radio-card-quadrado .radio-name {
             font-size: 13px;
-            font-weight: 800;
             text-transform: uppercase;
-            transition: 0.3s;
+            font-weight: 900;
+            line-height: 1.2;
+            word-break: break-word;
+        }
+
+        /* --- SEÇÃO DE MENSAGENS DO OUVINTE --- */
+        .input-msg { 
+            width: 100%; 
+            background: #0a0a0a; 
+            border: 1px solid #333; 
+            border-radius: 10px; 
+            color: #fff; 
+            padding: 12px; 
+            margin-bottom: 10px; 
+            outline: none; 
+            resize: none;
+        }
+
+        .btn-enviar { 
+            background: var(--primary); 
+            color: #fff; 
+            border: none; 
+            padding: 12px; 
+            border-radius: 10px; 
+            font-weight: bold; 
+            width: 100%; 
+            cursor: pointer; 
+            text-transform: uppercase; 
+        }
+
+        .msg-item {
+            background: #181818;
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 3px solid var(--primary);
+        }
+
+        .resp-adm-box {
+            background: #25122e;
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-top: 8px;
+            border-left: 3px solid var(--pink-light);
+        }
+
+        /* --- PLAYER FOOTER FLUTUANTE --- */
+        .player-footer { 
+            position: fixed; 
+            bottom: 0; 
+            left: 0; 
+            right: 0; 
+            background: #111; 
+            padding: 15px 25px; 
+            border-top: 2px solid var(--primary); 
+            z-index: 100; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+        }
+
+        .btn-play {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            box-shadow: 0 0 15px rgba(255, 182, 193, 0.25);
-            line-height: 1.3;
+            font-size: 18px;
+            cursor: pointer;
         }
 
-        .player-footer { position: fixed; bottom: 0; left: 0; right: 0; background: #111; padding: 15px 25px 25px 25px; border-top: 2px solid var(--primary); text-align: center; z-index: 100; width: 100%; overflow-x: hidden; }
-        .msg-barra { background: #ff0000; color: #fff; font-size: 14px; font-weight: 900; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 2px solid #fff; display: none; width: fit-content; margin: 0 auto; cursor: pointer; animation: piscar-alerta 0.8s infinite alternate; }
-        @keyframes piscar-alerta { 0% { opacity: 1; transform: scale(1); background: #ff0000; } 100% { opacity: 0.7; transform: scale(1.05); background: var(--primary); } }
-        
-        .controls-row { display: flex; align-items: center; justify-content: center; gap: 35px; }
-        .btn-nav { background: none; border: none; color: #b3b3b3; font-size: 24px; cursor: pointer; transition: 0.2s; }
-        .btn-nav:hover { color: var(--primary); transform: scale(1.1); }
-        .play-outer { position: relative; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; }
-        .ring-animation { position: absolute; width: 100%; height: 100%; border: 2px solid rgba(160, 32, 240, 0.1); border-top: 2px solid var(--primary); border-radius: 50%; animation: spin-slow 5s linear infinite; }
-        @keyframes spin-slow { 100% { transform: rotate(360deg); } }
-        .btn-spotify-play { width: 60px; height: 60px; background: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; color: black; cursor: pointer; z-index: 5; transition: 0.2s; }
-        .btn-spotify-play:hover { transform: scale(1.05); background: var(--primary); color: white; }
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
     </style>
 </head>
-<body onclick="fecharAviso()">
-    <div class="header online" id="header-main">
-        <div class="header-left">
-            <h2><span id="nome-exibicao">OUVINTE</span> <span class="status-badge">ON</span></h2>
-            <button class="btn-header btn-sair" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span>SAIR</span></button>
-        </div>
-        
-        <div id="container-pub"><img id="img-publicidade" src=""></div>
-        
-        <div class="header-center-resp">
-            <button id="btn-resposta-adm" class="btn-resposta-adm" onclick="toggleRespostasAdm()">
-                <i class="fas fa-comment-dots"></i> RESPOSTA DO ADM <span id="count-respostas">0</span>
-            </button>
-        </div>
-        
-        <div class="header-right">
-            <div class="datetime-container">
-                <div id="hora">00:00:00</div>
-                <div class="date-info">
-                    <span id="data-inline">00/00/0000</span> — <span id="dia-semana" class="day-highlight">...</span>
-                </div>
-            </div>
-        </div>
-    </div>
+<body>
 
-    <div id="container-respostas-ouvinte">
-        <div class="card">
-            <h3>MENSAGENS DO ADMINISTRADOR</h3>
-            <div id="respostas-list" class="respostas-grid"></div>
+    <div class="header">
+        <div>
+            <h2>PAINEL DO OUVINTE</h2>
+            <span id="nome-ouvinte-display" style="font-size: 12px; color: #aaa;"></span>
         </div>
+        <button class="btn-sair" onclick="logout()"><i class="fas fa-sign-out-alt"></i> SAIR</button>
     </div>
 
     <div class="main-container">
-        <div class="side-pub" id="pub-left"></div>
-        <div class="center-content">
-            <div class="card">
-                <h3>MINHA GRADE (ARRASTE PARA CIMA/BAIXO)</h3>
-                <div id="my-radio-list" class="radio-grid"></div>
-            </div>
-            <div class="card">
-                <h3>SELECIONE AQUI SUA RÁDIO</h3>
-                <div id="selector-list" class="selector-list"></div>
 
-                <div style="margin-top: 18px; border-top: 1px solid #282828; padding-top: 18px;">
-                    <button type="button" class="btn-pedir-radio" onclick="toggleFormRadio()">
-                        <i class="fas fa-paper-plane" style="font-size: 16px;"></i>
-                        <span>ENVIE UMA MENSAGEM PARA O NOSSO ADM PEDINDO PARA INCLUIR A SUA RÁDIO PREFERIDA</span>
-                    </button>
-                    
-                    <div id="form-pedir-radio" style="display: none; margin-top: 12px; flex-direction: column; gap: 10px;">
-                        <textarea id="msg-radio-input" placeholder="Escreva o nome da rádio ou sua mensagem para o adm..." style="width: 100%; height: 80px; background: #0a0a0a; border: 1px solid var(--pink-light); border-radius: 8px; color: #fff; padding: 12px; font-family: inherit; font-size: 13px; resize: none; box-sizing: border-box; outline: none;"></textarea>
-                        <button type="button" onclick="enviarMensagemAdm()" style="width: 100%; background: var(--pink-light); color: #000; border: none; padding: 12px; border-radius: 8px; font-weight: 900; cursor: pointer; font-size: 12px; text-transform: uppercase; transition: 0.2s;">ENVIAR MENSAGEM</button>
-                    </div>
-                </div>
-
-            </div>
+        <!-- CARDS QUADRADOS DAS RÁDIOS -->
+        <div class="card-box">
+            <h3>SELECIONE UMA RÁDIO PARA OUVIR</h3>
+            <div id="grid-radios" class="radio-grid-ouvinte"></div>
         </div>
-        <div class="side-pub" id="pub-right"></div>
+
+        <!-- ENVIAR MENSAGENS E VER RESPOSTAS -->
+        <div class="card-box">
+            <h3>MANDAR RECADO / PEDIDO DE MÚSICA</h3>
+            <textarea id="texto-mensagem" class="input-msg" rows="3" placeholder="Escreva sua mensagem ou pedido de música aqui..."></textarea>
+            <button class="btn-enviar" onclick="enviarMensagem()">Enviar Mensagem</button>
+
+            <h3 style="margin-top: 25px;">SUAS MENSAGENS E RESPOSTAS</h3>
+            <div id="lista-respostas-adm"></div>
+        </div>
+
     </div>
 
+    <!-- PLAYER FOOTER -->
     <div class="player-footer">
-        <div id="aviso-novidade" class="msg-barra" onclick="fecharAviso()">
-            <i class="fas fa-bullhorn" style="margin-right:8px;"></i> EI, TEM RADIO NOVA NA AREA, CONFIRA SUA LISTA E MERGULHE NO SOM
+        <div>
+            <div id="player-title" style="font-size: 13px; font-weight: bold; color: #fff;">Nenhuma rádio selecionada</div>
+            <div style="font-size: 10px; color: #888;">Clique em uma rádio acima para tocar</div>
         </div>
-        <div id="now-title" style="font-size:11px; color:#888; margin-bottom:15px; letter-spacing: 1px; text-transform: uppercase;">SELECIONE UMA RÁDIO</div>
-        <div class="controls-row">
-            <button class="btn-nav" onclick="prevRadio()"><i class="fas fa-step-backward"></i></button>
-            <div class="play-outer">
-                <div class="ring-animation"></div>
-                <button class="btn-spotify-play" onclick="togglePlay()"><i class="fas fa-play" id="play-icon" style="margin-left: 3px;"></i></button>
-            </div>
-            <button class="btn-nav" onclick="nextRadio()"><i class="fas fa-step-forward"></i></button>
-        </div>
+        <button id="btn-play" class="btn-play" onclick="togglePlay()"><i class="fas fa-play"></i></button>
     </div>
 
-    <audio id="audio-player"></audio>
+    <audio id="audio-ouvinte"></audio>
 
     <script>
         const firebaseConfig = {
@@ -289,261 +278,140 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const player = document.getElementById('audio-player');
+        const player = document.getElementById('audio-ouvinte');
 
-        const userId = localStorage.getItem('userId') || localStorage.getItem('usuarioKey');
-        const nomeUsuario = (localStorage.getItem('usuarioNome') || "OUVINTE").trim();
-        
-        if(!userId) { window.location.href = 'index.html'; }
-        
-        document.getElementById('nome-exibicao').innerText = nomeUsuario;
+        const ouvinteId = localStorage.getItem('userId') || ('ouvinte_' + Date.now());
+        const ouvinteNome = localStorage.getItem('usuarioNome') || 'Ouvinte Anônimo';
 
-        db.ref('contas/' + userId).update({
-            status: "online",
-            lastSeen: firebase.database.ServerValue.TIMESTAMP,
-            sessionStart: firebase.database.ServerValue.TIMESTAMP
-        });
+        document.getElementById('nome-ouvinte-display').innerText = "Olá, " + ouvinteNome;
 
-        let allRadios = [], mySelectedIds = [], activeIndex = -1;
+        let radiosArray = [];
+        let radioTocandoKey = null;
 
-        setInterval(() => {
-            const agora = new Date();
-            document.getElementById('hora').innerText = agora.toLocaleTimeString('pt-BR');
-            document.getElementById('data-inline').innerText = agora.toLocaleDateString('pt-BR');
-            const diasSemana = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
-            document.getElementById('dia-semana').innerText = diasSemana[agora.getDay()];
-        }, 1000);
-
-        function fecharAviso() { document.getElementById('aviso-novidade').style.display = 'none'; }
-
-        function toggleRespostasAdm() {
-            document.getElementById('container-respostas-ouvinte').classList.toggle('aberto');
-        }
-
-        function carregarRespostas() {
-            const container = document.getElementById('respostas-list');
-            const btnResp = document.getElementById('btn-resposta-adm');
-            const countElem = document.getElementById('count-respostas');
-            
-            if(!container) return;
-
-            const pastasParaBuscar = ['respostas_adm', 'respostas_ouvintes'];
-
-            pastasParaBuscar.forEach(pasta => {
-                db.ref(pasta).on('value', snap => {
-                    container.innerHTML = "";
-                    const data = snap.val() || {};
-                    let count = 0;
-
-                    const meuNomeLower = nomeUsuario.toLowerCase();
-                    const meuIdLower = String(userId).toLowerCase();
-
-                    for(let id in data) {
-                        const item = data[id];
-                        
-                        const targetOuvinte = String(item.ouvinte || item.ouvinteNome || item.nome || item.usuario || "").trim().toLowerCase();
-                        const targetId = String(item.ouvinteId || item.id || "").trim().toLowerCase();
-                        
-                        const eParaMim = (targetOuvinte && meuNomeLower.includes(targetOuvinte)) || 
-                                         (targetId && targetId === meuIdLower) || 
-                                         targetOuvinte === "todos" ||
-                                         !targetOuvinte;
-
-                        if(eParaMim) {
-                            count++;
-                            const textoResposta = item.resposta || item.mensagem || item.texto || "Resposta enviada pelo ADM";
-                            const dataHora = item.dataHora || (item.timestamp ? new Date(item.timestamp).toLocaleString('pt-BR') : '');
-
-                            const div = document.createElement('div');
-                            div.className = "card-resposta-item";
-                            div.innerHTML = `
-                                <h5>
-                                    <span><i class="fas fa-user-shield"></i> ADM RESPONDEU:</span>
-                                    <i class="fas fa-trash-alt" style="color:#ff4444; cursor:pointer; font-size:14px;" title="Apagar" onclick="if(confirm('Apagar?')) db.ref('${pasta}/${id}').remove()"></i>
-                                </h5>
-                                <p>${textoResposta}</p>
-                                <div class="data-resp">${dataHora}</div>
-                            `;
-                            container.appendChild(div);
-                        }
-                    }
-
-                    if(countElem) countElem.innerText = count;
-
-                    if(count > 0) {
-                        if(btnResp) btnResp.classList.add('piscar');
-                    } else {
-                        if(btnResp) btnResp.classList.remove('piscar');
-                        container.innerHTML = "<p style='color:#888; font-size:12px; grid-column:1/-1; text-align:center;'>Nenhuma resposta do ADM no momento.</p>";
-                    }
-                });
-            });
-        }
-
-        carregarRespostas();
-
+        // CARREGAR RÁDIOS E RENDERIZAR QUADRADAS LADO A LADO
         db.ref('radios').on('value', snap => {
-            allRadios = [];
-            snap.forEach(c => { allRadios.push({ ...c.val(), key: c.key }); });
-            allRadios.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
-            
-            db.ref('contas/' + userId + '/grade').once('value', userSnap => {
-                mySelectedIds = userSnap.val() || [];
-                renderAll();
+            radiosArray = [];
+            snap.forEach(child => {
+                radiosArray.push({ key: child.key, ...child.val() });
+            });
+
+            // Ordenação idêntica ao painel ADM
+            radiosArray.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
+
+            const container = document.getElementById('grid-radios');
+            container.innerHTML = "";
+
+            radiosArray.forEach(r => {
+                const isPlaying = radioTocandoKey === r.key;
+                const cardColor = r.color || '#d1a3ff';
+
+                container.innerHTML += `
+                    <div class="radio-card-quadrado ${isPlaying ? 'playing' : ''}" 
+                         style="background: ${cardColor};" 
+                         onclick="tocarRadio('${r.key}')">
+                        <i class="fas ${isPlaying ? 'fa-volume-high' : 'fa-radio'} icon-radio"></i>
+                        <span class="radio-name">${r.name}</span>
+                    </div>
+                `;
             });
         });
 
-        function renderAll() {
-            const myGrid = document.getElementById('my-radio-list'), selector = document.getElementById('selector-list');
-            myGrid.innerHTML = ""; selector.innerHTML = "";
-            const myRadios = mySelectedIds.map(id => allRadios.find(r => r.key === id)).filter(Boolean);
-            myRadios.forEach((r, i) => {
-                myGrid.innerHTML += `<div class="radio-item ${activeIndex === i ? 'active' : ''}" style="background: ${r.color || '#d1a3ff'}" data-id="${r.key}" onclick="playRadio(${i})"><i class="fas fa-tower-broadcast antena"></i><span>${r.name}</span></div>`;
-            });
-            allRadios.forEach(r => {
-                const isSelected = mySelectedIds.includes(r.key);
-                selector.innerHTML += `<div class="selector-item ${isSelected ? 'selected' : ''}"><span style="font-size:13px; font-weight:bold">${r.name}</span><button class="btn-toggle-radio ${isSelected ? 'remove' : 'add'}" onclick="toggleSelection('${r.key}')"><i class="fas ${isSelected ? 'fa-times-circle' : 'fa-plus-circle'}"></i></button></div>`;
-            });
-        }
+        // TOCAR RÁDIO
+        function tocarRadio(key) {
+            const radio = radiosArray.find(r => r.key === key);
+            if(!radio) return;
 
-        function salvarGrade() {
-            db.ref('contas/' + userId + '/grade').set(mySelectedIds);
-        }
-
-        /* --- CONFIGURAÇÃO RIGOROSA DE ARRASTE (EXCLUSIVO NO EIXO VERTICAL Y) --- */
-        new Sortable(document.getElementById('my-radio-list'), {
-            animation: 150,
-            direction: 'vertical',
-            delay: 150,
-            delayOnTouchOnly: true,
-            forceFallback: true, /* Força uma simulação perfeita para travar movimento lateral no celular */
-            fallbackOnBody: true,
-            swapThreshold: 0.65,
-            onEnd: function() {
-                const newIds = [];
-                document.querySelectorAll('#my-radio-list .radio-item').forEach(el => { newIds.push(el.getAttribute('data-id')); });
-                mySelectedIds = newIds;
-                salvarGrade();
-            }
-        });
-
-        function toggleSelection(id) {
-            const index = mySelectedIds.indexOf(id);
-            if (index > -1) mySelectedIds.splice(index, 1); else mySelectedIds.push(id);
-            salvarGrade();
-            renderAll();
-        }
-
-        function toggleFormRadio() {
-            const form = document.getElementById('form-pedir-radio');
-            if (form.style.display === 'none' || form.style.display === '') {
-                form.style.display = 'flex';
+            if(radioTocandoKey === key) {
+                togglePlay();
             } else {
-                form.style.display = 'none';
+                radioTocandoKey = key;
+                player.src = radio.url;
+                player.play();
+                document.getElementById('player-title').innerText = radio.name;
+                document.getElementById('btn-play').innerHTML = '<i class="fas fa-pause"></i>';
+                
+                // Re-renderiza estilo ativo
+                db.ref('radios').once('value');
             }
-        }
-
-        function enviarMensagemAdm() {
-            const txtInput = document.getElementById('msg-radio-input');
-            const mensagem = txtInput.value.trim();
-
-            if(!mensagem) {
-                alert("Por favor, digite sua mensagem antes de enviar!");
-                return;
-            }
-
-            db.ref('mensagens_ouvintes').push({
-                ouvinteId: userId,
-                ouvinte: nomeUsuario,
-                ouvinteNome: nomeUsuario,
-                nome: nomeUsuario,
-                mensagem: mensagem,
-                dataHora: new Date().toLocaleString('pt-BR'),
-                timestamp: firebase.database.ServerValue.TIMESTAMP
-            }).then(() => {
-                alert("Mensagem enviada com sucesso para o Administrador!");
-                txtInput.value = "";
-                toggleFormRadio();
-            }).catch(err => {
-                alert("Erro ao enviar mensagem: " + err.message);
-            });
-        }
-
-        function playRadio(index) {
-            const myRadios = mySelectedIds.map(id => allRadios.find(r => r.key === id)).filter(Boolean);
-            if (!myRadios[index]) return;
-            activeIndex = index;
-            const r = myRadios[index];
-            player.src = r.url; player.play();
-            document.getElementById('now-title').innerText = "OUVINTE: " + r.name;
-            document.getElementById('play-icon').className = "fas fa-stop";
-            
-            db.ref('contas/' + userId).update({
-                radioAtual: r.name,
-                radioStart: firebase.database.ServerValue.TIMESTAMP,
-                lastSeen: firebase.database.ServerValue.TIMESTAMP
-            });
-            renderAll();
         }
 
         function togglePlay() {
             if(!player.src) return;
-            if(player.paused) { player.play(); document.getElementById('play-icon').className = "fas fa-stop"; }
-            else { player.pause(); document.getElementById('play-icon').className = "fas fa-play"; }
+            if(player.paused) {
+                player.play();
+                document.getElementById('btn-play').innerHTML = '<i class="fas fa-pause"></i>';
+            } else {
+                player.pause();
+                document.getElementById('btn-play').innerHTML = '<i class="fas fa-play"></i>';
+            }
         }
 
-        function nextRadio() { if(activeIndex < mySelectedIds.length - 1) playRadio(activeIndex + 1); else playRadio(0); }
-        function prevRadio() { if(activeIndex > 0) playRadio(activeIndex - 1); else playRadio(mySelectedIds.length - 1); }
+        // ENVIAR MENSAGEM AO ADM
+        function enviarMensagem() {
+            const texto = document.getElementById('texto-mensagem').value.trim();
+            if(!texto) return alert("Digite sua mensagem!");
 
-        function logout() { if(confirm("Deseja sair?")) { 
-            db.ref('contas/' + userId).update({ status: "offline" });
-            localStorage.clear(); 
-            window.location.href = 'index.html'; 
-        } }
+            db.ref('mensagens_ouvintes').push({
+                ouvinteId: ouvinteId,
+                ouvinte: ouvinteNome,
+                mensagem: texto,
+                dataHora: new Date().toLocaleString('pt-BR'),
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            }).then(() => {
+                alert("Mensagem enviada para o Locutor/ADM!");
+                document.getElementById('texto-mensagem').value = "";
+            });
+        }
 
-        let listaPubs = [], idxPub = 0;
-        db.ref('publicidade').on('value', snap => {
-            listaPubs = [];
-            const agora = Date.now();
-            snap.forEach(child => {
-                const p = child.val();
-                if ((p.destino === 'TODOS' || p.ouvinteAlvo === nomeUsuario) && (agora >= p.inicio && agora <= p.fim)) {
-                    listaPubs.push(p);
+        // CARREGAR MENSAGENS ENVIADAS E RESPOSTAS DO ADM
+        db.ref('respostas_adm').on('value', snapResps => {
+            const respostas = snapResps.val() || {};
+
+            db.ref('mensagens_ouvintes').on('value', snapMsgs => {
+                const container = document.getElementById('lista-respostas-adm');
+                container.innerHTML = "";
+                const msgs = snapMsgs.val() || {};
+
+                let temItem = false;
+
+                for(let id in msgs) {
+                    const m = msgs[id];
+                    if(m.ouvinteId === ouvinteId || m.ouvinte === ouvinteNome) {
+                        temItem = true;
+                        let htmlMsg = `
+                            <div class="msg-item">
+                                <div style="font-size:10px; color:#aaa; margin-bottom: 3px;">Você enviou (${m.dataHora || ''}):</div>
+                                <div style="font-size:13px;">${m.mensagem}</div>
+                        `;
+
+                        // Procura se o ADM respondeu esta mensagem especificamente
+                        for(let rId in respostas) {
+                            const r = respostas[rId];
+                            if(r.ouvinteId === ouvinteId || r.ouvinte === ouvinteNome) {
+                                htmlMsg += `
+                                    <div class="resp-adm-box">
+                                        <div style="font-size:10px; color: var(--pink-light); font-weight:bold;">Resposta do ADM (${r.dataHora || ''}):</div>
+                                        <div style="font-size:13px; margin-top:2px;">${r.resposta}</div>
+                                    </div>
+                                `;
+                            }
+                        }
+
+                        htmlMsg += `</div>`;
+                        container.innerHTML += htmlMsg;
+                    }
+                }
+
+                if(!temItem) {
+                    container.innerHTML = "<p style='color:#666; text-align:center; font-size:12px;'>Você ainda não enviou mensagens.</p>";
                 }
             });
-            if (listaPubs.length > 0) { idxPub = 0; mostrarPub(); }
         });
 
-        function mostrarPub() {
-            const imgHeader = document.getElementById('img-publicidade');
-            const containerLeft = document.getElementById('pub-left');
-            const containerRight = document.getElementById('pub-right');
-            if (listaPubs[idxPub]) {
-                const pub = listaPubs[idxPub];
-                imgHeader.src = pub.imagem;
-                imgHeader.style.display = "block";
-                imgHeader.style.opacity = 1;
-                containerLeft.innerHTML = `<img src="${pub.imagem}">`;
-                containerRight.innerHTML = `<img src="${listaPubs[(idxPub + 1) % listaPubs.length]?.imagem || pub.imagem}">`;
-            }
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'index.html';
         }
-
-        setInterval(() => {
-            if (listaPubs.length > 1) {
-                idxPub = (idxPub + 1) % listaPubs.length;
-                document.getElementById('img-publicidade').style.opacity = 0;
-                setTimeout(mostrarPub, 500);
-            }
-        }, 10000);
-
-        setInterval(() => { 
-            if(userId) {
-                db.ref('contas/' + userId).update({ 
-                    lastSeen: firebase.database.ServerValue.TIMESTAMP,
-                    status: "online"
-                }); 
-            }
-        }, 15000); 
     </script>
 </body>
 </html>
