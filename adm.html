@@ -33,8 +33,12 @@
         #container-mensagens-adm.aberto { max-height: 2000px; margin-bottom: 25px; }
         .msg-grid-adm { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; padding: 10px; background: #080808; border-radius: 15px; border: 1px solid #222; }
         .msg-card-individual { background: #181818; border: 1px solid #333; border-radius: 12px; padding: 15px; position: relative; }
-        .msg-card-individual h4 { margin: 0 0 5px 0; color: var(--primary); font-size: 14px; display: flex; justify-content: space-between; }
+        .msg-card-individual h4 { margin: 0 0 5px 0; color: var(--primary); font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
         .msg-card-individual p { font-size: 13px; margin: 10px 0; line-height: 1.4; color: #eee; background: #222; padding: 8px; border-radius: 5px; }
+        
+        /* ESTILO DOS CAMPOS DE RESPOSTA DO ADM */
+        .msg-card-individual textarea { width: 100%; background: #111; border: 1px solid #444; border-radius: 6px; color: #fff; padding: 8px; font-size: 12px; margin-top: 8px; resize: none; box-sizing: border-box; }
+        .msg-card-individual .btn-resp-adm { background: var(--primary); color: #000; border: none; padding: 6px 12px; border-radius: 5px; font-weight: bold; font-size: 11px; cursor: pointer; margin-top: 6px; width: 100%; text-transform: uppercase; }
 
         /* GRID PRINCIPAL */
         .main-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; max-width: 1400px; margin: 0 auto; }
@@ -183,6 +187,75 @@
         function logout() { if(confirm("Sair?")) { localStorage.removeItem('usuarioNome'); window.location.href = 'index.html'; } }
         function toggleMensagens() { document.getElementById('container-mensagens-adm').classList.toggle('aberto'); }
 
+        // ==========================================
+        // LEITURA E RESPOSTA DE MENSAGENS DOS OUVINTES
+        // ==========================================
+        db.ref('mensagens_ouvintes').on('value', snapMsgs => {
+            const container = document.getElementById('msg-list-adm');
+            const countElem = document.getElementById('count-msg');
+            if(!container) return;
+
+            container.innerHTML = "";
+            const msgs = snapMsgs.val() || {};
+            let total = 0;
+
+            for(let key in msgs) {
+                total++;
+                const m = msgs[key];
+                
+                const card = document.createElement('div');
+                card.className = "msg-card-individual";
+                card.innerHTML = `
+                    <h4>
+                        <span><i class="fas fa-user"></i> ${m.ouvinte || 'Ouvinte'}</span>
+                        <i class="fas fa-trash-alt" style="color:#ff4444; cursor:pointer;" title="Excluir" onclick="deletarMsgOuvinte('${key}')"></i>
+                    </h4>
+                    <span style="font-size: 10px; color: #888;">${m.dataHora || ''}</span>
+                    <p>${m.mensagem}</p>
+                    <textarea id="resp-input-${key}" rows="2" placeholder="Escreva sua resposta ao ouvinte..."></textarea>
+                    <button class="btn-resp-adm" onclick="responderOuvinte('${key}', '${m.ouvinteId || ''}', '${m.ouvinte || ''}')">
+                        <i class="fas fa-paper-plane"></i> Responder
+                    </button>
+                `;
+                container.appendChild(card);
+            }
+
+            if(countElem) countElem.innerText = total;
+
+            if(total === 0) {
+                container.innerHTML = "<p style='color:#666; font-size:12px; grid-column:1/-1; text-align:center;'>Nenhuma mensagem recebida.</p>";
+            }
+        });
+
+        function responderOuvinte(msgKey, ouvinteId, ouvinteNome) {
+            const txtInput = document.getElementById(`resp-input-${msgKey}`);
+            if(!txtInput) return;
+            const resposta = txtInput.value.trim();
+
+            if(!resposta) return alert("Digite uma resposta!");
+
+            db.ref('respostas_adm').push({
+                msgKey: msgKey,
+                ouvinteId: ouvinteId,
+                ouvinte: ouvinteNome,
+                resposta: resposta,
+                dataHora: new Date().toLocaleString('pt-BR'),
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            }).then(() => {
+                alert("Resposta enviada para o ouvinte com sucesso!");
+                txtInput.value = "";
+            });
+        }
+
+        function deletarMsgOuvinte(key) {
+            if(confirm("Excluir esta mensagem?")) {
+                db.ref('mensagens_ouvintes/' + key).remove();
+            }
+        }
+
+        // ==========================================
+        // GERENCIAMENTO DE RÁDIOS
+        // ==========================================
         db.ref('radios').on('value', snap => {
             radioData = []; snap.forEach(c => { radioData.push({ ...c.val(), key: c.key }); });
             radioData.sort((a,b) => (a.posicao || 0) - (b.posicao || 0));
@@ -265,7 +338,9 @@
             });
         });
 
-        // AJUSTE CIRÚRGICO NO MONITOR DE OUVINTES PARA CRONÔMETRO PRECISO
+        // ==========================================
+        // MONITOR DE OUVINTES
+        // ==========================================
         db.ref('contas').on('value', snap => {
             const container = document.getElementById('user-list'); if(!container) return;
             const agora = Date.now();
@@ -278,7 +353,6 @@
                 const sinalVida = u.lastSeen || u.lastActive || 0;
                 const isOnline = (u.status === 'online' && (agora - sinalVida < 45000));
                 
-                // Sincroniza o cache local com os dados reais do Firebase para o cronômetro
                 if (!usersDataCache[safeId] || usersDataCache[safeId].radioAtual !== u.radioAtual) {
                     usersDataCache[safeId] = { 
                         sStart: u.sessionStart || agora, 
