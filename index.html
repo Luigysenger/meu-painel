@@ -2,107 +2,82 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <!-- Forçar atualização imediata nos celulares/tablets (Anti-Cache) -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <!-- Viewport estrita: impede zoom e impede scroll lateral a nível de dispositivo -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
-    <title>LOGIN - PAINEL DE RÁDIOS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LOGIN - PAINEL LUIGY</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        /* --- TRAVA ABSOLUTA CONTRA MOVIMENTO LATERAL (APP BEHAVIOR) --- */
-        *, *::before, *::after {
-            box-sizing: border-box !important;
-            max-width: 100% !important;
-        }
-
-        html {
-            width: 100vw !important;
-            height: 100% !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            overflow-x: hidden !important;
-            overscroll-behavior-x: none !important; /* Impede o efeito "elástico" lateral do iOS/Android */
-            touch-action: pan-y !important; /* Força resposta de toque APENAS no eixo Y (Cima/Baixo) */
-        }
-
+        *, *::before, *::after { box-sizing: border-box !important; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             background: #000;
-            color: #fff;
+            color: white;
+            margin: 0;
+            padding: 20px;
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             min-height: 100vh;
-            width: 100vw !important;
-            margin: 0 !important;
-            padding: 20px !important;
-            overflow-x: hidden !important;
-            overflow-y: auto !important;
-            overscroll-behavior-x: none !important;
-            touch-action: pan-y !important;
-            -webkit-overflow-scrolling: touch;
         }
 
         .login-card {
             background: #121212;
-            border: 1px solid #333;
+            border: 1px solid #282828;
             border-radius: 20px;
-            padding: 30px 25px;
+            padding: 30px;
             width: 100%;
-            max-width: 380px !important;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            max-width: 400px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             text-align: center;
-            margin: auto;
         }
 
-        .login-card h2 {
+        h2 {
             color: #A020F0;
             margin-top: 0;
-            margin-bottom: 8px;
-            font-size: 22px;
+            margin-bottom: 5px;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
+            letter-spacing: 2px;
         }
 
-        .login-card p {
-            color: #888;
-            font-size: 13px;
+        p.sub {
+            color: #777;
+            font-size: 12px;
             margin-bottom: 25px;
         }
 
-        .form-group {
-            margin-bottom: 18px;
+        .field-group {
             text-align: left;
+            margin-bottom: 15px;
         }
 
-        .form-group label {
-            display: block;
-            font-size: 11px;
-            color: #b3b3b3;
-            margin-bottom: 6px;
+        label {
+            font-size: 10px;
+            color: #aaa;
             text-transform: uppercase;
             font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
             letter-spacing: 1px;
         }
 
-        .input-box {
+        .input-login {
             width: 100%;
             background: #1a1a1a;
             border: 1px solid #333;
             border-radius: 10px;
-            padding: 12px 15px;
             color: #fff;
+            padding: 12px 15px;
             font-size: 14px;
             outline: none;
             transition: 0.3s;
         }
 
-        .input-box:focus {
+        .input-login:focus {
             border-color: #A020F0;
             box-shadow: 0 0 10px rgba(160, 32, 240, 0.3);
         }
@@ -114,24 +89,18 @@
             border: none;
             padding: 14px;
             border-radius: 10px;
-            font-size: 14px;
-            font-weight: 800;
-            text-transform: uppercase;
+            font-weight: 900;
+            font-size: 13px;
             cursor: pointer;
-            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
             margin-top: 10px;
+            transition: 0.3s;
         }
 
         .btn-entrar:hover {
-            background: #b230ff;
-            transform: scale(1.02);
-        }
-
-        .erro-msg {
-            color: #ff4444;
-            font-size: 12px;
-            margin-top: 12px;
-            display: none;
+            background: #b23bf2;
+            box-shadow: 0 0 15px rgba(160, 32, 240, 0.5);
         }
     </style>
 </head>
@@ -139,21 +108,20 @@
 
     <div class="login-card">
         <h2>BEM-VINDO</h2>
-        <p>Informe seus dados para acessar o painel</p>
+        <p class="sub">Informe seus dados para acessar o painel</p>
 
         <form id="form-login" onsubmit="realizarLogin(event)">
-            <div class="form-group">
-                <label>NOME DE USUÁRIO</label>
-                <input type="text" id="input-usuario" class="input-box" placeholder="Digite seu usuário..." required autocomplete="off">
+            <div class="field-group">
+                <label>NOME DE USUÁRIO / E-MAIL</label>
+                <input type="text" id="usuario" class="input-login" placeholder="Digite seu usuário ou e-mail" required>
             </div>
 
-            <div class="form-group">
+            <div class="field-group">
                 <label>SENHA</label>
-                <input type="password" id="input-senha" class="input-box" placeholder="Digite sua senha..." required>
+                <input type="password" id="senha" class="input-login" placeholder="••••••" required>
             </div>
 
             <button type="submit" class="btn-entrar">ENTRAR NO PAINEL</button>
-            <div id="msg-erro" class="erro-msg">Usuário ou senha incorretos!</div>
         </form>
     </div>
 
@@ -169,52 +137,29 @@
 
         function realizarLogin(event) {
             event.preventDefault();
-            const usuarioDigitado = document.getElementById('input-usuario').value.trim();
-            const senhaDigitada = document.getElementById('input-senha').value.trim();
-            const msgErro = document.getElementById('msg-erro');
 
-            msgErro.style.display = 'none';
+            const usuarioInput = document.getElementById('usuario').value.trim();
+            const senhaInput = document.getElementById('senha').value.trim();
 
-            // Verifica se é acesso Administrador
-            if(usuarioDigitado.toLowerCase() === 'admin' && senhaDigitada === 'admin123') {
-                localStorage.setItem('userId', 'admin');
-                localStorage.setItem('usuarioNome', 'ADMINISTRADOR');
-                window.location.href = 'adm.html?v=4';
+            if (!usuarioInput || !senhaInput) {
+                alert("Preencha todos os campos!");
                 return;
             }
 
-            // Busca os ouvintes cadastrados na pasta 'contas'
-            db.ref('contas').once('value', snap => {
-                const contas = snap.val() || {};
-                let encontrado = false;
+            const userLower = usuarioInput.toLowerCase();
 
-                for(let id in contas) {
-                    const c = contas[id];
-                    const nomeConta = (c.nome || c.usuario || "").trim();
-                    const senhaConta = (c.senha || "").trim();
-
-                    if(nomeConta.toLowerCase() === usuarioDigitado.toLowerCase() && senhaConta === senhaDigitada) {
-                        encontrado = true;
-                        localStorage.setItem('userId', id);
-                        localStorage.setItem('usuarioKey', id);
-                        localStorage.setItem('usuarioNome', nomeConta);
-                        
-                        // Atualiza o status do login no banco
-                        db.ref('contas/' + id).update({
-                            status: "online",
-                            lastSeen: firebase.database.ServerValue.TIMESTAMP
-                        });
-
-                        window.location.href = 'ouvinte.html?v=4';
-                        break;
-                    }
-                }
-
-                if(!encontrado) {
-                    msgErro.innerText = "Usuário ou senha incorretos!";
-                    msgErro.style.display = 'block';
-                }
-            });
+            // VERIFICAÇÃO SE É O ADMINISTRADOR
+            if (userLower === 'admin' || userLower === 'senger.luigy@gmail.com') {
+                localStorage.setItem('userId', 'admin');
+                localStorage.setItem('usuarioNome', 'ADMINISTRADOR');
+                window.location.href = 'adm.html';
+            } else {
+                // ENTRADA COMO OUVINTE
+                const idFormatado = userLower.replace(/[^a-z0-9]/g, '_');
+                localStorage.setItem('userId', idFormatado);
+                localStorage.setItem('usuarioNome', usuarioInput);
+                window.location.href = 'ouvinte.html';
+            }
         }
     </script>
 </body>
