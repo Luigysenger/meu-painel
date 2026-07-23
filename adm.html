@@ -187,6 +187,47 @@
         function logout() { if(confirm("Sair?")) { localStorage.removeItem('usuarioNome'); window.location.href = 'index.html'; } }
         function toggleMensagens() { document.getElementById('container-mensagens-adm').classList.toggle('aberto'); }
 
+        // ======================================================
+        // EXTRATOR EXCLUSIVO PARA EXTRAIR APENAS O NOME DO OUVINTE
+        // ======================================================
+        function extrairApenasNome(u) {
+            // Procura todos os campos possíveis em ordem de prioridade
+            let candidatos = [
+                u.nomeOuvinte,
+                u.nomeCadastro,
+                u.nomeCompleto,
+                u.nome,
+                u.ouvinte,
+                u.usuario,
+                u.login
+            ];
+
+            let nomeFinal = "";
+
+            // Encontra o primeiro campo preenchido que NÃO seja um e-mail completo
+            for (let item of candidatos) {
+                if (item && typeof item === 'string' && item.trim() !== '') {
+                    if (!item.includes('@')) {
+                        nomeFinal = item;
+                        break;
+                    }
+                }
+            }
+
+            // Se ainda não encontrou nada sem @ (ou seja, se só existir o e-mail no banco)
+            if (!nomeFinal) {
+                for (let item of candidatos) {
+                    if (item && typeof item === 'string' && item.includes('@')) {
+                        nomeFinal = item.split('@')[0]; // Pega somente o nome antes do @
+                        nomeFinal = nomeFinal.replace(/[._-]/g, ' '); // Troca pontos e traços por espaços
+                        break;
+                    }
+                }
+            }
+
+            return (nomeFinal || 'OUVINTE').trim().toUpperCase();
+        }
+
         // ==========================================
         // LEITURA E RESPOSTA DE MENSAGENS DOS OUVINTES
         // ==========================================
@@ -202,18 +243,19 @@
             for(let key in msgs) {
                 total++;
                 const m = msgs[key];
+                const nomeExibicao = extrairApenasNome(m);
                 
                 const card = document.createElement('div');
                 card.className = "msg-card-individual";
                 card.innerHTML = `
                     <h4>
-                        <span><i class="fas fa-user"></i> ${m.ouvinte || 'Ouvinte'}</span>
+                        <span><i class="fas fa-user"></i> ${nomeExibicao}</span>
                         <i class="fas fa-trash-alt" style="color:#ff4444; cursor:pointer;" title="Excluir" onclick="deletarMsgOuvinte('${key}')"></i>
                     </h4>
                     <span style="font-size: 10px; color: #888;">${m.dataHora || ''}</span>
                     <p>${m.mensagem}</p>
                     <textarea id="resp-input-${key}" rows="2" placeholder="Escreva sua resposta ao ouvinte..."></textarea>
-                    <button class="btn-resp-adm" onclick="responderOuvinte('${key}', '${m.ouvinteId || ''}', '${m.ouvinte || ''}')">
+                    <button class="btn-resp-adm" onclick="responderOuvinte('${key}', '${m.ouvinteId || ''}', '${nomeExibicao}')">
                         <i class="fas fa-paper-plane"></i> Responder
                     </button>
                 `;
@@ -339,7 +381,7 @@
         });
 
         // ==========================================
-        // MONITOR DE OUVINTES
+        // MONITOR DE OUVINTES (SOMENTE NOME DO OUVINTE)
         // ==========================================
         db.ref('contas').on('value', snap => {
             const container = document.getElementById('user-list'); if(!container) return;
@@ -353,6 +395,9 @@
                 const sinalVida = u.lastSeen || u.lastActive || 0;
                 const isOnline = (u.status === 'online' && (agora - sinalVida < 45000));
                 
+                // Extração garantida apenas do nome
+                const nomeExibicao = extrairApenasNome(u);
+
                 if (!usersDataCache[safeId] || usersDataCache[safeId].radioAtual !== u.radioAtual) {
                     usersDataCache[safeId] = { 
                         sStart: u.sessionStart || agora, 
@@ -368,7 +413,7 @@
                 div.innerHTML = `
                     <div style="display: flex; align-items: center; background: none;">
                         <button class="user-name-btn" style="flex: 1;" onclick="const d=this.parentElement.nextElementSibling; d.style.display=(d.style.display=='block'?'none':'block')">
-                            <span style="color:${isOnline ? 'white' : '#d1a3ff'}">${(u.nome || 'Ouvinte').toUpperCase()}</span>
+                            <span style="color:${isOnline ? 'white' : '#d1a3ff'}">${nomeExibicao}</span>
                             <span class="${isOnline ? 'status-on' : 'status-off'}">${isOnline ? '● ONLINE' : 'OFF'}</span>
                         </button>
                         <i class="fas fa-trash-alt" style="color: #ff4444; padding: 15px; cursor: pointer; font-size: 14px; opacity: 0.7;" 
