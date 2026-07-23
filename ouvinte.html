@@ -57,16 +57,37 @@
             padding: 20px; 
             border-radius: 15px; 
             border: 1px solid #333; 
-            margin-bottom: 25px; 
+            margin-bottom: 15px; 
             width: 100%; 
             max-width: 1200px; 
         }
 
+        /* FONTE AUMENTADA DO PAINEL DO OUVINTE */
         .header h2 { 
             margin: 0; 
             color: var(--primary); 
-            font-size: 18px; 
+            font-size: 26px; 
+            font-weight: 900;
             text-transform: uppercase; 
+            letter-spacing: 1px;
+        }
+
+        .header-widgets {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 13px;
+            color: #ccc;
+        }
+
+        .widget-item {
+            background: #1e1e1e;
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .btn-sair { 
@@ -78,6 +99,22 @@
             cursor: pointer; 
             font-size: 12px; 
             font-weight: bold; 
+        }
+
+        /* TÍTULO NO MEIO DA TELA */
+        .frase-centro-playlist {
+            text-align: center;
+            font-size: 22px;
+            font-weight: 800;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 10px 0 20px 0;
+            width: 100%;
+            max-width: 1200px;
+            background: linear-gradient(90deg, transparent, #15002b, transparent);
+            padding: 10px;
+            border-radius: 10px;
         }
 
         .main-container { 
@@ -108,7 +145,6 @@
             line-height: 1.4;
         }
 
-        /* BANNER DE AVISO COM FUNDO CLARO E FONTE MAIOR */
         .banner-destaque-adm {
             background: #f0e6ff;
             color: #2a004f;
@@ -125,7 +161,6 @@
             box-shadow: 0 4px 15px rgba(160, 32, 240, 0.3);
         }
 
-        /* SEÇÃO RÁDIOS - DISPOSIÇÃO DUPLA (ESQUERDA CATÁLOGO / DIREITA PLAYLIST) */
         .radios-section-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -136,9 +171,13 @@
             .radios-section-container {
                 grid-template-columns: 1fr;
             }
+            .header {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
         }
 
-        /* BARRAS DE RÁDIO DO CATÁLOGO (LADO ESQUERDO) */
         .catalogo-list {
             display: flex;
             flex-direction: column;
@@ -160,7 +199,6 @@
             font-size: 13px;
         }
 
-        /* SELECIONADO: FUNDO ROXO CLARO */
         .bar-radio-catalogo.adicionada {
             background: #d8b4fe !important;
             color: #2e0054 !important;
@@ -174,7 +212,6 @@
             justify-content: center;
         }
 
-        /* CARDS QUADRADOS DA PLAYLIST (LADO DIREITO) */
         .playlist-grid-ouvinte {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
@@ -236,7 +273,6 @@
             word-break: break-word;
         }
 
-        /* FORMULÁRIO E MENSAGENS */
         .input-msg { 
             width: 100%; 
             background: #0a0a0a; 
@@ -296,7 +332,6 @@
             border-left: 3px solid var(--pink-light);
         }
 
-        /* PLAYER FOOTER FLUTUANTE */
         .player-footer { 
             position: fixed; 
             bottom: 0; 
@@ -365,9 +400,26 @@
     <div class="header">
         <div>
             <h2>PAINEL DO OUVINTE</h2>
-            <span id="nome-ouvinte-display" style="font-size: 12px; color: #aaa;"></span>
+            <span id="nome-ouvinte-display" style="font-size: 13px; color: #aaa;"></span>
         </div>
-        <button class="btn-sair" onclick="logout()"><i class="fas fa-sign-out-alt"></i> SAIR</button>
+
+        <!-- CLIMA E HORA -->
+        <div class="header-widgets">
+            <div class="widget-item">
+                <i class="far fa-clock" style="color: var(--primary);"></i>
+                <span id="relogio-digital">00:00:00</span>
+            </div>
+            <div class="widget-item">
+                <i class="fas fa-temperature-high" style="color: #ff9900;"></i>
+                <span id="clima-cidade">Carregando clima...</span>
+            </div>
+            <button class="btn-sair" onclick="logout()"><i class="fas fa-sign-out-alt"></i> SAIR</button>
+        </div>
+    </div>
+
+    <!-- FRASE NO MEIO DA TELA -->
+    <div class="frase-centro-playlist">
+        curta sua playliste de radio
     </div>
 
     <div class="main-container">
@@ -377,13 +429,11 @@
             <h3>GERENCIAR SUAS RÁDIOS PREFERIDAS</h3>
             
             <div class="radios-section-container">
-                <!-- LADO ESQUERDO: CATÁLOGO GERAL DE RÁDIOS -->
                 <div>
                     <h3 style="font-size: 10px; text-align: left; color: #aaa;">1. ADICIONE RÁDIOS</h3>
                     <div id="catalogo-radios" class="catalogo-list"></div>
                 </div>
 
-                <!-- LADO DIREITO: SUA PLAYLIST (REORDENÁVEL COM ARRASTE) -->
                 <div>
                     <h3 style="font-size: 10px; text-align: left; color: #aaa;">2. SUA PLAYLIST (ARRASTE)</h3>
                     <div id="grid-playlist" class="playlist-grid-ouvinte"></div>
@@ -393,7 +443,6 @@
 
         <!-- ENVIAR MENSAGENS E VER RESPOSTAS DO ADM -->
         <div class="card-box">
-            <!-- BANNER EM DESTAQUE COM FUNDO CLARO E FONTE MAIOR -->
             <div class="banner-destaque-adm">
                 MANDE MENSAGEM PARA O ADM PARA PEDIR PARA ADICIONAR UMA RADIO QUE VC GOSTE
             </div>
@@ -407,7 +456,7 @@
 
     </div>
 
-    <!-- PLAYER FOOTER CENTRALIZADO -->
+    <!-- PLAYER FOOTER -->
     <div class="player-footer">
         <div class="player-info">
             <div id="player-title" style="font-size: 13px; font-weight: bold; color: #fff;">Nenhuma rádio selecionada</div>
@@ -442,9 +491,48 @@
         const player = document.getElementById('audio-ouvinte');
 
         const ouvinteId = localStorage.getItem('userId') || ('ouvinte_' + Date.now());
-        const ouvinteNome = localStorage.getItem('usuarioNome') || 'Ouvinte Anônimo';
-
+        
+        // APENAS NOME DO USUÁRIO (NÃO EXIBE E-MAIL)
+        let ouvinteNome = localStorage.getItem('usuarioNome') || localStorage.getItem('usuarioEmail') || 'Ouvinte Anônimo';
+        if (ouvinteNome.includes('@')) {
+            ouvinteNome = ouvinteNome.split('@')[0];
+        }
         document.getElementById('nome-ouvinte-display').innerText = "Olá, " + ouvinteNome;
+
+        // RELÓGIO EM TEMPO REAL
+        function atualizarRelogio() {
+            const agora = new Date();
+            document.getElementById('relogio-digital').innerText = agora.toLocaleTimeString('pt-BR');
+        }
+        setInterval(atualizarRelogio, 1000);
+        atualizarRelogio();
+
+        // OBTER CLIMA E CIDADE POR IP
+        async function carregarClimaPorIP() {
+            try {
+                const resGeo = await fetch('https://ipapi.co/json/');
+                const geoData = await resGeo.json();
+                
+                if (geoData.latitude && geoData.longitude) {
+                    const lat = geoData.latitude;
+                    const lon = geoData.longitude;
+                    const cidade = geoData.city || 'Sua Região';
+
+                    const resClima = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+                    const climaData = await resClima.json();
+                    
+                    if (climaData.current_weather) {
+                        const temp = Math.round(climaData.current_weather.temperature);
+                        document.getElementById('clima-cidade').innerText = `${cidade}: ${temp}°C`;
+                    }
+                } else {
+                    document.getElementById('clima-cidade').innerText = "Clima indisponível";
+                }
+            } catch (e) {
+                document.getElementById('clima-cidade').innerText = "Brasil";
+            }
+        }
+        carregarClimaPorIP();
 
         let todasRadios = [];
         let playlistKeys = JSON.parse(localStorage.getItem('playlist_keys_ouvinte') || '[]');
@@ -459,7 +547,6 @@
 
             todasRadios.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
 
-            // Se for o primeiro acesso do ouvinte, seleciona todas por padrão
             if (!localStorage.getItem('playlist_iniciada')) {
                 playlistKeys = todasRadios.map(r => r.key);
                 localStorage.setItem('playlist_keys_ouvinte', JSON.stringify(playlistKeys));
@@ -474,7 +561,6 @@
             renderizarPlaylistDireita();
         }
 
-        // RENDERIZA O CATÁLOGO GERAL DA ESQUERDA
         function renderizarCatologoEsquerda() {
             const container = document.getElementById('catalogo-radios');
             container.innerHTML = "";
@@ -496,7 +582,6 @@
             });
         }
 
-        // RENDERIZA A PLAYLIST DO CANTO DIREITO (CARDS QUADRADOS)
         function renderizarPlaylistDireita() {
             const container = document.getElementById('grid-playlist');
             container.innerHTML = "";
@@ -526,7 +611,6 @@
             });
         }
 
-        // ADICIONAR / REMOVER RÁDIO DA PLAYLIST DO OUVINTE
         function togglePlaylistRadio(key) {
             const index = playlistKeys.indexOf(key);
             if (index > -1) {
@@ -539,7 +623,6 @@
             renderizarPainelRadios();
         }
 
-        // HABILITAR ORDENAÇÃO POR ARRASTE APENAS NA PLAYLIST DIREITA
         new Sortable(document.getElementById('grid-playlist'), {
             animation: 150,
             delay: 100,
@@ -555,7 +638,6 @@
             }
         });
 
-        // PLAYER DE ÁUDIO
         function tocarRadioPorKey(key) {
             const radio = todasRadios.find(r => r.key === key);
             if (!radio) return;
@@ -599,7 +681,6 @@
             }
         }
 
-        // MENSAGENS DO OUVINTE
         function enviarMensagem() {
             const texto = document.getElementById('texto-mensagem').value.trim();
             if (!texto) return alert("Digite sua mensagem!");
@@ -622,7 +703,6 @@
             }
         }
 
-        // LISTAR MENSAGENS E RESPOSTAS COM LIXEIRA
         db.ref('respostas_adm').on('value', snapResps => {
             const respostas = snapResps.val() || {};
 
