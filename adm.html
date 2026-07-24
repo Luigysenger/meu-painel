@@ -67,6 +67,10 @@
         .active .antena { display: block !important; animation: antenaPisca 0.8s infinite alternate !important; }
         @keyframes antenaPisca { from { opacity: 1; transform: scale(1.1); } to { opacity: 0.1; transform: scale(0.9); } }
 
+        /* ICONE DE AUTO FALANTE PISCANDO NO MONITOR */
+        .speaker-icon { color: var(--primary); margin-right: 8px; animation: speakerPisca 0.8s infinite alternate; }
+        @keyframes speakerPisca { from { opacity: 1; transform: scale(1.1); } to { opacity: 0.2; transform: scale(0.9); } }
+
         /* CONTROLES DO PLAYER */
         .player-footer { margin-top: 20px; background: #111; padding: 20px; border-radius: 20px; border: 1px solid #222; text-align: center; }
         .controls-row { display: flex; align-items: center; justify-content: center; gap: 25px; }
@@ -221,12 +225,10 @@
                         const lat = pos.coords.latitude;
                         const lon = pos.coords.longitude;
                         
-                        // Busca o nome do município/cidade
                         const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/reverse?latitude=${lat}&longitude=${lon}`);
                         const geoData = await geoRes.json();
                         const city = geoData.results?.[0]?.name || "Local";
 
-                        // Busca clima e código do tempo
                         const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
                         const wData = await wRes.json();
                         const temp = Math.round(wData.current_weather.temperature);
@@ -244,7 +246,6 @@
 
         async function fetchFallbackWeather() {
             try {
-                // Fallback para Cascavel
                 const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=-24.9578&longitude=-53.4594&current_weather=true`);
                 const wData = await wRes.json();
                 const temp = Math.round(wData.current_weather.temperature);
@@ -260,22 +261,21 @@
             const icon = document.getElementById('weather-icon');
             txt.innerText = `${city}: ${temp}°C`;
 
-            // Mapeia ícones baseados na WMO Weather Interpretation Codes
             if (code === 0) {
                 icon.className = "fas fa-sun";
-                icon.style.color = "#f59e0b"; // Ensolarado
+                icon.style.color = "#f59e0b";
             } else if (code >= 1 && code <= 3) {
                 icon.className = "fas fa-cloud-sun";
-                icon.style.color = "#cbd5e1"; // Parcialmente Nublado
+                icon.style.color = "#cbd5e1";
             } else if (code >= 45 && code <= 48) {
                 icon.className = "fas fa-smog";
-                icon.style.color = "#94a3b8"; // Neblina
+                icon.style.color = "#94a3b8";
             } else if (code >= 51 && code <= 67) {
                 icon.className = "fas fa-cloud-rain";
-                icon.style.color = "#38bdf8"; // Chuva Leve
+                icon.style.color = "#38bdf8";
             } else if (code >= 80 && code <= 99) {
                 icon.className = "fas fa-cloud-showers-heavy";
-                icon.style.color = "#60a5fa"; // Tempestade / Chuva Forte
+                icon.style.color = "#60a5fa";
             } else {
                 icon.className = "fas fa-cloud";
                 icon.style.color = "#94a3b8";
@@ -440,7 +440,7 @@
         });
 
         // ==========================================
-        // MONITOR DE OUVINTES (PUXANDO DO NÓ "usuarios")
+        // MONITOR DE OUVINTES (AJUSTADO CIRURGICAMENTE)
         // ==========================================
         db.ref('usuarios').on('value', snap => {
             const container = document.getElementById('user-list'); if(!container) return;
@@ -451,38 +451,53 @@
             for (let nomeKey in data) {
                 const u = data[nomeKey] || {};
                 
-                // O nome exato que está no banco de dados
                 const nomeExibicao = u.nome || u.nomeCadastrado || nomeKey;
-                
                 const safeId = nomeKey.replace(/[^a-zA-Z0-9]/g, '_');
                 const sinalVida = u.lastSeen || u.lastActive || 0;
                 const isOnline = (u.status === 'online' && (agora - sinalVida < 45000));
 
-                if (!usersDataCache[safeId] || usersDataCache[safeId].radioAtual !== u.radioAtual) {
+                // Atualização ou criação do Cache individual
+                if (!usersDataCache[safeId]) {
                     usersDataCache[safeId] = { 
                         sStart: u.sessionStart || agora, 
                         rStart: u.radioStart || agora, 
-                        radioAtual: u.radioAtual 
+                        radioAtual: u.radioAtual || 'Nenhuma'
                     };
+                } else {
+                    // Se o ouvinte trocar de rádio, reinicia o timer da rádio mantendo o de sessão
+                    if (usersDataCache[safeId].radioAtual !== u.radioAtual) {
+                        usersDataCache[safeId].rStart = u.radioStart || agora;
+                        usersDataCache[safeId].radioAtual = u.radioAtual || 'Nenhuma';
+                    }
+                    if (u.sessionStart) usersDataCache[safeId].sStart = u.sessionStart;
                 }
+                
                 usersDataCache[safeId].isOnline = isOnline;
+                usersDataCache[safeId].tempoSessaoTotal = u.tempoSessaoTotal;
+                usersDataCache[safeId].tempoRadioTotal = u.tempoRadioTotal;
                 
                 const div = document.createElement('div');
                 div.className = "user-item";
                 div.style.borderLeft = isOnline ? '4px solid #1DB954' : '4px solid #d1a3ff';
+                
+                // Ícone de Alto falante piscando quando ONLINE
+                const iconSpeaker = isOnline ? `<i class="fas fa-volume-high speaker-icon"></i>` : '';
+
                 div.innerHTML = `
                     <div style="display: flex; align-items: center; background: none;">
                         <button class="user-name-btn" style="flex: 1;" onclick="const d=this.parentElement.nextElementSibling; d.style.display=(d.style.display=='block'?'none':'block')">
-                            <span style="color:${isOnline ? 'white' : '#d1a3ff'}">${nomeExibicao}</span>
+                            <span style="color:${isOnline ? 'white' : '#d1a3ff'}; display:flex; align-items:center;">
+                                ${iconSpeaker}${nomeExibicao}
+                            </span>
                             <span class="${isOnline ? 'status-on' : 'status-off'}">${isOnline ? '● ONLINE' : 'OFF'}</span>
                         </button>
                         <i class="fas fa-trash-alt" style="color: #ff4444; padding: 15px; cursor: pointer; font-size: 14px; opacity: 0.7;" 
                            onclick="if(confirm('Deseja excluir este ouvinte permanentemente?')) db.ref('usuarios/${nomeKey}').remove()"></i>
                     </div>
                     <div class="user-details-bar">
-                        Rádio: <b style="color:var(--primary)">${isOnline ? (u.radioAtual || 'Nenhuma') : '---'}</b><br>
-                        Sessão: <b id="ts-${safeId}">00:00:00</b><br>
-                        Nesta Rádio: <b id="tr-${safeId}">00:00:00</b>
+                        Rádio: <b style="color:var(--primary)">${u.radioAtual || 'Nenhuma'}</b><br>
+                        Sessão: <b id="ts-${safeId}">${isOnline ? '00:00:00' : (u.tempoSessaoTotal || '00:00:00')}</b><br>
+                        Nesta Rádio: <b id="tr-${safeId}">${isOnline ? '00:00:00' : (u.tempoRadioTotal || '00:00:00')}</b>
                     </div>`;
                 container.appendChild(div);
             }
@@ -499,8 +514,9 @@
                 }
             }
         }
+
         function format(ms) {
-            if(ms < 0) ms = 0;
+            if(!ms || ms < 0) ms = 0;
             const s = Math.floor(ms/1000), h = Math.floor(s/3600), m = Math.floor((s%3600)/60), seg = s%60;
             return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${seg.toString().padStart(2,'0')}`;
         }
