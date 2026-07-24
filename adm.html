@@ -78,7 +78,7 @@
         .pub-list-btn { flex: 1; padding: 12px; background: none; border: none; color: white; text-align: left; display: flex; align-items: center; gap: 10px; cursor: pointer; min-width: 0; }
         .pub-thumb-mini { width: 40px; height: 25px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
 
-        .user-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; overflow: hidden; border-left: 4px solid #d1a3ff; }
+        .user-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; overflow: hidden; border-left: 4px solid #1DB954; }
         .user-name-btn { width: 100%; padding: 15px; background: none; border: none; color: white; text-align: left; font-weight: bold; font-size: 13px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .status-on { color: #1DB954; font-weight: 900; font-size: 10px; }
         .status-off { color: #d1a3ff; font-weight: 900; font-size: 10px; }
@@ -414,7 +414,7 @@
         });
 
         // ==========================================
-        // MONITOR DE OUVINTES COM CRUZAMENTO DE NÓS (CORRIGIDO)
+        // MONITOR DE OUVINTES COM EXCLUSÃO CIRÚRGICA
         // ==========================================
         let rawUsuarios = {};
         let rawContas = {};
@@ -426,10 +426,8 @@
             const agora = Date.now();
             container.innerHTML = "";
 
-            // Mescla contas e usuarios
             const todosOuvintes = {};
 
-            // 1. Processa 'contas'
             for (let k in rawContas) {
                 const item = rawContas[k];
                 const nome = item.nome || item.nomeCadastrado || item.usuario || k;
@@ -447,7 +445,6 @@
                 };
             }
 
-            // 2. Processa ou Sobrescreve com 'usuarios'
             for (let k in rawUsuarios) {
                 const item = rawUsuarios[k];
                 const nome = item.nome || item.nomeCadastrado || k;
@@ -469,7 +466,6 @@
                 const u = todosOuvintes[key];
                 const safeId = key.replace(/[^a-zA-Z0-9]/g, '_');
                 
-                // Tolera até 60 segundos sem heartbeat ou verifica flag online
                 const tempoSemSinal = agora - u.lastSeen;
                 const isOnline = (u.status === 'online' || u.status === 'ONLINE' || (u.lastSeen > 0 && tempoSemSinal < 60000));
 
@@ -515,13 +511,36 @@
             }
         }
 
+        // FUNÇÃO COM O AJUSTE CIRÚRGICO DE EXCLUSÃO
         function deletarOuvinte(node, key) {
             if(confirm('Deseja excluir este ouvinte permanentemente?')) {
-                db.ref(node + '/' + key).remove();
+                // 1. Busca os dados para capturar e armazenar a senha anterior
+                db.ref(node + '/' + key).once('value').then(snapshot => {
+                    const dados = snapshot.val();
+                    if (dados) {
+                        const senhaAntiga = dados.senha || dados.pass;
+                        const keyFormatada = key.replace(/[^a-zA-Z0-9]/g, '_');
+                        
+                        if (senhaAntiga) {
+                            // Registra a senha bloqueada no histórico
+                            db.ref('senhas_antigas/' + keyFormatada).push({
+                                senha: senhaAntiga,
+                                dataExclusao: firebase.database.ServerValue.TIMESTAMP
+                            });
+                        }
+                    }
+
+                    // 2. Remove completamente de todos os nós para revogar o acesso
+                    const updates = {};
+                    updates['usuarios/' + key] = null;
+                    updates['contas/' + key] = null;
+                    updates['ouvintes_preferencias/' + key] = null;
+
+                    db.ref().update(updates);
+                });
             }
         }
 
-        // Sincronização em tempo real dos dois nós
         db.ref('usuarios').on('value', snap => {
             rawUsuarios = snap.val() || {};
             renderOuvintes();
