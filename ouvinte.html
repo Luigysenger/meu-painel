@@ -458,7 +458,7 @@
 
     <!-- FRASE CENTRO -->
     <div class="frase-centro-playlist">
-        curta sua playliste de radio
+        CURTA AQUI SUAS RADIOS PREFERIDAS
     </div>
 
     <div class="main-container">
@@ -530,6 +530,9 @@
         const player = document.getElementById('audio-ouvinte');
 
         const ouvinteId = localStorage.getItem('userId') || ('ouvinte_' + Date.now());
+        if (!localStorage.getItem('userId')) {
+            localStorage.setItem('userId', ouvinteId);
+        }
         
         let ouvinteNome = localStorage.getItem('usuarioNome') || localStorage.getItem('usuarioEmail') || 'Ouvinte Anônimo';
         if (ouvinteNome.includes('@')) {
@@ -567,16 +570,12 @@
                         let iconeHTML = '<i class="fas fa-sun" style="color: #ffcc00; font-size: 20px;"></i>'; // Sol padrão
 
                         if (code === 0 || code === 1) {
-                            // Ensolarado / Céu Limpo
                             iconeHTML = '<i class="fas fa-sun" style="color: #ffcc00; font-size: 20px;"></i>';
                         } else if (code === 2 || code === 3) {
-                            // Parcialmente Nublado / Sol com Nuvem
                             iconeHTML = '<i class="fas fa-cloud-sun" style="color: #ffbb00; font-size: 20px;"></i>';
                         } else if (code >= 51 && code <= 99) {
-                            // Chuva / Garoa / Tempestade
                             iconeHTML = '<i class="fas fa-cloud-showers-heavy" style="color: #00ccff; font-size: 20px;"></i>';
                         } else if (code === 45 || code === 48) {
-                            // Nevoeiro / Nublado Denso
                             iconeHTML = '<i class="fas fa-cloud" style="color: #aaaaaa; font-size: 20px;"></i>';
                         }
 
@@ -596,6 +595,25 @@
         let playlistKeys = JSON.parse(localStorage.getItem('playlist_keys_ouvinte') || '[]');
         let radioTocandoKey = null;
 
+        // CARREGAR PREFERÊNCIAS SALVAS DO OUVINTE DO FIREBASE SE EXISTIREM
+        db.ref('ouvintes_preferencias/' + ouvinteId + '/playlist').once('value', snap => {
+            if (snap.exists()) {
+                playlistKeys = snap.val();
+                localStorage.setItem('playlist_keys_ouvinte', JSON.stringify(playlistKeys));
+                localStorage.setItem('playlist_iniciada', 'true');
+            }
+        });
+
+        // SALVAR PLAYLIST NO LOCALSTORAGE E FIREBASE
+        function salvarPreferenciasOuvinte() {
+            localStorage.setItem('playlist_keys_ouvinte', JSON.stringify(playlistKeys));
+            db.ref('ouvintes_preferencias/' + ouvinteId).set({
+                ouvinte: ouvinteNome,
+                playlist: playlistKeys,
+                ultimaAtualizacao: firebase.database.ServerValue.TIMESTAMP
+            });
+        }
+
         // CARREGAR RÁDIOS DO FIREBASE
         db.ref('radios').on('value', snap => {
             todasRadios = [];
@@ -605,9 +623,9 @@
 
             todasRadios.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
 
-            if (!localStorage.getItem('playlist_iniciada')) {
+            if (!localStorage.getItem('playlist_iniciada') && playlistKeys.length === 0) {
                 playlistKeys = todasRadios.map(r => r.key);
-                localStorage.setItem('playlist_keys_ouvinte', JSON.stringify(playlistKeys));
+                salvarPreferenciasOuvinte();
                 localStorage.setItem('playlist_iniciada', 'true');
             }
 
@@ -653,7 +671,7 @@
                 return;
             }
 
-            radiosPlaylist.forEach((r, idx) => {
+            radiosPlaylist.forEach((r) => {
                 const isPlaying = (radioTocandoKey === r.key);
                 const cardColor = r.color || '#d1a3ff';
 
@@ -677,7 +695,7 @@
                 playlistKeys.push(key);
             }
 
-            localStorage.setItem('playlist_keys_ouvinte', JSON.stringify(playlistKeys));
+            salvarPreferenciasOuvinte();
             renderizarPainelRadios();
         }
 
@@ -692,7 +710,7 @@
                 });
 
                 playlistKeys = novaOrdem;
-                localStorage.setItem('playlist_keys_ouvinte', JSON.stringify(playlistKeys));
+                salvarPreferenciasOuvinte();
             }
         });
 
