@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #1DB954; --bg: #000; --card: #121212; --text-muted: #b3b3b3; --purple-light: #d1a3ff; --purple-brand: #a855f7; --blue-online: #38bdf8; }
+        :root { --primary: #1DB954; --bg: #000; --card: #121212; --text-muted: #b3b3b3; --purple-light: #a855f7; --purple-brand: #a855f7; --blue-online: #38bdf8; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 10px; user-select: none; }
         
         .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 15px 20px; border-radius: 15px; border: 1px solid #282828; margin-bottom: 20px; gap: 15px; flex-wrap: wrap; }
@@ -78,7 +78,7 @@
         .pub-list-btn { flex: 1; padding: 12px; background: none; border: none; color: white; text-align: left; display: flex; align-items: center; gap: 10px; cursor: pointer; min-width: 0; }
         .pub-thumb-mini { width: 40px; height: 25px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
 
-        /* MONITOR DE OUVINTES COM AS NOVAS CORES E ESTILOS */
+        /* MONITOR DE OUVINTES - ESTILOS E REGRAS VISUAIS */
         .user-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; overflow: hidden; transition: 0.3s; }
         .user-item.online { border-left: 5px solid var(--blue-online); }
         .user-item.offline { border-left: 5px solid var(--purple-light); }
@@ -86,7 +86,7 @@
         .user-name-btn { width: 100%; padding: 15px; background: none; border: none; color: white; text-align: left; font-weight: bold; font-size: 13px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .status-on { color: var(--blue-online); font-weight: 900; font-size: 11px; }
         .status-off { color: var(--purple-light); font-weight: 900; font-size: 11px; }
-        .user-details-bar { display: none; padding: 0 15px 15px 15px; font-size: 12px; color: #ccc; border-top: 1px solid #222; }
+        .user-details-bar { display: none; padding: 0 15px 15px 15px; font-size: 12px; color: #ccc; border-top: 1px solid #222; margin-top: 5px; }
 
         input, select { padding: 12px; background: #2a2a2a; border: none; color: white; border-radius: 8px; margin-bottom: 10px; width: -webkit-fill-available; outline: none; font-size: 14px; }
         .btn-save { padding: 12px; background: var(--primary); border: none; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; }
@@ -419,7 +419,7 @@
         });
 
         // ==========================================
-        // MONITOR DE OUVINTES (NOVA LÓGICA COMPLETA)
+        // MONITOR DE OUVINTES (AJUSTE CIRÚRGICO)
         // ==========================================
         let rawUsuarios = {};
         let rawContas = {};
@@ -443,7 +443,7 @@
                     nome: nome,
                     status: item.status || 'offline',
                     lastSeen: item.lastSeen || item.lastActive || item.timestamp || 0,
-                    radioAtual: item.radioAtual || 'Nenhuma',
+                    radioAtual: item.radioAtual || item.radio || 'Nenhuma',
                     sessionStart: item.sessionStart || agora,
                     radioStart: item.radioStart || agora,
                     tempoSessaoTotal: item.tempoSessaoTotal,
@@ -461,17 +461,16 @@
                         nome: nome,
                         status: item.status || 'offline',
                         lastSeen: item.lastSeen || item.lastActive || item.timestamp || 0,
-                        radioAtual: item.radioAtual || 'Nenhuma',
+                        radioAtual: item.radioAtual || item.radio || 'Nenhuma',
                         sessionStart: item.sessionStart || agora,
                         radioStart: item.radioStart || agora,
                         tempoSessaoTotal: item.tempoSessaoTotal,
                         tempoRadioTotal: item.tempoRadioTotal
                     };
                 } else {
-                    // Mescla dados atualizados
                     todosOuvintes[k].status = item.status || todosOuvintes[k].status;
                     todosOuvintes[k].lastSeen = item.lastSeen || item.lastActive || todosOuvintes[k].lastSeen;
-                    todosOuvintes[k].radioAtual = item.radioAtual || todosOuvintes[k].radioAtual;
+                    todosOuvintes[k].radioAtual = item.radioAtual || item.radio || todosOuvintes[k].radioAtual;
                     todosOuvintes[k].sessionStart = item.sessionStart || todosOuvintes[k].sessionStart;
                     todosOuvintes[k].radioStart = item.radioStart || todosOuvintes[k].radioStart;
                 }
@@ -491,10 +490,14 @@
                         radioAtual: u.radioAtual 
                     };
                 } else {
-                    // Se o ouvinte trocou de rádio, reseta o rStart para zerar e recomeçar a contagem dessa rádio
+                    // Atualização em tempo real quando troca de rádio
                     if (usersDataCache[safeId].radioAtual !== u.radioAtual) {
                         usersDataCache[safeId].rStart = u.radioStart || agora;
                         usersDataCache[safeId].radioAtual = u.radioAtual;
+                        
+                        // Atualiza o texto na interface se o detalhe estiver aberto
+                        const radioElem = document.getElementById(`radio-txt-${safeId}`);
+                        if(radioElem) radioElem.innerText = u.radioAtual;
                     }
                     if (u.sessionStart) usersDataCache[safeId].sStart = u.sessionStart;
                 }
@@ -504,11 +507,12 @@
                 const div = document.createElement('div');
                 div.className = `user-item ${isOnline ? 'online' : 'offline'}`;
                 
+                // A ANTENA PISCANDO SÓ APARECE QUANDO O OUVINTE ESTIVER ONLINE
                 const iconSpeaker = isOnline ? `<i class="fas fa-volume-high speaker-icon"></i>` : '';
 
                 div.innerHTML = `
                     <div style="display: flex; align-items: center; background: none;">
-                        <button class="user-name-btn" style="flex: 1;" onclick="const d=this.parentElement.nextElementSibling; d.style.display=(d.style.display=='block'?'none':'block')">
+                        <button class="user-name-btn" style="flex: 1;" onclick="const d=document.getElementById('det-${safeId}'); d.style.display=(d.style.display=='block'?'none':'block')">
                             <span style="color:${isOnline ? 'white' : '#d1a3ff'}; display:flex; align-items:center;">
                                 ${iconSpeaker}${u.nome}
                             </span>
@@ -517,8 +521,8 @@
                         <i class="fas fa-trash-alt" style="color: #ff4444; padding: 15px; cursor: pointer; font-size: 14px; opacity: 0.8;" 
                            title="Excluir Ouvinte" onclick="deletarOuvinte('${u.node}', '${key}')"></i>
                     </div>
-                    <div class="user-details-bar">
-                        Rádio: <b style="color:var(--primary)">${u.radioAtual}</b><br>
+                    <div class="user-details-bar" id="det-${safeId}">
+                        Rádio: <b style="color:var(--primary)" id="radio-txt-${safeId}">${u.radioAtual}</b><br>
                         Tempo de Sessão: <b id="ts-${safeId}">${isOnline ? '00:00:00' : (u.tempoSessaoTotal || '00:00:00')}</b><br>
                         Nesta Rádio: <b id="tr-${safeId}">${isOnline ? '00:00:00' : (u.tempoRadioTotal || '00:00:00')}</b>
                     </div>`;
@@ -542,7 +546,6 @@
                         }
                     }
 
-                    // Limpa totalmente os registros no Firebase
                     const updates = {};
                     updates['usuarios/' + key] = null;
                     updates['contas/' + key] = null;
