@@ -75,17 +75,25 @@
         @media (max-width: 600px) { .pub-container { grid-template-columns: 1fr; } }
         .pub-preview { width: 100%; max-height: 120px; object-fit: contain; margin-top: 10px; border-radius: 10px; border: 1px dashed #444; display: none; }
 
-        /* MONITOR DE OUVINTES DO PAINEL ADM */
-        .user-item { background: #141414; margin-bottom: 12px; border-radius: 12px; border: 1px solid #222; overflow: hidden; transition: 0.3s; }
-        .user-item.online { border-left: 5px solid var(--blue-online); background: #181818; }
-        .user-item.offline { border-left: 5px solid var(--purple-light); opacity: 0.8; }
+        /* MONITOR DE OUVINTES (RETRÁTIL/SANFONA) */
+        .user-item { background: #141414; margin-bottom: 10px; border-radius: 10px; border: 1px solid #222; overflow: hidden; transition: all 0.3s ease; }
+        .user-item.online { border-left: 4px solid var(--blue-online); background: #181818; }
+        .user-item.offline { border-left: 4px solid var(--purple-light); opacity: 0.85; }
         
-        .user-header-bar { width: 100%; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
-        .user-title { color: white; font-weight: bold; font-size: 14px; display: flex; align-items: center; }
-        .status-on { color: var(--blue-online); font-weight: 900; font-size: 11px; background: rgba(56, 189, 248, 0.1); padding: 4px 8px; border-radius: 6px; }
-        .status-off { color: var(--purple-light); font-weight: 900; font-size: 11px; background: rgba(168, 85, 247, 0.1); padding: 4px 8px; border-radius: 6px; }
+        .user-header-bar { width: 100%; padding: 12px 15px; display: flex; justify- space-between; align-items: center; box-sizing: border-box; cursor: pointer; user-select: none; }
+        .user-header-bar:hover { background: rgba(255, 255, 255, 0.03); }
+        .user-title { color: white; font-weight: bold; font-size: 13px; display: flex; align-items: center; gap: 8px; }
         
-        .user-details-bar { padding: 10px 15px 15px 15px; font-size: 12px; color: #ccc; border-top: 1px solid #222; background: #111; line-height: 1.8; }
+        .status-on { color: var(--blue-online); font-weight: 900; font-size: 10px; background: rgba(56, 189, 248, 0.1); padding: 3px 8px; border-radius: 6px; }
+        .status-off { color: var(--purple-light); font-weight: 900; font-size: 10px; background: rgba(168, 85, 247, 0.1); padding: 3px 8px; border-radius: 6px; }
+        
+        /* DETALHES RETRÁTEIS (FECHADO POR PADRÃO) */
+        .user-details-wrapper { max-height: 0; overflow: hidden; transition: max-height 0.35s ease-in-out, padding 0.35s ease; background: #0d0d0d; }
+        .user-item.open .user-details-wrapper { max-height: 200px; padding: 12px 15px; border-top: 1px solid #222; }
+
+        .user-details-bar { font-size: 12px; color: #ccc; line-height: 1.8; }
+        .chevron-icon { font-size: 11px; color: #666; transition: transform 0.3s; margin-left: 8px; }
+        .user-item.open .chevron-icon { transform: rotate(180deg); color: #fff; }
 
         input, select { padding: 12px; background: #2a2a2a; border: none; color: white; border-radius: 8px; margin-bottom: 10px; width: -webkit-fill-available; outline: none; font-size: 14px; }
         .btn-save { padding: 12px; background: var(--primary); border: none; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; }
@@ -126,7 +134,7 @@
 
     <div id="container-mensagens-adm">
         <div class="card">
-            <div style="display:flex; justify- continental space-between; align-items: center; margin-bottom: 15px;">
+            <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <h3>MENSAGENS DOS OUVINTES</h3>
                 <button onclick="window.print()" class="btn-header" style="font-size: 11px;"><i class="fas fa-file-pdf"></i> PDF</button>
             </div>
@@ -201,8 +209,9 @@
         const player = document.getElementById('audio-player');
         let radioData = [], activeIndex = -1, imgBase64 = "", sortableInstance = null;
         let rawContas = {}, rawPreferencias = {}, rawOnlineState = {};
+        let openCards = {}; // Guarda quais cards o ADM expandiu
 
-        // Atualizador de relógio e cronômetros
+        // Relógio e Atualização de Cronômetros
         setInterval(() => {
             const hElement = document.getElementById('hora');
             if(hElement) hElement.innerText = new Date().toLocaleTimeString('pt-BR');
@@ -340,9 +349,33 @@
             document.getElementById('pub-key').value = ""; document.getElementById('pub-view').style.display="none"; alert("OK");
         }
 
-        // ==========================================
-        // MONITOR DE OUVINTES MULTI-NÓS (REALTIME)
-        // ==========================================
+        // =======================================================
+        // MONITOR DE OUVINTES (RETRÁTIL + CHECKER AVANÇADO ONLINE)
+        // =======================================================
+        function toggleUserCard(key) {
+            openCards[key] = !openCards[key];
+            const itemElem = document.getElementById(`user-card-${key.replace(/[^a-zA-Z0-9]/g, '_')}`);
+            if (itemElem) {
+                if (openCards[key]) {
+                    itemElem.classList.add('open');
+                } else {
+                    itemElem.classList.remove('open');
+                }
+            }
+        }
+
+        function parseTimestamp(val) {
+            if(!val) return 0;
+            if(typeof val === 'number') return val;
+            if(typeof val === 'string') {
+                const parsed = Date.parse(val);
+                if(!isNaN(parsed)) return parsed;
+                const num = parseInt(val);
+                if(!isNaN(num)) return num;
+            }
+            return 0;
+        }
+
         function renderOuvintes() {
             const container = document.getElementById('user-list'); 
             if(!container) return;
@@ -350,7 +383,6 @@
             const agora = Date.now();
             container.innerHTML = "";
 
-            // Junta todas as chaves de ouvintes registradas
             const allKeys = new Set([...Object.keys(rawContas), ...Object.keys(rawPreferencias), ...Object.keys(rawOnlineState)]);
 
             allKeys.forEach(k => {
@@ -361,36 +393,53 @@
                 const nome = conta.nome || conta.usuario || pref.nome || k;
                 const safeKey = k.replace(/[^a-zA-Z0-9]/g, '_');
 
-                // Verificação de Atividade Instantânea (limite max de 12 segundos sem ping)
-                const lastActive = pref.lastActive || onState.lastActive || pref.timestamp || 0;
-                const statusExplicit = pref.status || onState.status || (pref.online === true ? 'online' : '');
+                // Busca o último timestamp disponível entre todos os nós e campos possíveis
+                const t1 = parseTimestamp(pref.lastActive);
+                const t2 = parseTimestamp(pref.timestamp);
+                const t3 = parseTimestamp(pref.ultimaAtividade);
+                const t4 = parseTimestamp(onState.lastActive);
+                const t5 = parseTimestamp(onState.timestamp);
                 
-                const isOnline = (statusExplicit === 'online' || (agora - lastActive < 12000));
+                const lastActive = Math.max(t1, t2, t3, t4, t5);
 
-                const radioTocando = isOnline ? (pref.radioAtual || onState.radioAtual || 'Nenhuma') : 'Nenhuma';
+                const explicitStatus = (pref.status || onState.status || '').toLowerCase();
+                const explicitOnline = (pref.online === true || onState.online === true);
+
+                // É considerado ONLINE se:
+                // 1) O status/boolean explicitamente indicar 'online' OU
+                // 2) Tiver enviado pulso de atividade nos últimos 30 segundos (30000 ms)
+                const isOnline = (explicitStatus === 'online' || explicitOnline || (lastActive > 0 && (agora - lastActive < 30000)));
+
+                const radioTocando = isOnline ? (pref.radioAtual || onState.radioAtual || pref.radio || 'Ouvindo Rádio') : 'Nenhuma';
                 const sessionStart = pref.sessionStart || onState.sessionStart || (isOnline ? (lastActive || agora) : agora);
                 const radioStart = pref.radioStart || onState.radioStart || (isOnline ? (lastActive || agora) : agora);
 
+                const isOpen = !!openCards[k];
+
                 const div = document.createElement('div');
-                div.className = `user-item ${isOnline ? 'online' : 'offline'}`;
+                div.id = `user-card-${safeKey}`;
+                div.className = `user-item ${isOnline ? 'online' : 'offline'} ${isOpen ? 'open' : ''}`;
                 
                 const iconSpeaker = isOnline ? `<i class="fas fa-volume-high speaker-icon"></i>` : '';
 
                 div.innerHTML = `
-                    <div class="user-header-bar">
+                    <div class="user-header-bar" onclick="toggleUserCard('${k}')">
                         <span class="user-title">
                             ${iconSpeaker} ${nome}
+                            <i class="fas fa-chevron-down chevron-icon"></i>
                         </span>
                         <div style="display:flex; align-items:center; gap:10px;">
                             <span class="${isOnline ? 'status-on' : 'status-off'}">${isOnline ? '● ONLINE' : 'OFF'}</span>
-                            <i class="fas fa-trash-alt" style="color: #ff4444; cursor: pointer; font-size: 13px;" 
-                               title="Excluir Ouvinte" onclick="deletarOuvinte('${k}')"></i>
+                            <i class="fas fa-trash-alt" style="color: #ff4444; cursor: pointer; font-size: 12px;" 
+                               title="Excluir Ouvinte" onclick="event.stopPropagation(); deletarOuvinte('${k}')"></i>
                         </div>
                     </div>
-                    <div class="user-details-bar">
-                        <div>Rádio Atual: <b style="color:var(--primary)">${radioTocando}</b></div>
-                        <div>Tempo de Sessão: <b style="color:#38bdf8" id="ts-${safeKey}" data-start="${sessionStart}" data-online="${isOnline}">00:00:00</b></div>
-                        <div>Tempo nesta Rádio: <b style="color:#a855f7" id="tr-${safeKey}" data-start="${radioStart}" data-online="${isOnline}">00:00:00</b></div>
+                    <div class="user-details-wrapper">
+                        <div class="user-details-bar">
+                            <div>Rádio Atual: <b style="color:var(--primary)">${radioTocando}</b></div>
+                            <div>Tempo de Sessão: <b style="color:#38bdf8" id="ts-${safeKey}" data-start="${sessionStart}" data-online="${isOnline}">00:00:00</b></div>
+                            <div>Tempo nesta Rádio: <b style="color:#a855f7" id="tr-${safeKey}" data-start="${radioStart}" data-online="${isOnline}">00:00:00</b></div>
+                        </div>
                     </div>`;
                 container.appendChild(div);
             });
@@ -434,7 +483,7 @@
             }
         }
 
-        // LEITURA EM TEMPO REAL DOS NÓS DO BANCO DE DADOS
+        // LISTENERS DE REALTIME
         db.ref('contas').on('value', snap => {
             rawContas = snap.val() || {};
             renderOuvintes();
