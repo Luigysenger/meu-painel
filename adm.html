@@ -12,7 +12,6 @@
         :root { --primary: #1DB954; --bg: #000; --card: #121212; --text-muted: #b3b3b3; --purple-light: #d1a3ff; --purple-brand: #a855f7; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 10px; user-select: none; }
         
-        /* CABEÇALHO ESTILO PAINEL OUVINTE */
         .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 15px 20px; border-radius: 15px; border: 1px solid #282828; margin-bottom: 20px; gap: 15px; flex-wrap: wrap; }
         .header-brand { display: flex; flex-direction: column; gap: 2px; }
         .header-title { font-size: 20px; font-weight: 900; color: #a855f7; letter-spacing: 1px; margin: 0; text-transform: uppercase; }
@@ -36,7 +35,6 @@
             .header-right { justify-content: center; }
         }
 
-        /* MENSAGENS */
         #container-mensagens-adm { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out; }
         #container-mensagens-adm.aberto { max-height: 2000px; margin-bottom: 25px; }
         .msg-grid-adm { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; padding: 10px; background: #080808; border-radius: 15px; border: 1px solid #222; }
@@ -47,13 +45,11 @@
         .msg-card-individual textarea { width: 100%; background: #111; border: 1px solid #444; border-radius: 6px; color: #fff; padding: 8px; font-size: 12px; margin-top: 8px; resize: none; box-sizing: border-box; }
         .msg-card-individual .btn-resp-adm { background: var(--primary); color: #000; border: none; padding: 6px 12px; border-radius: 5px; font-weight: bold; font-size: 11px; cursor: pointer; margin-top: 6px; width: 100%; text-transform: uppercase; }
 
-        /* GRID PRINCIPAL */
         .main-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; max-width: 1400px; margin: 0 auto; }
         @media (max-width: 1024px) { .main-grid { grid-template-columns: 1fr; } }
         .card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid #282828; margin-bottom: 20px; }
         h3 { color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; }
 
-        /* RADIOS */
         .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
         @media (max-width: 480px) { .radio-grid { grid-template-columns: repeat(2, 1fr); } }
 
@@ -62,22 +58,18 @@
         .radio-actions { position: absolute; top: 5px; right: 5px; display: flex; gap: 5px; z-index: 10; }
         .radio-actions i { cursor: pointer; padding: 4px; background: rgba(0,0,0,0.1); border-radius: 4px; font-size: 11px; }
 
-        /* ANTENA PISCANDO */
         .antena { font-size: 24px; margin-bottom: 8px; display: none; color: var(--primary); }
         .active .antena { display: block !important; animation: antenaPisca 0.8s infinite alternate !important; }
         @keyframes antenaPisca { from { opacity: 1; transform: scale(1.1); } to { opacity: 0.1; transform: scale(0.9); } }
 
-        /* ICONE DE AUTO FALANTE PISCANDO NO MONITOR */
         .speaker-icon { color: var(--primary); margin-right: 8px; animation: speakerPisca 0.8s infinite alternate; }
         @keyframes speakerPisca { from { opacity: 1; transform: scale(1.1); } to { opacity: 0.2; transform: scale(0.9); } }
 
-        /* CONTROLES DO PLAYER */
         .player-footer { margin-top: 20px; background: #111; padding: 20px; border-radius: 20px; border: 1px solid #222; text-align: center; }
         .controls-row { display: flex; align-items: center; justify-content: center; gap: 25px; }
         .btn-nav { background: none; border: none; color: #b3b3b3; font-size: 24px; cursor: pointer; }
         .btn-spotify-play { width: 55px; height: 55px; background: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: black; cursor: pointer; }
 
-        /* PUBLICIDADE */
         .pub-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
         @media (max-width: 600px) { .pub-container { grid-template-columns: 1fr; } }
         .pub-preview { width: 100%; max-height: 120px; object-fit: contain; margin-top: 10px; border-radius: 10px; border: 1px dashed #444; display: none; }
@@ -86,7 +78,6 @@
         .pub-list-btn { flex: 1; padding: 12px; background: none; border: none; color: white; text-align: left; display: flex; align-items: center; gap: 10px; cursor: pointer; min-width: 0; }
         .pub-thumb-mini { width: 40px; height: 25px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
 
-        /* MONITOR OUVINTES */
         .user-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; overflow: hidden; border-left: 4px solid #d1a3ff; }
         .user-name-btn { width: 100%; padding: 15px; background: none; border: none; color: white; text-align: left; font-weight: bold; font-size: 13px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .status-on { color: #1DB954; font-weight: 900; font-size: 10px; }
@@ -99,7 +90,6 @@
 </head>
 <body>
 
-    <!-- CABEÇALHO ATUALIZADO IGUAL AO DO OUVINTE -->
     <div class="header">
         <div class="header-brand">
             <h2 class="header-title">PAINEL ADM</h2>
@@ -115,13 +105,11 @@
                 <i class="fas fa-sync-alt"></i> REINICIAR
             </button>
 
-            <!-- PILL DE HORA -->
             <div class="info-pill">
                 <i class="far fa-clock"></i>
                 <span id="hora">00:00:00</span>
             </div>
 
-            <!-- PILL DE CLIMA COM ÍCONES DINÂMICOS -->
             <div class="info-pill" id="weather-pill">
                 <i class="fas fa-sun" id="weather-icon" style="color: #f59e0b;"></i>
                 <span id="weather-text">Carregando...</span>
@@ -210,14 +198,12 @@
         const player = document.getElementById('audio-player');
         let radioData = [], activeIndex = -1, usersDataCache = {}, imgBase64 = "";
 
-        // RELÓGIO & TIMERS
         setInterval(() => {
             const hElement = document.getElementById('hora');
             if(hElement) hElement.innerText = new Date().toLocaleTimeString('pt-BR');
             updateUserTimers();
         }, 1000);
 
-        // PREVISÃO DO TEMPO COM ÍCONES DINÂMICOS (OPEN-METEO)
         async function fetchWeather() {
             try {
                 if ("geolocation" in navigator) {
@@ -262,23 +248,17 @@
             txt.innerText = `${city}: ${temp}°C`;
 
             if (code === 0) {
-                icon.className = "fas fa-sun";
-                icon.style.color = "#f59e0b";
+                icon.className = "fas fa-sun"; icon.style.color = "#f59e0b";
             } else if (code >= 1 && code <= 3) {
-                icon.className = "fas fa-cloud-sun";
-                icon.style.color = "#cbd5e1";
+                icon.className = "fas fa-cloud-sun"; icon.style.color = "#cbd5e1";
             } else if (code >= 45 && code <= 48) {
-                icon.className = "fas fa-smog";
-                icon.style.color = "#94a3b8";
+                icon.className = "fas fa-smog"; icon.style.color = "#94a3b8";
             } else if (code >= 51 && code <= 67) {
-                icon.className = "fas fa-cloud-rain";
-                icon.style.color = "#38bdf8";
+                icon.className = "fas fa-cloud-rain"; icon.style.color = "#38bdf8";
             } else if (code >= 80 && code <= 99) {
-                icon.className = "fas fa-cloud-showers-heavy";
-                icon.style.color = "#60a5fa";
+                icon.className = "fas fa-cloud-showers-heavy"; icon.style.color = "#60a5fa";
             } else {
-                icon.className = "fas fa-cloud";
-                icon.style.color = "#94a3b8";
+                icon.className = "fas fa-cloud"; icon.style.color = "#94a3b8";
             }
         }
 
@@ -287,9 +267,6 @@
         function logout() { if(confirm("Sair?")) { localStorage.removeItem('usuarioNome'); window.location.href = 'index.html'; } }
         function toggleMensagens() { document.getElementById('container-mensagens-adm').classList.toggle('aberto'); }
 
-        // ==========================================
-        // LEITURA E RESPOSTA DE MENSAGENS DOS OUVINTES
-        // ==========================================
         db.ref('mensagens_ouvintes').on('value', snapMsgs => {
             const container = document.getElementById('msg-list-adm');
             const countElem = document.getElementById('count-msg');
@@ -354,9 +331,6 @@
             }
         }
 
-        // ==========================================
-        // GERENCIAMENTO DE RÁDIOS
-        // ==========================================
         db.ref('radios').on('value', snap => {
             radioData = []; snap.forEach(c => { radioData.push({ ...c.val(), key: c.key }); });
             radioData.sort((a,b) => (a.posicao || 0) - (b.posicao || 0));
@@ -440,67 +414,122 @@
         });
 
         // ==========================================
-        // MONITOR DE OUVINTES (AJUSTADO CIRURGICAMENTE)
+        // MONITOR DE OUVINTES COM CRUZAMENTO DE NÓS (CORRIGIDO)
         // ==========================================
-        db.ref('usuarios').on('value', snap => {
-            const container = document.getElementById('user-list'); if(!container) return;
+        let rawUsuarios = {};
+        let rawContas = {};
+
+        function renderOuvintes() {
+            const container = document.getElementById('user-list'); 
+            if(!container) return;
+            
             const agora = Date.now();
-            const data = snap.val() || {};
-            container.innerHTML = ""; 
+            container.innerHTML = "";
 
-            for (let nomeKey in data) {
-                const u = data[nomeKey] || {};
+            // Mescla contas e usuarios
+            const todosOuvintes = {};
+
+            // 1. Processa 'contas'
+            for (let k in rawContas) {
+                const item = rawContas[k];
+                const nome = item.nome || item.nomeCadastrado || item.usuario || k;
+                todosOuvintes[k] = {
+                    key: k,
+                    node: 'contas',
+                    nome: nome,
+                    status: item.status || 'offline',
+                    lastSeen: item.lastSeen || item.lastActive || item.timestamp || 0,
+                    radioAtual: item.radioAtual || 'Nenhuma',
+                    sessionStart: item.sessionStart || agora,
+                    radioStart: item.radioStart || agora,
+                    tempoSessaoTotal: item.tempoSessaoTotal,
+                    tempoRadioTotal: item.tempoRadioTotal
+                };
+            }
+
+            // 2. Processa ou Sobrescreve com 'usuarios'
+            for (let k in rawUsuarios) {
+                const item = rawUsuarios[k];
+                const nome = item.nome || item.nomeCadastrado || k;
+                todosOuvintes[k] = {
+                    key: k,
+                    node: 'usuarios',
+                    nome: nome,
+                    status: item.status || 'offline',
+                    lastSeen: item.lastSeen || item.lastActive || item.timestamp || 0,
+                    radioAtual: item.radioAtual || 'Nenhuma',
+                    sessionStart: item.sessionStart || agora,
+                    radioStart: item.radioStart || agora,
+                    tempoSessaoTotal: item.tempoSessaoTotal,
+                    tempoRadioTotal: item.tempoRadioTotal
+                };
+            }
+
+            for (let key in todosOuvintes) {
+                const u = todosOuvintes[key];
+                const safeId = key.replace(/[^a-zA-Z0-9]/g, '_');
                 
-                const nomeExibicao = u.nome || u.nomeCadastrado || nomeKey;
-                const safeId = nomeKey.replace(/[^a-zA-Z0-9]/g, '_');
-                const sinalVida = u.lastSeen || u.lastActive || 0;
-                const isOnline = (u.status === 'online' && (agora - sinalVida < 45000));
+                // Tolera até 60 segundos sem heartbeat ou verifica flag online
+                const tempoSemSinal = agora - u.lastSeen;
+                const isOnline = (u.status === 'online' || u.status === 'ONLINE' || (u.lastSeen > 0 && tempoSemSinal < 60000));
 
-                // Atualização ou criação do Cache individual
                 if (!usersDataCache[safeId]) {
                     usersDataCache[safeId] = { 
-                        sStart: u.sessionStart || agora, 
-                        rStart: u.radioStart || agora, 
-                        radioAtual: u.radioAtual || 'Nenhuma'
+                        sStart: u.sessionStart, 
+                        rStart: u.radioStart, 
+                        radioAtual: u.radioAtual 
                     };
                 } else {
-                    // Se o ouvinte trocar de rádio, reinicia o timer da rádio mantendo o de sessão
                     if (usersDataCache[safeId].radioAtual !== u.radioAtual) {
-                        usersDataCache[safeId].rStart = u.radioStart || agora;
-                        usersDataCache[safeId].radioAtual = u.radioAtual || 'Nenhuma';
+                        usersDataCache[safeId].rStart = u.radioStart;
+                        usersDataCache[safeId].radioAtual = u.radioAtual;
                     }
                     if (u.sessionStart) usersDataCache[safeId].sStart = u.sessionStart;
                 }
                 
                 usersDataCache[safeId].isOnline = isOnline;
-                usersDataCache[safeId].tempoSessaoTotal = u.tempoSessaoTotal;
-                usersDataCache[safeId].tempoRadioTotal = u.tempoRadioTotal;
                 
                 const div = document.createElement('div');
                 div.className = "user-item";
                 div.style.borderLeft = isOnline ? '4px solid #1DB954' : '4px solid #d1a3ff';
                 
-                // Ícone de Alto falante piscando quando ONLINE
                 const iconSpeaker = isOnline ? `<i class="fas fa-volume-high speaker-icon"></i>` : '';
 
                 div.innerHTML = `
                     <div style="display: flex; align-items: center; background: none;">
                         <button class="user-name-btn" style="flex: 1;" onclick="const d=this.parentElement.nextElementSibling; d.style.display=(d.style.display=='block'?'none':'block')">
                             <span style="color:${isOnline ? 'white' : '#d1a3ff'}; display:flex; align-items:center;">
-                                ${iconSpeaker}${nomeExibicao}
+                                ${iconSpeaker}${u.nome}
                             </span>
                             <span class="${isOnline ? 'status-on' : 'status-off'}">${isOnline ? '● ONLINE' : 'OFF'}</span>
                         </button>
                         <i class="fas fa-trash-alt" style="color: #ff4444; padding: 15px; cursor: pointer; font-size: 14px; opacity: 0.7;" 
-                           onclick="if(confirm('Deseja excluir este ouvinte permanentemente?')) db.ref('usuarios/${nomeKey}').remove()"></i>
+                           onclick="deletarOuvinte('${u.node}', '${key}')"></i>
                     </div>
                     <div class="user-details-bar">
-                        Rádio: <b style="color:var(--primary)">${u.radioAtual || 'Nenhuma'}</b><br>
+                        Rádio: <b style="color:var(--primary)">${u.radioAtual}</b><br>
                         Sessão: <b id="ts-${safeId}">${isOnline ? '00:00:00' : (u.tempoSessaoTotal || '00:00:00')}</b><br>
                         Nesta Rádio: <b id="tr-${safeId}">${isOnline ? '00:00:00' : (u.tempoRadioTotal || '00:00:00')}</b>
                     </div>`;
                 container.appendChild(div);
             }
+        }
+
+        function deletarOuvinte(node, key) {
+            if(confirm('Deseja excluir este ouvinte permanentemente?')) {
+                db.ref(node + '/' + key).remove();
+            }
+        }
+
+        // Sincronização em tempo real dos dois nós
+        db.ref('usuarios').on('value', snap => {
+            rawUsuarios = snap.val() || {};
+            renderOuvintes();
+        });
+
+        db.ref('contas').on('value', snap => {
+            rawContas = snap.val() || {};
+            renderOuvintes();
         });
 
         function updateUserTimers() {
