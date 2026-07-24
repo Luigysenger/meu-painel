@@ -168,12 +168,21 @@
 
         h3 { 
             color: var(--primary); 
-            font-size: 11px; 
+            font-size: 16px; 
+            font-weight: 900;
             text-transform: uppercase; 
             letter-spacing: 1.5px; 
             margin-bottom: 20px; 
             text-align: center; 
             line-height: 1.4;
+        }
+
+        .sub-titulo-secao {
+            font-size: 14px !important;
+            font-weight: 800;
+            text-align: left;
+            color: #d8b4fe !important;
+            margin-bottom: 12px;
         }
 
         .banner-destaque-adm {
@@ -314,19 +323,22 @@
             border: 1px solid #333; 
             border-radius: 10px; 
             color: #fff; 
-            padding: 12px; 
+            padding: 14px; 
             margin-bottom: 10px; 
             outline: none; 
             resize: none;
+            font-size: 16px;
+            font-family: inherit;
         }
 
         .btn-enviar { 
             background: var(--primary); 
             color: #fff; 
             border: none; 
-            padding: 12px; 
+            padding: 14px; 
             border-radius: 10px; 
             font-weight: bold; 
+            font-size: 15px;
             width: 100%; 
             cursor: pointer; 
             text-transform: uppercase; 
@@ -334,22 +346,30 @@
 
         .msg-item {
             background: #181818;
-            padding: 12px 14px;
+            padding: 14px 16px;
             border-radius: 8px;
             margin-bottom: 12px;
-            border-left: 3px solid var(--primary);
+            border-left: 4px solid var(--primary);
             position: relative;
+        }
+
+        .msg-texto-ouvinte {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            padding-right: 30px;
+            line-height: 1.4;
         }
 
         .btn-delete-msg {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 12px;
+            right: 12px;
             background: none;
             border: none;
             color: #ff4444;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 16px;
             opacity: 0.7;
             transition: 0.2s;
         }
@@ -361,9 +381,9 @@
 
         .resp-adm-box {
             background: #25122e;
-            padding: 10px 14px;
+            padding: 12px 14px;
             border-radius: 8px;
-            margin-top: 8px;
+            margin-top: 10px;
             border-left: 3px solid var(--pink-light);
         }
 
@@ -469,12 +489,12 @@
             
             <div class="radios-section-container">
                 <div>
-                    <h3 style="font-size: 10px; text-align: left; color: #aaa;">1. ADICIONE RÁDIOS</h3>
+                    <h3 class="sub-titulo-secao">1. ADICIONE SUAS RÁDIOS</h3>
                     <div id="catalogo-radios" class="catalogo-list"></div>
                 </div>
 
                 <div>
-                    <h3 style="font-size: 10px; text-align: left; color: #aaa;">2. SUA PLAYLIST (ARRASTE)</h3>
+                    <h3 class="sub-titulo-secao">2. SEGURE E ARRASTE PARA DEIXAR NA ORDEM SUAS RÁDIOS</h3>
                     <div id="grid-playlist" class="playlist-grid-ouvinte"></div>
                 </div>
             </div>
@@ -787,41 +807,47 @@
                 container.innerHTML = "";
                 const msgs = snapMsgs.val() || {};
 
-                let temItem = false;
+                let minhasMsgs = [];
 
                 for (let id in msgs) {
                     const m = msgs[id];
                     if (m.ouvinteId === ouvinteId || m.ouvinte === ouvinteNome) {
-                        temItem = true;
-                        let htmlMsg = `
-                            <div class="msg-item">
-                                <button class="btn-delete-msg" title="Apagar Mensagem" onclick="deletarMensagem('${id}')">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                                <div style="font-size:10px; color:#aaa; margin-bottom: 3px;">Você enviou (${m.dataHora || ''}):</div>
-                                <div style="font-size:13px; padding-right: 25px;">${m.mensagem}</div>
-                        `;
-
-                        for (let rId in respostas) {
-                            const r = respostas[rId];
-                            if (r.ouvinteId === ouvinteId || r.ouvinte === ouvinteNome) {
-                                htmlMsg += `
-                                    <div class="resp-adm-box">
-                                        <div style="font-size:10px; color: var(--pink-light); font-weight:bold;">Resposta do ADM (${r.dataHora || ''}):</div>
-                                        <div style="font-size:13px; margin-top:2px;">${r.resposta}</div>
-                                    </div>
-                                `;
-                            }
-                        }
-
-                        htmlMsg += `</div>`;
-                        container.innerHTML += htmlMsg;
+                        minhasMsgs.push({ id, ...m });
                     }
                 }
 
-                if (!temItem) {
-                    container.innerHTML = "<p style='color:#666; text-align:center; font-size:12px;'>Você ainda não enviou mensagens.</p>";
+                // Ordenação cronológica para garantir a numeração exata em sequência (1, 2, 3...)
+                minhasMsgs.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+
+                if (minhasMsgs.length === 0) {
+                    container.innerHTML = "<p style='color:#666; text-align:center; font-size:14px; margin-top:20px;'>Você ainda não enviou mensagens.</p>";
+                    return;
                 }
+
+                minhasMsgs.forEach((m, idx) => {
+                    let htmlMsg = `
+                        <div class="msg-item">
+                            <button class="btn-delete-msg" title="Apagar Mensagem" onclick="deletarMensagem('${m.id}')">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                            <div class="msg-texto-ouvinte">${idx + 1}. ${m.mensagem}</div>
+                    `;
+
+                    for (let rId in respostas) {
+                        const r = respostas[rId];
+                        if (r.ouvinteId === ouvinteId || r.ouvinte === ouvinteNome) {
+                            htmlMsg += `
+                                <div class="resp-adm-box">
+                                    <div style="font-size:12px; color: var(--pink-light); font-weight:bold;">Resposta do ADM:</div>
+                                    <div style="font-size:15px; margin-top:3px; color:#fff;">${r.resposta}</div>
+                                </div>
+                            `;
+                        }
+                    }
+
+                    htmlMsg += `</div>`;
+                    container.innerHTML += htmlMsg;
+                });
             });
         });
 
