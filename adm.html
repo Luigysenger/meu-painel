@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #1DB954; --bg: #000; --card: #121212; --text-muted: #b3b3b3; --purple-light: #d1a3ff; --purple-brand: #a855f7; }
+        :root { --primary: #1DB954; --bg: #000; --card: #121212; --text-muted: #b3b3b3; --purple-light: #d1a3ff; --purple-brand: #a855f7; --blue-online: #38bdf8; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 10px; user-select: none; }
         
         .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 15px 20px; border-radius: 15px; border: 1px solid #282828; margin-bottom: 20px; gap: 15px; flex-wrap: wrap; }
@@ -62,8 +62,8 @@
         .active .antena { display: block !important; animation: antenaPisca 0.8s infinite alternate !important; }
         @keyframes antenaPisca { from { opacity: 1; transform: scale(1.1); } to { opacity: 0.1; transform: scale(0.9); } }
 
-        .speaker-icon { color: var(--primary); margin-right: 8px; animation: speakerPisca 0.8s infinite alternate; }
-        @keyframes speakerPisca { from { opacity: 1; transform: scale(1.1); } to { opacity: 0.2; transform: scale(0.9); } }
+        .speaker-icon { color: #38bdf8; margin-right: 8px; animation: speakerPisca 0.8s infinite alternate; }
+        @keyframes speakerPisca { from { opacity: 1; transform: scale(1.2); } to { opacity: 0.2; transform: scale(0.9); } }
 
         .player-footer { margin-top: 20px; background: #111; padding: 20px; border-radius: 20px; border: 1px solid #222; text-align: center; }
         .controls-row { display: flex; align-items: center; justify-content: center; gap: 25px; }
@@ -78,10 +78,14 @@
         .pub-list-btn { flex: 1; padding: 12px; background: none; border: none; color: white; text-align: left; display: flex; align-items: center; gap: 10px; cursor: pointer; min-width: 0; }
         .pub-thumb-mini { width: 40px; height: 25px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
 
-        .user-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; overflow: hidden; border-left: 4px solid #1DB954; }
+        /* MONITOR DE OUVINTES COM AS NOVAS CORES E ESTILOS */
+        .user-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; overflow: hidden; transition: 0.3s; }
+        .user-item.online { border-left: 5px solid var(--blue-online); }
+        .user-item.offline { border-left: 5px solid var(--purple-light); }
+        
         .user-name-btn { width: 100%; padding: 15px; background: none; border: none; color: white; text-align: left; font-weight: bold; font-size: 13px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-        .status-on { color: #1DB954; font-weight: 900; font-size: 10px; }
-        .status-off { color: #d1a3ff; font-weight: 900; font-size: 10px; }
+        .status-on { color: var(--blue-online); font-weight: 900; font-size: 11px; }
+        .status-off { color: var(--purple-light); font-weight: 900; font-size: 11px; }
         .user-details-bar { display: none; padding: 0 15px 15px 15px; font-size: 12px; color: #ccc; border-top: 1px solid #222; }
 
         input, select { padding: 12px; background: #2a2a2a; border: none; color: white; border-radius: 8px; margin-bottom: 10px; width: -webkit-fill-available; outline: none; font-size: 14px; }
@@ -245,6 +249,7 @@
         function updateWeatherUI(city, temp, code) {
             const txt = document.getElementById('weather-text');
             const icon = document.getElementById('weather-icon');
+            if(!txt || !icon) return;
             txt.innerText = `${city}: ${temp}°C`;
 
             if (code === 0) {
@@ -414,7 +419,7 @@
         });
 
         // ==========================================
-        // MONITOR DE OUVINTES COM EXCLUSÃO CIRÚRGICA
+        // MONITOR DE OUVINTES (NOVA LÓGICA COMPLETA)
         // ==========================================
         let rawUsuarios = {};
         let rawContas = {};
@@ -428,6 +433,7 @@
 
             const todosOuvintes = {};
 
+            // Mapeia todas as contas cadastradas
             for (let k in rawContas) {
                 const item = rawContas[k];
                 const nome = item.nome || item.nomeCadastrado || item.usuario || k;
@@ -448,18 +454,27 @@
             for (let k in rawUsuarios) {
                 const item = rawUsuarios[k];
                 const nome = item.nome || item.nomeCadastrado || k;
-                todosOuvintes[k] = {
-                    key: k,
-                    node: 'usuarios',
-                    nome: nome,
-                    status: item.status || 'offline',
-                    lastSeen: item.lastSeen || item.lastActive || item.timestamp || 0,
-                    radioAtual: item.radioAtual || 'Nenhuma',
-                    sessionStart: item.sessionStart || agora,
-                    radioStart: item.radioStart || agora,
-                    tempoSessaoTotal: item.tempoSessaoTotal,
-                    tempoRadioTotal: item.tempoRadioTotal
-                };
+                if (!todosOuvintes[k]) {
+                    todosOuvintes[k] = {
+                        key: k,
+                        node: 'usuarios',
+                        nome: nome,
+                        status: item.status || 'offline',
+                        lastSeen: item.lastSeen || item.lastActive || item.timestamp || 0,
+                        radioAtual: item.radioAtual || 'Nenhuma',
+                        sessionStart: item.sessionStart || agora,
+                        radioStart: item.radioStart || agora,
+                        tempoSessaoTotal: item.tempoSessaoTotal,
+                        tempoRadioTotal: item.tempoRadioTotal
+                    };
+                } else {
+                    // Mescla dados atualizados
+                    todosOuvintes[k].status = item.status || todosOuvintes[k].status;
+                    todosOuvintes[k].lastSeen = item.lastSeen || item.lastActive || todosOuvintes[k].lastSeen;
+                    todosOuvintes[k].radioAtual = item.radioAtual || todosOuvintes[k].radioAtual;
+                    todosOuvintes[k].sessionStart = item.sessionStart || todosOuvintes[k].sessionStart;
+                    todosOuvintes[k].radioStart = item.radioStart || todosOuvintes[k].radioStart;
+                }
             }
 
             for (let key in todosOuvintes) {
@@ -476,8 +491,9 @@
                         radioAtual: u.radioAtual 
                     };
                 } else {
+                    // Se o ouvinte trocou de rádio, reseta o rStart para zerar e recomeçar a contagem dessa rádio
                     if (usersDataCache[safeId].radioAtual !== u.radioAtual) {
-                        usersDataCache[safeId].rStart = u.radioStart;
+                        usersDataCache[safeId].rStart = u.radioStart || agora;
                         usersDataCache[safeId].radioAtual = u.radioAtual;
                     }
                     if (u.sessionStart) usersDataCache[safeId].sStart = u.sessionStart;
@@ -486,8 +502,7 @@
                 usersDataCache[safeId].isOnline = isOnline;
                 
                 const div = document.createElement('div');
-                div.className = "user-item";
-                div.style.borderLeft = isOnline ? '4px solid #1DB954' : '4px solid #d1a3ff';
+                div.className = `user-item ${isOnline ? 'online' : 'offline'}`;
                 
                 const iconSpeaker = isOnline ? `<i class="fas fa-volume-high speaker-icon"></i>` : '';
 
@@ -499,22 +514,20 @@
                             </span>
                             <span class="${isOnline ? 'status-on' : 'status-off'}">${isOnline ? '● ONLINE' : 'OFF'}</span>
                         </button>
-                        <i class="fas fa-trash-alt" style="color: #ff4444; padding: 15px; cursor: pointer; font-size: 14px; opacity: 0.7;" 
-                           onclick="deletarOuvinte('${u.node}', '${key}')"></i>
+                        <i class="fas fa-trash-alt" style="color: #ff4444; padding: 15px; cursor: pointer; font-size: 14px; opacity: 0.8;" 
+                           title="Excluir Ouvinte" onclick="deletarOuvinte('${u.node}', '${key}')"></i>
                     </div>
                     <div class="user-details-bar">
                         Rádio: <b style="color:var(--primary)">${u.radioAtual}</b><br>
-                        Sessão: <b id="ts-${safeId}">${isOnline ? '00:00:00' : (u.tempoSessaoTotal || '00:00:00')}</b><br>
+                        Tempo de Sessão: <b id="ts-${safeId}">${isOnline ? '00:00:00' : (u.tempoSessaoTotal || '00:00:00')}</b><br>
                         Nesta Rádio: <b id="tr-${safeId}">${isOnline ? '00:00:00' : (u.tempoRadioTotal || '00:00:00')}</b>
                     </div>`;
                 container.appendChild(div);
             }
         }
 
-        // FUNÇÃO COM O AJUSTE CIRÚRGICO DE EXCLUSÃO
         function deletarOuvinte(node, key) {
             if(confirm('Deseja excluir este ouvinte permanentemente?')) {
-                // 1. Busca os dados para capturar e armazenar a senha anterior
                 db.ref(node + '/' + key).once('value').then(snapshot => {
                     const dados = snapshot.val();
                     if (dados) {
@@ -522,7 +535,6 @@
                         const keyFormatada = key.replace(/[^a-zA-Z0-9]/g, '_');
                         
                         if (senhaAntiga) {
-                            // Registra a senha bloqueada no histórico
                             db.ref('senhas_antigas/' + keyFormatada).push({
                                 senha: senhaAntiga,
                                 dataExclusao: firebase.database.ServerValue.TIMESTAMP
@@ -530,13 +542,16 @@
                         }
                     }
 
-                    // 2. Remove completamente de todos os nós para revogar o acesso
+                    // Limpa totalmente os registros no Firebase
                     const updates = {};
                     updates['usuarios/' + key] = null;
                     updates['contas/' + key] = null;
                     updates['ouvintes_preferencias/' + key] = null;
+                    updates['sessoes_ativas/' + key] = null;
 
-                    db.ref().update(updates);
+                    db.ref().update(updates).then(() => {
+                        alert("Ouvinte deletado e revogado com sucesso!");
+                    });
                 });
             }
         }
