@@ -198,13 +198,13 @@
         const db = firebase.database();
         const player = document.getElementById('audio-player');
         let radioData = [], activeIndex = -1, imgBase64 = "", sortableInstance = null;
-        let rawContas = {}, rawOuvintesOnline = {}, usersDataCache = {};
+        let rawContas = {}, rawOuvintesOnline = {};
 
-        // Atualizador de relógio e cronômetros
+        // Atualizador de relógio e cronômetros em tempo real
         setInterval(() => {
             const hElement = document.getElementById('hora');
             if(hElement) hElement.innerText = new Date().toLocaleTimeString('pt-BR');
-            updateUserTimers();
+            updateLiveTimers();
         }, 1000);
 
         async function fetchWeather() {
@@ -291,7 +291,6 @@
                 list.appendChild(div);
             });
 
-            // Ativa Drag and Drop caso ainda não tenha ativado
             if(!sortableInstance) {
                 sortableInstance = new Sortable(list, {
                     animation: 150,
@@ -342,7 +341,7 @@
         }
 
         // ==========================================
-        // MONITOR DE OUVINTES (DETECÇÃO RÁPIDA E PRESEVERAÇÃO)
+        // MONITOR DE OUVINTES TEMPO REAL INSTANTÂNEO
         // ==========================================
         function renderOuvintes() {
             const container = document.getElementById('user-list'); 
@@ -356,32 +355,14 @@
                 const safeKey = k.replace(/[^a-zA-Z0-9]/g, '_');
                 const nome = conta.nome || conta.usuario || k;
 
-                // Busca dados em tempo real no banco
+                // Busca dados em tempo real
                 const statusRT = rawOuvintesOnline[safeKey] || rawOuvintesOnline[k] || {};
                 
-                const radioTocando = statusRT.radioAtual || 'Nenhuma';
-                const lastActive = statusRT.lastActive || 0;
-                
-                // Critério de presença instantânea: considera online se status==='online' E o ping ocorreu há menos de 120s
-                const isOnline = (statusRT.status === 'online' && (lastActive === 0 || (agora - lastActive) < 120000));
-
-                if (!usersDataCache[safeKey]) {
-                    usersDataCache[safeKey] = {
-                        loginStart: statusRT.sessionStart || agora,
-                        radioStart: statusRT.radioStart || agora,
-                        radioAtual: radioTocando,
-                        isOnline: isOnline
-                    };
-                } else {
-                    if (usersDataCache[safeKey].radioAtual !== radioTocando) {
-                        usersDataCache[safeKey].radioStart = statusRT.radioStart || agora;
-                        usersDataCache[safeKey].radioAtual = radioTocando;
-                    }
-                    if (statusRT.sessionStart) {
-                        usersDataCache[safeKey].loginStart = statusRT.sessionStart;
-                    }
-                    usersDataCache[safeKey].isOnline = isOnline;
-                }
+                // Status instantâneo direto do Firebase Websockets
+                const isOnline = (statusRT.status === 'online');
+                const radioTocando = isOnline ? (statusRT.radioAtual || 'Nenhuma') : 'Nenhuma';
+                const sessionStart = statusRT.sessionStart || agora;
+                const radioStart = statusRT.radioStart || agora;
 
                 const div = document.createElement('div');
                 div.className = `user-item ${isOnline ? 'online' : 'offline'}`;
@@ -390,7 +371,7 @@
 
                 div.innerHTML = `
                     <div style="display: flex; align-items: center; background: none;">
-                        <button class="user-name-btn" style="flex: 1;" onclick="const d=document.getElementById('det-${safeKey}'); d.style.display=(d.style.display=='block'?'none':'block')">
+                        <button class="user-name-btn" style="flex: 1;" onclick="toggleDetails('det-${safeKey}')">
                             <span style="color:${isOnline ? 'white' : '#d1a3ff'}; display:flex; align-items:center;">
                                 ${iconSpeaker}${nome}
                             </span>
@@ -400,26 +381,32 @@
                            title="Excluir Ouvinte" onclick="deletarOuvinte('${k}', '${safeKey}')"></i>
                     </div>
                     <div class="user-details-bar" id="det-${safeKey}">
-                        <div>Rádio Atual: <b style="color:var(--primary)">${radioTocando}</b></div>
-                        <div>Tempo de Sessão: <b style="color:#38bdf8" id="ts-${safeKey}">${isOnline ? formatMs(agora - usersDataCache[safeKey].loginStart) : '00:00:00'}</b></div>
-                        <div>Tempo nesta Rádio: <b style="color:#a855f7" id="tr-${safeKey}">${isOnline ? formatMs(agora - usersDataCache[safeKey].radioStart) : '00:00:00'}</b></div>
+                        <div>Rádio Atual: <b style="color:var(--primary)" id="radname-${safeKey}">${radioTocando}</b></div>
+                        <div>Tempo de Sessão: <b style="color:#38bdf8" id="ts-${safeKey}" data-start="${sessionStart}" data-online="${isOnline}">00:00:00</b></div>
+                        <div>Tempo nesta Rádio: <b style="color:#a855f7" id="tr-${safeKey}" data-start="${radioStart}" data-online="${isOnline}">00:00:00</b></div>
                     </div>`;
                 container.appendChild(div);
             }
+            updateLiveTimers();
         }
 
-        function updateUserTimers() {
+        function toggleDetails(id) {
+            const d = document.getElementById(id);
+            if(d) d.style.display = (d.style.display === 'block' ? 'none' : 'block');
+        }
+
+        function updateLiveTimers() {
             const agora = Date.now();
-            for (let id in usersDataCache) {
-                const u = usersDataCache[id];
-                if (u.isOnline) {
-                    const elemSessao = document.getElementById(`ts-${id}`);
-                    const elemRadio = document.getElementById(`tr-${id}`);
-                    
-                    if (elemSessao) elemSessao.innerText = formatMs(agora - u.loginStart);
-                    if (elemRadio) elemRadio.innerText = formatMs(agora - u.radioStart);
-                }
-            }
+            document.querySelectorAll('[id^="ts-"]').forEach(elem => {
+                const isOnline = elem.getAttribute('data-online') === 'true';
+                const start = parseInt(elem.getAttribute('data-start') || agora);
+                elem.innerText = isOnline ? formatMs(agora - start) : '00:00:00';
+            });
+            document.querySelectorAll('[id^="tr-"]').forEach(elem => {
+                const isOnline = elem.getAttribute('data-online') === 'true';
+                const start = parseInt(elem.getAttribute('data-start') || agora);
+                elem.innerText = isOnline ? formatMs(agora - start) : '00:00:00';
+            });
         }
 
         function formatMs(ms) {
@@ -443,6 +430,7 @@
             }
         }
 
+        // LISTENERS TEMPO REAL INSTANTÂNEOS
         db.ref('contas').on('value', snap => {
             rawContas = snap.val() || {};
             renderOuvintes();
