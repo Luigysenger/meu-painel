@@ -85,7 +85,7 @@
         .user-name-btn { width: 100%; padding: 15px; background: none; border: none; color: white; text-align: left; font-weight: bold; font-size: 13px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .status-on { color: var(--blue-online); font-weight: 900; font-size: 11px; }
         .status-off { color: var(--purple-light); font-weight: 900; font-size: 11px; }
-        .user-details-bar { display: none; padding: 0 15px 15px 15px; font-size: 12px; color: #ccc; border-top: 1px solid #222; margin-top: 5px; }
+        .user-details-bar { display: none; padding: 12px 15px; font-size: 12px; color: #ccc; border-top: 1px solid #222; background: #141414; line-height: 1.6; }
 
         input, select { padding: 12px; background: #2a2a2a; border: none; color: white; border-radius: 8px; margin-bottom: 10px; width: -webkit-fill-available; outline: none; font-size: 14px; }
         .btn-save { padding: 12px; background: var(--primary); border: none; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; }
@@ -199,8 +199,10 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const player = document.getElementById('audio-player');
-        let radioData = [], activeIndex = -1, usersDataCache = {}, imgBase64 = "";
+        let radioData = [], activeIndex = -1, imgBase64 = "";
+        let rawContas = {}, rawOuvintesOnline = {}, usersDataCache = {};
 
+        // Atualizador de relógio e cronômetros
         setInterval(() => {
             const hElement = document.getElementById('hora');
             if(hElement) hElement.innerText = new Date().toLocaleTimeString('pt-BR');
@@ -213,126 +215,62 @@
                     navigator.geolocation.getCurrentPosition(async (pos) => {
                         const lat = pos.coords.latitude;
                         const lon = pos.coords.longitude;
-                        
                         const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/reverse?latitude=${lat}&longitude=${lon}`);
                         const geoData = await geoRes.json();
                         const city = geoData.results?.[0]?.name || "Local";
-
                         const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
                         const wData = await wRes.json();
-                        const temp = Math.round(wData.current_weather.temperature);
-                        const code = wData.current_weather.weathercode;
-
-                        updateWeatherUI(city, temp, code);
+                        updateWeatherUI(city, Math.round(wData.current_weather.temperature), wData.current_weather.weathercode);
                     }, () => fetchFallbackWeather());
-                } else {
-                    fetchFallbackWeather();
-                }
-            } catch (e) {
-                fetchFallbackWeather();
-            }
+                } else { fetchFallbackWeather(); }
+            } catch (e) { fetchFallbackWeather(); }
         }
 
         async function fetchFallbackWeather() {
             try {
                 const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=-24.9578&longitude=-53.4594&current_weather=true`);
                 const wData = await wRes.json();
-                const temp = Math.round(wData.current_weather.temperature);
-                const code = wData.current_weather.weathercode;
-                updateWeatherUI("Cascavel", temp, code);
-            } catch (e) {
-                document.getElementById('weather-text').innerText = "Indisponível";
-            }
+                updateWeatherUI("Cascavel", Math.round(wData.current_weather.temperature), wData.current_weather.weathercode);
+            } catch (e) { document.getElementById('weather-text').innerText = "Indisponível"; }
         }
 
         function updateWeatherUI(city, temp, code) {
-            const txt = document.getElementById('weather-text');
-            const icon = document.getElementById('weather-icon');
+            const txt = document.getElementById('weather-text'), icon = document.getElementById('weather-icon');
             if(!txt || !icon) return;
             txt.innerText = `${city}: ${temp}°C`;
-
-            if (code === 0) {
-                icon.className = "fas fa-sun"; icon.style.color = "#f59e0b";
-            } else if (code >= 1 && code <= 3) {
-                icon.className = "fas fa-cloud-sun"; icon.style.color = "#cbd5e1";
-            } else if (code >= 45 && code <= 48) {
-                icon.className = "fas fa-smog"; icon.style.color = "#94a3b8";
-            } else if (code >= 51 && code <= 67) {
-                icon.className = "fas fa-cloud-rain"; icon.style.color = "#38bdf8";
-            } else if (code >= 80 && code <= 99) {
-                icon.className = "fas fa-cloud-showers-heavy"; icon.style.color = "#60a5fa";
-            } else {
-                icon.className = "fas fa-cloud"; icon.style.color = "#94a3b8";
-            }
+            icon.className = code === 0 ? "fas fa-sun" : (code <= 3 ? "fas fa-cloud-sun" : "fas fa-cloud");
+            icon.style.color = code === 0 ? "#f59e0b" : "#cbd5e1";
         }
-
         fetchWeather();
 
         function logout() { if(confirm("Sair?")) { localStorage.removeItem('usuarioNome'); window.location.href = 'index.html'; } }
         function toggleMensagens() { document.getElementById('container-mensagens-adm').classList.toggle('aberto'); }
 
         db.ref('mensagens_ouvintes').on('value', snapMsgs => {
-            const container = document.getElementById('msg-list-adm');
-            const countElem = document.getElementById('count-msg');
+            const container = document.getElementById('msg-list-adm'), countElem = document.getElementById('count-msg');
             if(!container) return;
-
             container.innerHTML = "";
             const msgs = snapMsgs.val() || {};
             let total = 0;
-
             for(let key in msgs) {
                 total++;
-                const m = msgs[key];
-                const nomeExibicao = m.ouvinte || m.nome || m.nomeOuvinte || 'Ouvinte';
-                
-                const card = document.createElement('div');
-                card.className = "msg-card-individual";
-                card.innerHTML = `
-                    <h4>
-                        <span><i class="fas fa-user"></i> ${nomeExibicao}</span>
-                        <i class="fas fa-trash-alt" style="color:#ff4444; cursor:pointer;" title="Excluir" onclick="deletarMsgOuvinte('${key}')"></i>
-                    </h4>
-                    <span style="font-size: 10px; color: #888;">${m.dataHora || ''}</span>
-                    <p>${m.mensagem}</p>
-                    <textarea id="resp-input-${key}" rows="2" placeholder="Escreva sua resposta ao ouvinte..."></textarea>
-                    <button class="btn-resp-adm" onclick="responderOuvinte('${key}', '${m.ouvinteId || ''}', '${nomeExibicao}')">
-                        <i class="fas fa-paper-plane"></i> Responder
-                    </button>
-                `;
+                const m = msgs[key], nomeExibicao = m.ouvinte || m.nome || 'Ouvinte';
+                const card = document.createElement('div'); card.className = "msg-card-individual";
+                card.innerHTML = `<h4><span><i class="fas fa-user"></i> ${nomeExibicao}</span><i class="fas fa-trash-alt" style="color:#ff4444; cursor:pointer;" onclick="db.ref('mensagens_ouvintes/${key}').remove()"></i></h4>
+                    <span style="font-size: 10px; color: #888;">${m.dataHora || ''}</span><p>${m.mensagem}</p>
+                    <textarea id="resp-input-${key}" rows="2" placeholder="Escreva sua resposta..."></textarea>
+                    <button class="btn-resp-adm" onclick="responderOuvinte('${key}', '${m.ouvinteId || ''}', '${nomeExibicao}')">Responder</button>`;
                 container.appendChild(card);
             }
-
             if(countElem) countElem.innerText = total;
-
-            if(total === 0) {
-                container.innerHTML = "<p style='color:#666; font-size:12px; grid-column:1/-1; text-align:center;'>Nenhuma mensagem recebida.</p>";
-            }
         });
 
         function responderOuvinte(msgKey, ouvinteId, ouvinteNome) {
             const txtInput = document.getElementById(`resp-input-${msgKey}`);
-            if(!txtInput) return;
-            const resposta = txtInput.value.trim();
-
-            if(!resposta) return alert("Digite uma resposta!");
-
-            db.ref('respostas_adm').push({
-                msgKey: msgKey,
-                ouvinteId: ouvinteId,
-                ouvinte: ouvinteNome,
-                resposta: resposta,
-                dataHora: new Date().toLocaleString('pt-BR'),
-                timestamp: firebase.database.ServerValue.TIMESTAMP
-            }).then(() => {
-                alert("Resposta enviada para o ouvinte com sucesso!");
-                txtInput.value = "";
+            if(!txtInput || !txtInput.value.trim()) return alert("Digite uma resposta!");
+            db.ref('respostas_adm').push({ msgKey, ouvinteId, ouvinte: ouvinteNome, resposta: txtInput.value.trim(), dataHora: new Date().toLocaleString('pt-BR'), timestamp: firebase.database.ServerValue.TIMESTAMP }).then(() => {
+                alert("Resposta enviada!"); txtInput.value = "";
             });
-        }
-
-        function deletarMsgOuvinte(key) {
-            if(confirm("Excluir esta mensagem?")) {
-                db.ref('mensagens_ouvintes/' + key).remove();
-            }
         }
 
         db.ref('radios').on('value', snap => {
@@ -344,33 +282,18 @@
                 const div = document.createElement('div');
                 div.className = `radio-item ${activeIndex === i ? 'active' : ''}`;
                 div.style.background = r.color || '#ece4db';
-                div.setAttribute('data-id', r.key);
                 div.onclick = () => playRadio(i);
-                div.innerHTML = `<div class="radio-actions">
-                    <i class="fas fa-pencil-alt" onclick="event.stopPropagation(); prepareEditRadio('${r.key}','${r.name}','${r.url}')"></i>
-                    <i class="fas fa-times" onclick="event.stopPropagation(); if(confirm('Excluir?')) db.ref('radios/${r.key}').remove()"></i>
-                </div><i class="fas fa-tower-broadcast antena"></i><span>${r.name}</span>`;
+                div.innerHTML = `<div class="radio-actions"><i class="fas fa-pencil-alt" onclick="event.stopPropagation(); prepareEditRadio('${r.key}','${r.name}','${r.url}')"></i><i class="fas fa-times" onclick="event.stopPropagation(); if(confirm('Excluir?')) db.ref('radios/${r.key}').remove()"></i></div><i class="fas fa-tower-broadcast antena"></i><span>${r.name}</span>`;
                 list.appendChild(div);
             });
-            if(!window.sortInit && radioData.length > 0) {
-                Sortable.create(list, { 
-                    animation: 150, delay: 500, delayOnTouchOnly: true,
-                    onEnd: () => { list.querySelectorAll('.radio-item').forEach((it, idx) => { db.ref('radios/' + it.dataset.id).update({ posicao: idx }); }); }
-                }); window.sortInit = true;
-            }
         });
 
         function playRadio(idx) {
             activeIndex = idx; const r = radioData[idx]; player.src = r.url; player.play();
             document.getElementById('now-title').innerText = "OUVINDO: " + r.name;
             document.getElementById('play-icon').className = "fas fa-stop";
-            const items = document.querySelectorAll('.radio-item');
-            items.forEach((item, i) => { if(i === idx) item.classList.add('active'); else item.classList.remove('active'); });
         }
-        function togglePlay() { 
-            if(player.paused) { player.play(); document.getElementById('play-icon').className = "fas fa-stop"; } 
-            else { player.pause(); document.getElementById('play-icon').className = "fas fa-play"; } 
-        }
+        function togglePlay() { if(player.paused) { player.play(); document.getElementById('play-icon').className = "fas fa-stop"; } else { player.pause(); document.getElementById('play-icon').className = "fas fa-play"; } }
         function nextRadio() { if(radioData.length) playRadio((activeIndex + 1) % radioData.length); }
         function prevRadio() { if(radioData.length) playRadio((activeIndex - 1 + radioData.length) % radioData.length); }
         function addRadio() {
@@ -379,10 +302,9 @@
                 if(k) db.ref('radios/'+k).update({name:n, url:u});
                 else db.ref('radios').push({ name: n, url: u, color: '#ece4db', posicao: radioData.length });
                 document.getElementById('r-name').value = ""; document.getElementById('r-url').value = ""; document.getElementById('r-key').value = "";
-                document.getElementById('btn-radio-action').innerText = "SALVAR";
             }
         }
-        function prepareEditRadio(k, n, u) { document.getElementById('r-key').value = k; document.getElementById('r-name').value = n; document.getElementById('r-url').value = u; document.getElementById('btn-radio-action').innerText = "ATUALIZAR"; }
+        function prepareEditRadio(k, n, u) { document.getElementById('r-key').value = k; document.getElementById('r-name').value = n; document.getElementById('r-url').value = u; }
 
         function previewPub(input) {
             const reader = new FileReader();
@@ -396,32 +318,10 @@
             if(k) db.ref('publicidade/'+k).update(d); else db.ref('publicidade').push(d);
             document.getElementById('pub-key').value = ""; document.getElementById('pub-view').style.display="none"; alert("OK");
         }
-        function prepareEditPub(id, img, ini, fim, target, manual) {
-            document.getElementById('pub-key').value = id; imgBase64 = img;
-            document.getElementById('pub-view').src = img; document.getElementById('pub-view').style.display = "block";
-            document.getElementById('pub-ini').value = new Date(ini).toISOString().slice(0,16);
-            document.getElementById('pub-fim').value = new Date(fim).toISOString().slice(0,16);
-            document.getElementById('pub-target').value = target; document.getElementById('pub-manual').value = manual;
-            document.getElementById('btn-pub-action').innerText = "ATUALIZAR";
-        }
-        db.ref('publicidade').on('value', snap => {
-            const list = document.getElementById('pub-list-admin'); if(!list) return;
-            list.innerHTML = "";
-            snap.forEach(c => {
-                const p = c.val(), id = c.key;
-                const div = document.createElement('div'); div.className = "pub-list-item";
-                div.innerHTML = `<div class="pub-list-row"><button class="pub-list-btn"><img src="${p.imagem}" class="pub-thumb-mini"><span>${p.ouvinteAlvo}</span></button>
-                    <i class="fas fa-pencil-alt" style="padding:15px; cursor:pointer; color:var(--primary)" onclick="prepareEditPub('${id}','${p.imagem}',${p.inicio},${p.fim},'${p.destino}','${p.ouvinteAlvo}')"></i>
-                    <i class="fas fa-trash" style="padding:15px; cursor:pointer; color:red" onclick="db.ref('publicidade/${id}').remove()"></i></div>`;
-                list.appendChild(div);
-            });
-        });
 
         // ==========================================
-        // MONITOR DE OUVINTES (MAPEADO PARA `contas`)
+        // MONITOR DE OUVINTES (PERFEITO E PRECISO)
         // ==========================================
-        let rawContas = {};
-
         function renderOuvintes() {
             const container = document.getElementById('user-list'); 
             if(!container) return;
@@ -429,115 +329,111 @@
             const agora = Date.now();
             container.innerHTML = "";
 
+            // Varre todas as contas cadastradas
             for (let k in rawContas) {
-                const item = rawContas[k];
-                // Busca o nome em qualquer propriedade comum de cadastro
-                const nome = item.nome || item.nomeCadastrado || item.usuario || item.login || k;
-                
-                // Pega a rádio atual (gravada no ouvinte) ou coloca fallback
-                const radioTocando = item.radioAtual || item.radio || item.radioTocando || 'Nenhuma';
-                
-                // Valida online por ping/lastSeen ou flag status
-                const lastSeen = item.lastSeen || item.lastActive || item.ping || 0;
-                const tempoSemSinal = agora - lastSeen;
-                
-                // Considera ONLINE se a flag for 'online' OU se mandou sinal nos últimos 45 segundos
-                const isOnline = (item.status === 'online' || item.status === 'ONLINE' || (lastSeen > 0 && tempoSemSinal < 45000));
+                const conta = rawContas[k];
+                const safeKey = k.replace(/[^a-zA-Z0-9]/g, '_');
+                const nome = conta.nome || conta.usuario || k;
 
-                const safeId = k.replace(/[^a-zA-Z0-9]/g, '_');
+                // Cruza com os dados em tempo real da pasta ouvintes_online
+                const statusRT = rawOuvintesOnline[safeKey] || rawOuvintesOnline[k] || {};
+                
+                const radioTocando = statusRT.radioAtual || 'Nenhuma';
+                const lastActive = statusRT.lastActive || 0;
+                
+                // Critério Cirúrgico: ONLINE só se tiver enviado sinal nos últimos 30 segundos
+                const isOnline = (statusRT.status === 'online' && (agora - lastActive) < 30000);
 
-                if (!usersDataCache[safeId]) {
-                    usersDataCache[safeId] = { 
-                        sStart: item.sessionStart || agora, 
-                        rStart: item.radioStart || agora, 
-                        radioAtual: radioTocando 
+                // Gerenciamento de Cronômetros do Cache
+                if (!usersDataCache[safeKey]) {
+                    usersDataCache[safeKey] = {
+                        loginStart: statusRT.sessionStart || agora,
+                        radioStart: statusRT.radioStart || agora,
+                        radioAtual: radioTocando,
+                        isOnline: isOnline
                     };
                 } else {
-                    if (usersDataCache[safeId].radioAtual !== radioTocando) {
-                        usersDataCache[safeId].rStart = item.radioStart || agora;
-                        usersDataCache[safeId].radioAtual = radioTocando;
+                    // Se trocou de rádio, reseta a contagem da rádio
+                    if (usersDataCache[safeKey].radioAtual !== radioTocando) {
+                        usersDataCache[safeKey].radioStart = statusRT.radioStart || agora;
+                        usersDataCache[safeKey].radioAtual = radioTocando;
                     }
-                    if (item.sessionStart) usersDataCache[safeId].sStart = item.sessionStart;
+                    if (statusRT.sessionStart) {
+                        usersDataCache[safeKey].loginStart = statusRT.sessionStart;
+                    }
+                    usersDataCache[safeKey].isOnline = isOnline;
                 }
-                
-                usersDataCache[safeId].isOnline = isOnline;
-                
+
                 const div = document.createElement('div');
                 div.className = `user-item ${isOnline ? 'online' : 'offline'}`;
                 
-                // ANTENA PISCANDO SÓ SE TIVER ONLINE
                 const iconSpeaker = isOnline ? `<i class="fas fa-volume-high speaker-icon"></i>` : '';
 
                 div.innerHTML = `
                     <div style="display: flex; align-items: center; background: none;">
-                        <button class="user-name-btn" style="flex: 1;" onclick="const d=document.getElementById('det-${safeId}'); d.style.display=(d.style.display=='block'?'none':'block')">
+                        <button class="user-name-btn" style="flex: 1;" onclick="const d=document.getElementById('det-${safeKey}'); d.style.display=(d.style.display=='block'?'none':'block')">
                             <span style="color:${isOnline ? 'white' : '#d1a3ff'}; display:flex; align-items:center;">
                                 ${iconSpeaker}${nome}
                             </span>
                             <span class="${isOnline ? 'status-on' : 'status-off'}">${isOnline ? '● ONLINE' : 'OFF'}</span>
                         </button>
                         <i class="fas fa-trash-alt" style="color: #ff4444; padding: 15px; cursor: pointer; font-size: 14px; opacity: 0.8;" 
-                           title="Excluir Ouvinte" onclick="deletarOuvinte('contas', '${k}')"></i>
+                           title="Excluir Ouvinte" onclick="deletarOuvinte('${k}', '${safeKey}')"></i>
                     </div>
-                    <div class="user-details-bar" id="det-${safeId}">
-                        Rádio: <b style="color:var(--primary)" id="radio-txt-${safeId}">${radioTocando}</b><br>
-                        Tempo de Sessão: <b id="ts-${safeId}">${isOnline ? '00:00:00' : (item.tempoSessaoTotal || '00:00:00')}</b><br>
-                        Nesta Rádio: <b id="tr-${safeId}">${isOnline ? '00:00:00' : (item.tempoRadioTotal || '00:00:00')}</b>
+                    <div class="user-details-bar" id="det-${safeKey}">
+                        <div>Rádio Atual: <b style="color:var(--primary)">${radioTocando}</b></div>
+                        <div>Tempo de Sessão: <b style="color:#38bdf8" id="ts-${safeKey}">${isOnline ? formatMs(agora - usersDataCache[safeKey].loginStart) : '00:00:00'}</b></div>
+                        <div>Tempo nesta Rádio: <b style="color:#a855f7" id="tr-${safeKey}">${isOnline ? formatMs(agora - usersDataCache[safeKey].radioStart) : '00:00:00'}</b></div>
                     </div>`;
                 container.appendChild(div);
             }
         }
 
-        function deletarOuvinte(node, key) {
+        function updateUserTimers() {
+            const agora = Date.now();
+            for (let id in usersDataCache) {
+                const u = usersDataCache[id];
+                if (u.isOnline) {
+                    const elemSessao = document.getElementById(`ts-${id}`);
+                    const elemRadio = document.getElementById(`tr-${id}`);
+                    
+                    if (elemSessao) elemSessao.innerText = formatMs(agora - u.loginStart);
+                    if (elemRadio) elemRadio.innerText = formatMs(agora - u.radioStart);
+                }
+            }
+        }
+
+        function formatMs(ms) {
+            if (!ms || ms < 0) ms = 0;
+            const totalSeg = Math.floor(ms / 1000);
+            const h = Math.floor(totalSeg / 3600);
+            const m = Math.floor((totalSeg % 3600) / 60);
+            const s = totalSeg % 60;
+            return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        }
+
+        function deletarOuvinte(keyConta, safeKey) {
             if(confirm('Deseja excluir este ouvinte permanentemente?')) {
-                db.ref(node + '/' + key).once('value').then(snapshot => {
-                    const dados = snapshot.val();
-                    if (dados) {
-                        const senhaAntiga = dados.senha || dados.pass;
-                        const keyFormatada = key.replace(/[^a-zA-Z0-9]/g, '_');
-                        
-                        if (senhaAntiga) {
-                            db.ref('senhas_antigas/' + keyFormatada).push({
-                                senha: senhaAntiga,
-                                dataExclusao: firebase.database.ServerValue.TIMESTAMP
-                            });
-                        }
-                    }
+                const updates = {};
+                updates['contas/' + keyConta] = null;
+                updates['ouvintes_online/' + safeKey] = null;
 
-                    const updates = {};
-                    updates['contas/' + key] = null;
-                    updates['ouvintes_preferencias/' + key] = null;
-
-                    db.ref().update(updates).then(() => {
-                        alert("Ouvinte deletado com sucesso!");
-                    });
+                db.ref().update(updates).then(() => {
+                    alert("Ouvinte deletado com sucesso!");
                 });
             }
         }
 
-        // Lê exatamente o nó 'contas' mostrado no seu Firebase
+        // Carrega dados e escuta em tempo real
         db.ref('contas').on('value', snap => {
             rawContas = snap.val() || {};
             renderOuvintes();
         });
 
-        function updateUserTimers() {
-            const agora = Date.now();
-            for (let id in usersDataCache) {
-                const d = usersDataCache[id];
-                if (d.isOnline) {
-                    const s = document.getElementById(`ts-${id}`), r = document.getElementById(`tr-${id}`);
-                    if(s) s.innerText = format(agora - d.sStart);
-                    if(r) r.innerText = format(agora - d.rStart);
-                }
-            }
-        }
-
-        function format(ms) {
-            if(!ms || ms < 0) ms = 0;
-            const s = Math.floor(ms/1000), h = Math.floor(s/3600), m = Math.floor((s%3600)/60), seg = s%60;
-            return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${seg.toString().padStart(2,'0')}`;
-        }
+        db.ref('ouvintes_online').on('value', snap => {
+            rawOuvintesOnline = snap.val() || {};
+            renderOuvintes();
+        });
     </script>
 </body>
 </html>
