@@ -45,6 +45,7 @@
         :root { 
             --primary: #A020F0; 
             --pink-light: #FFB6C1; 
+            --pink-accent: #ff007f;
             --bg: #000; 
             --card: #121212; 
         }
@@ -71,7 +72,6 @@
             letter-spacing: 1px;
         }
 
-        /* NOME DO USUÁRIO COM FONTE MAIOR */
         .user-name-title {
             font-size: 16px !important;
             font-weight: bold;
@@ -80,7 +80,6 @@
             display: block;
         }
 
-        /* CONTAINER DOS WIDGETS DO HEADER */
         .header-widgets {
             display: flex;
             align-items: center;
@@ -98,21 +97,18 @@
             gap: 8px;
         }
 
-        /* RELÓGIO COM FONTE AUMENTADA */
         .relogio-box {
             font-size: 18px !important;
             font-weight: bold;
             color: #fff;
         }
 
-        /* CLIMA COM FONTE AUMENTADA */
         .clima-box {
             font-size: 16px !important;
             font-weight: bold;
             color: #fff;
         }
 
-        /* BOTÃO SAIR AUMENTADO */
         .btn-sair { 
             background: rgba(255, 68, 68, 0.1); 
             border: 2px solid #ff4444; 
@@ -344,6 +340,7 @@
             text-transform: uppercase; 
         }
 
+        /* CARD DE MENSAGEM PADRÃO OU RESPONDIDA */
         .msg-item {
             background: #181818;
             padding: 14px 16px;
@@ -351,6 +348,13 @@
             margin-bottom: 12px;
             border-left: 4px solid var(--primary);
             position: relative;
+            transition: border-color 0.3s;
+        }
+
+        /* BORDA DE OUTRA COR PARA MENSAGENS PENDENTES DE RESPOSTA DO ADM */
+        .msg-item.pendente {
+            border-left: 4px solid var(--pink-accent) !important;
+            box-shadow: 0 0 10px rgba(255, 0, 127, 0.15);
         }
 
         .msg-texto-ouvinte {
@@ -458,7 +462,6 @@
             <span id="nome-ouvinte-display" class="user-name-title"></span>
         </div>
 
-        <!-- CLIMA E HORA AUMENTADOS E DINÂMICOS -->
         <div class="header-widgets">
             <div class="widget-item">
                 <i class="far fa-clock" style="color: var(--primary); font-size: 20px;"></i>
@@ -476,14 +479,12 @@
         </div>
     </div>
 
-    <!-- FRASE CENTRO -->
     <div class="frase-centro-playlist">
         CURTA AQUI SUAS RADIOS PREFERIDAS
     </div>
 
     <div class="main-container">
 
-        <!-- SEÇÃO DE SELEÇÃO E PLAYLIST DE RÁDIOS -->
         <div class="card-box">
             <h3>GERENCIAR SUAS RÁDIOS PREFERIDAS</h3>
             
@@ -500,7 +501,6 @@
             </div>
         </div>
 
-        <!-- ENVIAR MENSAGENS E VER RESPOSTAS DO ADM -->
         <div class="card-box">
             <div class="banner-destaque-adm">
                 MANDE MENSAGEM PARA O ADM PARA PEDIR PARA ADICIONAR UMA RADIO QUE VC GOSTE
@@ -515,7 +515,6 @@
 
     </div>
 
-    <!-- PLAYER FOOTER -->
     <div class="player-footer">
         <div class="player-info">
             <div id="player-title" style="font-size: 13px; font-weight: bold; color: #fff;">Nenhuma rádio selecionada</div>
@@ -560,7 +559,6 @@
         }
         document.getElementById('nome-ouvinte-display').innerText = "Olá, " + ouvinteNome;
 
-        // RELÓGIO DIGITAL
         function atualizarRelogio() {
             const agora = new Date();
             document.getElementById('relogio-digital').innerText = agora.toLocaleTimeString('pt-BR');
@@ -568,7 +566,6 @@
         setInterval(atualizarRelogio, 1000);
         atualizarRelogio();
 
-        // OBTER CLIMA E CIDADE POR IP COM ÍCONES DINÂMICOS
         async function carregarClimaPorIP() {
             try {
                 const resGeo = await fetch('https://ipapi.co/json/');
@@ -586,8 +583,7 @@
                         const temp = Math.round(climaData.current_weather.temperature);
                         const code = climaData.current_weather.weathercode;
 
-                        // SELEÇÃO DO ÍCONE COM BASE NO CÓDIGO METEOROLÓGICO
-                        let iconeHTML = '<i class="fas fa-sun" style="color: #ffcc00; font-size: 20px;"></i>'; // Sol padrão
+                        let iconeHTML = '<i class="fas fa-sun" style="color: #ffcc00; font-size: 20px;"></i>';
 
                         if (code === 0 || code === 1) {
                             iconeHTML = '<i class="fas fa-sun" style="color: #ffcc00; font-size: 20px;"></i>';
@@ -615,7 +611,6 @@
         let playlistKeys = JSON.parse(localStorage.getItem('playlist_keys_ouvinte') || '[]');
         let radioTocandoKey = null;
 
-        // CARREGAR PREFERÊNCIAS SALVAS DO OUVINTE DO FIREBASE SE EXISTIREM
         db.ref('ouvintes_preferencias/' + ouvinteId + '/playlist').once('value', snap => {
             if (snap.exists()) {
                 playlistKeys = snap.val();
@@ -624,7 +619,6 @@
             }
         });
 
-        // SALVAR PLAYLIST NO LOCALSTORAGE E FIREBASE
         function salvarPreferenciasOuvinte() {
             localStorage.setItem('playlist_keys_ouvinte', JSON.stringify(playlistKeys));
             db.ref('ouvintes_preferencias/' + ouvinteId).set({
@@ -634,7 +628,6 @@
             });
         }
 
-        // CARREGAR RÁDIOS DO FIREBASE
         db.ref('radios').on('value', snap => {
             todasRadios = [];
             snap.forEach(child => {
@@ -816,7 +809,6 @@
                     }
                 }
 
-                // Ordenação cronológica para garantir a numeração exata em sequência (1, 2, 3...)
                 minhasMsgs.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
 
                 if (minhasMsgs.length === 0) {
@@ -825,24 +817,37 @@
                 }
 
                 minhasMsgs.forEach((m, idx) => {
+                    // Filtrar apenas respostas direcionadas especificamente para ESTA mensagem
+                    let respostasDestaMsg = [];
+                    for (let rId in respostas) {
+                        const r = respostas[rId];
+                        if (r.mensagemId === m.id || r.msgKey === m.id) {
+                            respostasDestaMsg.push(r);
+                        }
+                    }
+
+                    const temResposta = respostasDestaMsg.length > 0;
+                    // Se não tiver resposta, ganha a classe 'pendente' (borda de outra cor)
+                    const classeStatus = temResposta ? '' : 'pendente';
+
                     let htmlMsg = `
-                        <div class="msg-item">
+                        <div class="msg-item ${classeStatus}">
                             <button class="btn-delete-msg" title="Apagar Mensagem" onclick="deletarMensagem('${m.id}')">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
                             <div class="msg-texto-ouvinte">${idx + 1}. ${m.mensagem}</div>
                     `;
 
-                    for (let rId in respostas) {
-                        const r = respostas[rId];
-                        if (r.ouvinteId === ouvinteId || r.ouvinte === ouvinteNome) {
+                    // Só renderiza os balões de resposta se o ADM tiver respondido a esta mensagem
+                    if (temResposta) {
+                        respostasDestaMsg.forEach(r => {
                             htmlMsg += `
                                 <div class="resp-adm-box">
                                     <div style="font-size:12px; color: var(--pink-light); font-weight:bold;">Resposta do ADM:</div>
                                     <div style="font-size:15px; margin-top:3px; color:#fff;">${r.resposta}</div>
                                 </div>
                             `;
-                        }
+                        });
                     }
 
                     htmlMsg += `</div>`;
