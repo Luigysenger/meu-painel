@@ -52,7 +52,9 @@
         .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
         @media (max-width: 480px) { .radio-grid { grid-template-columns: repeat(2, 1fr); } }
 
-        .radio-item { aspect-ratio: 1/1; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #000; font-weight: bold; font-size: 12px; text-align: center; padding: 10px; cursor: pointer; transition: 0.3s; position: relative; border: 2px solid transparent; -webkit-tap-highlight-color: transparent; }
+        .radio-item { aspect-ratio: 1/1; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #000; font-weight: bold; font-size: 12px; text-align: center; padding: 10px; cursor: grab; transition: transform 0.2s, box-shadow 0.2s; position: relative; border: 2px solid transparent; -webkit-tap-highlight-color: transparent; }
+        .radio-item:active { cursor: grabbing; }
+        .radio-item.sortable-ghost { opacity: 0.4; border: 2px dashed #1DB954; }
         .radio-item.active { background: #000 !important; color: var(--primary) !important; border-color: var(--primary); box-shadow: 0 0 15px rgba(29, 185, 84, 0.3); }
         .radio-actions { position: absolute; top: 5px; right: 5px; display: flex; gap: 5px; z-index: 10; }
         .radio-actions i { cursor: pointer; padding: 4px; background: rgba(0,0,0,0.1); border-radius: 4px; font-size: 11px; }
@@ -72,10 +74,6 @@
         .pub-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
         @media (max-width: 600px) { .pub-container { grid-template-columns: 1fr; } }
         .pub-preview { width: 100%; max-height: 120px; object-fit: contain; margin-top: 10px; border-radius: 10px; border: 1px dashed #444; display: none; }
-        .pub-list-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; overflow: hidden; border-left: 4px solid var(--primary); }
-        .pub-list-row { display: flex; align-items: center; width: 100%; }
-        .pub-list-btn { flex: 1; padding: 12px; background: none; border: none; color: white; text-align: left; display: flex; align-items: center; gap: 10px; cursor: pointer; min-width: 0; }
-        .pub-thumb-mini { width: 40px; height: 25px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
 
         /* MONITOR DE OUVINTES */
         .user-item { background: #1a1a1a; margin-bottom: 8px; border-radius: 10px; overflow: hidden; transition: 0.3s; }
@@ -144,7 +142,7 @@
                     <input type="text" id="r-url" placeholder="Link .mp3">
                     <button class="btn-save" id="btn-radio-action" onclick="addRadio()">SALVAR</button>
                 </div>
-                <h3>GRADE DE RÁDIOS</h3>
+                <h3>GRADE DE RÁDIOS (ARRASTE PARA ORGANIZAR)</h3>
                 <div id="radio-list" class="radio-grid"></div>
                 <div class="player-footer">
                     <div id="now-title" style="font-size:10px; color:#888; margin-bottom:15px;">SELECIONE UMA RÁDIO</div>
@@ -199,7 +197,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const player = document.getElementById('audio-player');
-        let radioData = [], activeIndex = -1, imgBase64 = "";
+        let radioData = [], activeIndex = -1, imgBase64 = "", sortableInstance = null;
         let rawContas = {}, rawOuvintesOnline = {}, usersDataCache = {};
 
         // Atualizador de relógio e cronômetros
@@ -273,25 +271,49 @@
             });
         }
 
+        // CARREGA E HABILITA ARRASTAR DE RÁDIOS
         db.ref('radios').on('value', snap => {
             radioData = []; snap.forEach(c => { radioData.push({ ...c.val(), key: c.key }); });
             radioData.sort((a,b) => (a.posicao || 0) - (b.posicao || 0));
+            renderRadioGrid();
+        });
+
+        function renderRadioGrid() {
             const list = document.getElementById('radio-list'); if(!list) return;
             list.innerHTML = "";
             radioData.forEach((r, i) => {
                 const div = document.createElement('div');
                 div.className = `radio-item ${activeIndex === i ? 'active' : ''}`;
                 div.style.background = r.color || '#ece4db';
+                div.dataset.key = r.key;
                 div.onclick = () => playRadio(i);
                 div.innerHTML = `<div class="radio-actions"><i class="fas fa-pencil-alt" onclick="event.stopPropagation(); prepareEditRadio('${r.key}','${r.name}','${r.url}')"></i><i class="fas fa-times" onclick="event.stopPropagation(); if(confirm('Excluir?')) db.ref('radios/${r.key}').remove()"></i></div><i class="fas fa-tower-broadcast antena"></i><span>${r.name}</span>`;
                 list.appendChild(div);
             });
-        });
+
+            // Ativa Drag and Drop caso ainda não tenha ativado
+            if(!sortableInstance) {
+                sortableInstance = new Sortable(list, {
+                    animation: 150,
+                    ghostClass: 'sortable-ghost',
+                    onEnd: function () {
+                        const items = list.querySelectorAll('.radio-item');
+                        items.forEach((item, index) => {
+                            const key = item.dataset.key;
+                            if(key) {
+                                db.ref('radios/' + key).update({ posicao: index });
+                            }
+                        });
+                    }
+                });
+            }
+        }
 
         function playRadio(idx) {
             activeIndex = idx; const r = radioData[idx]; player.src = r.url; player.play();
             document.getElementById('now-title').innerText = "OUVINDO: " + r.name;
             document.getElementById('play-icon').className = "fas fa-stop";
+            renderRadioGrid();
         }
         function togglePlay() { if(player.paused) { player.play(); document.getElementById('play-icon').className = "fas fa-stop"; } else { player.pause(); document.getElementById('play-icon').className = "fas fa-play"; } }
         function nextRadio() { if(radioData.length) playRadio((activeIndex + 1) % radioData.length); }
@@ -320,7 +342,7 @@
         }
 
         // ==========================================
-        // MONITOR DE OUVINTES (PERFEITO E PRECISO)
+        // MONITOR DE OUVINTES (DETECÇÃO RÁPIDA E PRESEVERAÇÃO)
         // ==========================================
         function renderOuvintes() {
             const container = document.getElementById('user-list'); 
@@ -329,22 +351,20 @@
             const agora = Date.now();
             container.innerHTML = "";
 
-            // Varre todas as contas cadastradas
             for (let k in rawContas) {
                 const conta = rawContas[k];
                 const safeKey = k.replace(/[^a-zA-Z0-9]/g, '_');
                 const nome = conta.nome || conta.usuario || k;
 
-                // Cruza com os dados em tempo real da pasta ouvintes_online
+                // Busca dados em tempo real no banco
                 const statusRT = rawOuvintesOnline[safeKey] || rawOuvintesOnline[k] || {};
                 
                 const radioTocando = statusRT.radioAtual || 'Nenhuma';
                 const lastActive = statusRT.lastActive || 0;
                 
-                // Critério Cirúrgico: ONLINE só se tiver enviado sinal nos últimos 30 segundos
-                const isOnline = (statusRT.status === 'online' && (agora - lastActive) < 30000);
+                // Critério de presença instantânea: considera online se status==='online' E o ping ocorreu há menos de 120s
+                const isOnline = (statusRT.status === 'online' && (lastActive === 0 || (agora - lastActive) < 120000));
 
-                // Gerenciamento de Cronômetros do Cache
                 if (!usersDataCache[safeKey]) {
                     usersDataCache[safeKey] = {
                         loginStart: statusRT.sessionStart || agora,
@@ -353,7 +373,6 @@
                         isOnline: isOnline
                     };
                 } else {
-                    // Se trocou de rádio, reseta a contagem da rádio
                     if (usersDataCache[safeKey].radioAtual !== radioTocando) {
                         usersDataCache[safeKey].radioStart = statusRT.radioStart || agora;
                         usersDataCache[safeKey].radioAtual = radioTocando;
@@ -424,7 +443,6 @@
             }
         }
 
-        // Carrega dados e escuta em tempo real
         db.ref('contas').on('value', snap => {
             rawContas = snap.val() || {};
             renderOuvintes();
