@@ -9,23 +9,31 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #1DB954; --bg: #000; --card: #121212; --text-muted: #b3b3b3; --purple-light: #d1a3ff; }
+        :root { --primary: #1DB954; --bg: #000; --card: #121212; --text-muted: #b3b3b3; --purple-light: #d1a3ff; --purple-brand: #a855f7; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 10px; user-select: none; }
         
-        /* CABEÇALHO */
-        .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 15px 20px; border-radius: 15px; border: 1px solid #333; margin-bottom: 20px; gap: 15px; }
-        .header-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        .header h2 { margin: 0; color: var(--primary); font-size: 18px; white-space: nowrap; }
-        .btn-msg-notif { background: #ff4444; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; font-size: 13px; }
+        /* CABEÇALHO ESTILO PAINEL OUVINTE */
+        .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 15px 20px; border-radius: 15px; border: 1px solid #282828; margin-bottom: 20px; gap: 15px; flex-wrap: wrap; }
+        .header-brand { display: flex; flex-direction: column; gap: 2px; }
+        .header-title { font-size: 20px; font-weight: 900; color: #a855f7; letter-spacing: 1px; margin: 0; text-transform: uppercase; }
+        .header-sub { font-size: 13px; color: #e5e7eb; font-weight: 600; margin: 0; }
+        
+        .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        
+        .info-pill { background: #1e1e1e; border: 1px solid #333; padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: bold; color: #fff; display: flex; align-items: center; gap: 8px; }
+        .info-pill i { color: #a855f7; }
+        
+        .btn-msg-notif { background: #ff4444; color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; font-size: 13px; }
         .btn-msg-notif span { background: white; color: #ff4444; padding: 2px 6px; border-radius: 50%; font-size: 12px; }
-        .btn-header { background: none; border: 1px solid #333; color: white; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 5px; }
-        .btn-sair { color: #ff4444; border-color: #442222; }
-        #hora { font-size: 20px; font-weight: 900; min-width: 80px; text-align: right; }
+        .btn-header { background: #1e1e1e; border: 1px solid #333; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
+        .btn-header:hover { background: #2a2a2a; }
+        .btn-sair { color: #ff4444; border-color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+        .btn-sair:hover { background: rgba(239, 68, 68, 0.2); }
 
-        @media (max-width: 600px) {
-            .header { flex-direction: column; text-align: center; }
-            .header-left { justify-content: center; }
-            #hora { text-align: center; font-size: 24px; }
+        @media (max-width: 850px) {
+            .header { flex-direction: column; align-items: stretch; text-align: center; }
+            .header-brand { align-items: center; }
+            .header-right { justify-content: center; }
         }
 
         /* MENSAGENS */
@@ -86,18 +94,39 @@
     </style>
 </head>
 <body>
+
+    <!-- CABEÇALHO ATUALIZADO IGUAL AO DO OUVINTE -->
     <div class="header">
-        <div class="header-left">
-            <h2><i class="fab fa-spotify"></i> LUIGY ADM</h2>
-            <button class="btn-header" onclick="location.reload()"><i class="fas fa-sync-alt"></i> REINICIAR</button>
-            <button class="btn-header btn-sair" onclick="logout()"><i class="fas fa-sign-out-alt"></i> SAIR</button>
+        <div class="header-brand">
+            <h2 class="header-title">PAINEL ADM</h2>
+            <p class="header-sub">Seja bem vindo ADM</p>
         </div>
-        <div class="header-center">
+
+        <div class="header-right">
             <button class="btn-msg-notif" onclick="toggleMensagens()">
                 <i class="fas fa-envelope"></i> MENSAGENS <span id="count-msg">0</span>
             </button>
+            
+            <button class="btn-header" onclick="location.reload()" title="Reiniciar">
+                <i class="fas fa-sync-alt"></i> REINICIAR
+            </button>
+
+            <!-- PILL DE HORA -->
+            <div class="info-pill">
+                <i class="far fa-clock"></i>
+                <span id="hora">00:00:00</span>
+            </div>
+
+            <!-- PILL DE CLIMA COM ÍCONES DINÂMICOS -->
+            <div class="info-pill" id="weather-pill">
+                <i class="fas fa-sun" id="weather-icon" style="color: #f59e0b;"></i>
+                <span id="weather-text">Carregando...</span>
+            </div>
+
+            <button class="btn-header btn-sair" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> SAIR
+            </button>
         </div>
-        <div id="hora">00:00:00</div>
     </div>
 
     <div id="container-mensagens-adm">
@@ -177,11 +206,83 @@
         const player = document.getElementById('audio-player');
         let radioData = [], activeIndex = -1, usersDataCache = {}, imgBase64 = "";
 
+        // RELÓGIO & TIMERS
         setInterval(() => {
             const hElement = document.getElementById('hora');
             if(hElement) hElement.innerText = new Date().toLocaleTimeString('pt-BR');
             updateUserTimers();
         }, 1000);
+
+        // PREVISÃO DO TEMPO COM ÍCONES DINÂMICOS (OPEN-METEO)
+        async function fetchWeather() {
+            try {
+                if ("geolocation" in navigator) {
+                    navigator.geolocation.getCurrentPosition(async (pos) => {
+                        const lat = pos.coords.latitude;
+                        const lon = pos.coords.longitude;
+                        
+                        // Busca o nome do município/cidade
+                        const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/reverse?latitude=${lat}&longitude=${lon}`);
+                        const geoData = await geoRes.json();
+                        const city = geoData.results?.[0]?.name || "Local";
+
+                        // Busca clima e código do tempo
+                        const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+                        const wData = await wRes.json();
+                        const temp = Math.round(wData.current_weather.temperature);
+                        const code = wData.current_weather.weathercode;
+
+                        updateWeatherUI(city, temp, code);
+                    }, () => fetchFallbackWeather());
+                } else {
+                    fetchFallbackWeather();
+                }
+            } catch (e) {
+                fetchFallbackWeather();
+            }
+        }
+
+        async function fetchFallbackWeather() {
+            try {
+                // Fallback para Cascavel
+                const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=-24.9578&longitude=-53.4594&current_weather=true`);
+                const wData = await wRes.json();
+                const temp = Math.round(wData.current_weather.temperature);
+                const code = wData.current_weather.weathercode;
+                updateWeatherUI("Cascavel", temp, code);
+            } catch (e) {
+                document.getElementById('weather-text').innerText = "Indisponível";
+            }
+        }
+
+        function updateWeatherUI(city, temp, code) {
+            const txt = document.getElementById('weather-text');
+            const icon = document.getElementById('weather-icon');
+            txt.innerText = `${city}: ${temp}°C`;
+
+            // Mapeia ícones baseados na WMO Weather Interpretation Codes
+            if (code === 0) {
+                icon.className = "fas fa-sun";
+                icon.style.color = "#f59e0b"; // Ensolarado
+            } else if (code >= 1 && code <= 3) {
+                icon.className = "fas fa-cloud-sun";
+                icon.style.color = "#cbd5e1"; // Parcialmente Nublado
+            } else if (code >= 45 && code <= 48) {
+                icon.className = "fas fa-smog";
+                icon.style.color = "#94a3b8"; // Neblina
+            } else if (code >= 51 && code <= 67) {
+                icon.className = "fas fa-cloud-rain";
+                icon.style.color = "#38bdf8"; // Chuva Leve
+            } else if (code >= 80 && code <= 99) {
+                icon.className = "fas fa-cloud-showers-heavy";
+                icon.style.color = "#60a5fa"; // Tempestade / Chuva Forte
+            } else {
+                icon.className = "fas fa-cloud";
+                icon.style.color = "#94a3b8";
+            }
+        }
+
+        fetchWeather();
 
         function logout() { if(confirm("Sair?")) { localStorage.removeItem('usuarioNome'); window.location.href = 'index.html'; } }
         function toggleMensagens() { document.getElementById('container-mensagens-adm').classList.toggle('aberto'); }
