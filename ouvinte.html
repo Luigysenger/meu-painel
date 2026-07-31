@@ -1,865 +1,429 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PAINEL OUVINTE - LUIGY</title>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
-    <style>
-        *, *::before, *::after {
-            box-sizing: border-box !important;
-            max-width: 100% !important;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PAINEL DO OUVINTE - GRUPO DIVULGA</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    /* ESTILOS GERAIS DO PAINEL DO OUVINTE */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-        html {
-            width: 100vw !important;
-            overflow-x: hidden !important;
-            overscroll-behavior-x: none !important;
-            touch-action: pan-y !important;
-        }
+    body {
+      background-color: #05020a;
+      color: #ffffff;
+      padding: 20px 40px 80px 40px;
+    }
 
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: #000;
-            color: white;
-            margin: 0;
-            padding: 20px;
-            width: 100vw !important;
-            overflow-x: hidden !important;
-            overscroll-behavior-x: none !important;
-            touch-action: pan-y !important;
-            -webkit-overflow-scrolling: touch;
-            user-select: none;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+    /* HEADER */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+    }
 
-        :root { 
-            --primary: #A020F0; 
-            --pink-light: #FFB6C1; 
-            --pink-accent: #ff007f;
-            --bg: #000; 
-            --card: #121212; 
-        }
-        
-        .header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            background: #121212; 
-            padding: 20px; 
-            border-radius: 15px; 
-            border: 1px solid #333; 
-            margin-bottom: 15px; 
-            width: 100%; 
-            max-width: 1200px; 
-        }
+    .top-bar h1 {
+      font-size: 20px;
+      font-weight: 900;
+      color: #d100d1;
+      letter-spacing: 1px;
+    }
 
-        .header h2 { 
-            margin: 0; 
-            color: var(--primary); 
-            font-size: 26px; 
-            font-weight: 900;
-            text-transform: uppercase; 
-            letter-spacing: 1px;
-        }
+    .top-bar p {
+      font-size: 11px;
+      color: #a39bb8;
+      margin-top: 2px;
+      font-weight: 700;
+    }
 
-        .user-name-title {
-            font-size: 16px !important;
-            font-weight: bold;
-            color: #ddd;
-            margin-top: 4px;
-            display: block;
-        }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
 
-        .header-widgets {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            color: #ccc;
-        }
+    .btn-action {
+      background: #120824;
+      border: 1px solid #28144a;
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
 
-        .widget-item {
-            background: #1e1e1e;
-            padding: 8px 15px;
-            border-radius: 10px;
-            border: 1px solid #333;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+    .btn-sair {
+      background-color: #d100d1;
+      border: none;
+      cursor: pointer;
+    }
 
-        .relogio-box {
-            font-size: 18px !important;
-            font-weight: bold;
-            color: #fff;
-        }
+    /* BANNER PRINCIPAL */
+    .banner-title {
+      text-align: center;
+      font-size: 16px;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      margin-bottom: 25px;
+      text-transform: uppercase;
+    }
 
-        .clima-box {
-            font-size: 16px !important;
-            font-weight: bold;
-            color: #fff;
-        }
+    /* GRID PRINCIPAL */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 25px;
+    }
 
-        .btn-sair { 
-            background: rgba(255, 68, 68, 0.1); 
-            border: 2px solid #ff4444; 
-            color: #ff4444; 
-            padding: 10px 18px !important; 
-            border-radius: 10px; 
-            cursor: pointer; 
-            font-size: 14px !important; 
-            font-weight: 900; 
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+    .section-box {
+      background-color: #0c051a;
+      border: 1px solid #1c0e38;
+      border-radius: 12px;
+      padding: 20px;
+    }
 
-        .btn-sair:hover {
-            background: #ff4444;
-            color: #fff;
-        }
+    .section-subtitle {
+      text-align: center;
+      font-size: 11px;
+      font-weight: 900;
+      color: #d100d1;
+      letter-spacing: 1.5px;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+    }
 
-        .frase-centro-playlist {
-            text-align: center;
-            font-size: 22px;
-            font-weight: 800;
-            color: #fff;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin: 10px 0 20px 0;
-            width: 100%;
-            max-width: 1200px;
-            background: linear-gradient(90deg, transparent, #15002b, transparent);
-            padding: 10px;
-            border-radius: 10px;
-        }
+    /* GERENCIAR PREFERIDAS */
+    .pref-container {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 15px;
+    }
 
-        .main-container { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); 
-            gap: 20px; 
-            width: 100%; 
-            max-width: 1200px; 
-            margin-bottom: 140px; 
-            align-items: start;
-        }
+    .pref-list-title {
+      font-size: 10px;
+      font-weight: 800;
+      color: #a39bb8;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
 
-        .card-box { 
-            background: var(--card); 
-            border-radius: 20px; 
-            padding: 20px; 
-            border: 1px solid #282828; 
-            width: 100%; 
-        }
+    .pref-items {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
 
-        h3 { 
-            color: var(--primary); 
-            font-size: 16px; 
-            font-weight: 900;
-            text-transform: uppercase; 
-            letter-spacing: 1.5px; 
-            margin-bottom: 20px; 
-            text-align: center; 
-            line-height: 1.4;
-        }
+    .pref-item-btn {
+      background-color: #d8b4fe;
+      color: #000;
+      border: none;
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 800;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
 
-        .sub-titulo-secao {
-            font-size: 14px !important;
-            font-weight: 800;
-            text-align: left;
-            color: #d8b4fe !important;
-            margin-bottom: 12px;
-        }
+    /* GRADE PREFERIDAS */
+    .grid-preferidas {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
 
-        .banner-destaque-adm {
-            background: #f0e6ff;
-            color: #2a004f;
-            border: 2px solid var(--primary);
-            border-radius: 12px;
-            padding: 15px;
-            font-size: 14px;
-            font-weight: 900;
-            text-transform: uppercase;
-            text-align: center;
-            letter-spacing: 1px;
-            line-height: 1.4;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 15px rgba(160, 32, 240, 0.3);
-        }
+    .card-pref {
+      aspect-ratio: 1;
+      border-radius: 8px;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 9px;
+      font-weight: 900;
+      color: #000;
+      cursor: pointer;
+      position: relative;
+    }
 
-        .radios-section-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
+    .card-pref.active {
+      border: 2px solid #00e676;
+      box-shadow: 0 0 12px rgba(0, 230, 118, 0.4);
+    }
 
-        @media (max-width: 768px) {
-            .radios-section-container {
-                grid-template-columns: 1fr;
-            }
-            .header {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-            .header-widgets {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-        }
+    .card-pref.active::before {
+      content: "\f09e";
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      position: absolute;
+      top: 6px;
+      color: #00e676;
+      font-size: 12px;
+    }
 
-        .catalogo-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+    /* CORES RÁDIOS */
+    .c-green { background-color: #86efac; }
+    .c-yellow { background-color: #fef08a; }
+    .c-lightyellow { background-color: #fef9c3; }
+    .c-cyan { background-color: #a7f3d0; }
+    .c-white { background-color: #f3f4f6; }
+    .c-pink { background-color: #fca5a5; }
+    .c-purple { background-color: #c084fc; }
+    .c-peach { background-color: #fed7aa; }
 
-        .bar-radio-catalogo {
-            background: #1a1a1a;
-            border: 1px solid #333;
-            border-radius: 10px;
-            padding: 12px 15px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            transition: 0.3s;
-            color: #fff;
-            font-weight: bold;
-            font-size: 13px;
-        }
+    /* MENSAGENS AO ADM */
+    .msg-header-box {
+      background-color: #ebd5ff;
+      color: #000;
+      font-size: 11px;
+      font-weight: 900;
+      text-align: center;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+    }
 
-        .bar-radio-catalogo.adicionada {
-            background: #d8b4fe !important;
-            color: #2e0054 !important;
-            border-color: #a855f7 !important;
-        }
+    .msg-textarea {
+      width: 100%;
+      height: 100px;
+      background-color: #07030f;
+      border: 1px solid #231245;
+      border-radius: 8px;
+      padding: 12px;
+      color: #fff;
+      font-size: 11px;
+      outline: none;
+      resize: none;
+      margin-bottom: 12px;
+    }
 
-        .bar-radio-catalogo .btn-add-icon {
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+    .btn-enviar-msg {
+      width: 100%;
+      background-color: #a855f7;
+      color: #fff;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 900;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
 
-        .playlist-grid-ouvinte {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-            gap: 10px;
-            width: 100%;
-            min-height: 120px;
-        }
+    .respostas-title {
+      text-align: center;
+      font-size: 11px;
+      font-weight: 900;
+      color: #d100d1;
+      margin: 20px 0 10px 0;
+      text-transform: uppercase;
+    }
 
-        .radio-card-quadrado {
-            aspect-ratio: 1 / 1;
-            border-radius: 14px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 10px;
-            cursor: grab;
-            color: #000;
-            font-weight: bold;
-            transition: background 0.3s, transform 0.2s, box-shadow 0.2s, border 0.3s;
-            position: relative;
-            border: 2px solid transparent;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
+    .respostas-empty {
+      text-align: center;
+      font-size: 10px;
+      color: #666;
+    }
 
-        .radio-card-quadrado:active {
-            cursor: grabbing;
-        }
+    /* PLAYER FIXO INFERIOR */
+    .footer-player {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: #05020a;
+      border-top: 1px solid #1c0e38;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
 
-        .radio-card-quadrado.playing {
-            background: #151515 !important;
-            color: #fff !important;
-            border-color: #00ff66 !important;
-            box-shadow: 0 0 20px rgba(0, 255, 102, 0.4);
-        }
+    .radio-tocando-nome {
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      color: #fff;
+    }
 
-        .radio-card-quadrado i.icon-radio {
-            font-size: 26px;
-            margin-bottom: 6px;
-        }
+    .player-controls {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
 
-        .antena-piscando {
-            color: #00ff66;
-            font-size: 24px !important;
-            animation: piscar 1s infinite alternate;
-        }
-
-        @keyframes piscar {
-            0% { opacity: 0.3; transform: scale(0.95); }
-            100% { opacity: 1; transform: scale(1.1); }
-        }
-
-        .radio-card-quadrado .radio-name {
-            font-size: 11px;
-            text-transform: uppercase;
-            font-weight: 900;
-            line-height: 1.2;
-            word-break: break-word;
-        }
-
-        .input-msg { 
-            width: 100%; 
-            background: #0a0a0a; 
-            border: 1px solid #333; 
-            border-radius: 10px; 
-            color: #fff; 
-            padding: 14px; 
-            margin-bottom: 10px; 
-            outline: none; 
-            resize: none;
-            font-size: 16px;
-            font-family: inherit;
-        }
-
-        .btn-enviar { 
-            background: var(--primary); 
-            color: #fff; 
-            border: none; 
-            padding: 14px; 
-            border-radius: 10px; 
-            font-weight: bold; 
-            font-size: 15px;
-            width: 100%; 
-            cursor: pointer; 
-            text-transform: uppercase; 
-        }
-
-        /* CARD DE MENSAGEM PADRÃO OU RESPONDIDA */
-        .msg-item {
-            background: #181818;
-            padding: 14px 16px;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            border-left: 4px solid var(--primary);
-            position: relative;
-            transition: border-color 0.3s;
-        }
-
-        /* BORDA DE OUTRA COR PARA MENSAGENS PENDENTES DE RESPOSTA DO ADM */
-        .msg-item.pendente {
-            border-left: 4px solid var(--pink-accent) !important;
-            box-shadow: 0 0 10px rgba(255, 0, 127, 0.15);
-        }
-
-        .msg-texto-ouvinte {
-            font-size: 16px;
-            font-weight: 700;
-            color: #fff;
-            padding-right: 30px;
-            line-height: 1.4;
-        }
-
-        .btn-delete-msg {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            background: none;
-            border: none;
-            color: #ff4444;
-            cursor: pointer;
-            font-size: 16px;
-            opacity: 0.7;
-            transition: 0.2s;
-        }
-
-        .btn-delete-msg:hover {
-            opacity: 1;
-            transform: scale(1.15);
-        }
-
-        .resp-adm-box {
-            background: #25122e;
-            padding: 12px 14px;
-            border-radius: 8px;
-            margin-top: 10px;
-            border-left: 3px solid var(--pink-light);
-        }
-
-        .player-footer { 
-            position: fixed; 
-            bottom: 0; 
-            left: 0; 
-            right: 0; 
-            background: #111; 
-            padding: 12px 20px; 
-            border-top: 2px solid var(--primary); 
-            z-index: 100; 
-            display: flex; 
-            flex-direction: column;
-            align-items: center; 
-            gap: 8px;
-        }
-
-        .player-info { text-align: center; }
-
-        .player-controls {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 20px;
-        }
-
-        .btn-control-step {
-            background: #222;
-            color: #fff;
-            border: 1px solid #444;
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .btn-control-step:hover {
-            background: #333;
-            border-color: var(--primary);
-        }
-
-        .btn-play {
-            background: var(--primary);
-            color: #fff;
-            border: none;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            cursor: pointer;
-            box-shadow: 0 0 12px rgba(160, 32, 240, 0.5);
-        }
-
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
-    </style>
+    .btn-play-main {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background-color: #a855f7;
+      color: #fff;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
 
-    <div class="header">
+  <!-- HEADER -->
+  <header class="top-bar">
+    <div>
+      <h1>PAINEL DO OUVINTE</h1>
+      <p id="usuario-boas-vindas">Olá, GABI</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-action"><i class="far fa-clock"></i> 17:58:40</button>
+      <button class="btn-action"><i class="fas fa-sun"></i> Cascavel: 22°C</button>
+      <button class="btn-action btn-sair"><i class="fas fa-sign-out-alt"></i> SAIR</button>
+    </div>
+  </header>
+
+  <div class="banner-title">CURTA AQUI SUAS RADIOS PREFERIDAS</div>
+
+  <!-- GRID CONTEÚDO -->
+  <div class="main-grid">
+    
+    <!-- ESQUERDA: GERENCIAR RÁDIOS PREFERIDAS -->
+    <div class="section-box">
+      <div class="section-subtitle">GERENCIAR SUAS RÁDIOS PREFERIDAS</div>
+      
+      <div class="pref-container">
         <div>
-            <h2>PAINEL DO OUVINTE</h2>
-            <span id="nome-ouvinte-display" class="user-name-title"></span>
+          <div class="pref-list-title">1. ADICIONE SUAS RÁDIOS</div>
+          <div class="pref-items">
+            <button class="pref-item-btn"><i class="fas fa-check"></i> JOVEN PAM CASCAVEL</button>
+            <button class="pref-item-btn"><i class="fas fa-check"></i> MARINGA FM</button>
+            <button class="pref-item-btn"><i class="fas fa-check"></i> ROTA DO SOL - BOA VISTA DA APARECIDA</button>
+            <button class="pref-item-btn"><i class="fas fa-check"></i> CAPITAL FM - CASCAVEL</button>
+            <button class="pref-item-btn"><i class="fas fa-check"></i> MIX - PONTA GROSSA</button>
+            <button class="pref-item-btn"><i class="fas fa-check"></i> ANTENA 1</button>
+            <button class="pref-item-btn"><i class="fas fa-check"></i> KISS FM - SÃO PAULO</button>
+            <button class="pref-item-btn"><i class="fas fa-check"></i> COLMEIA - CASCAVEL</button>
+            <button class="pref-item-btn"><i class="fas fa-check"></i> TAROBÁ - CASCAVEL</button>
+            <button class="pref-item-btn"><i class="fas fa-check"></i> OURO VERDE - CURITIBA</button>
+            <button class="pref-item-btn"><i class="fas fa-check"></i> ALPHA FM - SÃO PAULO</button>
+            <button class="pref-item-btn"><i class="fas fa-check"></i> CLUBE FM - BRASÍLIA</button>
+          </div>
         </div>
 
-        <div class="header-widgets">
-            <div class="widget-item">
-                <i class="far fa-clock" style="color: var(--primary); font-size: 20px;"></i>
-                <span id="relogio-digital" class="relogio-box">00:00:00</span>
-            </div>
-            
-            <div class="widget-item">
-                <span id="icone-clima-dinamico"><i class="fas fa-sun" style="color: #ffcc00; font-size: 20px;"></i></span>
-                <span id="clima-cidade" class="clima-box">Carregando clima...</span>
-            </div>
-            
-            <button class="btn-sair" onclick="logout()">
-                <i class="fas fa-sign-out-alt"></i> SAIR
-            </button>
+        <div>
+          <div class="pref-list-title">2. SEGURE E ARRASTE PARA DEIXAR NA ORDEM SUAS RÁDIOS</div>
+          <div class="grid-preferidas">
+            <div class="card-pref c-green active" onclick="selecionarRadio('JOVEN PAM CASCAVEL')">JOVEN PAM CASCAVEL</div>
+            <div class="card-pref c-yellow" onclick="selecionarRadio('ROTA DO SOL - BOA VISTA DA APARECIDA')">ROTA DO SOL - BOA VISTA DA APARECIDA</div>
+            <div class="card-pref c-lightyellow" onclick="selecionarRadio('MIX - PONTA GROSSA')">MIX - PONTA GROSSA</div>
+            <div class="card-pref c-yellow" onclick="selecionarRadio('MARINGA FM')">MARINGA FM</div>
+            <div class="card-pref c-white" onclick="selecionarRadio('ANTENA 1')">ANTENA 1</div>
+            <div class="card-pref c-cyan" onclick="selecionarRadio('KISS FM - SÃO PAULO')">KISS FM - SÃO PAULO</div>
+            <div class="card-pref c-cyan" onclick="selecionarRadio('OURO VERDE - CURITIBA')">OURO VERDE - CURITIBA</div>
+            <div class="card-pref c-yellow" onclick="selecionarRadio('COLMEIA - CASCAVEL')">COLMEIA - CASCAVEL</div>
+            <div class="card-pref c-purple" onclick="selecionarRadio('CAPITAL FM - CASCAVEL')">CAPITAL FM - CASCAVEL</div>
+            <div class="card-pref c-pink" onclick="selecionarRadio('TAROBÁ - CASCAVEL')">TAROBÁ - CASCAVEL</div>
+            <div class="card-pref c-green" onclick="selecionarRadio('ALPHA FM - SÃO PAULO')">ALPHA FM - SÃO PAULO</div>
+            <div class="card-pref c-purple" onclick="selecionarRadio('CLUBE FM - BRASÍLIA')">CLUBE FM - BRASÍLIA</div>
+            <div class="card-pref c-peach" onclick="selecionarRadio('COSTA OESTE - SANTA HELENA')">COSTA OESTE - SANTA HELENA</div>
+            <div class="card-pref c-white" onclick="selecionarRadio('FM O DIA - RIO DE JANEIRO')">FM O DIA - RIO DE JANEIRO</div>
+            <div class="card-pref c-pink" onclick="selecionarRadio('98FM - CURITIBA')">98FM - CURITIBA</div>
+          </div>
         </div>
+      </div>
     </div>
 
-    <div class="frase-centro-playlist">
-        CURTA AQUI SUAS RADIOS PREFERIDAS
+    <!-- DIREITA: MENSAGENS AO ADM -->
+    <div class="section-box">
+      <div class="msg-header-box">MANDE MENSAGEM PARA O ADM PARA PEDIR PARA ADICIONAR UMA RADIO QUE VC GOSTE</div>
+      <textarea class="msg-textarea" placeholder="Escreva seu recado ou pedido de rádio aqui..."></textarea>
+      <button class="btn-enviar-msg">ENVIAR MENSAGEM</button>
+
+      <div class="respostas-title">SUAS MENSAGENS E RESPOSTAS</div>
+      <div class="respostas-empty">Você ainda não enviou mensagens.</div>
     </div>
 
-    <div class="main-container">
+  </div>
 
-        <div class="card-box">
-            <h3>GERENCIAR SUAS RÁDIOS PREFERIDAS</h3>
-            
-            <div class="radios-section-container">
-                <div>
-                    <h3 class="sub-titulo-secao">1. ADICIONE SUAS RÁDIOS</h3>
-                    <div id="catalogo-radios" class="catalogo-list"></div>
-                </div>
-
-                <div>
-                    <h3 class="sub-titulo-secao">2. SEGURE E ARRASTE PARA DEIXAR NA ORDEM SUAS RÁDIOS</h3>
-                    <div id="grid-playlist" class="playlist-grid-ouvinte"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card-box">
-            <div class="banner-destaque-adm">
-                MANDE MENSAGEM PARA O ADM PARA PEDIR PARA ADICIONAR UMA RADIO QUE VC GOSTE
-            </div>
-
-            <textarea id="texto-mensagem" class="input-msg" rows="3" placeholder="Escreva seu recado ou pedido de rádio aqui..."></textarea>
-            <button class="btn-enviar" onclick="enviarMensagem()">Enviar Mensagem</button>
-
-            <h3 style="margin-top: 25px;">SUAS MENSAGENS E RESPOSTAS</h3>
-            <div id="lista-respostas-adm"></div>
-        </div>
-
+  <!-- PLAYER FIXO INFERIOR -->
+  <div class="footer-player">
+    <span class="radio-tocando-nome" id="radio-nome-display">JOVEN PAM CASCAVEL</span>
+    <div class="player-controls">
+      <i class="fas fa-step-backward" style="font-size: 11px; cursor: pointer;"></i>
+      <button class="btn-play-main"><i class="fas fa-pause"></i></button>
+      <i class="fas fa-step-forward" style="font-size: 11px; cursor: pointer;"></i>
     </div>
+  </div>
 
-    <div class="player-footer">
-        <div class="player-info">
-            <div id="player-title" style="font-size: 13px; font-weight: bold; color: #fff;">Nenhuma rádio selecionada</div>
-        </div>
-        
-        <div class="player-controls">
-            <button class="btn-control-step" title="Rádio Anterior" onclick="mudarRadio(-1)">
-                <i class="fas fa-step-backward"></i>
-            </button>
-            
-            <button id="btn-play" class="btn-play" onclick="togglePlay()">
-                <i class="fas fa-play"></i>
-            </button>
-            
-            <button class="btn-control-step" title="Próxima Rádio" onclick="mudarRadio(1)">
-                <i class="fas fa-step-forward"></i>
-            </button>
-        </div>
-    </div>
+  <!-- SCRIPT CIRÚRGICO DE SINCRONIZAÇÃO DE STATUS (HEARTBEAT) -->
+  <script>
+    // Configurações do ouvinte logado
+    let radioAtual = 'JOVEN PAM CASCAVEL';
+    const ouvinteNome = localStorage.getItem('usuarioLogado') || 'GABI';
 
-    <audio id="audio-ouvinte"></audio>
+    // Atualiza nome na interface se disponível
+    document.getElementById('usuario-boas-vindas').innerText = 'Olá, ' + ouvinteNome;
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
-            authDomain: "meu-painel-f2efe.firebaseapp.com",
-            databaseURL: "https://meu-painel-f2efe-default-rtdb.firebaseio.com/",
-            projectId: "meu-painel-f2efe"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        const player = document.getElementById('audio-ouvinte');
+    function enviarHeartbeatOuvinte() {
+      let ouvintes = JSON.parse(localStorage.getItem('monitor_ouvintes') || '{}');
+      
+      // Registra a sessão online com o nome correto e a rádio atual
+      ouvintes[ouvinteNome] = {
+        status: 'ONLINE',
+        radioAtual: radioAtual,
+        ultimoPing: Date.now()
+      };
 
-        const ouvinteId = localStorage.getItem('userId') || ('ouvinte_' + Date.now());
-        if (!localStorage.getItem('userId')) {
-            localStorage.setItem('userId', ouvinteId);
+      localStorage.setItem('monitor_ouvintes', JSON.stringify(ouvintes));
+    }
+
+    function selecionarRadio(nomeRadio) {
+      radioAtual = nomeRadio;
+      document.getElementById('radio-nome-display').innerText = nomeRadio;
+      
+      // Atualiza bordas dos cards
+      const cards = document.querySelectorAll('.card-pref');
+      cards.forEach(card => {
+        if(card.innerText.trim() === nomeRadio) {
+          card.classList.add('active');
+        } else {
+          card.classList.remove('active');
         }
-        
-        let ouvinteNome = localStorage.getItem('usuarioNome') || localStorage.getItem('usuarioEmail') || 'Ouvinte Anônimo';
-        if (ouvinteNome.includes('@')) {
-            ouvinteNome = ouvinteNome.split('@')[0];
-        }
-        document.getElementById('nome-ouvinte-display').innerText = "Olá, " + ouvinteNome;
+      });
 
-        function atualizarRelogio() {
-            const agora = new Date();
-            document.getElementById('relogio-digital').innerText = agora.toLocaleTimeString('pt-BR');
-        }
-        setInterval(atualizarRelogio, 1000);
-        atualizarRelogio();
+      enviarHeartbeatOuvinte();
+    }
 
-        async function carregarClimaPorIP() {
-            try {
-                const resGeo = await fetch('https://ipapi.co/json/');
-                const geoData = await resGeo.json();
-                
-                if (geoData.latitude && geoData.longitude) {
-                    const lat = geoData.latitude;
-                    const lon = geoData.longitude;
-                    const cidade = geoData.city || 'Sua Cidade';
+    // Envia o primeiro sinal imediatamente
+    enviarHeartbeatOuvinte();
 
-                    const resClima = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
-                    const climaData = await resClima.json();
-                    
-                    if (climaData.current_weather) {
-                        const temp = Math.round(climaData.current_weather.temperature);
-                        const code = climaData.current_weather.weathercode;
+    // Mantém o status ativo no ADM enviando o sinal de vida a cada 4 segundos
+    setInterval(enviarHeartbeatOuvinte, 4000);
 
-                        let iconeHTML = '<i class="fas fa-sun" style="color: #ffcc00; font-size: 20px;"></i>';
-
-                        if (code === 0 || code === 1) {
-                            iconeHTML = '<i class="fas fa-sun" style="color: #ffcc00; font-size: 20px;"></i>';
-                        } else if (code === 2 || code === 3) {
-                            iconeHTML = '<i class="fas fa-cloud-sun" style="color: #ffbb00; font-size: 20px;"></i>';
-                        } else if (code >= 51 && code <= 99) {
-                            iconeHTML = '<i class="fas fa-cloud-showers-heavy" style="color: #00ccff; font-size: 20px;"></i>';
-                        } else if (code === 45 || code === 48) {
-                            iconeHTML = '<i class="fas fa-cloud" style="color: #aaaaaa; font-size: 20px;"></i>';
-                        }
-
-                        document.getElementById('icone-clima-dinamico').innerHTML = iconeHTML;
-                        document.getElementById('clima-cidade').innerText = `${cidade}: ${temp}°C`;
-                    }
-                } else {
-                    document.getElementById('clima-cidade').innerText = "Indisponível";
-                }
-            } catch (e) {
-                document.getElementById('clima-cidade').innerText = "Clima indisponível";
-            }
-        }
-        carregarClimaPorIP();
-
-        let todasRadios = [];
-        let playlistKeys = JSON.parse(localStorage.getItem('playlist_keys_ouvinte') || '[]');
-        let radioTocandoKey = null;
-
-        db.ref('ouvintes_preferencias/' + ouvinteId + '/playlist').once('value', snap => {
-            if (snap.exists()) {
-                playlistKeys = snap.val();
-                localStorage.setItem('playlist_keys_ouvinte', JSON.stringify(playlistKeys));
-                localStorage.setItem('playlist_iniciada', 'true');
-            }
-        });
-
-        function salvarPreferenciasOuvinte() {
-            localStorage.setItem('playlist_keys_ouvinte', JSON.stringify(playlistKeys));
-            db.ref('ouvintes_preferencias/' + ouvinteId).set({
-                ouvinte: ouvinteNome,
-                playlist: playlistKeys,
-                ultimaAtualizacao: firebase.database.ServerValue.TIMESTAMP
-            });
-        }
-
-        db.ref('radios').on('value', snap => {
-            todasRadios = [];
-            snap.forEach(child => {
-                todasRadios.push({ key: child.key, ...child.val() });
-            });
-
-            todasRadios.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
-
-            if (!localStorage.getItem('playlist_iniciada') && playlistKeys.length === 0) {
-                playlistKeys = todasRadios.map(r => r.key);
-                salvarPreferenciasOuvinte();
-                localStorage.setItem('playlist_iniciada', 'true');
-            }
-
-            renderizarPainelRadios();
-        });
-
-        function renderizarPainelRadios() {
-            renderizarCatologoEsquerda();
-            renderizarPlaylistDireita();
-        }
-
-        function renderizarCatologoEsquerda() {
-            const container = document.getElementById('catalogo-radios');
-            container.innerHTML = "";
-
-            if (todasRadios.length === 0) {
-                container.innerHTML = "<p style='color:#666; font-size:11px;'>Nenhuma rádio cadastrada.</p>";
-                return;
-            }
-
-            todasRadios.forEach(r => {
-                const estaNaPlaylist = playlistKeys.includes(r.key);
-
-                container.innerHTML += `
-                    <div class="bar-radio-catalogo ${estaNaPlaylist ? 'adicionada' : ''}" onclick="togglePlaylistRadio('${r.key}')">
-                        <span class="btn-add-icon"><i class="fas ${estaNaPlaylist ? 'fa-check' : 'fa-plus'}"></i></span>
-                        <span>${r.name}</span>
-                    </div>
-                `;
-            });
-        }
-
-        function renderizarPlaylistDireita() {
-            const container = document.getElementById('grid-playlist');
-            container.innerHTML = "";
-
-            const radiosPlaylist = playlistKeys
-                .map(key => todasRadios.find(r => r.key === key))
-                .filter(Boolean);
-
-            if (radiosPlaylist.length === 0) {
-                container.innerHTML = "<p style='color:#666; font-size:11px; grid-column: 1/-1; text-align:center; padding: 20px;'>Clique no '+' ao lado para montar sua playlist!</p>";
-                return;
-            }
-
-            radiosPlaylist.forEach((r) => {
-                const isPlaying = (radioTocandoKey === r.key);
-                const cardColor = r.color || '#d1a3ff';
-
-                container.innerHTML += `
-                    <div class="radio-card-quadrado ${isPlaying ? 'playing' : ''}" 
-                         style="background: ${cardColor};" 
-                         data-key="${r.key}"
-                         onclick="tocarRadioPorKey('${r.key}')">
-                        <i class="fas ${isPlaying ? 'fa-tower-broadcast antena-piscando' : 'fa-radio'} icon-radio"></i>
-                        <span class="radio-name">${r.name}</span>
-                    </div>
-                `;
-            });
-        }
-
-        function togglePlaylistRadio(key) {
-            const index = playlistKeys.indexOf(key);
-            if (index > -1) {
-                playlistKeys.splice(index, 1);
-            } else {
-                playlistKeys.push(key);
-            }
-
-            salvarPreferenciasOuvinte();
-            renderizarPainelRadios();
-        }
-
-        new Sortable(document.getElementById('grid-playlist'), {
-            animation: 150,
-            delay: 100,
-            delayOnTouchOnly: true,
-            onEnd: function() {
-                const novaOrdem = [];
-                document.querySelectorAll('#grid-playlist .radio-card-quadrado').forEach(el => {
-                    novaOrdem.push(el.getAttribute('data-key'));
-                });
-
-                playlistKeys = novaOrdem;
-                salvarPreferenciasOuvinte();
-            }
-        });
-
-        function tocarRadioPorKey(key) {
-            const radio = todasRadios.find(r => r.key === key);
-            if (!radio) return;
-
-            if (radioTocandoKey === key) {
-                togglePlay();
-            } else {
-                radioTocandoKey = key;
-                player.src = radio.url;
-                player.play().catch(() => {});
-                document.getElementById('player-title').innerText = radio.name;
-                document.getElementById('btn-play').innerHTML = '<i class="fas fa-pause"></i>';
-                renderizarPlaylistDireita();
-            }
-        }
-
-        function mudarRadio(direcao) {
-            const radiosPlaylist = playlistKeys
-                .map(key => todasRadios.find(r => r.key === key))
-                .filter(Boolean);
-
-            if (radiosPlaylist.length === 0) return;
-
-            let currentIndex = radiosPlaylist.findIndex(r => r.key === radioTocandoKey);
-            let nextIndex = currentIndex + direcao;
-
-            if (nextIndex >= radiosPlaylist.length) nextIndex = 0;
-            if (nextIndex < 0) nextIndex = radiosPlaylist.length - 1;
-
-            tocarRadioPorKey(radiosPlaylist[nextIndex].key);
-        }
-
-        function togglePlay() {
-            if (!player.src) return;
-            if (player.paused) {
-                player.play();
-                document.getElementById('btn-play').innerHTML = '<i class="fas fa-pause"></i>';
-            } else {
-                player.pause();
-                document.getElementById('btn-play').innerHTML = '<i class="fas fa-play"></i>';
-            }
-        }
-
-        function enviarMensagem() {
-            const texto = document.getElementById('texto-mensagem').value.trim();
-            if (!texto) return alert("Digite sua mensagem!");
-
-            db.ref('mensagens_ouvintes').push({
-                ouvinteId: ouvinteId,
-                ouvinte: ouvinteNome,
-                mensagem: texto,
-                dataHora: new Date().toLocaleString('pt-BR'),
-                timestamp: firebase.database.ServerValue.TIMESTAMP
-            }).then(() => {
-                alert("Mensagem enviada com sucesso!");
-                document.getElementById('texto-mensagem').value = "";
-            });
-        }
-
-        function deletarMensagem(msgKey) {
-            if (confirm("Deseja apagar esta mensagem?")) {
-                db.ref('mensagens_ouvintes/' + msgKey).remove();
-            }
-        }
-
-        db.ref('respostas_adm').on('value', snapResps => {
-            const respostas = snapResps.val() || {};
-
-            db.ref('mensagens_ouvintes').on('value', snapMsgs => {
-                const container = document.getElementById('lista-respostas-adm');
-                container.innerHTML = "";
-                const msgs = snapMsgs.val() || {};
-
-                let minhasMsgs = [];
-
-                for (let id in msgs) {
-                    const m = msgs[id];
-                    if (m.ouvinteId === ouvinteId || m.ouvinte === ouvinteNome) {
-                        minhasMsgs.push({ id, ...m });
-                    }
-                }
-
-                minhasMsgs.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
-
-                if (minhasMsgs.length === 0) {
-                    container.innerHTML = "<p style='color:#666; text-align:center; font-size:14px; margin-top:20px;'>Você ainda não enviou mensagens.</p>";
-                    return;
-                }
-
-                minhasMsgs.forEach((m, idx) => {
-                    // Filtrar apenas respostas direcionadas especificamente para ESTA mensagem
-                    let respostasDestaMsg = [];
-                    for (let rId in respostas) {
-                        const r = respostas[rId];
-                        if (r.mensagemId === m.id || r.msgKey === m.id) {
-                            respostasDestaMsg.push(r);
-                        }
-                    }
-
-                    const temResposta = respostasDestaMsg.length > 0;
-                    // Se não tiver resposta, ganha a classe 'pendente' (borda de outra cor)
-                    const classeStatus = temResposta ? '' : 'pendente';
-
-                    let htmlMsg = `
-                        <div class="msg-item ${classeStatus}">
-                            <button class="btn-delete-msg" title="Apagar Mensagem" onclick="deletarMensagem('${m.id}')">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                            <div class="msg-texto-ouvinte">${idx + 1}. ${m.mensagem}</div>
-                    `;
-
-                    // Só renderiza os balões de resposta se o ADM tiver respondido a esta mensagem
-                    if (temResposta) {
-                        respostasDestaMsg.forEach(r => {
-                            htmlMsg += `
-                                <div class="resp-adm-box">
-                                    <div style="font-size:12px; color: var(--pink-light); font-weight:bold;">Resposta do ADM:</div>
-                                    <div style="font-size:15px; margin-top:3px; color:#fff;">${r.resposta}</div>
-                                </div>
-                            `;
-                        });
-                    }
-
-                    htmlMsg += `</div>`;
-                    container.innerHTML += htmlMsg;
-                });
-            });
-        });
-
-        function logout() {
-            localStorage.clear();
-            window.location.href = 'index.html';
-        }
-    </script>
+    // Marca o ouvinte como OFFLINE ao fechar a aba
+    window.addEventListener('beforeunload', function() {
+      let ouvintes = JSON.parse(localStorage.getItem('monitor_ouvintes') || '{}');
+      if (ouvintes[ouvinteNome]) {
+        ouvintes[ouvinteNome].status = 'OFFLINE';
+        localStorage.setItem('monitor_ouvintes', JSON.stringify(ouvintes));
+      }
+    });
+  </script>
 </body>
 </html>
