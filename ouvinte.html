@@ -105,7 +105,7 @@
                 <div class="chat-history" id="chat-history-ouvinte">
                     <!-- Histórico do Chat -->
                 </div>
-                <!-- AJUSTE CIRÚRGICO: CAMPO IDENTICO AO PAINEL ADM COM ENTER E SHIFT+ENTER -->
+                <!-- CAMPO DE MENSAGEM COM ATALHO ENTER / SHIFT+ENTER -->
                 <div class="chat-input-area">
                     <textarea id="msg-ouvinte-input" rows="2" placeholder="Escreva sua mensagem... (Enter envia)" onkeydown="handleOuvinteKeyDown(event)"></textarea>
                     <button class="btn-send-chat" onclick="enviarMensagemOuvinte()">ENVIAR</button>
@@ -175,15 +175,14 @@
         }
 
         // =======================================================
-        // SISTEMA DE CHAT DO OUVINTE (COM ATALHO ENTER)
+        // SISTEMA DE CHAT DO OUVINTE
         // =======================================================
         let allMensagens = {};
         let allRespostas = {};
 
         function handleOuvinteKeyDown(event) {
-            // Pressionar ENTER sem SHIFT envia a mensagem
             if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault(); // Impede a quebra de linha padrão
+                event.preventDefault();
                 enviarMensagemOuvinte();
             }
         }
@@ -243,7 +242,6 @@
                 container.appendChild(div);
             });
 
-            // Rola para a mensagem mais recente
             container.scrollTop = container.scrollHeight;
         }
 
