@@ -3,331 +3,239 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PAINEL ADM - GRUPO DIVULGA</title>
+  <title>PAINEL ADM</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <style>
-    /* ESTILOS GERAIS DO PAINEL ADM */
+    /* ESTILOS ORIGINAIS MANTIDOS */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: Arial, sans-serif;
     }
 
     body {
-      background-color: #08050b;
-      color: #ffffff;
-      padding: 20px 40px;
+      background-color: #000;
+      color: #fff;
+      padding: 20px;
     }
 
-    /* HEADER */
     .top-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 25px;
+      margin-bottom: 20px;
     }
 
     .top-bar h1 {
-      font-size: 20px;
-      font-weight: 900;
-      color: #d100d1;
-      letter-spacing: 1px;
+      color: #a855f7;
+      font-size: 22px;
     }
 
     .top-bar p {
-      font-size: 11px;
-      color: #7f759c;
-      margin-top: 2px;
+      font-size: 12px;
+      color: #aaa;
     }
 
     .header-actions {
       display: flex;
-      align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
 
     .btn-action {
-      background: #140d28;
-      border: 1px solid #281a4d;
+      background: #111;
+      border: 1px solid #333;
       color: #fff;
-      padding: 8px 16px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 700;
+      padding: 8px 12px;
+      border-radius: 5px;
+      font-size: 12px;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
     }
 
     .btn-mensagens {
-      background-color: #ff3355;
+      background: #ff3355;
       border: none;
-      border-radius: 20px;
-      padding: 8px 18px;
+      border-radius: 15px;
+      font-weight: bold;
     }
 
     .btn-sair {
-      background-color: #d100d1;
+      background: #a855f7;
       border: none;
-      border-radius: 6px;
+      font-weight: bold;
     }
 
-    /* LAYOUT PRINCIPAL */
     .main-grid {
       display: grid;
-      grid-template-columns: 1fr 340px;
-      gap: 25px;
+      grid-template-columns: 1fr 320px;
+      gap: 20px;
     }
 
-    /* GERENCIAR EMISSORA */
     .section-box {
-      background-color: #0d0818;
-      border: 1px solid #1a1030;
-      border-radius: 12px;
-      padding: 20px;
+      background: #0d0d0d;
+      border: 1px solid #222;
+      border-radius: 10px;
+      padding: 15px;
       margin-bottom: 20px;
     }
 
     .section-title {
-      font-size: 11px;
-      font-weight: 900;
       color: #00e676;
-      letter-spacing: 1.5px;
-      margin-bottom: 15px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .form-input {
-      background-color: #170f2b;
-      border: 1px solid #281a4d;
-      color: #fff;
-      padding: 12px 16px;
-      border-radius: 8px;
-      font-size: 12px;
-      outline: none;
-    }
-
-    .btn-salvar {
-      background-color: #00e676;
-      color: #000;
-      font-weight: 900;
-      font-size: 12px;
-      border: none;
-      padding: 12px;
-      border-radius: 8px;
-      cursor: pointer;
+      font-size: 11px;
+      font-weight: bold;
+      margin-bottom: 12px;
       letter-spacing: 1px;
     }
 
-    /* GRADE DE RÁDIOS */
+    .form-group input {
+      width: 100%;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      color: #fff;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+
+    .btn-salvar {
+      width: 100%;
+      background: #00e676;
+      border: none;
+      color: #000;
+      font-weight: bold;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
     .radios-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
-      gap: 12px;
-      margin-top: 15px;
+      gap: 10px;
     }
 
     .radio-card {
       aspect-ratio: 1;
-      border-radius: 12px;
-      padding: 12px;
+      border-radius: 8px;
+      padding: 10px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      position: relative;
-      cursor: grab;
       color: #000;
-      font-weight: 900;
-      font-size: 11px;
+      font-size: 10px;
+      font-weight: bold;
       text-align: center;
+      cursor: grab;
     }
 
     .radio-card .actions {
       display: flex;
       justify-content: flex-end;
-      gap: 6px;
+      gap: 5px;
     }
 
-    .radio-card .actions i {
-      font-size: 10px;
-      cursor: pointer;
-      opacity: 0.7;
-    }
+    .c1 { background: #fef08a; }
+    .c2 { background: #d9f99d; }
+    .c3 { background: #fde047; }
+    .c4 { background: #ddd6fe; }
+    .c5 { background: #e0e7ff; }
+    .c6 { background: #fecdd3; }
+    .c7 { background: #a7f3d0; }
+    .c8 { background: #fef08a; }
+    .c9 { background: #fca5a5; }
+    .c10 { background: #99f6e4; }
+    .c11 { background: #86efac; }
+    .c12 { background: #bfdbfe; }
+    .c13 { background: #f472b6; }
+    .c14 { background: #fca5a5; }
+    .c15 { background: #fef08a; }
 
-    /* CORES CARDS */
-    .c1 { background-color: #fef08a; }
-    .c2 { background-color: #d9f99d; }
-    .c3 { background-color: #fde047; }
-    .c4 { background-color: #ddd6fe; }
-    .c5 { background-color: #e0e7ff; }
-    .c6 { background-color: #fecdd3; }
-    .c7 { background-color: #a7f3d0; }
-    .c8 { background-color: #fef08a; }
-    .c9 { background-color: #fca5a5; }
-    .c10 { background-color: #99f6e4; }
-    .c11 { background-color: #86efac; }
-    .c12 { background-color: #bfdbfe; }
-    .c13 { background-color: #f472b6; }
-    .c14 { background-color: #fca5a5; }
-    .c15 { background-color: #fef08a; }
-
-    /* ESTILOS CIRÚRGICOS DO MONITOR DE OUVINTES */
+    /* ESTILOS EXCLUSIVOS E CIRÚRGICOS DO MONITOR DE OUVINTES */
     .monitor-box {
-      background-color: #0d0818;
-      border: 1px solid #1a1030;
-      border-radius: 12px;
-      padding: 20px;
-      height: fit-content;
+      background: #0d0d0d;
+      border: 1px solid #222;
+      border-radius: 10px;
+      padding: 15px;
     }
 
     .ouvinte-card {
-      background: #130a24;
-      border: 1px solid #231342;
-      border-radius: 8px;
-      margin-bottom: 10px;
+      background: #111;
+      border: 1px solid #222;
+      border-radius: 6px;
+      margin-bottom: 8px;
       overflow: hidden;
-      transition: all 0.3s ease;
     }
 
     .ouvinte-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 12px 14px;
+      padding: 10px 12px;
       cursor: pointer;
-      user-select: none;
-    }
-
-    .ouvinte-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
     }
 
     .ouvinte-nome {
-      font-weight: 800;
+      font-weight: bold;
       font-size: 13px;
-      color: #ffffff;
-      text-transform: uppercase;
+      color: #fff;
     }
 
-    /* BADGE VERDE AO VIVO */
+    /* BADGE AO VIVO VERDE */
     .badge-ao-vivo {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      background-color: rgba(0, 230, 118, 0.15);
+      gap: 5px;
+      background: rgba(0, 230, 118, 0.15);
       color: #00e676;
       border: 1px solid #00e676;
-      padding: 3px 8px;
-      border-radius: 12px;
+      padding: 2px 6px;
+      border-radius: 10px;
       font-size: 10px;
-      font-weight: 800;
-      letter-spacing: 0.5px;
+      font-weight: bold;
     }
 
-    /* ÍCONE DE ALTO-FALANTE PISCANTE */
+    /* ALTO-FALANTE PISCANTE */
     .speaker-pulsing {
       animation: speakerPulse 1s infinite alternate;
       color: #00e676;
     }
 
     @keyframes speakerPulse {
-      0% { opacity: 0.3; transform: scale(0.9); }
+      0% { opacity: 0.3; transform: scale(0.85); }
       100% { opacity: 1; transform: scale(1.15); }
     }
 
     .badge-off {
-      background-color: rgba(255, 255, 255, 0.05);
-      color: #666666;
-      border: 1px solid #333333;
-      padding: 3px 8px;
-      border-radius: 12px;
+      background: #222;
+      color: #777;
+      border: 1px solid #444;
+      padding: 2px 6px;
+      border-radius: 10px;
       font-size: 10px;
-      font-weight: 700;
-    }
-
-    /* DETALHES DESLIZANTES (ACCORDION) */
-    .ouvinte-detalhes {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.35s ease-out, padding 0.35s ease;
-      background: #090512;
-      border-top: 1px solid transparent;
-      padding: 0 14px;
-      font-size: 11px;
-      color: #a39bb8;
-    }
-
-    .ouvinte-detalhes.aberto {
-      max-height: 100px;
-      padding: 10px 14px;
-      border-top-color: #231342;
-    }
-
-    .detalhe-item {
-      margin-bottom: 5px;
-      display: flex;
-      justify-content: space-between;
-    }
-
-    .detalhe-item span {
-      color: #00e676;
       font-weight: bold;
     }
 
-    /* PLAYER DE PREVIEW */
-    .player-preview {
-      margin-top: 25px;
-      background-color: #0d0818;
-      border: 1px solid #1a1030;
-      border-radius: 12px;
-      padding: 15px;
-      text-align: center;
+    /* DETALHES DESLIZANTES */
+    .ouvinte-detalhes {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease, padding 0.35s ease;
+      background: #050505;
+      padding: 0 12px;
+      font-size: 11px;
+      color: #aaa;
     }
 
-    .player-preview p {
-      font-size: 10px;
-      color: #888;
-      margin-bottom: 10px;
-      font-weight: 700;
-    }
-
-    .player-preview-controls {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .btn-play-preview {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: #fff;
-      color: #000;
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
+    .ouvinte-detalhes.aberto {
+      max-height: 80px;
+      padding: 10px 12px;
+      border-top: 1px solid #222;
     }
   </style>
 </head>
 <body>
 
-  <!-- HEADER ADM -->
   <header class="top-bar">
     <div>
       <h1>PAINEL ADM</h1>
@@ -342,16 +250,13 @@
     </div>
   </header>
 
-  <!-- GRID PRINCIPAL -->
   <div class="main-grid">
-    
-    <!-- COLUNA DA ESQUERDA -->
     <div>
       <div class="section-box">
         <div class="section-title">GERENCIAR EMISSORA</div>
         <div class="form-group">
-          <input type="text" class="form-input" placeholder="Nome da Rádio">
-          <input type="text" class="form-input" placeholder="Link .mp3">
+          <input type="text" placeholder="Nome da Rádio">
+          <input type="text" placeholder="Link .mp3">
           <button class="btn-salvar">SALVAR</button>
         </div>
       </div>
@@ -359,52 +264,40 @@
       <div class="section-box">
         <div class="section-title">GRADE DE RÁDIOS (ARRASTE PARA ORGANIZAR)</div>
         <div class="radios-grid">
-          <div class="radio-card c1"><div class="actions"><i class="fas fa-pencil-alt"></i><i class="fas fa-times"></i></div><span>JOVEN PAM CASCAVEL</span></div>
-          <div class="radio-card c2"><div class="actions"><i class="fas fa-pencil-alt"></i><i class="fas fa-times"></i></div><span>MARINGA FM</span></div>
-          <div class="radio-card c3"><div class="actions"><i class="fas fa-pencil-alt"></i><i class="fas fa-times"></i></div><span>ROTA DO SOL - BOA VISTA DA APARECIDA</span></div>
-          <div class="radio-card c4"><div class="actions"><i class="fas fa-pencil-alt"></i><i class="fas fa-times"></i></div><span>CAPITAL FM - CASCAVEL</span></div>
-          <div class="radio-card c5"><div class="actions"><i class="fas fa-pencil-alt"></i><i class="fas fa-times"></i></div><span>MIX - PONTA GROSSA</span></div>
+          <div class="radio-card c1"><div class="actions"><i class="fas fa-pencil-alt"></i><i class="fas fa-times"></i></div>JOVEN PAM CASCAVEL</div>
+          <div class="radio-card c2"><div class="actions"><i class="fas fa-pencil-alt"></i><i class="fas fa-times"></i></div>MARINGA FM</div>
+          <div class="radio-card c3"><div class="actions"><i class="fas fa-pencil-alt"></i><i class="fas fa-times"></i></div>ROTA DO SOL - BOA VISTA DA APARECIDA</div>
+          <div class="radio-card c4"><div class="actions"><i class="fas fa-pencil-alt"></i><i class="fas fa-times"></i></div>CAPITAL FM - CASCAVEL</div>
+          <div class="radio-card c5"><div class="actions"><i class="fas fa-pencil-alt"></i><i class="fas fa-times"></i></div>MIX - PONTA GROSSA</div>
           
-          <div class="radio-card c6"><div class="actions"><i class="fas fa-pencil-alt"></i><i class="fas fa-times"></i></div><span>ANTENA 1</span></div>
-          <div class="radio-card c7"><div class="actions"><i class="fas fa-pencil-alt"></i><i class="fas fa-times"></i></div><span>KISS FM - SÃO PAULO</span></div>
-          <div class="radio-card c8"><div class="actions"><i class="fas fa-pencil-alt"></i><i class="fas fa-times"></i></div><span>COLMEIA - CASCAVEL</span></div>
-          <div class="radio-card c9"><div class="actions"><i class="fas fa-pencil-alt"></i><i class="fas fa-times"></i></div><span>TAROBÁ - CASCAVEL</span></div>
-          <div class="radio-card c10"><div class="actions"><i class="fas fa-pencil-alt"></i><i class="fas fa-times"></i></div><span>OURO VERDE - CURITIBA</span></div>
+          <div class="radio-card c6"><div class="actions"><i class="fas fa-pencil-alt"></i><i class="fas fa-times"></i></div>ANTENA 1</div>
+          <div class="radio-card c7"><div class="actions"><i class="fas fa-pencil-alt"></i><i class="fas fa-times"></i></div>KISS FM - SÃO PAULO</div>
+          <div class="radio-card c8"><div class="actions"><i class="fas fa-pencil-alt"></i><i class="fas fa-times"></i></div>COLMEIA - CASCAVEL</div>
+          <div class="radio-card c9"><div class="actions"><i class="fas fa-pencil-alt"></i><i class="fas fa-times"></i></div>TAROBÁ - CASCAVEL</div>
+          <div class="radio-card c10"><div class="actions"><i class="fas fa-pencil-alt"></i><i class="fas fa-times"></i></div>OURO VERDE - CURITIBA</div>
 
-          <div class="radio-card c11"><div class="actions"><i class="fas fa-pencil-alt"></i><i class="fas fa-times"></i></div><span>ALPHA FM - SÃO PAULO</span></div>
-          <div class="radio-card c12"><div class="actions"><i class="fas fa-pencil-alt"></i><i class="fas fa-times"></i></div><span>CLUBE FM - BRASÍLIA</span></div>
-          <div class="radio-card c13"><div class="actions"><i class="fas fa-pencil-alt"></i><i class="fas fa-times"></i></div><span>COSTA OESTE - SANTA HELENA</span></div>
-          <div class="radio-card c14"><div class="actions"><i class="fas fa-pencil-alt"></i><i class="fas fa-times"></i></div><span>98FM - CURITIBA</span></div>
-          <div class="radio-card c15"><div class="actions"><i class="fas fa-pencil-alt"></i><i class="fas fa-times"></i></div><span>FM O DIA - RIO DE JANEIRO</span></div>
-        </div>
-      </div>
-
-      <div class="player-preview">
-        <p>SELECIONE UMA RÁDIO</p>
-        <div class="player-preview-controls">
-          <i class="fas fa-step-backward"></i>
-          <button class="btn-play-preview"><i class="fas fa-play"></i></button>
-          <i class="fas fa-step-forward"></i>
+          <div class="radio-card c11"><div class="actions"><i class="fas fa-pencil-alt"></i><i class="fas fa-times"></i></div>ALPHA FM - SÃO PAULO</div>
+          <div class="radio-card c12"><div class="actions"><i class="fas fa-pencil-alt"></i><i class="fas fa-times"></i></div>CLUBE FM - BRASÍLIA</div>
+          <div class="radio-card c13"><div class="actions"><i class="fas fa-pencil-alt"></i><i class="fas fa-times"></i></div>COSTA OESTE - SANTA HELENA</div>
+          <div class="radio-card c14"><div class="actions"><i class="fas fa-pencil-alt"></i><i class="fas fa-times"></i></div>98FM - CURITIBA</div>
+          <div class="radio-card c15"><div class="actions"><i class="fas fa-pencil-alt"></i><i class="fas fa-times"></i></div>FM O DIA - RIO DE JANEIRO</div>
         </div>
       </div>
     </div>
 
-    <!-- COLUNA DA DIREITA: MONITOR DE OUVINTES DINÂMICO -->
+    <!-- PAINEL MONITOR DE OUVINTES -->
     <div>
       <div class="monitor-box">
         <div class="section-title"><i class="fas fa-users"></i> MONITOR DE OUVINTES</div>
         <div id="monitor-ouvintes-container">
-          <!-- Renderizado dinamicamente via JavaScript -->
+          <!-- Renderizado via JavaScript -->
         </div>
       </div>
     </div>
-
   </div>
 
-  <!-- SCRIPT DINÂMICO DO MONITOR DE OUVINTES -->
   <script>
     document.addEventListener("DOMContentLoaded", function() {
-      
       function renderizarMonitorOuvintes() {
         const container = document.getElementById('monitor-ouvintes-container');
         if (!container) return;
@@ -413,26 +306,18 @@
         const agora = Date.now();
         let html = '';
 
-        // Se o localStorage ainda estiver sem dados, popula a lista inicial do sistema
-        if (Object.keys(ouvintes).length === 0) {
-          ouvintes = {
-            'GABI': { status: 'ONLINE', radioAtual: 'JOVEN PAM CASCAVEL', ultimoPing: agora },
-            'admin': { status: 'OFFLINE' },
-            'JOILSON': { status: 'OFFLINE' },
-            'JHENY': { status: 'OFFLINE' }
-          };
-        }
-
-        Object.keys(ouvintes).forEach(nome => {
-          const dado = ouvintes[nome];
-          
-          // Considera AO VIVO se recebeu o sinal de vida nos últimos 12 segundos
-          const isOnline = dado.status === 'ONLINE' && (dado.ultimoPing && (agora - dado.ultimoPing < 12000));
+        // Lista base padrão igual ao print original
+        const listaPadrao = ['admin', 'GABI', 'JOILSON', 'JHENY'];
+        
+        listaPadrao.forEach(nome => {
+          const dado = ouvintes[nome] || {};
+          // Ativo se atualizou o heartbeat nos últimos 10 segundos
+          const isOnline = dado.status === 'ONLINE' && (dado.ultimoPing && (agora - dado.ultimoPing < 10000));
 
           html += `
             <div class="ouvinte-card">
               <div class="ouvinte-header" onclick="toggleDetalhes(this)">
-                <div class="ouvinte-info">
+                <div>
                   <span class="ouvinte-nome">${nome}</span>
                   ${isOnline ? `
                     <span class="badge-ao-vivo">
@@ -442,11 +327,11 @@
                     <span class="badge-off">OFF</span>
                   `}
                 </div>
-                <i class="fas fa-chevron-down" style="color: #666; font-size: 11px;"></i>
+                <i class="fas fa-chevron-down" style="color:#555; font-size:11px;"></i>
               </div>
               <div class="ouvinte-detalhes">
-                <div class="detalhe-item">Sessão: <strong>${isOnline ? 'Ativa' : 'Inativa'}</strong></div>
-                <div class="detalhe-item">Ouvindo: <span>${dado.radioAtual || 'Nenhuma rádio'}</span></div>
+                <div style="margin-bottom: 4px;">Status: <strong style="color:${isOnline ? '#00e676' : '#888'}">${isOnline ? 'Online agora' : 'Offline'}</strong></div>
+                <div>Ouvindo: <span style="color:#00e676; font-weight:bold;">${dado.radioAtual || 'Nenhuma rádio'}</span></div>
               </div>
             </div>
           `;
@@ -455,20 +340,12 @@
         container.innerHTML = html;
       }
 
-      // Função para deslizar os detalhes do ouvinte ao clicar
       window.toggleDetalhes = function(elementoHeader) {
         const card = elementoHeader.parentElement;
         const detalhes = card.querySelector('.ouvinte-detalhes');
-        const icone = elementoHeader.querySelector('.fa-chevron-down, .fa-chevron-up');
-        
         detalhes.classList.toggle('aberto');
-        if (icone) {
-          icone.classList.toggle('fa-chevron-down');
-          icone.classList.toggle('fa-chevron-up');
-        }
       };
 
-      // Atualiza a tela a cada 3 segundos em tempo real
       renderizarMonitorOuvintes();
       setInterval(renderizarMonitorOuvintes, 3000);
     });
