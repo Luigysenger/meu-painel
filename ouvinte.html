@@ -340,49 +340,49 @@
             text-transform: uppercase; 
         }
 
-        /* CONTAINER ESTILO CHAT WHATSAPP */
+        /* CONTAINER CHAT UNIFICADO ESTILO WHATSAPP */
         .chat-container {
             display: flex;
             flex-direction: column;
-            gap: 15px;
-            max-height: 450px;
+            gap: 12px;
+            max-height: 400px;
             overflow-y: auto;
-            padding: 10px 5px;
-            background: #0a0a0a;
+            padding: 12px;
+            background: #080808;
             border-radius: 12px;
             border: 1px solid #222;
         }
 
-        .chat-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            border-bottom: 1px solid #1f1f1f;
-            padding-bottom: 12px;
-        }
-
-        /* BALÃO OUVINTE (DIREITA) */
+        /* BALÃO DO OUVINTE (DIREITA) */
         .chat-bubble-ouvinte {
             align-self: flex-end;
             background: #3b1354;
             color: #fff;
             padding: 10px 14px;
             border-radius: 14px 14px 2px 14px;
-            max-width: 85%;
+            max-width: 80%;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
             position: relative;
         }
 
-        /* BALÃO ADM (ESQUERDA) */
+        /* BALÃO DO ADM (ESQUERDA) */
         .chat-bubble-adm {
             align-self: flex-start;
-            background: #1a2733;
-            border: 1px solid #0088cc;
+            background: #0d382c;
+            border: 1px solid #00ff66;
             color: #fff;
             padding: 10px 14px;
             border-radius: 14px 14px 14px 2px;
-            max-width: 85%;
+            max-width: 80%;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .chat-sender-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 4px;
         }
 
         .chat-sender-name {
@@ -390,11 +390,10 @@
             font-weight: 900;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 4px;
         }
 
         .chat-sender-name.adm {
-            color: #00ccff;
+            color: #00ff66;
         }
 
         .chat-sender-name.ouvinte {
@@ -411,7 +410,7 @@
             font-size: 10px;
             color: #aaa;
             text-align: right;
-            margin-top: 4px;
+            margin-top: 5px;
         }
 
         .btn-delete-chat {
@@ -420,9 +419,9 @@
             color: #ff5555;
             cursor: pointer;
             font-size: 12px;
-            margin-left: 8px;
             opacity: 0.7;
             transition: 0.2s;
+            padding: 0;
         }
 
         .btn-delete-chat:hover {
@@ -839,70 +838,89 @@
             }
         }
 
-        // CHAT FORMATO WHATSAPP ENTRE OUVINTE E ADM
-        db.ref('respostas_adm').on('value', snapResps => {
-            const respostas = snapResps.val() || {};
-
+        // CHAT COMPLETO EM TEMPO REAL COM O ADM
+        function carregarChatCompleto() {
             db.ref('mensagens_ouvintes').on('value', snapMsgs => {
-                const container = document.getElementById('lista-respostas-adm');
-                container.innerHTML = "";
-                const msgs = snapMsgs.val() || {};
+                db.ref('respostas_adm').on('value', snapResps => {
+                    const container = document.getElementById('lista-respostas-adm');
+                    container.innerHTML = "";
+                    
+                    const msgs = snapMsgs.val() || {};
+                    const resps = snapResps.val() || {};
 
-                let minhasMsgs = [];
+                    let listaHistorico = [];
 
-                for (let id in msgs) {
-                    const m = msgs[id];
-                    if (m.ouvinteId === ouvinteId || m.ouvinte === ouvinteNome) {
-                        minhasMsgs.push({ id, ...m });
-                    }
-                }
-
-                minhasMsgs.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
-
-                if (minhasMsgs.length === 0) {
-                    container.innerHTML = "<p style='color:#666; text-align:center; font-size:14px; padding:20px;'>Você ainda não enviou mensagens.</p>";
-                    return;
-                }
-
-                minhasMsgs.forEach((m) => {
-                    let chatHtml = `<div class="chat-group">`;
-
-                    // BALÃO DA MENSAGEM DO OUVINTE (DIREITA)
-                    chatHtml += `
-                        <div class="chat-bubble-ouvinte">
-                            <div class="chat-sender-name ouvinte">
-                                Você 
-                                <button class="btn-delete-chat" title="Apagar Mensagem" onclick="deletarMensagem('${m.id}')">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </div>
-                            <div class="chat-text">${m.mensagem}</div>
-                            <div class="chat-time">${m.dataHora || ''}</div>
-                        </div>
-                    `;
-
-                    // BUSCAR E EXIBIR RESPOSTAS DO ADM PARA ESTA MENSAGEM (ESQUERDA)
-                    for (let rId in respostas) {
-                        const r = respostas[rId];
-                        if (r.mensagemId === m.id || r.msgKey === m.id) {
-                            chatHtml += `
-                                <div class="chat-bubble-adm">
-                                    <div class="chat-sender-name adm"><i class="fas fa-user-shield"></i> ADM</div>
-                                    <div class="chat-text">${r.resposta}</div>
-                                    <div class="chat-time">${r.dataHora || ''}</div>
-                                </div>
-                            `;
+                    // 1. Filtrar Mensagens do Ouvinte Atual
+                    for (let id in msgs) {
+                        const m = msgs[id];
+                        if (m.ouvinteId === ouvinteId || m.ouvinte === ouvinteNome) {
+                            listaHistorico.push({
+                                tipo: 'ouvinte',
+                                id: id,
+                                texto: m.mensagem,
+                                dataHora: m.dataHora || '',
+                                timestamp: m.timestamp || 0
+                            });
                         }
                     }
 
-                    chatHtml += `</div>`;
-                    container.innerHTML += chatHtml;
-                });
+                    // 2. Filtrar Respostas do ADM Direcionadas a este Ouvinte
+                    for (let id in resps) {
+                        const r = resps[id];
+                        if (r.ouvinteId === ouvinteId || r.ouvinte === ouvinteNome) {
+                            listaHistorico.push({
+                                tipo: 'adm',
+                                id: id,
+                                texto: r.resposta,
+                                dataHora: r.dataHora || '',
+                                timestamp: r.timestamp || 0
+                            });
+                        }
+                    }
 
-                // Rolar automaticamente para o final do chat
-                container.scrollTop = container.scrollHeight;
+                    // 3. Ordenar todas as mensagens por Ordem Cronológica Exata
+                    listaHistorico.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+
+                    if (listaHistorico.length === 0) {
+                        container.innerHTML = "<p style='color:#666; text-align:center; font-size:14px; padding:20px;'>Você ainda não enviou mensagens.</p>";
+                        return;
+                    }
+
+                    // 4. Renderizar cada balão de conversa
+                    listaHistorico.forEach(item => {
+                        if (item.tipo === 'ouvinte') {
+                            container.innerHTML += `
+                                <div class="chat-bubble-ouvinte">
+                                    <div class="chat-sender-header">
+                                        <span class="chat-sender-name ouvinte">Você</span>
+                                        <button class="btn-delete-chat" title="Apagar Mensagem" onclick="deletarMensagem('${item.id}')">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                    <div class="chat-text">${item.texto}</div>
+                                    <div class="chat-time">${item.dataHora}</div>
+                                </div>
+                            `;
+                        } else {
+                            container.innerHTML += `
+                                <div class="chat-bubble-adm">
+                                    <div class="chat-sender-header">
+                                        <span class="chat-sender-name adm"><i class="fas fa-user-shield"></i> ADM</span>
+                                    </div>
+                                    <div class="chat-text">${item.texto}</div>
+                                    <div class="chat-time">${item.dataHora}</div>
+                                </div>
+                            `;
+                        }
+                    });
+
+                    // Scroll para o final da conversa automaticamente
+                    container.scrollTop = container.scrollHeight;
+                });
             });
-        });
+        }
+
+        carregarChatCompleto();
 
         function logout() {
             localStorage.clear();
