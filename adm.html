@@ -275,7 +275,7 @@
         function toggleMensagens() { document.getElementById('container-mensagens-adm').classList.toggle('aberto'); }
 
         // =======================================================
-        // SISTEMA DE CHAT AGRUPADO POR OUVINTE (AJUSTE SOLICITADO)
+        // SISTEMA DE CHAT AGRUPADO POR OUVINTE (COM ATALHO ENTER)
         // =======================================================
         let allMensagens = {};
         let allRespostas = {};
@@ -283,6 +283,14 @@
         function toggleChatAccordion(nomeOuvinte) {
             openChatCards[nomeOuvinte] = !openChatCards[nomeOuvinte];
             renderChats();
+        }
+
+        function handleChatKeyDown(event, nomeOuvinte, safeNome) {
+            // Pressionar ENTER sem SHIFT envia a mensagem
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault(); // Impede a quebra de linha padrão
+                enviarRespostaChat(nomeOuvinte, safeNome);
+            }
         }
 
         function renderChats() {
@@ -375,7 +383,7 @@
                             ${chatHistoryHTML}
                         </div>
                         <div class="chat-input-area">
-                            <textarea id="chat-input-${safeNome}" rows="2" placeholder="Escreva uma resposta para ${nome}..."></textarea>
+                            <textarea id="chat-input-${safeNome}" rows="2" placeholder="Escreva uma resposta... (Enter envia)" onkeydown="handleChatKeyDown(event, '${nome}', '${safeNome}')"></textarea>
                             <button class="btn-send-chat" onclick="enviarRespostaChat('${nome}', '${safeNome}')">RESPONDER</button>
                         </div>
                     </div>
