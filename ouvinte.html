@@ -2,139 +2,541 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PAINEL OUVINTE - SUPREMO</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PAINEL OUVINTE - LUIGY</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
-        :root { --primary: #1DB954; --bg: #000; --card: #121212; --purple-light: #a855f7; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 10px; user-select: none; }
-        
-        .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 15px 20px; border-radius: 15px; border: 1px solid #282828; margin-bottom: 20px; gap: 15px; flex-wrap: wrap; }
-        .header-brand { display: flex; flex-direction: column; gap: 2px; }
-        .header-title { font-size: 20px; font-weight: 900; color: #1DB954; letter-spacing: 1px; margin: 0; text-transform: uppercase; }
-        .header-sub { font-size: 13px; color: #e5e7eb; font-weight: 600; margin: 0; }
-        
-        .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        
-        .info-pill { background: #1e1e1e; border: 1px solid #333; padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: bold; color: #fff; display: flex; align-items: center; gap: 8px; }
-        .info-pill i { color: #1DB954; }
-        
-        .btn-msg-notif { background: #1DB954; color: black; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; font-size: 13px; }
-        .btn-header { background: #1e1e1e; border: 1px solid #333; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
-        .btn-header:hover { background: #2a2a2a; }
-        .btn-sair { color: #ff4444; border-color: #ef4444; background: rgba(239, 68, 68, 0.1); }
-
-        @media (max-width: 850px) {
-            .header { flex-direction: column; align-items: stretch; text-align: center; }
-            .header-brand { align-items: center; }
-            .header-right { justify-content: center; }
+        *, *::before, *::after {
+            box-sizing: border-box !important;
+            max-width: 100% !important;
         }
 
-        #container-mensagens-ouvinte { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out; }
-        #container-mensagens-ouvinte.aberto { max-height: 2000px; margin-bottom: 25px; }
+        html {
+            width: 100vw !important;
+            overflow-x: hidden !important;
+            overscroll-behavior-x: none !important;
+            touch-action: pan-y !important;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #000;
+            color: white;
+            margin: 0;
+            padding: 20px;
+            width: 100vw !important;
+            overflow-x: hidden !important;
+            overscroll-behavior-x: none !important;
+            touch-action: pan-y !important;
+            -webkit-overflow-scrolling: touch;
+            user-select: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        :root { 
+            --primary: #A020F0; 
+            --pink-light: #FFB6C1; 
+            --pink-accent: #ff007f;
+            --bg: #000; 
+            --card: #121212; 
+        }
         
-        /* CHAT ESTILO PAINEL ADM */
-        .chat-card { background: #141414; border: 1px solid #282828; border-radius: 12px; padding: 15px; }
-        .chat-history { display: flex; flex-direction: column; gap: 10px; max-height: 350px; overflow-y: auto; padding-right: 5px; margin-bottom: 12px; }
-        
-        .chat-bubble { max-width: 80%; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.4; word-break: break-word; }
-        .chat-bubble.ouvinte { align-self: flex-end; background: #1e3a29; color: #e2f8eb; border-right: 3px solid var(--primary); }
-        .chat-bubble.adm { align-self: flex-start; background: #222; color: #fff; border-left: 3px solid var(--purple-light); }
-        
-        .chat-meta { font-size: 10px; color: #aaa; margin-bottom: 4px; display: flex; justify-content: space-between; gap: 10px; }
-        
-        /* CAMPO DE MENSAGEM IGUAL AO DO PAINEL ADM */
-        .chat-input-area { display: flex; gap: 8px; margin-top: 10px; }
-        .chat-input-area textarea { flex: 1; background: #111; border: 1px solid #333; border-radius: 6px; color: #fff; padding: 8px; font-size: 12px; resize: none; outline: none; font-family: inherit; }
-        .btn-send-chat { background: var(--primary); color: #000; border: none; padding: 0 15px; border-radius: 6px; font-weight: bold; font-size: 12px; cursor: pointer; transition: 0.2s; }
-        .btn-send-chat:hover { opacity: 0.9; }
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            background: #121212; 
+            padding: 20px; 
+            border-radius: 15px; 
+            border: 1px solid #333; 
+            margin-bottom: 15px; 
+            width: 100%; 
+            max-width: 1200px; 
+        }
 
-        .main-grid { display: grid; grid-template-columns: 1fr; gap: 20px; max-width: 1000px; margin: 0 auto; }
-        .card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid #282828; margin-bottom: 20px; }
-        h3 { color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; }
+        .header h2 { 
+            margin: 0; 
+            color: var(--primary); 
+            font-size: 26px; 
+            font-weight: 900;
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+        }
 
-        .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
-        @media (max-width: 480px) { .radio-grid { grid-template-columns: repeat(2, 1fr); } }
+        .user-name-title {
+            font-size: 16px !important;
+            font-weight: bold;
+            color: #ddd;
+            margin-top: 4px;
+            display: block;
+        }
 
-        .radio-item { aspect-ratio: 1/1; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #000; font-weight: bold; font-size: 12px; text-align: center; padding: 10px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; border: 2px solid transparent; -webkit-tap-highlight-color: transparent; }
-        .radio-item.active { background: #000 !important; color: var(--primary) !important; border-color: var(--primary); box-shadow: 0 0 15px rgba(29, 185, 84, 0.3); }
+        .header-widgets {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: #ccc;
+        }
 
-        .antena { font-size: 24px; margin-bottom: 8px; display: none; color: var(--primary); }
-        .active .antena { display: block !important; animation: antenaPisca 0.8s infinite alternate !important; }
-        @keyframes antenaPisca { from { opacity: 1; transform: scale(1.1); } to { opacity: 0.1; transform: scale(0.9); } }
+        .widget-item {
+            background: #1e1e1e;
+            padding: 8px 15px;
+            border-radius: 10px;
+            border: 1px solid #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-        .player-footer { margin-top: 20px; background: #111; padding: 20px; border-radius: 20px; border: 1px solid #222; text-align: center; }
-        .controls-row { display: flex; align-items: center; justify-content: center; gap: 25px; }
-        .btn-nav { background: none; border: none; color: #b3b3b3; font-size: 24px; cursor: pointer; }
-        .btn-spotify-play { width: 55px; height: 55px; background: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: black; cursor: pointer; }
+        .relogio-box {
+            font-size: 18px !important;
+            font-weight: bold;
+            color: #fff;
+        }
 
-        .pub-banner-container { text-align: center; margin-bottom: 20px; display: none; }
-        .pub-banner-container img { max-width: 100%; max-height: 200px; border-radius: 12px; border: 1px solid #333; }
+        .clima-box {
+            font-size: 16px !important;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .btn-sair { 
+            background: rgba(255, 68, 68, 0.1); 
+            border: 2px solid #ff4444; 
+            color: #ff4444; 
+            padding: 10px 18px !important; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-size: 14px !important; 
+            font-weight: 900; 
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-sair:hover {
+            background: #ff4444;
+            color: #fff;
+        }
+
+        .frase-centro-playlist {
+            text-align: center;
+            font-size: 22px;
+            font-weight: 800;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 10px 0 20px 0;
+            width: 100%;
+            max-width: 1200px;
+            background: linear-gradient(90deg, transparent, #15002b, transparent);
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .main-container { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); 
+            gap: 20px; 
+            width: 100%; 
+            max-width: 1200px; 
+            margin-bottom: 140px; 
+            align-items: start;
+        }
+
+        .card-box { 
+            background: var(--card); 
+            border-radius: 20px; 
+            padding: 20px; 
+            border: 1px solid #282828; 
+            width: 100%; 
+        }
+
+        h3 { 
+            color: var(--primary); 
+            font-size: 16px; 
+            font-weight: 900;
+            text-transform: uppercase; 
+            letter-spacing: 1.5px; 
+            margin-bottom: 20px; 
+            text-align: center; 
+            line-height: 1.4;
+        }
+
+        .sub-titulo-secao {
+            font-size: 14px !important;
+            font-weight: 800;
+            text-align: left;
+            color: #d8b4fe !important;
+            margin-bottom: 12px;
+        }
+
+        .banner-destaque-adm {
+            background: #f0e6ff;
+            color: #2a004f;
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            padding: 15px;
+            font-size: 14px;
+            font-weight: 900;
+            text-transform: uppercase;
+            text-align: center;
+            letter-spacing: 1px;
+            line-height: 1.4;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(160, 32, 240, 0.3);
+        }
+
+        .radios-section-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .radios-section-container {
+                grid-template-columns: 1fr;
+            }
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            .header-widgets {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+
+        .catalogo-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .bar-radio-catalogo {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: 0.3s;
+            color: #fff;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .bar-radio-catalogo.adicionada {
+            background: #d8b4fe !important;
+            color: #2e0054 !important;
+            border-color: #a855f7 !important;
+        }
+
+        .bar-radio-catalogo .btn-add-icon {
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .playlist-grid-ouvinte {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 10px;
+            width: 100%;
+            min-height: 120px;
+        }
+
+        .radio-card-quadrado {
+            aspect-ratio: 1 / 1;
+            border-radius: 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 10px;
+            cursor: grab;
+            color: #000;
+            font-weight: bold;
+            transition: background 0.3s, transform 0.2s, box-shadow 0.2s, border 0.3s;
+            position: relative;
+            border: 2px solid transparent;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .radio-card-quadrado:active {
+            cursor: grabbing;
+        }
+
+        .radio-card-quadrado.playing {
+            background: #151515 !important;
+            color: #fff !important;
+            border-color: #00ff66 !important;
+            box-shadow: 0 0 20px rgba(0, 255, 102, 0.4);
+        }
+
+        .radio-card-quadrado i.icon-radio {
+            font-size: 26px;
+            margin-bottom: 6px;
+        }
+
+        .antena-piscando {
+            color: #00ff66;
+            font-size: 24px !important;
+            animation: piscar 1s infinite alternate;
+        }
+
+        @keyframes piscar {
+            0% { opacity: 0.3; transform: scale(0.95); }
+            100% { opacity: 1; transform: scale(1.1); }
+        }
+
+        .radio-card-quadrado .radio-name {
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: 900;
+            line-height: 1.2;
+            word-break: break-word;
+        }
+
+        .input-msg { 
+            width: 100%; 
+            background: #0a0a0a; 
+            border: 1px solid #333; 
+            border-radius: 10px; 
+            color: #fff; 
+            padding: 14px; 
+            margin-bottom: 10px; 
+            outline: none; 
+            resize: none;
+            font-size: 16px;
+            font-family: inherit;
+        }
+
+        .btn-enviar { 
+            background: var(--primary); 
+            color: #fff; 
+            border: none; 
+            padding: 14px; 
+            border-radius: 10px; 
+            font-weight: bold; 
+            font-size: 15px;
+            width: 100%; 
+            cursor: pointer; 
+            text-transform: uppercase; 
+        }
+
+        /* CARD DE MENSAGEM PADRÃO OU RESPONDIDA */
+        .msg-item {
+            background: #181818;
+            padding: 14px 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--primary);
+            position: relative;
+            transition: border-color 0.3s;
+        }
+
+        /* BORDA DE OUTRA COR PARA MENSAGENS PENDENTES DE RESPOSTA DO ADM */
+        .msg-item.pendente {
+            border-left: 4px solid var(--pink-accent) !important;
+            box-shadow: 0 0 10px rgba(255, 0, 127, 0.15);
+        }
+
+        .msg-texto-ouvinte {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            padding-right: 30px;
+            line-height: 1.4;
+        }
+
+        .btn-delete-msg {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: none;
+            border: none;
+            color: #ff4444;
+            cursor: pointer;
+            font-size: 16px;
+            opacity: 0.7;
+            transition: 0.2s;
+        }
+
+        .btn-delete-msg:hover {
+            opacity: 1;
+            transform: scale(1.15);
+        }
+
+        .resp-adm-box {
+            background: #25122e;
+            padding: 12px 14px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border-left: 3px solid var(--pink-light);
+        }
+
+        .player-footer { 
+            position: fixed; 
+            bottom: 0; 
+            left: 0; 
+            right: 0; 
+            background: #111; 
+            padding: 12px 20px; 
+            border-top: 2px solid var(--primary); 
+            z-index: 100; 
+            display: flex; 
+            flex-direction: column;
+            align-items: center; 
+            gap: 8px;
+        }
+
+        .player-info { text-align: center; }
+
+        .player-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .btn-control-step {
+            background: #222;
+            color: #fff;
+            border: 1px solid #444;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-control-step:hover {
+            background: #333;
+            border-color: var(--primary);
+        }
+
+        .btn-play {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 0 0 12px rgba(160, 32, 240, 0.5);
+        }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div class="header-brand">
-            <h2 class="header-title">PAINEL OUVINTE</h2>
-            <p class="header-sub" id="welcome-user">Bem-vindo(a)</p>
+        <div>
+            <h2>PAINEL DO OUVINTE</h2>
+            <span id="nome-ouvinte-display" class="user-name-title"></span>
         </div>
 
-        <div class="header-right">
-            <button class="btn-msg-notif" onclick="toggleMensagens()">
-                <i class="fas fa-envelope"></i> MENSAGENS E ATENDIMENTO
-            </button>
-
-            <div class="info-pill">
-                <i class="far fa-clock"></i>
-                <span id="hora">00:00:00</span>
+        <div class="header-widgets">
+            <div class="widget-item">
+                <i class="far fa-clock" style="color: var(--primary); font-size: 20px;"></i>
+                <span id="relogio-digital" class="relogio-box">00:00:00</span>
             </div>
-
-            <button class="btn-header btn-sair" onclick="logout()">
+            
+            <div class="widget-item">
+                <span id="icone-clima-dinamico"><i class="fas fa-sun" style="color: #ffcc00; font-size: 20px;"></i></span>
+                <span id="clima-cidade" class="clima-box">Carregando clima...</span>
+            </div>
+            
+            <button class="btn-sair" onclick="logout()">
                 <i class="fas fa-sign-out-alt"></i> SAIR
             </button>
         </div>
     </div>
 
-    <div id="container-mensagens-ouvinte">
-        <div class="card">
-            <h3>FALE COM A RÁDIO / ATENDIMENTO</h3>
-            <div class="chat-card">
-                <div class="chat-history" id="chat-history-ouvinte">
-                    <!-- Histórico do Chat -->
-                </div>
-                <!-- CAMPO DE MENSAGEM COM ATALHO ENTER / SHIFT+ENTER -->
-                <div class="chat-input-area">
-                    <textarea id="msg-ouvinte-input" rows="2" placeholder="Escreva sua mensagem... (Enter envia)" onkeydown="handleOuvinteKeyDown(event)"></textarea>
-                    <button class="btn-send-chat" onclick="enviarMensagemOuvinte()">ENVIAR</button>
-                </div>
-            </div>
-        </div>
+    <div class="frase-centro-playlist">
+        CURTA AQUI SUAS RADIOS PREFERIDAS
     </div>
 
-    <div id="pub-banner" class="pub-banner-container">
-        <img id="pub-banner-img" src="" alt="Publicidade">
-    </div>
+    <div class="main-container">
 
-    <div class="main-grid">
-        <div class="card">
-            <h3>SELEÇÃO DE RÁDIOS</h3>
-            <div id="radio-list" class="radio-grid"></div>
+        <div class="card-box">
+            <h3>GERENCIAR SUAS RÁDIOS PREFERIDAS</h3>
             
-            <div class="player-footer">
-                <div id="now-title" style="font-size:12px; font-weight:bold; color:#888; margin-bottom:15px;">SELECIONE UMA RÁDIO</div>
-                <div class="controls-row">
-                    <button class="btn-nav" onclick="prevRadio()"><i class="fas fa-step-backward"></i></button>
-                    <button class="btn-spotify-play" onclick="togglePlay()"><i class="fas fa-play" id="play-icon"></i></button>
-                    <button class="btn-nav" onclick="nextRadio()"><i class="fas fa-step-forward"></i></button>
+            <div class="radios-section-container">
+                <div>
+                    <h3 class="sub-titulo-secao">1. ADICIONE SUAS RÁDIOS</h3>
+                    <div id="catalogo-radios" class="catalogo-list"></div>
+                </div>
+
+                <div>
+                    <h3 class="sub-titulo-secao">2. SEGURE E ARRASTE PARA DEIXAR NA ORDEM SUAS RÁDIOS</h3>
+                    <div id="grid-playlist" class="playlist-grid-ouvinte"></div>
                 </div>
             </div>
         </div>
+
+        <div class="card-box">
+            <div class="banner-destaque-adm">
+                MANDE MENSAGEM PARA O ADM PARA PEDIR PARA ADICIONAR UMA RADIO QUE VC GOSTE
+            </div>
+
+            <!-- CAMPO DE MENSAGEM COM ATALHO (ENTER ENVIA / SHIFT+ENTER PULA LINHA) -->
+            <textarea id="texto-mensagem" class="input-msg" rows="3" placeholder="Escreva seu recado ou pedido de rádio aqui... (Enter envia)" onkeydown="handleKeyDown(event)"></textarea>
+            <button class="btn-enviar" onclick="enviarMensagem()">Enviar Mensagem</button>
+
+            <h3 style="margin-top: 25px;">SUAS MENSAGENS E RESPOSTAS</h3>
+            <div id="lista-respostas-adm"></div>
+        </div>
+
     </div>
 
-    <audio id="audio-player"></audio>
+    <div class="player-footer">
+        <div class="player-info">
+            <div id="player-title" style="font-size: 13px; font-weight: bold; color: #fff;">Nenhuma rádio selecionada</div>
+        </div>
+        
+        <div class="player-controls">
+            <button class="btn-control-step" title="Rádio Anterior" onclick="mudarRadio(-1)">
+                <i class="fas fa-step-backward"></i>
+            </button>
+            
+            <button id="btn-play" class="btn-play" onclick="togglePlay()">
+                <i class="fas fa-play"></i>
+            </button>
+            
+            <button class="btn-control-step" title="Próxima Rádio" onclick="mudarRadio(1)">
+                <i class="fas fa-step-forward"></i>
+            </button>
+        </div>
+    </div>
+
+    <audio id="audio-ouvinte"></audio>
 
     <script>
         const firebaseConfig = {
@@ -145,239 +547,328 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const player = document.getElementById('audio-player');
+        const player = document.getElementById('audio-ouvinte');
 
-        // Identificação do Ouvinte
-        let usuarioNome = localStorage.getItem('usuarioNome') || 'Ouvinte_Anonimo';
-        document.getElementById('welcome-user').innerText = `Bem-vindo(a), ${usuarioNome}`;
+        const ouvinteId = localStorage.getItem('userId') || ('ouvinte_' + Date.now());
+        if (!localStorage.getItem('userId')) {
+            localStorage.setItem('userId', ouvinteId);
+        }
+        
+        let ouvinteNome = localStorage.getItem('usuarioNome') || localStorage.getItem('usuarioEmail') || 'Ouvinte Anônimo';
+        if (ouvinteNome.includes('@')) {
+            ouvinteNome = ouvinteNome.split('@')[0];
+        }
+        document.getElementById('nome-ouvinte-display').innerText = "Olá, " + ouvinteNome;
 
-        let radioData = [], activeIndex = -1;
-        let sessionStartTime = Date.now();
-        let radioStartTime = Date.now();
+        function atualizarRelogio() {
+            const agora = new Date();
+            document.getElementById('relogio-digital').innerText = agora.toLocaleTimeString('pt-BR');
+        }
+        setInterval(atualizarRelogio, 1000);
+        atualizarRelogio();
 
-        // Relógio
-        setInterval(() => {
-            const hElement = document.getElementById('hora');
-            if(hElement) hElement.innerText = new Date().toLocaleTimeString('pt-BR');
-            enviarHeartbeat();
-        }, 1000);
+        async function carregarClimaPorIP() {
+            try {
+                const resGeo = await fetch('https://ipapi.co/json/');
+                const geoData = await resGeo.json();
+                
+                if (geoData.latitude && geoData.longitude) {
+                    const lat = geoData.latitude;
+                    const lon = geoData.longitude;
+                    const cidade = geoData.city || 'Sua Cidade';
 
-        function logout() {
-            if(confirm("Deseja sair do painel?")) {
-                db.ref('ouvintes_online/' + usuarioNome).update({ online: false, status: 'offline' });
-                localStorage.removeItem('usuarioNome');
-                window.location.href = 'index.html';
+                    const resClima = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+                    const climaData = await resClima.json();
+                    
+                    if (climaData.current_weather) {
+                        const temp = Math.round(climaData.current_weather.temperature);
+                        const code = climaData.current_weather.weathercode;
+
+                        let iconeHTML = '<i class="fas fa-sun" style="color: #ffcc00; font-size: 20px;"></i>';
+
+                        if (code === 0 || code === 1) {
+                            iconeHTML = '<i class="fas fa-sun" style="color: #ffcc00; font-size: 20px;"></i>';
+                        } else if (code === 2 || code === 3) {
+                            iconeHTML = '<i class="fas fa-cloud-sun" style="color: #ffbb00; font-size: 20px;"></i>';
+                        } else if (code >= 51 && code <= 99) {
+                            iconeHTML = '<i class="fas fa-cloud-showers-heavy" style="color: #00ccff; font-size: 20px;"></i>';
+                        } else if (code === 45 || code === 48) {
+                            iconeHTML = '<i class="fas fa-cloud" style="color: #aaaaaa; font-size: 20px;"></i>';
+                        }
+
+                        document.getElementById('icone-clima-dinamico').innerHTML = iconeHTML;
+                        document.getElementById('clima-cidade').innerText = `${cidade}: ${temp}°C`;
+                    }
+                } else {
+                    document.getElementById('clima-cidade').innerText = "Indisponível";
+                }
+            } catch (e) {
+                document.getElementById('clima-cidade').innerText = "Clima indisponível";
             }
         }
+        carregarClimaPorIP();
 
-        function toggleMensagens() { 
-            document.getElementById('container-mensagens-ouvinte').classList.toggle('aberto'); 
-        }
+        let todasRadios = [];
+        let playlistKeys = JSON.parse(localStorage.getItem('playlist_keys_ouvinte') || '[]');
+        let radioTocandoKey = null;
 
-        // =======================================================
-        // SISTEMA DE CHAT DO OUVINTE
-        // =======================================================
-        let allMensagens = {};
-        let allRespostas = {};
-
-        function handleOuvinteKeyDown(event) {
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                enviarMensagemOuvinte();
+        db.ref('ouvintes_preferencias/' + ouvinteId + '/playlist').once('value', snap => {
+            if (snap.exists()) {
+                playlistKeys = snap.val();
+                localStorage.setItem('playlist_keys_ouvinte', JSON.stringify(playlistKeys));
+                localStorage.setItem('playlist_iniciada', 'true');
             }
+        });
+
+        function salvarPreferenciasOuvinte() {
+            localStorage.setItem('playlist_keys_ouvinte', JSON.stringify(playlistKeys));
+            db.ref('ouvintes_preferencias/' + ouvinteId).set({
+                ouvinte: ouvinteNome,
+                playlist: playlistKeys,
+                ultimaAtualizacao: firebase.database.ServerValue.TIMESTAMP
+            });
         }
 
-        function renderChatOuvinte() {
-            const container = document.getElementById('chat-history-ouvinte');
-            if(!container) return;
+        db.ref('radios').on('value', snap => {
+            todasRadios = [];
+            snap.forEach(child => {
+                todasRadios.push({ key: child.key, ...child.val() });
+            });
+
+            todasRadios.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
+
+            if (!localStorage.getItem('playlist_iniciada') && playlistKeys.length === 0) {
+                playlistKeys = todasRadios.map(r => r.key);
+                salvarPreferenciasOuvinte();
+                localStorage.setItem('playlist_iniciada', 'true');
+            }
+
+            renderizarPainelRadios();
+        });
+
+        function renderizarPainelRadios() {
+            renderizarCatologoEsquerda();
+            renderizarPlaylistDireita();
+        }
+
+        function renderizarCatologoEsquerda() {
+            const container = document.getElementById('catalogo-radios');
             container.innerHTML = "";
 
-            let chatMsgs = [];
-
-            // Mensagens do próprio ouvinte
-            for(let key in allMensagens) {
-                const m = allMensagens[key];
-                if((m.ouvinte || m.nome) === usuarioNome) {
-                    chatMsgs.push({
-                        type: 'ouvinte',
-                        nome: usuarioNome,
-                        texto: m.mensagem,
-                        dataHora: m.dataHora || '',
-                        ts: m.timestamp || parseTimestamp(m.dataHora) || 0
-                    });
-                }
-            }
-
-            // Respostas do ADM para este ouvinte
-            for(let key in allRespostas) {
-                const r = allRespostas[key];
-                if(r.ouvinte === usuarioNome) {
-                    chatMsgs.push({
-                        type: 'adm',
-                        nome: 'ADM / Rádio',
-                        texto: r.resposta,
-                        dataHora: r.dataHora || '',
-                        ts: r.timestamp || parseTimestamp(r.dataHora) || 0
-                    });
-                }
-            }
-
-            chatMsgs.sort((a,b) => a.ts - b.ts);
-
-            if(chatMsgs.length === 0) {
-                container.innerHTML = `<div style="text-align:center; padding:20px; color:#666; font-size:12px;">Nenhuma mensagem trocada ainda. Envie um recado abaixo!</div>`;
+            if (todasRadios.length === 0) {
+                container.innerHTML = "<p style='color:#666; font-size:11px;'>Nenhuma rádio cadastrada.</p>";
                 return;
             }
 
-            chatMsgs.forEach(msg => {
-                const div = document.createElement('div');
-                div.className = `chat-bubble ${msg.type}`;
-                div.innerHTML = `
-                    <div class="chat-meta">
-                        <strong>${msg.nome}</strong>
-                        <span>${msg.dataHora}</span>
-                    </div>
-                    <div>${msg.texto}</div>
-                `;
-                container.appendChild(div);
-            });
+            todasRadios.forEach(r => {
+                const estaNaPlaylist = playlistKeys.includes(r.key);
 
-            container.scrollTop = container.scrollHeight;
+                container.innerHTML += `
+                    <div class="bar-radio-catalogo ${estaNaPlaylist ? 'adicionada' : ''}" onclick="togglePlaylistRadio('${r.key}')">
+                        <span class="btn-add-icon"><i class="fas ${estaNaPlaylist ? 'fa-check' : 'fa-plus'}"></i></span>
+                        <span>${r.name}</span>
+                    </div>
+                `;
+            });
         }
 
-        function enviarMensagemOuvinte() {
-            const txtInput = document.getElementById('msg-ouvinte-input');
-            if(!txtInput || !txtInput.value.trim()) return alert("Digite sua mensagem!");
+        function renderizarPlaylistDireita() {
+            const container = document.getElementById('grid-playlist');
+            container.innerHTML = "";
+
+            const radiosPlaylist = playlistKeys
+                .map(key => todasRadios.find(r => r.key === key))
+                .filter(Boolean);
+
+            if (radiosPlaylist.length === 0) {
+                container.innerHTML = "<p style='color:#666; font-size:11px; grid-column: 1/-1; text-align:center; padding: 20px;'>Clique no '+' ao lado para montar sua playlist!</p>";
+                return;
+            }
+
+            radiosPlaylist.forEach((r) => {
+                const isPlaying = (radioTocandoKey === r.key);
+                const cardColor = r.color || '#d1a3ff';
+
+                container.innerHTML += `
+                    <div class="radio-card-quadrado ${isPlaying ? 'playing' : ''}" 
+                         style="background: ${cardColor};" 
+                         data-key="${r.key}"
+                         onclick="tocarRadioPorKey('${r.key}')">
+                        <i class="fas ${isPlaying ? 'fa-tower-broadcast antena-piscando' : 'fa-radio'} icon-radio"></i>
+                        <span class="radio-name">${r.name}</span>
+                    </div>
+                `;
+            });
+        }
+
+        function togglePlaylistRadio(key) {
+            const index = playlistKeys.indexOf(key);
+            if (index > -1) {
+                playlistKeys.splice(index, 1);
+            } else {
+                playlistKeys.push(key);
+            }
+
+            salvarPreferenciasOuvinte();
+            renderizarPainelRadios();
+        }
+
+        new Sortable(document.getElementById('grid-playlist'), {
+            animation: 150,
+            delay: 100,
+            delayOnTouchOnly: true,
+            onEnd: function() {
+                const novaOrdem = [];
+                document.querySelectorAll('#grid-playlist .radio-card-quadrado').forEach(el => {
+                    novaOrdem.push(el.getAttribute('data-key'));
+                });
+
+                playlistKeys = novaOrdem;
+                salvarPreferenciasOuvinte();
+            }
+        });
+
+        function tocarRadioPorKey(key) {
+            const radio = todasRadios.find(r => r.key === key);
+            if (!radio) return;
+
+            if (radioTocandoKey === key) {
+                togglePlay();
+            } else {
+                radioTocandoKey = key;
+                player.src = radio.url;
+                player.play().catch(() => {});
+                document.getElementById('player-title').innerText = radio.name;
+                document.getElementById('btn-play').innerHTML = '<i class="fas fa-pause"></i>';
+                renderizarPlaylistDireita();
+            }
+        }
+
+        function mudarRadio(direcao) {
+            const radiosPlaylist = playlistKeys
+                .map(key => todasRadios.find(r => r.key === key))
+                .filter(Boolean);
+
+            if (radiosPlaylist.length === 0) return;
+
+            let currentIndex = radiosPlaylist.findIndex(r => r.key === radioTocandoKey);
+            let nextIndex = currentIndex + direcao;
+
+            if (nextIndex >= radiosPlaylist.length) nextIndex = 0;
+            if (nextIndex < 0) nextIndex = radiosPlaylist.length - 1;
+
+            tocarRadioPorKey(radiosPlaylist[nextIndex].key);
+        }
+
+        function togglePlay() {
+            if (!player.src) return;
+            if (player.paused) {
+                player.play();
+                document.getElementById('btn-play').innerHTML = '<i class="fas fa-pause"></i>';
+            } else {
+                player.pause();
+                document.getElementById('btn-play').innerHTML = '<i class="fas fa-play"></i>';
+            }
+        }
+
+        // CAPTURA DO TECLADO: ENTER ENVIA / SHIFT+ENTER QUEBRA LINHA
+        function handleKeyDown(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                enviarMensagem();
+            }
+        }
+
+        function enviarMensagem() {
+            const texto = document.getElementById('texto-mensagem').value.trim();
+            if (!texto) return alert("Digite sua mensagem!");
 
             db.ref('mensagens_ouvintes').push({
-                ouvinte: usuarioNome,
-                nome: usuarioNome,
-                mensagem: txtInput.value.trim(),
+                ouvinteId: ouvinteId,
+                ouvinte: ouvinteNome,
+                mensagem: texto,
                 dataHora: new Date().toLocaleString('pt-BR'),
                 timestamp: firebase.database.ServerValue.TIMESTAMP
             }).then(() => {
-                txtInput.value = "";
+                alert("Mensagem enviada com sucesso!");
+                document.getElementById('texto-mensagem').value = "";
             });
         }
 
-        function parseTimestamp(val) {
-            if(!val) return 0;
-            if(typeof val === 'number') return val;
-            if(typeof val === 'string') {
-                const parsed = Date.parse(val);
-                if(!isNaN(parsed)) return parsed;
-                const num = parseInt(val);
-                if(!isNaN(num)) return num;
+        function deletarMensagem(msgKey) {
+            if (confirm("Deseja apagar esta mensagem?")) {
+                db.ref('mensagens_ouvintes/' + msgKey).remove();
             }
-            return 0;
         }
 
-        db.ref('mensagens_ouvintes').on('value', snap => {
-            allMensagens = snap.val() || {};
-            renderChatOuvinte();
-        });
+        db.ref('respostas_adm').on('value', snapResps => {
+            const respostas = snapResps.val() || {};
 
-        db.ref('respostas_adm').on('value', snap => {
-            allRespostas = snap.val() || {};
-            renderChatOuvinte();
-        });
+            db.ref('mensagens_ouvintes').on('value', snapMsgs => {
+                const container = document.getElementById('lista-respostas-adm');
+                container.innerHTML = "";
+                const msgs = snapMsgs.val() || {};
 
-        // =======================================================
-        // GERENCIAMENTO DE RÁDIOS E PLAYER
-        // =======================================================
-        db.ref('radios').on('value', snap => {
-            radioData = []; 
-            snap.forEach(c => { radioData.push({ ...c.val(), key: c.key }); });
-            radioData.sort((a,b) => (a.posicao || 0) - (b.posicao || 0));
-            renderRadioGrid();
-        });
+                let minhasMsgs = [];
 
-        function renderRadioGrid() {
-            const list = document.getElementById('radio-list'); 
-            if(!list) return;
-            list.innerHTML = "";
-            radioData.forEach((r, i) => {
-                const div = document.createElement('div');
-                div.className = `radio-item ${activeIndex === i ? 'active' : ''}`;
-                div.style.background = r.color || '#ece4db';
-                div.onclick = () => playRadio(i);
-                div.innerHTML = `<i class="fas fa-tower-broadcast antena"></i><span>${r.name}</span>`;
-                list.appendChild(div);
-            });
-        }
-
-        function playRadio(idx) {
-            activeIndex = idx; 
-            const r = radioData[idx]; 
-            player.src = r.url; 
-            player.play();
-            radioStartTime = Date.now();
-
-            document.getElementById('now-title').innerText = "TOCANDO AGORA: " + r.name;
-            document.getElementById('play-icon').className = "fas fa-stop";
-            renderRadioGrid();
-            enviarHeartbeat();
-        }
-
-        function togglePlay() { 
-            if(player.paused) { 
-                if(activeIndex === -1 && radioData.length > 0) playRadio(0);
-                else player.play(); 
-                document.getElementById('play-icon').className = "fas fa-stop"; 
-            } else { 
-                player.pause(); 
-                document.getElementById('play-icon').className = "fas fa-play"; 
-            } 
-        }
-
-        function nextRadio() { if(radioData.length) playRadio((activeIndex + 1) % radioData.length); }
-        function prevRadio() { if(radioData.length) playRadio((activeIndex - 1 + radioData.length) % radioData.length); }
-
-        // Heartbeat para Monitor do ADM
-        function enviarHeartbeat() {
-            const radioNome = activeIndex >= 0 && radioData[activeIndex] ? radioData[activeIndex].name : 'Nenhuma';
-            const agora = Date.now();
-
-            const payload = {
-                nome: usuarioNome,
-                online: true,
-                status: 'online',
-                radioAtual: radioNome,
-                lastActive: firebase.database.ServerValue.TIMESTAMP,
-                timestamp: agora,
-                sessionStart: sessionStartTime,
-                radioStart: radioStartTime
-            };
-
-            db.ref('ouvintes_online/' + usuarioNome).update(payload);
-            db.ref('ouvintes_preferencias/' + usuarioNome).update(payload);
-        }
-
-        // Publicidade direcionada
-        db.ref('publicidade').on('value', snap => {
-            const pubs = snap.val() || {};
-            const agora = Date.now();
-            let pubExibir = null;
-
-            for(let key in pubs) {
-                const p = pubs[key];
-                if(p.inicio <= agora && p.fim >= agora) {
-                    if(p.destino === 'TODOS' || (p.destino === 'MANUAL' && p.ouvinteAlvo === usuarioNome)) {
-                        pubExibir = p;
-                        break;
+                for (let id in msgs) {
+                    const m = msgs[id];
+                    if (m.ouvinteId === ouvinteId || m.ouvinte === ouvinteNome) {
+                        minhasMsgs.push({ id, ...m });
                     }
                 }
-            }
 
-            const container = document.getElementById('pub-banner');
-            const img = document.getElementById('pub-banner-img');
-            if(pubExibir && pubExibir.imagem) {
-                img.src = pubExibir.imagem;
-                container.style.display = 'block';
-            } else {
-                container.style.display = 'none';
-            }
+                minhasMsgs.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+
+                if (minhasMsgs.length === 0) {
+                    container.innerHTML = "<p style='color:#666; text-align:center; font-size:14px; margin-top:20px;'>Você ainda não enviou mensagens.</p>";
+                    return;
+                }
+
+                minhasMsgs.forEach((m, idx) => {
+                    // Filtrar apenas respostas direcionadas especificamente para ESTA mensagem
+                    let respostasDestaMsg = [];
+                    for (let rId in respostas) {
+                        const r = respostas[rId];
+                        if (r.mensagemId === m.id || r.msgKey === m.id) {
+                            respostasDestaMsg.push(r);
+                        }
+                    }
+
+                    const temResposta = respostasDestaMsg.length > 0;
+                    // Se não tiver resposta, ganha a classe 'pendente' (borda de outra cor)
+                    const classeStatus = temResposta ? '' : 'pendente';
+
+                    let htmlMsg = `
+                        <div class="msg-item ${classeStatus}">
+                            <button class="btn-delete-msg" title="Apagar Mensagem" onclick="deletarMensagem('${m.id}')">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                            <div class="msg-texto-ouvinte">${idx + 1}. ${m.mensagem}</div>
+                    `;
+
+                    // Só renderiza os balões de resposta se o ADM tiver respondido a esta mensagem
+                    if (temResposta) {
+                        respostasDestaMsg.forEach(r => {
+                            htmlMsg += `
+                                <div class="resp-adm-box">
+                                    <div style="font-size:12px; color: var(--pink-light); font-weight:bold;">Resposta do ADM:</div>
+                                    <div style="font-size:15px; margin-top:3px; color:#fff;">${r.resposta}</div>
+                                </div>
+                            `;
+                        });
+                    }
+
+                    htmlMsg += `</div>`;
+                    container.innerHTML += htmlMsg;
+                });
+            });
         });
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
     </script>
 </body>
 </html>
