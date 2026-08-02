@@ -340,7 +340,7 @@
             text-transform: uppercase; 
         }
 
-        /* CONTAINER CHAT UNIFICADO ESTILO WHATSAPP */
+        /* CONTAINER CHAT UNIFICADO ESTILO MESSENGER */
         .chat-container {
             display: flex;
             flex-direction: column;
@@ -353,26 +353,26 @@
             border: 1px solid #222;
         }
 
-        /* BALÃO DO OUVINTE (DIREITA) */
+        /* BALÃO DO OUVINTE (AGORA NO LADO ESQUERDO) */
         .chat-bubble-ouvinte {
-            align-self: flex-end;
+            align-self: flex-start;
             background: #3b1354;
             color: #fff;
             padding: 10px 14px;
-            border-radius: 14px 14px 2px 14px;
+            border-radius: 14px 14px 14px 2px;
             max-width: 80%;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
             position: relative;
         }
 
-        /* BALÃO DO ADM (ESQUERDA) */
+        /* BALÃO DO ADM (AGORA NO LADO DIREITO) */
         .chat-bubble-adm {
-            align-self: flex-start;
+            align-self: flex-end;
             background: #0d382c;
             border: 1px solid #00ff66;
             color: #fff;
             padding: 10px 14px;
-            border-radius: 14px 14px 14px 2px;
+            border-radius: 14px 14px 2px 14px;
             max-width: 80%;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
@@ -422,6 +422,7 @@
             opacity: 0.7;
             transition: 0.2s;
             padding: 0;
+            margin-left: 8px;
         }
 
         .btn-delete-chat:hover {
@@ -809,7 +810,6 @@
             }
         }
 
-        // CAPTURA DO TECLADO: ENTER ENVIA / SHIFT+ENTER QUEBRA LINHA
         function handleKeyDown(event) {
             if (event.key === 'Enter' && !event.shiftKey) {
                 event.preventDefault();
@@ -838,7 +838,6 @@
             }
         }
 
-        // CHAT COMPLETO EM TEMPO REAL COM O ADM
         function carregarChatCompleto() {
             db.ref('mensagens_ouvintes').on('value', snapMsgs => {
                 db.ref('respostas_adm').on('value', snapResps => {
@@ -850,7 +849,6 @@
 
                     let listaHistorico = [];
 
-                    // 1. Filtrar Mensagens do Ouvinte Atual
                     for (let id in msgs) {
                         const m = msgs[id];
                         if (m.ouvinteId === ouvinteId || m.ouvinte === ouvinteNome) {
@@ -864,7 +862,6 @@
                         }
                     }
 
-                    // 2. Filtrar Respostas do ADM Direcionadas a este Ouvinte
                     for (let id in resps) {
                         const r = resps[id];
                         if (r.ouvinteId === ouvinteId || r.ouvinte === ouvinteNome) {
@@ -878,7 +875,6 @@
                         }
                     }
 
-                    // 3. Ordenar todas as mensagens por Ordem Cronológica Exata
                     listaHistorico.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
 
                     if (listaHistorico.length === 0) {
@@ -886,7 +882,6 @@
                         return;
                     }
 
-                    // 4. Renderizar cada balão de conversa
                     listaHistorico.forEach(item => {
                         if (item.tipo === 'ouvinte') {
                             container.innerHTML += `
@@ -914,7 +909,6 @@
                         }
                     });
 
-                    // Scroll para o final da conversa automaticamente
                     container.scrollTop = container.scrollHeight;
                 });
             });
