@@ -275,7 +275,7 @@
         function toggleMensagens() { document.getElementById('container-mensagens-adm').classList.toggle('aberto'); }
 
         // =======================================================
-        // SISTEMA DE CHAT AGRUPADO POR OUVINTE (COM ATALHO ENTER)
+        // SISTEMA DE CHAT AGRUPADO POR OUVINTE (SEQUÊNCIA ESTILO WHATSAPP)
         // =======================================================
         let allMensagens = {};
         let allRespostas = {};
@@ -286,9 +286,8 @@
         }
 
         function handleChatKeyDown(event, nomeOuvinte, safeNome) {
-            // Pressionar ENTER sem SHIFT envia a mensagem
             if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault(); // Impede a quebra de linha padrão
+                event.preventDefault();
                 enviarRespostaChat(nomeOuvinte, safeNome);
             }
         }
@@ -299,7 +298,6 @@
             if(!container) return;
             container.innerHTML = "";
 
-            // Agrupa histórico por Ouvinte
             const ouvintesMap = {};
 
             // Mapeia Mensagens dos Ouvintes
@@ -347,8 +345,9 @@
 
             ouvintesNomes.forEach(nome => {
                 const dados = ouvintesMap[nome];
-                // Inverte a ordem das mensagens (da mais recente para a mais antiga)
-                dados.msgs.sort((a,b) => b.ts - a.ts);
+                
+                // ORDENAÇÃO ESTILO WHATSAPP: Mensagens antigas no topo, novas no final (cronológico crescente)
+                dados.msgs.sort((a,b) => a.ts - b.ts);
 
                 const isOpen = !!openChatCards[nome];
                 const safeNome = nome.replace(/[^a-zA-Z0-9]/g, '_');
@@ -391,11 +390,11 @@
 
                 container.appendChild(card);
                 
-                // Rola o chat para o topo/início ao carregar se estiver aberto
+                // Rola automaticamente para o final da conversa (última mensagem recebida/enviada)
                 if(isOpen) {
                     setTimeout(() => {
                         const histDiv = document.getElementById(`chat-hist-${safeNome}`);
-                        if(histDiv) histDiv.scrollTop = 0;
+                        if(histDiv) histDiv.scrollTop = histDiv.scrollHeight;
                     }, 50);
                 }
             });
