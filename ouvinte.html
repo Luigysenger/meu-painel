@@ -175,7 +175,7 @@
             gap: 24px; 
             width: 100%; 
             max-width: 1200px; 
-            margin-bottom: 140px; 
+            margin-bottom: 180px; 
             align-items: start;
         }
 
@@ -509,7 +509,7 @@
         /* PLAYER RODAPÉ FLUTUANTE */
         .player-footer { 
             position: fixed; 
-            bottom: 20px; 
+            bottom: 50px; 
             left: 50%;
             transform: translateX(-50%);
             width: calc(100% - 40px);
@@ -589,6 +589,80 @@
         .btn-play:hover {
             transform: scale(1.05);
             box-shadow: 0 0 25px var(--primary-glow);
+        }
+
+        /* LETREIRO DE NOTÍCIAS FIXO NO RODAPÉ */
+        .news-ticker-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100vw;
+            height: 38px;
+            background: #09090c;
+            border-top: 1px solid #1f1f2b;
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .news-ticker-badge {
+            background: #dc2626;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 0 14px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            z-index: 2;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.5);
+            letter-spacing: 0.5px;
+        }
+
+        .news-ticker-badge i {
+            animation: piscar 1.2s infinite ease-in-out;
+        }
+
+        .news-ticker-content {
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+            will-change: transform;
+            animation: ticker-slide 60s linear infinite;
+        }
+
+        .news-ticker-bar:hover .news-ticker-content {
+            animation-play-state: paused;
+        }
+
+        .news-item-link {
+            color: #d1d5db;
+            font-size: 12.5px;
+            font-weight: 600;
+            text-decoration: none;
+            margin-right: 40px;
+            display: inline-flex;
+            align-items: center;
+            transition: color 0.2s ease;
+        }
+
+        .news-item-link:hover {
+            color: #a855f7;
+            text-decoration: underline;
+        }
+
+        .news-item-divider {
+            color: var(--primary);
+            margin-right: 12px;
+            font-size: 10px;
+        }
+
+        @keyframes ticker-slide {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
         }
 
         ::-webkit-scrollbar { width: 6px; }
@@ -678,6 +752,16 @@
         </div>
     </div>
 
+    <!-- LETREIRO DE NOTÍCIAS BRASIL -->
+    <div class="news-ticker-bar">
+        <div class="news-ticker-badge">
+            <i class="fas fa-circle"></i> NOTÍCIAS DO BRASIL
+        </div>
+        <div class="news-ticker-content" id="ticker-noticias-container">
+            <span class="news-item-link">Carregando últimas manchetes...</span>
+        </div>
+    </div>
+
     <audio id="audio-ouvinte"></audio>
 
     <script>
@@ -753,6 +837,34 @@
 
         atualizarCarrosselClima();
         setInterval(atualizarCarrosselClima, 6000);
+
+        // BUSCA E RENDERIZAÇÃO DE NOTÍCIAS DO BRASIL (G1 RSS)
+        async function carregarNoticiasBrasil() {
+            try {
+                const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fg1.globo.com%2Fdynamo%2Fbrasil%2Frss2.xml');
+                const data = await res.json();
+                
+                if (data.status === 'ok' && data.items && data.items.length > 0) {
+                    let htmlItems = '';
+                    data.items.slice(0, 15).forEach(item => {
+                        htmlItems += `
+                            <a href="${item.link}" target="_blank" class="news-item-link">
+                                <span class="news-item-divider">◆</span> ${item.title}
+                            </a>
+                        `;
+                    });
+
+                    // Duplicamos o conteúdo para criar efeito de loop contínuo infinito
+                    document.getElementById('ticker-noticias-container').innerHTML = htmlItems + htmlItems;
+                }
+            } catch (err) {
+                document.getElementById('ticker-noticias-container').innerHTML = `
+                    <span class="news-item-link"><span class="news-item-divider">◆</span> Notícias do Brasil atualizadas diariamente no portal G1.</span>
+                `;
+            }
+        }
+        carregarNoticiasBrasil();
+        setInterval(carregarNoticiasBrasil, 300000); // Atualiza a cada 5 minutos
 
         let todasRadios = [];
         let playlistKeys = JSON.parse(localStorage.getItem('playlist_keys_ouvinte') || '[]');
