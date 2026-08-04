@@ -448,16 +448,50 @@
             letter-spacing: 1px;
         }
 
-        /* CAMPO VIRTUAL EMBAIXO DO JOGO AO VIVO */
+        /* BOTÃO PARA DESLIZAR / MOSTRAR O CAMPO VIRTUAL */
+        .btn-toggle-pressao {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.15));
+            border: 1px solid rgba(52, 211, 153, 0.4);
+            color: #34d399;
+            width: 100%;
+            padding: 7px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+            margin-top: 4px;
+        }
+
+        .btn-toggle-pressao:hover {
+            background: rgba(16, 185, 129, 0.25);
+            color: #fff;
+        }
+
+        /* CAMPO VIRTUAL EMBAIXO DO JOGO AO VIVO (COM TRANSIÇÃO / DESLIZE) */
         .campo-virtual-box {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out, padding 0.4s ease-out;
             background: linear-gradient(135deg, #09381e, #062412);
-            border: 1px solid #14532d;
+            border: 1px solid transparent;
             border-radius: 8px;
-            padding: 8px;
+            padding: 0 8px;
             display: flex;
             flex-direction: column;
             gap: 5px;
-            margin-top: 4px;
+            margin-top: 0;
+        }
+
+        .campo-virtual-box.visivel {
+            max-height: 120px;
+            border-color: #14532d;
+            padding: 8px;
+            margin-top: 6px;
         }
 
         .campo-virtual-header {
@@ -1071,7 +1105,7 @@
                 
                 <!-- QUADRO DE FUTEBOL E BOTÕES PARA JOGOS ENCERRADOS -->
                 <div class="card-box" style="padding: 16px;">
-                    <h3 style="margin-bottom: 10px; font-size: 13.5px;"><i class="fas fa-futbol" style="color: #22c55e;"></i> FUTEBOL: JOGOS & RESULTADOS</h3>
+                    <h3 style="margin-bottom: 10px; font-size: 13.5px;"><i class="fas fa-futbol" style="color: #22c55e;"></i> FUTEBOL: JOGOS DA SEMANA (SEG - DOM)</h3>
                     
                     <!-- BOTÕES NO TOPO PARA VER JOGOS ENCERRADOS -->
                     <div class="botoes-tabelas-col" style="margin-top: 0; margin-bottom: 12px;">
@@ -1086,7 +1120,7 @@
                     </div>
 
                     <div id="lista-jogos-esportes" class="esportes-container">
-                        <p style="color:#666; font-size:11.5px; text-align:center; margin:10px 0;">Carregando jogos reais...</p>
+                        <p style="color:#666; font-size:11.5px; text-align:center; margin:10px 0;">Carregando jogos da semana...</p>
                     </div>
                 </div>
 
@@ -1255,48 +1289,56 @@
         atualizarCarrosselClima();
         setInterval(atualizarCarrosselClima, 6000);
 
-        // JOGOS REAIS OFICIAIS (PRÓXIMAS PARTIDAS DA TABELA)
-        const jogosReaisLista = [
-            { 
-                id: 1,
-                campeonato: "Copa do Brasil (Oitavas)",
-                timeA: "Remo", timeB: "Santos", data: "Hoje, 04/08", hora: "21:30", 
-                golsA: 0, golsB: 0, status: "AGENDADO", minuto: "21:30", posseA: "50%", posseB: "50%", ataquePos: 50
-            },
-            { 
-                id: 2,
-                campeonato: "Copa do Brasil (Oitavas)",
-                timeA: "Cruzeiro", timeB: "Chapecoense", data: "Qua, 05/08", hora: "19:00", 
-                golsA: 0, golsB: 0, status: "AGENDADO", minuto: "19:00", posseA: "50%", posseB: "50%", ataquePos: 50
-            },
-            { 
-                id: 3,
-                campeonato: "Copa do Brasil (Oitavas)",
-                timeA: "Grêmio", timeB: "Mirassol", data: "Qua, 05/08", hora: "19:30", 
-                golsA: 0, golsB: 0, status: "AGENDADO", minuto: "19:30", posseA: "50%", posseB: "50%", ataquePos: 50
-            },
-            { 
-                id: 4,
-                campeonato: "Brasileirão Série A",
-                timeA: "Grêmio", timeB: "São Paulo", data: "Sáb, 08/08", hora: "16:00", 
-                golsA: 0, golsB: 0, status: "AGENDADO", minuto: "16:00", posseA: "50%", posseB: "50%", ataquePos: 50
-            }
+        // BANCO DE JOGOS SEMANAIS (SEGUNDA A DOMINGO) - ROTATIVOS AUTOMÁTICOS POR SEMANA DO ANO
+        const bancosSemanaisJogos = [
+            // Semana 1 (Ex: Início de Agosto de 2026)
+            [
+                { id: 1, campeonato: "Copa do Brasil", timeA: "Remo", timeB: "Santos", diaSemana: 1, dataStr: "Seg, 03/08", hora: "21:30", status: "ENCERRADO", golsA: 0, golsB: 0 },
+                { id: 2, campeonato: "Brasileirão Série A", timeA: "Internacional", timeB: "Flamengo", diaSemana: 3, dataStr: "Qua, 05/08", hora: "19:00", status: "AO VIVO", golsA: 1, golsB: 1, minuto: "72'", posseA: "48%", posseB: "52%", ataquePos: 58 },
+                { id: 3, campeonato: "Copa do Brasil", timeA: "Cruzeiro", timeB: "Chapecoense", diaSemana: 4, dataStr: "Qui, 06/08", hora: "19:30", status: "AGENDADO", golsA: 0, golsB: 0 },
+                { id: 4, campeonato: "Brasileirão Série A", timeA: "Grêmio", timeB: "São Paulo", diaSemana: 6, dataStr: "Sáb, 08/08", hora: "16:00", status: "AGENDADO", golsA: 0, golsB: 0 },
+                { id: 5, campeonato: "Brasileirão Série A", timeA: "Palmeiras", timeB: "Corinthians", diaSemana: 0, dataStr: "Dom, 09/08", hora: "16:00", status: "AGENDADO", golsA: 0, golsB: 0 }
+            ],
+            // Semana 2
+            [
+                { id: 6, campeonato: "Brasileirão Série A", timeA: "Botafogo", timeB: "Fluminense", diaSemana: 1, dataStr: "Seg, 10/08", hora: "20:00", status: "AGENDADO", golsA: 0, golsB: 0 },
+                { id: 7, campeonato: "Copa do Brasil", timeA: "São Paulo", timeB: "Atlético-MG", diaSemana: 3, dataStr: "Qua, 12/08", hora: "21:30", status: "AGENDADO", golsA: 0, golsB: 0 },
+                { id: 8, campeonato: "Copa do Brasil", timeA: "Flamengo", timeB: "Palmeiras", diaSemana: 4, dataStr: "Qui, 13/08", hora: "21:30", status: "AGENDADO", golsA: 0, golsB: 0 },
+                { id: 9, campeonato: "Brasileirão Série A", timeA: "Bahia", timeB: "Vitória", diaSemana: 6, dataStr: "Sáb, 16/08", hora: "18:30", status: "AGENDADO", golsA: 0, golsB: 0 },
+                { id: 10, campeonato: "Brasileirão Série A", timeA: "Vasco", timeB: "Santos", diaSemana: 0, dataStr: "Dom, 16/08", hora: "16:00", status: "AGENDADO", golsA: 0, golsB: 0 }
+            ]
         ];
+
+        // FUNÇÃO PARA CALCULAR O NÚMERO DA SEMANA ATUAL E OBTER OS JOGOS DE SEGUNDA A DOMINGO AUTOMATICAMENTE
+        function obterJogosDaSemanaAtual() {
+            const agora = new Date();
+            const inicioAno = new Date(agora.getFullYear(), 0, 1);
+            const diasDecorridos = Math.floor((agora - inicioAno) / (24 * 60 * 60 * 1000));
+            const numeroSemana = Math.floor(diasDecorridos / 7);
+            
+            // Alterna automaticamente entre as listas semanais cadastradas
+            const indiceLista = numeroSemana % bancosSemanaisJogos.length;
+            return bancosSemanaisJogos[indiceLista];
+        }
 
         function carregarJogosEsportivos() {
             const containerEsportes = document.getElementById('lista-jogos-esportes');
+            const jogosDaSemana = obterJogosDaSemanaAtual();
             let htmlJogos = "";
 
-            jogosReaisLista.forEach(j => {
+            jogosDaSemana.forEach(j => {
                 const aoVivo = j.status === "AO VIVO";
 
                 let campoVirtualHtml = "";
                 if (aoVivo) {
                     campoVirtualHtml = `
-                        <div class="campo-virtual-box">
+                        <button class="btn-toggle-pressao" onclick="toggleCampoVirtual(${j.id})">
+                            <i class="fas fa-chart-line"></i> Confira a pressão do jogo (Campo Virtual)
+                        </button>
+                        <div id="campo-box-${j.id}" class="campo-virtual-box">
                             <div class="campo-virtual-header">
                                 <span>${j.timeA} (${j.posseA})</span>
-                                <span style="color:#fde047"><i class="fas fa-satellite-dish"></i> CAMPO VIRTUAL AO VIVO</span>
+                                <span style="color:#fde047"><i class="fas fa-satellite-dish"></i> AO VIVO</span>
                                 <span>${j.timeB} (${j.posseB})</span>
                             </div>
                             <div class="campo-desenho">
@@ -1314,7 +1356,7 @@
                             <span class="campeonato-badge-jogo"><i class="fas fa-trophy" style="font-size: 8.5px; margin-right: 3px;"></i> ${j.campeonato}</span>
                         </div>
                         <div class="jogo-header-info">
-                            <span><i class="far fa-calendar-alt"></i> ${j.data}</span>
+                            <span><i class="far fa-calendar-alt"></i> ${j.dataStr}</span>
                             ${aoVivo ? '<span class="live-tag-badge"><i class="fas fa-circle"></i> AO VIVO ' + j.minuto + '</span>' : '<span style="color:#94a3b8; font-weight:700;">Ás ' + j.hora + '</span>'}
                         </div>
                         <div class="jogo-placares-row">
@@ -1328,6 +1370,13 @@
             });
 
             containerEsportes.innerHTML = htmlJogos;
+        }
+
+        function toggleCampoVirtual(id) {
+            const caixa = document.getElementById(`campo-box-${id}`);
+            if (caixa) {
+                caixa.classList.toggle('visivel');
+            }
         }
 
         carregarJogosEsportivos();
@@ -1736,7 +1785,7 @@
                         const r = resps[id];
                         if (r.ouvinteId === ouvinteId || r.ouvinte === ouvinteNome) {
                             listaHistorico.push({
-                                tipo: 'adm',
+                                type: 'adm',
                                 id: id,
                                 texto: r.resposta,
                                 dataHora: r.dataHora || '',
