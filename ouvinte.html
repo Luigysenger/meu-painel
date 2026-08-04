@@ -78,7 +78,7 @@
             border: 1px solid var(--card-border); 
             margin-bottom: 16px; 
             width: 100%; 
-            max-width: 1350px; 
+            max-width: 1600px; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
@@ -160,7 +160,7 @@
             letter-spacing: 1.5px;
             margin: 0 0 20px 0;
             width: 100%;
-            max-width: 1350px;
+            max-width: 1600px;
             background: linear-gradient(90deg, rgba(147, 51, 234, 0), rgba(147, 51, 234, 0.15), rgba(147, 51, 234, 0));
             padding: 10px;
             border-radius: 12px;
@@ -168,13 +168,13 @@
             border-bottom: 1px solid rgba(147, 51, 234, 0.2);
         }
 
-        /* LAYOUT PRINCIPAL: 3 COLUNAS UNIFICADAS PARA NOTEBOOK E PC DE MESA */
+        /* LAYOUT PRINCIPAL: 3 COLUNAS AMPLIADAS PARA OCUPAR A TELA INTEIRA DO PC DE MESA */
         .main-container { 
             display: grid; 
-            grid-template-columns: 1fr 1.25fr 1.15fr; 
+            grid-template-columns: 1fr 1.35fr 1.2fr; 
             gap: 20px; 
             width: 100%; 
-            max-width: 1350px; 
+            max-width: 1600px; 
             margin-bottom: 200px; 
             align-items: start;
         }
@@ -241,7 +241,7 @@
             display: flex;
             flex-direction: column;
             gap: 7px;
-            max-height: 380px;
+            max-height: 440px;
             overflow-y: auto;
             padding-right: 4px;
         }
@@ -297,7 +297,7 @@
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
             width: 100%;
-            max-height: 400px;
+            max-height: 460px;
             overflow-y: auto;
             padding-right: 4px;
         }
@@ -797,7 +797,7 @@
             </div>
         </div>
 
-        <!-- CARD 2: SUAS RÁDIOS PREFERIDAS (CARDS MAIORES & 3 FILEIRAS) -->
+        <!-- CARD 2: SUAS RÁDIOS PREFERIDAS -->
         <div class="card-box">
             <h3>GERENCIAR SUAS RÁDIOS PREFERIDAS</h3>
             <div class="radios-section-container">
@@ -1270,7 +1270,6 @@
                         }
                     }
 
-unificado:
                     listaHistorico.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
 
                     if (listaHistorico.length === 0) {
@@ -1300,7 +1299,7 @@ unificado:
                                     </div>
                                     <div class="chat-text">${item.texto}</div>
                                     <div class="chat-time">${item.dataHora}</div>
-                                </div>
+                                    </div>
                             `;
                         }
                     });
