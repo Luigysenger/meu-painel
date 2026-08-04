@@ -78,7 +78,7 @@
             border: 1px solid var(--card-border); 
             margin-bottom: 16px; 
             width: 100%; 
-            max-width: 1300px; 
+            max-width: 1350px; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
@@ -160,7 +160,7 @@
             letter-spacing: 1.5px;
             margin: 0 0 20px 0;
             width: 100%;
-            max-width: 1300px;
+            max-width: 1350px;
             background: linear-gradient(90deg, rgba(147, 51, 234, 0), rgba(147, 51, 234, 0.15), rgba(147, 51, 234, 0));
             padding: 10px;
             border-radius: 12px;
@@ -168,13 +168,13 @@
             border-bottom: 1px solid rgba(147, 51, 234, 0.2);
         }
 
-        /* LAYOUT PRINCIPAL: 3 COLUNAS DE CARDS */
+        /* LAYOUT PRINCIPAL: 3 COLUNAS */
         .main-container { 
             display: grid; 
-            grid-template-columns: 1.1fr 1fr 1fr; 
+            grid-template-columns: 1fr 1.25fr 1.15fr; 
             gap: 20px; 
             width: 100%; 
-            max-width: 1300px; 
+            max-width: 1350px; 
             margin-bottom: 200px; 
             align-items: start;
         }
@@ -221,12 +221,12 @@
             color: #f3e8ff;
             border: 1px solid rgba(168, 85, 247, 0.4);
             border-radius: 14px;
-            padding: 12px;
-            font-size: 12px;
+            padding: 10px;
+            font-size: 11.5px;
             font-weight: 700;
             text-align: center;
             line-height: 1.4;
-            margin-bottom: 14px;
+            margin-bottom: 10px;
             box-shadow: 0 4px 20px rgba(147, 51, 234, 0.15);
         }
 
@@ -236,12 +236,12 @@
             gap: 16px;
         }
 
-        /* CATÁLOGO E PLAYLIST */
+        /* CATÁLOGO (MAIS EXTENSO NA VERTICAL) */
         .catalogo-list {
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            max-height: 250px;
+            gap: 7px;
+            max-height: 380px;
             overflow-y: auto;
             padding-right: 4px;
         }
@@ -250,7 +250,7 @@
             background: #1a1a22;
             border: 1px solid #2a2a36;
             border-radius: 10px;
-            padding: 10px 12px;
+            padding: 11px 12px;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -283,6 +283,7 @@
             align-items: center;
             justify-content: center;
             transition: 0.2s;
+            flex-shrink: 0;
         }
 
         .bar-radio-catalogo.adicionada .btn-add-icon {
@@ -290,32 +291,33 @@
             color: #fff;
         }
 
+        /* PLAYLIST COM CARDS MAIORES (3 FILEIRAS) */
         .playlist-grid-ouvinte {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
-            gap: 8px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
             width: 100%;
-            max-height: 250px;
+            max-height: 400px;
             overflow-y: auto;
-            padding-right: 2px;
+            padding-right: 4px;
         }
 
         .radio-card-quadrado {
             aspect-ratio: 1 / 1;
-            border-radius: 14px;
+            border-radius: 16px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 8px;
+            padding: 10px;
             cursor: grab;
             color: #fff;
             font-weight: 700;
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.12);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.45);
             overflow: hidden;
         }
 
@@ -334,7 +336,7 @@
 
         .radio-card-quadrado:hover {
             transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+            box-shadow: 0 10px 22px rgba(0,0,0,0.65);
         }
 
         .radio-card-quadrado:active {
@@ -343,18 +345,18 @@
 
         .radio-card-quadrado.playing {
             border: 2px solid #22c55e !important;
-            box-shadow: 0 0 20px rgba(34, 197, 94, 0.5) !important;
+            box-shadow: 0 0 22px rgba(34, 197, 94, 0.55) !important;
         }
 
         .radio-card-quadrado i.icon-radio {
-            font-size: 20px;
-            margin-bottom: 6px;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+            font-size: 26px;
+            margin-bottom: 8px;
+            filter: drop-shadow(0 2px 5px rgba(0,0,0,0.6));
         }
 
         .antena-piscando {
             color: #22c55e;
-            font-size: 20px !important;
+            font-size: 26px !important;
             animation: piscar 1.2s infinite ease-in-out;
         }
 
@@ -364,32 +366,26 @@
         }
 
         .radio-card-quadrado .radio-name {
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 800;
-            line-height: 1.15;
+            line-height: 1.2;
             word-break: break-word;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+            text-shadow: 0 1px 3px rgba(0,0,0,0.85);
         }
 
-        /* HORÓSCOPO DO DIA (COMPACTO) */
+        /* HORÓSCOPO DO DIA (MAIS COMPACTO) */
         .signos-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-
-        @media (max-width: 480px) {
-            .signos-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
+            gap: 6px;
+            margin-bottom: 10px;
         }
 
         .signo-btn {
             background: #181822;
             border: 1px solid #2b2b3b;
-            border-radius: 12px;
-            padding: 8px 4px;
+            border-radius: 10px;
+            padding: 6px 2px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -407,31 +403,31 @@
         }
 
         .signo-btn.ativo {
-            box-shadow: 0 0 14px rgba(168, 85, 247, 0.45);
+            box-shadow: 0 0 12px rgba(168, 85, 247, 0.45);
         }
 
         .signo-btn i {
-            font-size: 18px;
-            margin-bottom: 4px;
+            font-size: 15px;
+            margin-bottom: 3px;
             color: #c084fc;
         }
 
         .signo-btn span {
-            font-size: 10px;
+            font-size: 9.5px;
             font-weight: 800;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.4px;
         }
 
         .horoscopo-display {
             background: #0d0d12;
             border: 1px solid #2b2b3b;
-            border-radius: 14px;
-            padding: 14px;
-            font-size: 13.5px;
-            line-height: 1.5;
+            border-radius: 12px;
+            padding: 10px;
+            font-size: 12.5px;
+            line-height: 1.4;
             color: #f1f5f9;
-            min-height: 90px;
-            max-height: 140px;
+            min-height: 70px;
+            max-height: 110px;
             overflow-y: auto;
             display: flex;
             align-items: center;
@@ -443,23 +439,23 @@
             font-weight: 800;
             color: #d8b4fe;
             display: block;
-            margin-bottom: 4px;
-            font-size: 15px;
+            margin-bottom: 2px;
+            font-size: 13.5px;
             letter-spacing: 0.5px;
         }
 
-        /* CHAT E MENSAGENS (COMPACTO) */
+        /* CHAT E MENSAGENS (COMPACTO NA ALTURA) */
         .input-msg { 
             width: 100%; 
             background: #0f0f14; 
             border: 1px solid #272734; 
             border-radius: 12px; 
             color: #fff; 
-            padding: 10px 12px; 
-            margin-bottom: 10px; 
+            padding: 9px 12px; 
+            margin-bottom: 8px; 
             outline: none; 
             resize: none;
-            font-size: 13px;
+            font-size: 12.5px;
             font-family: inherit;
             transition: all 0.2s ease;
         }
@@ -473,10 +469,10 @@
             background: linear-gradient(135deg, var(--primary), #7e22ce); 
             color: #fff; 
             border: none; 
-            padding: 11px; 
+            padding: 10px; 
             border-radius: 12px; 
             font-weight: 700; 
-            font-size: 13px;
+            font-size: 12.5px;
             width: 100%; 
             cursor: pointer; 
             transition: all 0.2s ease;
@@ -492,12 +488,12 @@
         .chat-container {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            max-height: 180px;
+            gap: 8px;
+            max-height: 140px;
             overflow-y: auto;
-            padding: 10px;
+            padding: 8px;
             background: #0d0d12;
-            border-radius: 14px;
+            border-radius: 12px;
             border: 1px solid #22222e;
         }
 
@@ -506,8 +502,8 @@
             background: linear-gradient(135deg, #2e1045, #1e0b2e);
             border: 1px solid rgba(168, 85, 247, 0.3);
             color: #fff;
-            padding: 10px 14px;
-            border-radius: 14px 14px 14px 4px;
+            padding: 8px 12px;
+            border-radius: 12px 12px 12px 4px;
             max-width: 85%;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             position: relative;
@@ -518,8 +514,8 @@
             background: linear-gradient(135deg, #063726, #032217);
             border: 1px solid rgba(34, 197, 94, 0.4);
             color: #fff;
-            padding: 10px 14px;
-            border-radius: 14px 14px 4px 14px;
+            padding: 8px 12px;
+            border-radius: 12px 12px 4px 12px;
             max-width: 85%;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
@@ -529,11 +525,11 @@
             justify-content: space-between;
             align-items: center;
             gap: 10px;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
         }
 
         .chat-sender-name {
-            font-size: 10.5px;
+            font-size: 10px;
             font-weight: 800;
             letter-spacing: 0.5px;
         }
@@ -547,16 +543,16 @@
         }
 
         .chat-text {
-            font-size: 12.5px;
-            line-height: 1.4;
+            font-size: 12px;
+            line-height: 1.35;
             word-break: break-word;
         }
 
         .chat-time {
-            font-size: 9.5px;
+            font-size: 9px;
             color: #94a3b8;
             text-align: right;
-            margin-top: 4px;
+            margin-top: 3px;
         }
 
         .btn-delete-chat {
@@ -564,7 +560,7 @@
             border: none;
             color: #f87171;
             cursor: pointer;
-            font-size: 11px;
+            font-size: 10.5px;
             opacity: 0.7;
             transition: 0.2s;
             padding: 0;
@@ -792,32 +788,32 @@
 
         <!-- CARD 1: ADICIONAR RÁDIOS -->
         <div class="card-box">
-            <h3>ADICIONAR RÁDIOS</h3>
+            <h3>GERENCIAR SUAS RÁDIOS PREFERIDAS</h3>
             <div class="radios-section-container">
                 <div>
-                    <h3 class="sub-titulo-secao"><i class="fas fa-plus-circle"></i> CATÁLOGO DISPONÍVEL</h3>
+                    <h3 class="sub-titulo-secao"><i class="fas fa-plus-circle"></i> 1. ADICIONE SUAS RÁDIOS</h3>
                     <div id="catalogo-radios" class="catalogo-list"></div>
                 </div>
             </div>
         </div>
 
-        <!-- CARD 2: SUAS RÁDIOS PREFERIDAS (3 FILEIRAS) -->
+        <!-- CARD 2: SUAS RÁDIOS PREFERIDAS (CARDS MAIORES & 3 FILEIRAS) -->
         <div class="card-box">
-            <h3>SUAS RÁDIOS PREFERIDAS</h3>
+            <h3>GERENCIAR SUAS RÁDIOS PREFERIDAS</h3>
             <div class="radios-section-container">
                 <div>
-                    <h3 class="sub-titulo-secao"><i class="fas fa-sort"></i> ARRASTE PARA REORDENAR</h3>
+                    <h3 class="sub-titulo-secao"><i class="fas fa-sort"></i> 2. ARRASTE PARA REORDENAR</h3>
                     <div id="grid-playlist" class="playlist-grid-ouvinte"></div>
                 </div>
             </div>
         </div>
 
-        <!-- CARD 3: COLUNA DIREITA COMPACTA (HORÓSCOPO + CHAT) -->
+        <!-- CARD 3: COLUNA DIREITA (HORÓSCOPO + CHAT COMPACTOS) -->
         <div class="coluna-direita" style="display: flex; flex-direction: column; gap: 20px;">
             
             <!-- HORÓSCOPO DO DIA -->
             <div class="card-box" style="padding: 16px;">
-                <h3 style="margin-bottom: 12px; font-size: 13px;"><i class="fas fa-star-of-david" style="color: #c084fc;"></i> HORÓSCOPO DO DIA</h3>
+                <h3 style="margin-bottom: 10px; font-size: 13px;"><i class="fas fa-star-of-david" style="color: #c084fc;"></i> HORÓSCOPO DO DIA</h3>
                 <div class="signos-grid">
                     <div class="signo-btn" onclick="carregarHoroscopo('aries', this)"><i class="fas fa-aries"></i><span>ÁRIES</span></div>
                     <div class="signo-btn" onclick="carregarHoroscopo('taurus', this)"><i class="fas fa-taurus"></i><span>TOURO</span></div>
@@ -839,14 +835,14 @@
 
             <!-- CARD DE MENSAGENS -->
             <div class="card-box" style="padding: 16px;">
-                <div class="banner-destaque-adm" style="font-size: 11.5px; padding: 10px; margin-bottom: 10px;">
-                    <i class="fas fa-paper-plane" style="margin-right: 4px;"></i> PEDIR NOVA RÁDIO AO ADM
+                <div class="banner-destaque-adm">
+                    <i class="fas fa-paper-plane" style="margin-right: 4px;"></i> MANDE MENSAGEM PARA O ADM PARA PEDIR PARA ADICIONAR UMA RÁDIO QUE VOCÊ GOSTE
                 </div>
 
-                <textarea id="texto-mensagem" class="input-msg" rows="2" placeholder="Escreva seu pedido aqui... (Enter envia)" onkeydown="handleKeyDown(event)"></textarea>
-                <button class="btn-enviar" onclick="enviarMensagem()"><i class="fas fa-paper-plane"></i> Enviar Recado</button>
+                <textarea id="texto-mensagem" class="input-msg" rows="2" placeholder="Escreva seu recado ou pedido de rádio aqui... (Enter envia)" onkeydown="handleKeyDown(event)"></textarea>
+                <button class="btn-enviar" onclick="enviarMensagem()"><i class="fas fa-paper-plane"></i> Enviar Mensagem</button>
 
-                <h3 style="margin-top: 16px; margin-bottom: 10px; text-align: left; font-size: 13px;"><i class="fas fa-comments"></i> MENSAGENS E RESPOSTAS</h3>
+                <h3 style="margin-top: 14px; margin-bottom: 8px; text-align: left; font-size: 13px;"><i class="fas fa-comments"></i> SUAS MENSAGENS E RESPOSTAS</h3>
                 <div id="lista-respostas-adm" class="chat-container"></div>
             </div>
 
@@ -911,7 +907,7 @@
         if (ouvinteNome.includes('@')) {
             ouvinteNome = ouvinteNome.split('@')[0];
         }
-        document.getElementById('nome-ouvinte-display').innerText = "Olá, " + ouvinteNome;
+        document.getElementById('nome-ouvinte-display').innerText = "Olá, " + ouvinteNome.toUpperCase();
 
         function atualizarRelogio() {
             const agora = new Date();
