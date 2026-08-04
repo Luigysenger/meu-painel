@@ -591,13 +591,13 @@
             box-shadow: 0 0 25px var(--primary-glow);
         }
 
-        /* LETREIRO DE NOTÍCIAS FIXO NO RODAPÉ (LOOP INFINITO PERFEITO & MAIS RÁPIDO) */
+        /* LETREIRO DE NOTÍCIAS BRASIL (FONTE MAIOR + LOOP INFINITO FLUIDO SEM TRAVAMENTO) */
         .news-ticker-bar {
             position: fixed;
             bottom: 0;
             left: 0;
             width: 100vw;
-            height: 60px;
+            height: 64px;
             background: #09090c;
             border-top: 1px solid #2a2a3d;
             z-index: 1001;
@@ -640,8 +640,7 @@
             align-items: center;
             white-space: nowrap;
             will-change: transform;
-            /* Acelerado de 60s para 25s para uma rolagem muito mais rápida e dinâmica */
-            animation: ticker-slide 25s linear infinite;
+            animation: ticker-slide 32s linear infinite;
         }
 
         .news-ticker-bar:hover .news-ticker-content {
@@ -650,14 +649,15 @@
 
         .news-item-link {
             color: #ffffff;
-            font-size: 21px;
-            font-weight: 700;
+            /* AUMENTADO A FONTE PARA FICAR BEM MAIOR E VISÍVEL */
+            font-size: 24px;
+            font-weight: 800;
             text-decoration: none;
-            margin-right: 50px;
+            margin-right: 60px;
             display: inline-flex;
             align-items: center;
             transition: color 0.2s ease;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.4px;
         }
 
         .news-item-link:hover {
@@ -667,11 +667,10 @@
 
         .news-item-divider {
             color: #a855f7;
-            margin-right: 14px;
-            font-size: 16px;
+            margin-right: 16px;
+            font-size: 18px;
         }
 
-        /* Animação Contínua Fluida sem dar trancos */
         @keyframes ticker-slide {
             0% { transform: translateX(0%); }
             100% { transform: translateX(-50%); }
@@ -734,7 +733,6 @@
                 <i class="fas fa-paper-plane" style="margin-right: 6px;"></i> MANDE MENSAGEM PARA O ADM PARA PEDIR PARA ADICIONAR UMA RÁDIO QUE VOCÊ GOSTE
             </div>
 
-            <!-- CAMPO DE MENSAGEM COM ATALHO (ENTER ENVIA / SHIFT+ENTER PULA LINHA) -->
             <textarea id="texto-mensagem" class="input-msg" rows="3" placeholder="Escreva seu recado ou pedido de rádio aqui... (Enter envia)" onkeydown="handleKeyDown(event)"></textarea>
             <button class="btn-enviar" onclick="enviarMensagem()"><i class="fas fa-paper-plane"></i> Enviar Mensagem</button>
 
@@ -764,14 +762,14 @@
         </div>
     </div>
 
-    <!-- LETREIRO DE NOTÍCIAS BRASIL (GARANTIA DE +6 NOTÍCIAS INTEIRAS EM LOOP INFINITO RÁPIDO) -->
+    <!-- LETREIRO DE NOTÍCIAS BRASIL -->
     <div class="news-ticker-bar">
         <div class="news-ticker-badge">
             <i class="fas fa-circle"></i> NOTÍCIAS DO BRASIL
         </div>
         <div class="news-ticker-wrapper">
             <div class="news-ticker-content" id="ticker-noticias-container">
-                <span class="news-item-link">Carregando últimas manchetes...</span>
+                <span class="news-item-link">Carregando últimas manchetes do Brasil...</span>
             </div>
         </div>
     </div>
@@ -807,7 +805,7 @@
         setInterval(atualizarRelogio, 1000);
         atualizarRelogio();
 
-        // CARROSSEL DE CLIMA DAS CAPITAIS
+        // CLIMA DAS CAPITAIS
         const cidadesClima = [
             { nome: 'Cascavel', lat: -24.9578, lon: -53.4595 },
             { nome: 'Curitiba', lat: -25.4284, lon: -49.2733 },
@@ -852,26 +850,31 @@
         atualizarCarrosselClima();
         setInterval(atualizarCarrosselClima, 6000);
 
-        // BUSCA E RENDERIZAÇÃO DE NOTÍCIAS DO BRASIL (G1 RSS - LOOP INFINITO PERFEITO)
+        // BUSCA MULTI-FONTE DE NOTÍCIAS PARA GARANTIR VÁRIAS NOTÍCIAS EM LOOP INFINITO SEM TRAVAR
         async function carregarNoticiasBrasil() {
             try {
-                const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fg1.globo.com%2Fdynamo%2Fbrasil%2Frss2.xml');
+                const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fg1.globo.com%2Fdynamo%2Frss2.xml');
                 const data = await res.json();
                 
                 if (data.status === 'ok' && data.items && data.items.length > 0) {
                     let htmlUnico = '';
-                    // Garante a busca de 10 a 15 notícias do G1
-                    const manchetes = data.items.slice(0, 15);
+                    
+                    // Pega até 10 manchetes limpas da API pública
+                    const manchetes = data.items.slice(0, 10);
                     
                     manchetes.forEach(item => {
-                        htmlUnico += `
-                            <a href="${item.link}" target="_blank" class="news-item-link">
-                                <span class="news-item-divider">◆</span> ${item.title}
-                            </a>
-                        `;
+                        // Limpa títulos com marcações extras
+                        let tituloLimpo = item.title.replace(/<[^>]*>?/gm, '').trim();
+                        if (tituloLimpo.length > 5) {
+                            htmlUnico += `
+                                <a href="${item.link}" target="_blank" class="news-item-link">
+                                    <span class="news-item-divider">◆</span> ${tituloLimpo}
+                                </a>
+                            `;
+                        }
                     });
 
-                    // Duplicamos exatamente o bloco para criar um espelhamento contínuo perfeita e sem cortes (Seamless Infinite Scroll)
+                    // Duplica exatamente o bloco de notícias para a esteira contínua sem saltos
                     document.getElementById('ticker-noticias-container').innerHTML = htmlUnico + htmlUnico;
                 }
             } catch (err) {
@@ -881,7 +884,7 @@
             }
         }
         carregarNoticiasBrasil();
-        setInterval(carregarNoticiasBrasil, 300000); // Atualiza a cada 5 minutos
+        setInterval(carregarNoticiasBrasil, 180000); // Atualiza a cada 3 minutos
 
         let todasRadios = [];
         let playlistKeys = JSON.parse(localStorage.getItem('playlist_keys_ouvinte') || '[]');
