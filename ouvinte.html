@@ -168,7 +168,7 @@
             border-bottom: 1px solid rgba(147, 51, 234, 0.2);
         }
 
-        /* LAYOUT PRINCIPAL: 3 COLUNAS */
+        /* LAYOUT PRINCIPAL: 3 COLUNAS UNIFICADAS PARA NOTEBOOK E PC DE MESA */
         .main-container { 
             display: grid; 
             grid-template-columns: 1fr 1.25fr 1.15fr; 
@@ -179,7 +179,7 @@
             align-items: start;
         }
 
-        @media (max-width: 1024px) {
+        @media (max-width: 1200px) {
             .main-container {
                 grid-template-columns: 1fr;
             }
@@ -236,7 +236,7 @@
             gap: 16px;
         }
 
-        /* CATÁLOGO (MAIS EXTENSO NA VERTICAL) */
+        /* CATÁLOGO */
         .catalogo-list {
             display: flex;
             flex-direction: column;
@@ -291,7 +291,7 @@
             color: #fff;
         }
 
-        /* PLAYLIST COM CARDS MAIORES (3 FILEIRAS) */
+        /* PLAYLIST (3 FILEIRAS FIXAS) */
         .playlist-grid-ouvinte {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -373,7 +373,7 @@
             text-shadow: 0 1px 3px rgba(0,0,0,0.85);
         }
 
-        /* HORÓSCOPO DO DIA (MAIS COMPACTO) */
+        /* HORÓSCOPO DO DIA */
         .signos-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -444,7 +444,7 @@
             letter-spacing: 0.5px;
         }
 
-        /* CHAT E MENSAGENS (COMPACTO NA ALTURA) */
+        /* CHAT E MENSAGENS */
         .input-msg { 
             width: 100%; 
             background: #0f0f14; 
@@ -1270,6 +1270,7 @@
                         }
                     }
 
+unificado:
                     listaHistorico.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
 
                     if (listaHistorico.length === 0) {
