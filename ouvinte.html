@@ -219,7 +219,7 @@
             gap: 10px;
         }
 
-        /* CATÁLOGO DE RÁDIOS (AUMENTADO EM ALTURA PARA BATER COM OS CARDS) */
+        /* CATÁLOGO DE RÁDIOS */
         .catalogo-list {
             display: flex;
             flex-direction: column;
@@ -273,7 +273,7 @@
             color: #fff;
         }
 
-        /* PLAYLIST (GRID DE CARDS 3x3 AMPLIADO) */
+        /* PLAYLIST (GRID DE CARDS 3x3) - AJUSTADO PARA CORRESPONDER EXATAMENTE AO FORMATO DA FOTO */
         .playlist-grid-ouvinte {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -330,14 +330,16 @@
             box-shadow: 0 0 16px rgba(34, 197, 94, 0.5) !important;
         }
 
+        /* AJUSTE CIRÚRGICO DOS ÍCONES DOS CARDS IGUAL À FOTO DE REFERÊNCIA */
         .radio-card-quadrado i.icon-radio {
-            font-size: clamp(28px, 3.2vw, 42px);
-            margin-bottom: 8px;
+            font-size: 20px;
+            margin-bottom: 10px;
+            opacity: 0.95;
         }
 
         .antena-piscando {
             color: #22c55e;
-            font-size: clamp(28px, 3.2vw, 42px) !important;
+            font-size: 20px !important;
             animation: piscar 1.2s infinite ease-in-out;
         }
 
@@ -354,19 +356,19 @@
             text-shadow: 0 1px 2px rgba(0,0,0,0.8);
         }
 
-        /* HORÓSCOPO DO DIA DINÂMICO (AUMENTADO EM TAMANHO E ESPAÇAMENTO) */
+        /* HORÓSCOPO DO DIA DINÂMICO (MAIOR CONFORME SOLICITADO) */
         .signos-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 7px;
-            margin-bottom: 10px;
+            gap: 8px;
+            margin-bottom: 12px;
         }
 
         .signo-btn {
             background: #181822;
             border: 1px solid #2b2b3b;
             border-radius: 10px;
-            padding: clamp(8px, 1.1vh, 12px) 4px;
+            padding: clamp(11px, 1.5vh, 15px) 4px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -388,13 +390,13 @@
         }
 
         .signo-btn i {
-            font-size: 18px;
-            margin-bottom: 3px;
+            font-size: 20px;
+            margin-bottom: 4px;
             color: #c084fc;
         }
 
         .signo-btn span {
-            font-size: 10.5px;
+            font-size: 11px;
             font-weight: 800;
             letter-spacing: 0.3px;
         }
@@ -403,12 +405,12 @@
             background: #0d0d12;
             border: 1px solid #2b2b3b;
             border-radius: 12px;
-            padding: 14px;
-            font-size: 13.5px;
-            line-height: 1.5;
+            padding: 16px;
+            font-size: 14px;
+            line-height: 1.55;
             color: #f1f5f9;
-            min-height: 110px;
-            max-height: 160px;
+            min-height: 135px;
+            max-height: 195px;
             overflow-y: auto;
             display: flex;
             align-items: center;
@@ -420,22 +422,22 @@
             font-weight: 800;
             color: #d8b4fe;
             display: block;
-            margin-bottom: 4px;
-            font-size: 14.5px;
+            margin-bottom: 6px;
+            font-size: 15px;
         }
 
-        /* CHAT */
+        /* CHAT (CAMPO E ALTURA AMPLIADOS PARA APARECEREM BEM AS MENSAGENS) */
         .input-msg { 
             width: 100%; 
             background: #0f0f14; 
             border: 1px solid #272734; 
             border-radius: 10px; 
             color: #fff; 
-            padding: 9px 12px; 
-            margin-bottom: 7px; 
+            padding: 11px 13px; 
+            margin-bottom: 8px; 
             outline: none; 
             resize: none;
-            font-size: 12.5px;
+            font-size: 13px;
             font-family: inherit;
             box-sizing: border-box;
         }
@@ -449,14 +451,15 @@
             background: linear-gradient(135deg, var(--primary), #7e22ce); 
             color: #fff; 
             border: none; 
-            padding: 9px; 
+            padding: 10px; 
             border-radius: 10px; 
             font-weight: 700; 
-            font-size: 12.5px;
+            font-size: 13px;
             width: 100%; 
             cursor: pointer; 
             transition: all 0.2s ease;
             box-shadow: 0 4px 12px var(--primary-glow);
+            margin-bottom: 8px;
         }
 
         .btn-enviar:hover {
@@ -467,10 +470,10 @@
         .chat-container {
             display: flex;
             flex-direction: column;
-            gap: 7px;
-            max-height: 140px;
+            gap: 8px;
+            max-height: 220px;
             overflow-y: auto;
-            padding: 8px;
+            padding: 10px;
             background: #0d0d12;
             border-radius: 10px;
             border: 1px solid #22222e;
@@ -481,7 +484,7 @@
             background: linear-gradient(135deg, #2e1045, #1e0b2e);
             border: 1px solid rgba(168, 85, 247, 0.3);
             color: #fff;
-            padding: 7px 11px;
+            padding: 8px 12px;
             border-radius: 10px 10px 10px 3px;
             max-width: 85%;
         }
@@ -491,7 +494,7 @@
             background: linear-gradient(135deg, #063726, #032217);
             border: 1px solid rgba(34, 197, 94, 0.4);
             color: #fff;
-            padding: 7px 11px;
+            padding: 8px 12px;
             border-radius: 10px 10px 3px 10px;
             max-width: 85%;
         }
@@ -501,11 +504,11 @@
             justify-content: space-between;
             align-items: center;
             gap: 8px;
-            margin-bottom: 2px;
+            margin-bottom: 3px;
         }
 
         .chat-sender-name {
-            font-size: 10px;
+            font-size: 10.5px;
             font-weight: 800;
         }
 
@@ -513,13 +516,13 @@
         .chat-sender-name.ouvinte { color: #e9d5ff; }
 
         .chat-text {
-            font-size: 12px;
+            font-size: 12.5px;
             line-height: 1.4;
             word-break: break-word;
         }
 
         .chat-time {
-            font-size: 9px;
+            font-size: 9.5px;
             color: #94a3b8;
             text-align: right;
             margin-top: 2px;
@@ -613,7 +616,7 @@
             box-shadow: 0 0 15px var(--primary-glow);
         }
 
-        /* LETREIRO DE NOTÍCIAS BRASIL */
+        /* LETREIRO DE NOTÍCIAS BRASIL (FONTE AUMENTADA CONFORME SOLICITADO) */
         .news-ticker-bar {
             position: fixed;
             bottom: 0;
@@ -631,7 +634,7 @@
         .news-ticker-badge {
             background: #dc2626;
             color: #fff;
-            font-size: 12px;
+            font-size: 12.5px;
             font-weight: 800;
             padding: 0 16px;
             height: 100%;
@@ -678,7 +681,7 @@
 
         .news-item-link {
             color: #ffffff;
-            font-size: 13.5px;
+            font-size: 15px;
             font-weight: 700;
             text-decoration: none;
             display: inline-flex;
@@ -694,7 +697,7 @@
 
         .news-item-divider {
             color: #a855f7;
-            font-size: 10px;
+            font-size: 11px;
         }
 
         @keyframes ticker-slide {
@@ -787,9 +790,9 @@
             <!-- CARD 3: COLUNA DIREITA (HORÓSCOPO + CHAT) -->
             <div class="coluna-direita" style="display: flex; flex-direction: column; gap: 14px;">
                 
-                <!-- HORÓSCOPO DO DIA (AUMENTADO) -->
-                <div class="card-box" style="padding: 16px;">
-                    <h3 style="margin-bottom: 10px; font-size: 13.5px;"><i class="fas fa-star-of-david" style="color: #c084fc;"></i> HORÓSCOPO DO DIA</h3>
+                <!-- HORÓSCOPO DO DIA (MAIOR) -->
+                <div class="card-box" style="padding: 18px;">
+                    <h3 style="margin-bottom: 12px; font-size: 14px;"><i class="fas fa-star-of-david" style="color: #c084fc;"></i> HORÓSCOPO DO DIA</h3>
                     <div class="signos-grid">
                         <div class="signo-btn" onclick="carregarHoroscopo('aries', this)"><i class="fas fa-aries"></i><span>ÁRIES</span></div>
                         <div class="signo-btn" onclick="carregarHoroscopo('taurus', this)"><i class="fas fa-taurus"></i><span>TOURO</span></div>
@@ -809,16 +812,16 @@
                     </div>
                 </div>
 
-                <!-- CARD DE MENSAGENS -->
-                <div class="card-box" style="padding: 14px;">
+                <!-- CARD DE MENSAGENS (CHAT AMPLIADO) -->
+                <div class="card-box" style="padding: 16px;">
                     <div class="banner-destaque-adm">
                         <i class="fas fa-paper-plane" style="margin-right: 4px;"></i> MANDE MENSAGEM PARA O ADM PARA PEDIR PARA ADICIONAR UMA RÁDIO QUE VOCÊ GOSTE
                     </div>
 
-                    <textarea id="texto-mensagem" class="input-msg" rows="2" placeholder="Escreva seu recado ou pedido de rádio aqui... (Enter envia)" onkeydown="handleKeyDown(event)"></textarea>
+                    <textarea id="texto-mensagem" class="input-msg" rows="3" placeholder="Escreva seu recado ou pedido de rádio aqui... (Enter envia)" onkeydown="handleKeyDown(event)"></textarea>
                     <button class="btn-enviar" onclick="enviarMensagem()"><i class="fas fa-paper-plane"></i> Enviar Mensagem</button>
 
-                    <h3 style="margin-top: 10px; margin-bottom: 7px; text-align: left; font-size: 12.5px;"><i class="fas fa-comments"></i> SUAS MENSAGENS E RESPOSTAS</h3>
+                    <h3 style="margin-top: 12px; margin-bottom: 8px; text-align: left; font-size: 13px;"><i class="fas fa-comments"></i> SUAS MENSAGENS E RESPOSTAS</h3>
                     <div id="lista-respostas-adm" class="chat-container"></div>
                 </div>
 
