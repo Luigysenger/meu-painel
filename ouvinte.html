@@ -374,7 +374,6 @@
             gap: 6px;
         }
 
-        /* ESTILO DO CAMPEONATO ACIMA DOS TIMES */
         .campeonato-badge-jogo {
             font-size: 10px;
             font-weight: 800;
@@ -447,7 +446,6 @@
             letter-spacing: 1px;
         }
 
-        /* GOLS / ARTILHEIROS DO JOGO */
         .gols-artilheiros-box {
             background: #111117;
             border-top: 1px dashed #272736;
@@ -472,7 +470,6 @@
             font-size: 10px;
         }
 
-        /* BOTÕES DE TABELAS */
         .botoes-tabelas-col {
             display: flex;
             flex-direction: column;
@@ -671,7 +668,7 @@
             font-size: 14.5px;
         }
 
-        /* ESTILOS PARA O PLANTÃO DE NOVELAS (BOTÕES E ACCORDION) */
+        /* ESTILOS PARA O PLANTÃO DE NOVELAS */
         .novelas-botoes-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -1087,7 +1084,6 @@
                         <p style="color:#666; font-size:11.5px; text-align:center; margin:10px 0;">Carregando jogos da semana...</p>
                     </div>
 
-                    <!-- BOTÕES CIRÚRGICOS PEDIDOS -->
                     <div class="botoes-tabelas-col">
                         <button class="btn-tabela-esporte" onclick="abrirModalTabela('brasileirao')">
                             <span><i class="fas fa-table" style="color: #a855f7; margin-right: 6px;"></i> Confira a tabela e classificação</span>
@@ -1122,13 +1118,13 @@
                     </div>
                 </div>
 
-                <!-- PLANTÃO DE NOVELAS (COM BOTÕES DAS 3 NOVELAS E DESLIZAMENTO INTERativo) -->
+                <!-- PLANTÃO DE NOVELAS (AJUSTADO COM NOBREZA DO AMOR, CORAÇÃO ACELERADO E QUEM AMA CUIDA) -->
                 <div class="card-box" style="padding: 16px;">
                     <h3 style="margin-bottom: 10px; font-size: 13.5px;"><i class="fas fa-tv" style="color: #ec4899;"></i> PLANTÃO DE NOVELAS</h3>
                     <div class="novelas-botoes-grid">
-                        <button class="btn-novela-tab" onclick="toggleNovela('novela18', this)">Garota do Momento</button>
-                        <button class="btn-novela-tab" onclick="toggleNovela('novela19', this)">Volta por Cima</button>
-                        <button class="btn-novela-tab" onclick="toggleNovela('novela21', this)">Mania de Você</button>
+                        <button class="btn-novela-tab" onclick="toggleNovela('novela18', this)">Nobreza do Amor</button>
+                        <button class="btn-novela-tab" onclick="toggleNovela('novela19', this)">Coração Acelerado</button>
+                        <button class="btn-novela-tab" onclick="toggleNovela('novela21', this)">Quem Ama Cuida</button>
                     </div>
                     
                     <div id="painel-novela-resumo" class="novela-painel-resumo">
@@ -1164,9 +1160,7 @@
                 <h3 id="modal-titulo-tabela"><i class="fas fa-trophy" style="color: #a855f7;"></i> Classificação</h3>
                 <button class="btn-fechar-modal" onclick="fecharModalTabela()"><i class="fas fa-times"></i></button>
             </div>
-            <div class="modal-body-tabela" id="modal-corpo-tabela">
-                <!-- Conteúdo injetado via JS -->
-            </div>
+            <div class="modal-body-tabela" id="modal-corpo-tabela"></div>
         </div>
     </div>
 
@@ -1236,23 +1230,23 @@
         setInterval(atualizarRelogio, 1000);
         atualizarRelogio();
 
-        // CONTROLE INTERATIVO DO PLANTÃO DE NOVELAS (ABRE E ENCOLHE AO CLICAR)
+        // CONTROLE INTERATIVO DO PLANTÃO DE NOVELAS ATUALIZADO COM OS NOMES SOLICITADOS
         let novelaAtivaAtual = null;
         const resumosNovelasData = {
             novela18: {
-                titulo: "Garota do Momento (Novela das 18h)",
+                titulo: "Nobreza do Amor (Novela das 18h)",
                 dataExibicao: "Exibição em: 08/08/2026",
-                texto: "Beatriz confronta Juliano após descobrir novas pistas sobre o passado de sua mãe, enquanto Clarice tenta se lembrar de fragmentos importantes de sua verdadeira história."
+                texto: "Segredos da alta corte vêm à tona quando os protagonistas enfrentam barreiras sociais para viverem um romance proibido em meio a intrigas familiares e alianças inesperadas."
             },
             novela19: {
-                titulo: "Volta por Cima (Novela das 19h)",
+                titulo: "Coração Acelerado (Novela das 19h)",
                 dataExibicao: "Exibição em: 08/08/2026",
-                texto: "Madá assume novas responsabilidades para ajudar a família e acaba tendo um esbarrão cheio de tensão com Jão, enquanto Violeta arma um novo plano nos bastidores."
+                texto: "A corrida contra o tempo agita os bastidores da trama, com confusões cômicas, reviravoltas românticas e muita adrenalina para unir os casais favoritos do público."
             },
             novela21: {
-                titulo: "Mania de Você (Novela das 21h)",
+                titulo: "Quem Ama Cuida (Novela das 21h)",
                 dataExibicao: "Exibição em: 08/08/2026",
-                texto: "Luma e Viola se encontram em um momento decisivo onde segredos e alianças do passado começam a desmoronar diante de uma armação perigosa de Mavi."
+                texto: "O jogo de poder e falsas aparências se intensifica em um embate implacável, onde alianças desmoronam e a verdade sobre crimes do passado começa a assustar os vilões."
             }
         };
 
@@ -1262,7 +1256,6 @@
             const elData = document.getElementById('data-novela');
             const elResumo = document.getElementById('texto-resumo');
 
-            // Se clicar no botão que já está ativo, ele encolhe e fecha
             if (novelaAtivaAtual === chaveNovela && painel.classList.contains('aberto')) {
                 painel.classList.remove('aberto');
                 elBtn.classList.remove('ativo');
@@ -1270,7 +1263,6 @@
                 return;
             }
 
-            // Caso contrário, abre ou troca para a nova novela escolhida
             document.querySelectorAll('.btn-novela-tab').forEach(b => b.classList.remove('ativo'));
             elBtn.classList.add('ativo');
 
@@ -1328,7 +1320,7 @@
         atualizarCarrosselClima();
         setInterval(atualizarCarrosselClima, 6000);
 
-        // JOGOS DA SEMANA COM CAMPEONATO EXIBIDO EM CIMA DOS TIMES
+        // JOGOS DA SEMANA
         function carregarJogosBrasileiraoSemana() {
             const containerEsportes = document.getElementById('lista-jogos-esportes');
             
@@ -1422,7 +1414,7 @@
         carregarJogosBrasileiraoSemana();
         setInterval(carregarJogosBrasileiraoSemana, 30000);
 
-        // DADOS REAIS DA CLASSIFICAÇÃO COM VARIAÇÃO DE POSIÇÕES (SETAS)
+        // CLASSIFICAÇÃO
         const tabelaBrasileiraoDados = [
             { pos: 1, var: 0, time: "Palmeiras", pts: 47, j: 21, v: 14, sg: 22 },
             { pos: 2, var: 0, time: "Flamengo", pts: 39, j: 20, v: 11, sg: 19 },
@@ -1545,7 +1537,7 @@
             }
         }
 
-        // HORÓSCOPO DO DIA DINÂMICO
+        // HORÓSCOPO DO DIA
         const nomesSignos = {
             aries: 'Áries', taurus: 'Touro', gemini: 'Gêmeos', cancer: 'Câncer',
             leo: 'Leão', virgo: 'Virgem', libra: 'Libra', scorpio: 'Escorpião',
@@ -1938,4 +1930,3 @@
     </script>
 </body>
 </html>
-```[cite: 4]
