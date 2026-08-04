@@ -374,6 +374,21 @@
             gap: 6px;
         }
 
+        /* ESTILO DO CAMPEONATO ACIMA DOS TIMES */
+        .campeonato-badge-jogo {
+            font-size: 10px;
+            font-weight: 800;
+            color: #c084fc;
+            background: rgba(168, 85, 247, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: inline-block;
+            width: fit-content;
+            border: 1px solid rgba(168, 85, 247, 0.25);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
         .jogo-header-info {
             display: flex;
             justify-content: space-between;
@@ -654,6 +669,51 @@
             display: block;
             margin-bottom: 4px;
             font-size: 14.5px;
+        }
+
+        /* ESTILOS PARA O PLANTÃO DE NOVELAS (BOTÕES E ACCORDION) */
+        .novelas-botoes-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        .btn-novela-tab {
+            background: #181822;
+            border: 1px solid #2b2b3b;
+            color: #cbd5e1;
+            padding: 8px 4px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .btn-novela-tab:hover, .btn-novela-tab.ativo {
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.25), rgba(147, 51, 234, 0.25));
+            border-color: #ec4899;
+            color: #fff;
+        }
+
+        .novela-painel-resumo {
+            background: #0d0d12;
+            border: 1px solid #2b2b3b;
+            border-radius: 12px;
+            padding: 0 14px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.35s ease-in-out, padding 0.35s ease-in-out;
+        }
+
+        .novela-painel-resumo.aberto {
+            padding: 14px;
+            max-height: 180px;
         }
 
         /* CHAT */
@@ -953,6 +1013,9 @@
             .signos-grid {
                 grid-template-columns: repeat(3, 1fr);
             }
+            .novelas-botoes-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         ::-webkit-scrollbar { width: 5px; }
@@ -1059,12 +1122,18 @@
                     </div>
                 </div>
 
-                <!-- PLANTÃO DE NOVELAS (AUTOMÁTICO POR HORÁRIO) -->
+                <!-- PLANTÃO DE NOVELAS (COM BOTÕES DAS 3 NOVELAS E DESLIZAMENTO INTERativo) -->
                 <div class="card-box" style="padding: 16px;">
                     <h3 style="margin-bottom: 10px; font-size: 13.5px;"><i class="fas fa-tv" style="color: #ec4899;"></i> PLANTÃO DE NOVELAS</h3>
-                    <div style="background: #0d0d12; border: 1px solid #2b2b3b; border-radius: 12px; padding: 14px;">
-                        <div id="titulo-novela" style="font-size: 14px; font-weight: 800; color: #d8b4fe; margin-bottom: 6px;">Carregando novela...</div>
-                        <p id="texto-resumo" style="margin: 0; font-size: 12.5px; line-height: 1.4; color: #cbd5e1;">Aguarde, atualizando programação...</p>
+                    <div class="novelas-botoes-grid">
+                        <button class="btn-novela-tab" onclick="toggleNovela('novela18', this)">Novela das 18h</button>
+                        <button class="btn-novela-tab" onclick="toggleNovela('novela19', this)">Novela das 19h</button>
+                        <button class="btn-novela-tab" onclick="toggleNovela('novela21', this)">Novela das 21h</button>
+                    </div>
+                    
+                    <div id="painel-novela-resumo" class="novela-painel-resumo">
+                        <div id="titulo-novela" style="font-size: 13.5px; font-weight: 800; color: #d8b4fe; margin-bottom: 5px;">Selecione uma novela</div>
+                        <p id="texto-resumo" style="margin: 0; font-size: 12px; line-height: 1.4; color: #cbd5e1;">Clique no botão acima para ver ou ocultar o resumo do capítulo.</p>
                     </div>
                 </div>
 
@@ -1166,42 +1235,47 @@
         setInterval(atualizarRelogio, 1000);
         atualizarRelogio();
 
-        // ATUALIZAÇÃO AUTOMÁTICA DE NOVELAS POR HORÁRIO COM RESUMOS DETALHADOS DOS PRÓXIMOS CAPÍTULOS
-        function atualizarResumosAutomaticos() {
-            const agora = new Date();
-            const horaDecimal = agora.getHours() + (agora.getMinutes() / 60);
-
-            let nomeNovela = "Programação Normal";
-            let resumoNovela = "Fique ligado na nossa programação! Acompanhe os desdobramentos e emoções das tramas que movimentam a telinha.";
-
-            // Novela das 18h (Ex: 18:00 até 18:50)
-            if (horaDecimal >= 18.0 && horaDecimal < 18.83) {
-                nomeNovela = "Novela das 18h";
-                resumoNovela = "Nos próximos capítulos: O plano secreto de Beatriz é descoberto por Joaquim, gerando um confronto tenso. Enquanto isso, Mariana toma uma decisão corajosa que mudará os rumos do romance, e um segredo do passado da família principal ameaça vir à tona de vez.";
+        // CONTROLE INTERATIVO DO PLANTÃO DE NOVELAS (ABRE E ENCOLHE AO CLICAR)
+        let novelaAtivaAtual = null;
+        const resumosNovelasData = {
+            novela18: {
+                titulo: "Novela das 18h - Resumo do Capítulo",
+                texto: "Neste capítulo, a tensão aumenta quando os segredos do passado começam a vir à tona, colocando em risco o romance dos protagonistas e surpreendendo a todos na vila."
+            },
+            novela19: {
+                titulo: "Novela das 19h - Resumo do Capítulo",
+                texto: "A reviravolta na vida dos personagens principais promete emocionar o público hoje. Uma aliança inesperada surge para desmascarar as armações do grande vilão."
+            },
+            novela21: {
+                titulo: "Novela das 21h - Resumo do Capítulo",
+                texto: "O plano arquitetado pelos vilões sofre uma grande ameaça após uma descoberta surpreendente. Segredos familiares profundos são revelados em uma cena emocionante."
             }
-            // Novela das 19h (Ex: 19:00 até 19:50)
-            else if (horaDecimal >= 19.0 && horaDecimal < 19.83) {
-                nomeNovela = "Novela das 19h";
-                resumoNovela = "Nos próximos capítulos: Muita confusão e humor marcam a tentativa de Leo em esconder a verdade dos amigos. Em paralelo, um novo pretendente surge na vida de Roberta, deixando Beto morrendo de ciúmes e armando confusões hilárias.";
-            }
-            // Novela das 21h (Ex: 21:00 até 22:00)
-            else if (horaDecimal >= 21.0 && horaDecimal < 22.0) {
-                nomeNovela = "Novela das 21h";
-                resumoNovela = "Nos próximos capítulos: A aliança entre os vilões começa a desmoronar após uma traição inesperada na mansão. Helena faz uma descoberta estarrecedora sobre sua verdadeira origem, e o cerco se fecha contra os crimes cometidos na alta sociedade.";
-            }
+        };
 
+        function toggleNovela(chaveNovela, elBtn) {
+            const painel = document.getElementById('painel-novela-resumo');
             const elTitulo = document.getElementById('titulo-novela');
             const elResumo = document.getElementById('texto-resumo');
 
-            if (elTitulo && elResumo) {
-                if (elTitulo.innerText !== nomeNovela) {
-                    elTitulo.innerText = nomeNovela;
-                    elResumo.innerText = resumoNovela;
-                }
+            // Se clicar no botão que já está ativo, ele encolhe e fecha
+            if (novelaAtivaAtual === chaveNovela && painel.classList.contains('aberto')) {
+                painel.classList.remove('aberto');
+                elBtn.classList.remove('ativo');
+                novelaAtivaAtual = null;
+                return;
             }
+
+            // Caso contrário, abre ou troca para a nova novela escolhida
+            document.querySelectorAll('.btn-novela-tab').forEach(b => b.classList.remove('ativo'));
+            elBtn.classList.add('ativo');
+
+            const dados = resumosNovelasData[chaveNovela];
+            elTitulo.innerText = dados.titulo;
+            elResumo.innerText = dados.texto;
+
+            painel.classList.add('aberto');
+            novelaAtivaAtual = chaveNovela;
         }
-        atualizarResumosAutomaticos();
-        setInterval(atualizarResumosAutomaticos, 60000);
 
         // CLIMA DAS CAPITAIS
         const cidadesClima = [
@@ -1248,7 +1322,7 @@
         atualizarCarrosselClima();
         setInterval(atualizarCarrosselClima, 6000);
 
-        // JOGOS DA SEMANA COM CAMPEONATO E GOLS EM TEMPO REAL
+        // JOGOS DA SEMANA COM CAMPEONATO EXIBIDO EM CIMA DOS TIMES
         function carregarJogosBrasileiraoSemana() {
             const containerEsportes = document.getElementById('lista-jogos-esportes');
             
@@ -1273,7 +1347,7 @@
                         { min: "81'", autor: "Paulinho (Atlético-MG)" }
                     ]
                 },
-                { campeonato: "Brasileirão Série B", timeA: "Coritiba", timeB: "Chapecoense", data: "Sáb, 08/08", hora: "20:30", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 8, 20, 30).getTime() },
+                { campeonato: "Brasileirão Série A", timeA: "Coritiba", timeB: "Chapecoense", data: "Sáb, 08/08", hora: "20:30", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 8, 20, 30).getTime() },
                 { campeonato: "Brasileirão Série A", timeA: "Botafogo", timeB: "Fluminense", data: "Sáb, 08/08", hora: "21:00", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 8, 21, 0).getTime() },
                 { campeonato: "Brasileirão Série A", timeA: "Cruzeiro", timeB: "Mirassol", data: "Dom, 09/08", hora: "11:00", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 11, 0).getTime() },
                 { campeonato: "Brasileirão Série A", timeA: "Bahia", timeB: "Vasco", data: "Dom, 09/08", hora: "16:00", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 16, 0).getTime() },
@@ -1319,8 +1393,11 @@
 
                 htmlJogos += `
                     <div class="jogo-card-item">
+                        <div>
+                            <span class="campeonato-badge-jogo"><i class="fas fa-trophy" style="font-size: 8.5px; margin-right: 3px;"></i> ${j.campeonato}</span>
+                        </div>
                         <div class="jogo-header-info">
-                            <span><i class="fas fa-trophy" style="color:#a855f7; margin-right:3px;"></i> ${j.campeonato}</span>
+                            <span><i class="far fa-calendar-alt"></i> ${j.data}</span>
                             ${aoVivo ? '<span class="live-tag-badge"><i class="fas fa-circle"></i> AO VIVO ' + tempoExibicao + '</span>' : '<span>' + (status === 'AGENDADO' ? 'Às ' + j.hora : 'Encerrado') + '</span>'}
                         </div>
                         <div class="jogo-placares-row">
