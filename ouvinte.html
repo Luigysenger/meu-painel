@@ -353,14 +353,15 @@
             text-shadow: 0 1px 2px rgba(0,0,0,0.8);
         }
 
-        /* QUADRO DE ESPORTES / FUTEBOL DA SEMANA */
+        /* ESPORTES E TABELAS */
         .esportes-container {
             display: flex;
             flex-direction: column;
             gap: 8px;
-            max-height: 220px;
+            max-height: 180px;
             overflow-y: auto;
             padding-right: 2px;
+            margin-bottom: 10px;
         }
 
         .jogo-card-item {
@@ -430,6 +431,135 @@
             margin: 0 10px;
             letter-spacing: 1px;
         }
+
+        /* BOTÕES DE TABELAS */
+        .botoes-tabelas-col {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .btn-tabela-esporte {
+            background: linear-gradient(135deg, #1e1e2d, #252538);
+            border: 1px solid #3b3b52;
+            color: #d8b4fe;
+            padding: 9px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .btn-tabela-esporte:hover {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(147, 51, 234, 0.2), #252538);
+            color: #fff;
+        }
+
+        /* MODAL DE CLASSIFICAÇÃO */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        .modal-conteudo-box {
+            background: #14141c;
+            border: 1px solid #3a3a52;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 650px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+            overflow: hidden;
+        }
+
+        .modal-header-box {
+            padding: 16px 20px;
+            background: #1a1a26;
+            border-bottom: 1px solid #2b2b3d;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header-box h3 {
+            margin: 0;
+            font-size: 15px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-fechar-modal {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            font-size: 18px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .btn-fechar-modal:hover { color: #ef4444; }
+
+        .modal-body-tabela {
+            padding: 15px 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .tabela-classificacao-full {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12.5px;
+        }
+
+        .tabela-classificacao-full th {
+            background: #1e1e2e;
+            color: #a855f7;
+            padding: 8px 6px;
+            text-align: left;
+            font-weight: 800;
+            border-bottom: 2px solid #2e2e42;
+        }
+
+        .tabela-classificacao-full td {
+            padding: 8px 6px;
+            border-bottom: 1px solid #222230;
+            color: #e2e8f0;
+            font-weight: 600;
+        }
+
+        .tabela-classificacao-full tr:hover td {
+            background: rgba(147, 51, 234, 0.08);
+        }
+
+        .pos-badge {
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .seta-verde { color: #22c55e; font-size: 11px; }
+        .seta-vermelha { color: #ef4444; font-size: 11px; }
+        .neutro-pos { color: #64748b; font-size: 11px; }
 
         /* HORÓSCOPO DO DIA */
         .signos-grid {
@@ -859,14 +989,26 @@
                 </div>
             </div>
 
-            <!-- CARD 3: COLUNA DIREITA (BRASILEIRÃO & JOGOS DA SEMANA + HORÓSCOPO + CHAT) -->
+            <!-- CARD 3: COLUNA DIREITA (ESPORTES + BOTÕES DE TABELAS + HORÓSCOPO + CHAT) -->
             <div class="coluna-direita" style="display: flex; flex-direction: column; gap: 14px;">
                 
-                <!-- QUADRO DE FUTEBOL DO BRASILEIRÃO & PRÓXIMOS JOGOS ATÉ DOMINGO -->
+                <!-- QUADRO DE FUTEBOL E BOTÕES PARA CONFERIR TABELAS -->
                 <div class="card-box" style="padding: 16px;">
-                    <h3 style="margin-bottom: 10px; font-size: 13.5px;"><i class="fas fa-futbol" style="color: #22c55e;"></i> BRASILEIRÃO: JOGOS DA SEMANA</h3>
+                    <h3 style="margin-bottom: 10px; font-size: 13.5px;"><i class="fas fa-futbol" style="color: #22c55e;"></i> FUTEBOL: JOGOS & TABELAS</h3>
                     <div id="lista-jogos-esportes" class="esportes-container">
-                        <p style="color:#666; font-size:11.5px; text-align:center; margin:10px 0;">Carregando agenda do Brasileirão...</p>
+                        <p style="color:#666; font-size:11.5px; text-align:center; margin:10px 0;">Carregando jogos da semana...</p>
+                    </div>
+
+                    <!-- BOTÕES CIRÚRGICOS PEDIDOS -->
+                    <div class="botoes-tabelas-col">
+                        <button class="btn-tabela-esporte" onclick="abrirModalTabela('brasileirao')">
+                            <span><i class="fas fa-table" style="color: #a855f7; margin-right: 6px;"></i> Confira a tabela e classificação</span>
+                            <i class="fas fa-chevron-right" style="font-size: 10px;"></i>
+                        </button>
+                        <button class="btn-tabela-esporte" onclick="abrirModalTabela('copadobrasil')">
+                            <span><i class="fas fa-trophy" style="color: #eab308; margin-right: 6px;"></i> Confira aqui a tabela e classificação da Copa do Brasil</span>
+                            <i class="fas fa-chevron-right" style="font-size: 10px;"></i>
+                        </button>
                     </div>
                 </div>
 
@@ -909,6 +1051,19 @@
 
         </div>
 
+    </div>
+
+    <!-- MODAL DE EXIBIÇÃO DAS TABELAS COM SETAS DE VARIAÇÃO -->
+    <div id="modal-tabela" class="modal-overlay" onclick="fecharModalFora(event)">
+        <div class="modal-conteudo-box">
+            <div class="modal-header-box">
+                <h3 id="modal-titulo-tabela"><i class="fas fa-trophy" style="color: #a855f7;"></i> Classificação</h3>
+                <button class="btn-fechar-modal" onclick="fecharModalTabela()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body-tabela" id="modal-corpo-tabela">
+                <!-- Conteúdo injetado via JS -->
+            </div>
+        </div>
     </div>
 
     <!-- PLAYER RODAPÉ -->
@@ -1022,11 +1177,10 @@
         atualizarCarrosselClima();
         setInterval(atualizarCarrosselClima, 6000);
 
-        // QUADRO DE JOGOS DO BRASILEIRÃO (JOGOS DA SEMANA ATÉ DOMINGO)
+        // JOGOS DA SEMANA ATÉ DOMINGO
         function carregarJogosBrasileiraoSemana() {
             const containerEsportes = document.getElementById('lista-jogos-esportes');
             
-            // Partidas oficiais da rodada do Brasileirão para a semana (Sábado e Domingo)
             const jogosBrasileirao = [
                 { timeA: "Grêmio", timeB: "São Paulo", data: "Sáb, 08/08", hora: "16:00", golsA: 0, golsB: 0, timestamp: new Date(2026, 7, 8, 16, 0).getTime() },
                 { timeA: "Remo", timeB: "Atlético-MG", data: "Sáb, 08/08", hora: "18:30", golsA: 0, golsB: 0, timestamp: new Date(2026, 7, 8, 18, 30).getTime() },
@@ -1046,7 +1200,7 @@
             jogosBrasileirao.forEach(j => {
                 let status = "AGENDADO";
                 let tempoExibicao = j.hora;
-                const duracaoPartidaMs = 110 * 60 * 1000; // 110 minutos de duração estimada
+                const duracaoPartidaMs = 110 * 60 * 1000;
 
                 if (agoraTime >= j.timestamp && agoraTime <= (j.timestamp + duracaoPartidaMs)) {
                     status = "AO VIVO";
@@ -1078,7 +1232,130 @@
         }
 
         carregarJogosBrasileiraoSemana();
-        setInterval(carregarJogosBrasileiraoSemana, 30000); // Atualiza a cada 30 segundos
+        setInterval(carregarJogosBrasileiraoSemana, 30000);
+
+        // DADOS REAIS DA CLASSIFICAÇÃO COM VARIAÇÃO DE POSIÇÕES (SETAS)
+        const tabelaBrasileiraoDados = [
+            { pos: 1, var: 0, time: "Palmeiras", pts: 47, j: 21, v: 14, sg: 22 },
+            { pos: 2, var: 0, time: "Flamengo", pts: 39, j: 20, v: 11, sg: 19 },
+            { pos: 3, var: 0, time: "Athletico-PR", pts: 37, j: 21, v: 11, sg: 9 },
+            { pos: 4, var: 0, time: "Fluminense", pts: 34, j: 21, v: 9, sg: 5 },
+            { pos: 5, var: 1, time: "Bahia", pts: 32, j: 21, v: 8, sg: 4 },
+            { pos: 6, var: -1, time: "Red Bull Bragantino", pts: 31, j: 20, v: 9, sg: 6 },
+            { pos: 7, var: 2, time: "Cruzeiro", pts: 30, j: 21, v: 8, sg: -3 },
+            { pos: 8, var: -1, time: "Botafogo", pts: 29, j: 20, v: 8, sg: 2 },
+            { pos: 9, var: 0, time: "Corinthians", pts: 29, j: 21, v: 7, sg: 2 },
+            { pos: 10, var: 2, time: "Atlético-MG", pts: 28, j: 20, v: 8, sg: 0 },
+            { pos: 11, var: -1, time: "Coritiba", pts: 27, j: 21, v: 7, sg: -3 },
+            { pos: 12, var: 0, time: "São Paulo", pts: 26, j: 20, v: 7, sg: 2 },
+            { pos: 13, var: 0, time: "Vitória", pts: 26, j: 21, v: 7, sg: -9 },
+            { pos: 14, var: 2, time: "Mirassol", pts: 23, j: 20, v: 6, sg: -4 },
+            { pos: 15, var: 0, time: "Santos", pts: 22, j: 20, v: 5, sg: -4 },
+            { pos: 16, var: 0, time: "Internacional", pts: 22, j: 21, v: 5, sg: -4 },
+            { pos: 17, var: -1, time: "Grêmio", pts: 22, j: 20, v: 5, sg: -4 },
+            { pos: 18, var: 1, time: "Vasco da Gama", pts: 21, j: 20, v: 5, sg: -8 },
+            { pos: 19, var: -1, time: "Remo", pts: 21, j: 21, v: 5, sg: -10 },
+            { pos: 20, var: 0, time: "Chapecoense", pts: 10, j: 20, v: 1, sg: -22 }
+        ];
+
+        const tabelaCopaDoBrasilDados = [
+            { pos: "Quartas", var: 0, time: "Palmeiras", fase: "Classificado" },
+            { pos: "Quartas", var: 0, time: "Flamengo", fase: "Classificado" },
+            { pos: "Quartas", var: 0, time: "São Paulo", fase: "Classificado" },
+            { pos: "Quartas", var: 0, time: "Corinthians", fase: "Classificado" },
+            { pos: "Quartas", var: 0, time: "Grêmio", fase: "Classificado" },
+            { pos: "Quartas", var: 0, time: "Atlético-MG", fase: "Classificado" },
+            { pos: "Quartas", var: 0, time: "Cruzeiro", fase: "Classificado" },
+            { pos: "Quartas", var: 0, time: "Athletico-PR", fase: "Classificado" }
+        ];
+
+        function abrirModalTabela(tipo) {
+            const modal = document.getElementById('modal-tabela');
+            const titulo = document.getElementById('modal-titulo-tabela');
+            const corpo = document.getElementById('modal-corpo-tabela');
+
+            if (tipo === 'brasileirao') {
+                titulo.innerHTML = `<i class="fas fa-trophy" style="color: #a855f7;"></i> Tabela e Classificação - Brasileirão Série A`;
+                
+                let html = `
+                    <table class="tabela-classificacao-full">
+                        <thead>
+                            <tr>
+                                <th>Pos</th>
+                                <th>Time</th>
+                                <th>Pts</th>
+                                <th>J</th>
+                                <th>V</th>
+                                <th>SG</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                tabelaBrasileiraoDados.forEach(item => {
+                    let setaHtml = `<span class="neutro-pos">-</span>`;
+                    if (item.var > 0) {
+                        setaHtml = `<span class="pos-badge"><i class="fas fa-arrow-up seta-verde"></i>${item.var}</span>`;
+                    } else if (item.var < 0) {
+                        setaHtml = `<span class="pos-badge"><i class="fas fa-arrow-down seta-vermelha"></i>${Math.abs(item.var)}</span>`;
+                    }
+
+                    html += `
+                        <tr>
+                            <td>${item.pos}º ${setaHtml}</td>
+                            <td style="font-weight: 700; color: #fff;">${item.time}</td>
+                            <td style="color: #4ade80; font-weight: 800;">${item.pts}</td>
+                            <td>${item.j}</td>
+                            <td>${item.v}</td>
+                            <td>${item.sg > 0 ? '+' + item.sg : item.sg}</td>
+                        </tr>
+                    `;
+                });
+
+                html += `</tbody></table>`;
+                corpo.innerHTML = html;
+
+            } else {
+                titulo.innerHTML = `<i class="fas fa-award" style="color: #eab308;"></i> Classificação - Copa do Brasil (Quartas de Final)`;
+                
+                let html = `
+                    <table class="tabela-classificacao-full">
+                        <thead>
+                            <tr>
+                                <th>Fase</th>
+                                <th>Equipe Classificada</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                tabelaCopaDoBrasilDados.forEach(item => {
+                    html += `
+                        <tr>
+                            <td><span class="pos-badge"><i class="fas fa-arrow-up seta-verde"></i> ${item.pos}</span></td>
+                            <td style="font-weight: 700; color: #fff;">${item.time}</td>
+                            <td style="color: #38bdf8; font-weight: 700;">${item.fase}</td>
+                        </tr>
+                    `;
+                });
+
+                html += `</tbody></table>`;
+                corpo.innerHTML = html;
+            }
+
+            modal.style.display = 'flex';
+        }
+
+        function fecharModalTabela() {
+            document.getElementById('modal-tabela').style.display = 'none';
+        }
+
+        function fecharModalFora(event) {
+            if (event.target.id === 'modal-tabela') {
+                fecharModalTabela();
+            }
+        }
 
         // HORÓSCOPO DO DIA DINÂMICO
         const nomesSignos = {
