@@ -384,7 +384,7 @@
             text-shadow: 0 1px 3px rgba(0,0,0,0.8);
         }
 
-        /* HORÓSCOPO DO DIA (ÍCONES DOS SIGNOS) */
+        /* HORÓSCOPO DO DIA */
         .signos-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -672,7 +672,7 @@
             box-shadow: 0 0 25px var(--primary-glow);
         }
 
-        /* LETREIRO DE NOTÍCIAS BRASIL */
+        /* LETREIRO DE NOTÍCIAS BRASIL - REFORMULADO E ADEQUADO A TODOS OS TAMANHOS DE TELA */
         .news-ticker-bar {
             position: fixed;
             bottom: 0;
@@ -690,7 +690,7 @@
         .news-ticker-badge {
             background: #dc2626;
             color: #fff;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 800;
             padding: 0 22px;
             height: 100%;
@@ -699,7 +699,7 @@
             gap: 10px;
             white-space: nowrap;
             z-index: 10;
-            box-shadow: 12px 0 25px rgba(0,0,0,0.85);
+            box-shadow: 15px 0 30px rgba(0,0,0,0.9);
             letter-spacing: 1px;
             flex-shrink: 0;
         }
@@ -714,30 +714,40 @@
             overflow: hidden;
             display: flex;
             align-items: center;
+            position: relative;
         }
 
         .news-ticker-content {
-            display: inline-flex;
+            display: flex;
             align-items: center;
             white-space: nowrap;
             will-change: transform;
-            animation: ticker-slide 32s linear infinite;
+            animation: ticker-slide 45s linear infinite;
         }
 
         .news-ticker-bar:hover .news-ticker-content {
             animation-play-state: paused;
         }
 
+        .news-block-repeat {
+            display: flex;
+            align-items: center;
+            gap: 50px;
+            padding-right: 50px;
+            flex-shrink: 0;
+        }
+
         .news-item-link {
             color: #ffffff;
-            font-size: 24px;
-            font-weight: 800;
+            font-size: 20px;
+            font-weight: 700;
             text-decoration: none;
-            margin-right: 60px;
             display: inline-flex;
             align-items: center;
+            gap: 15px;
             transition: color 0.2s ease;
             letter-spacing: 0.4px;
+            white-space: nowrap;
         }
 
         .news-item-link:hover {
@@ -747,12 +757,11 @@
 
         .news-item-divider {
             color: #a855f7;
-            margin-right: 16px;
-            font-size: 18px;
+            font-size: 16px;
         }
 
         @keyframes ticker-slide {
-            0% { transform: translateX(0%); }
+            0% { transform: translateX(0); }
             100% { transform: translateX(-50%); }
         }
 
@@ -812,7 +821,7 @@
         <!-- COLUNA DA DIREITA: HORÓSCOPO + CHAT -->
         <div class="coluna-direita">
             
-            <!-- CARD DO HORÓSCOPO DO DIA (COM ÍCONES DOS SIGNOS) -->
+            <!-- CARD DO HORÓSCOPO DO DIA -->
             <div class="card-box">
                 <h3 style="margin-bottom: 18px;"><i class="fas fa-star-of-david" style="color: #c084fc;"></i> HORÓSCOPO DO DIA</h3>
                 <div class="signos-grid">
@@ -879,7 +888,9 @@
         </div>
         <div class="news-ticker-wrapper">
             <div class="news-ticker-content" id="ticker-noticias-container">
-                <span class="news-item-link">Carregando últimas manchetes do Brasil...</span>
+                <div class="news-block-repeat">
+                    <span class="news-item-link">Carregando últimas manchetes do Brasil...</span>
+                </div>
             </div>
         </div>
     </div>
@@ -1005,33 +1016,38 @@
             }
         }
 
-        // BUSCA MULTI-FONTE DE NOTÍCIAS PARA GARANTIR VÁRIAS NOTÍCIAS EM LOOP INFINITO SEM TRAVAR
+        // CARREGADOR DE NOTÍCIAS BRASIL PERFEITAMENTE AJUSTADO PARA NOTEBOOKS E MONITORES GRANDES
         async function carregarNoticiasBrasil() {
             try {
                 const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fg1.globo.com%2Fdynamo%2Frss2.xml');
                 const data = await res.json();
                 
                 if (data.status === 'ok' && data.items && data.items.length > 0) {
-                    let htmlUnico = '';
-                    const manchetes = data.items.slice(0, 10);
+                    let htmlItens = '';
+                    const manchetes = data.items.slice(0, 15);
                     
                     manchetes.forEach(item => {
                         let tituloLimpo = item.title.replace(/<[^>]*>?/gm, '').trim();
                         if (tituloLimpo.length > 5) {
-                            htmlUnico += `
+                            htmlItens += `
                                 <a href="${item.link}" target="_blank" class="news-item-link">
-                                    <span class="news-item-divider">◆</span> ${tituloLimpo}
+                                    <span class="news-item-divider"><i class="fas fa-diamond"></i></span> ${tituloLimpo}
                                 </a>
                             `;
                         }
                     });
 
-                    document.getElementById('ticker-noticias-container').innerHTML = htmlUnico + htmlUnico;
+                    const blocoOriginal = `<div class="news-block-repeat">${htmlItens}</div>`;
+                    // Duplicamos o bloco de notícias para garantir um loop contínuo perfeito em qualquer tela
+                    document.getElementById('ticker-noticias-container').innerHTML = blocoOriginal + blocoOriginal;
                 }
             } catch (err) {
-                document.getElementById('ticker-noticias-container').innerHTML = `
-                    <span class="news-item-link"><span class="news-item-divider">◆</span> Notícias do Brasil atualizadas diariamente no portal G1.</span>
+                const htmlFallback = `
+                    <div class="news-block-repeat">
+                        <span class="news-item-link"><span class="news-item-divider"><i class="fas fa-diamond"></i></span> Notícias do Brasil atualizadas diariamente no portal G1.</span>
+                    </div>
                 `;
+                document.getElementById('ticker-noticias-container').innerHTML = htmlFallback + htmlFallback;
             }
         }
         carregarNoticiasBrasil();
