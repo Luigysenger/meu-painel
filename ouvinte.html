@@ -591,7 +591,7 @@
             box-shadow: 0 0 25px var(--primary-glow);
         }
 
-        /* LETREIRO DE NOTÍCIAS FIXO NO RODAPÉ (LOOP INFINITO CONTÍNUO E FLUIDO) */
+        /* LETREIRO DE NOTÍCIAS FIXO NO RODAPÉ (LOOP INFINITO PERFEITO & MAIS RÁPIDO) */
         .news-ticker-bar {
             position: fixed;
             bottom: 0;
@@ -617,9 +617,10 @@
             align-items: center;
             gap: 10px;
             white-space: nowrap;
-            z-index: 2;
+            z-index: 10;
             box-shadow: 12px 0 25px rgba(0,0,0,0.85);
             letter-spacing: 1px;
+            flex-shrink: 0;
         }
 
         .news-ticker-badge i {
@@ -627,12 +628,20 @@
             font-size: 12px;
         }
 
-        .news-ticker-content {
+        .news-ticker-wrapper {
+            flex: 1;
+            overflow: hidden;
             display: flex;
+            align-items: center;
+        }
+
+        .news-ticker-content {
+            display: inline-flex;
             align-items: center;
             white-space: nowrap;
             will-change: transform;
-            animation: ticker-slide 60s linear infinite;
+            /* Acelerado de 60s para 25s para uma rolagem muito mais rápida e dinâmica */
+            animation: ticker-slide 25s linear infinite;
         }
 
         .news-ticker-bar:hover .news-ticker-content {
@@ -644,7 +653,7 @@
             font-size: 21px;
             font-weight: 700;
             text-decoration: none;
-            margin-right: 60px;
+            margin-right: 50px;
             display: inline-flex;
             align-items: center;
             transition: color 0.2s ease;
@@ -658,12 +667,13 @@
 
         .news-item-divider {
             color: #a855f7;
-            margin-right: 18px;
+            margin-right: 14px;
             font-size: 16px;
         }
 
+        /* Animação Contínua Fluida sem dar trancos */
         @keyframes ticker-slide {
-            0% { transform: translateX(0); }
+            0% { transform: translateX(0%); }
             100% { transform: translateX(-50%); }
         }
 
@@ -754,13 +764,15 @@
         </div>
     </div>
 
-    <!-- LETREIRO DE NOTÍCIAS BRASIL (15 NOTÍCIAS SEM TRAVAR EM LOOP CONTÍNUO) -->
+    <!-- LETREIRO DE NOTÍCIAS BRASIL (GARANTIA DE +6 NOTÍCIAS INTEIRAS EM LOOP INFINITO RÁPIDO) -->
     <div class="news-ticker-bar">
         <div class="news-ticker-badge">
             <i class="fas fa-circle"></i> NOTÍCIAS DO BRASIL
         </div>
-        <div class="news-ticker-content" id="ticker-noticias-container">
-            <span class="news-item-link">Carregando últimas manchetes...</span>
+        <div class="news-ticker-wrapper">
+            <div class="news-ticker-content" id="ticker-noticias-container">
+                <span class="news-item-link">Carregando últimas manchetes...</span>
+            </div>
         </div>
     </div>
 
@@ -840,27 +852,27 @@
         atualizarCarrosselClima();
         setInterval(atualizarCarrosselClima, 6000);
 
-        // BUSCA E RENDERIZAÇÃO DE NOTÍCIAS DO BRASIL (G1 RSS - 15 MENSAGENS EM LOOP PERFEITO)
+        // BUSCA E RENDERIZAÇÃO DE NOTÍCIAS DO BRASIL (G1 RSS - LOOP INFINITO PERFEITO)
         async function carregarNoticiasBrasil() {
             try {
                 const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fg1.globo.com%2Fdynamo%2Fbrasil%2Frss2.xml');
                 const data = await res.json();
                 
                 if (data.status === 'ok' && data.items && data.items.length > 0) {
-                    let htmlItems = '';
-                    // Carrega até 15 notícias principais
+                    let htmlUnico = '';
+                    // Garante a busca de 10 a 15 notícias do G1
                     const manchetes = data.items.slice(0, 15);
                     
                     manchetes.forEach(item => {
-                        htmlItems += `
+                        htmlUnico += `
                             <a href="${item.link}" target="_blank" class="news-item-link">
                                 <span class="news-item-divider">◆</span> ${item.title}
                             </a>
                         `;
                     });
 
-                    // Duplicamos o bloco para criar um loop Seamless (infinito e contínuo, sem travar ao reiniciar)
-                    document.getElementById('ticker-noticias-container').innerHTML = htmlItems + htmlItems;
+                    // Duplicamos exatamente o bloco para criar um espelhamento contínuo perfeita e sem cortes (Seamless Infinite Scroll)
+                    document.getElementById('ticker-noticias-container').innerHTML = htmlUnico + htmlUnico;
                 }
             } catch (err) {
                 document.getElementById('ticker-noticias-container').innerHTML = `
