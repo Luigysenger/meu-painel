@@ -219,12 +219,12 @@
             gap: 10px;
         }
 
-        /* CATÁLOGO DE RÁDIOS */
+        /* CATÁLOGO DE RÁDIOS (AUMENTADO EM ALTURA PARA BATER COM OS CARDS) */
         .catalogo-list {
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            max-height: clamp(450px, 62vh, 680px);
+            gap: 9px;
+            max-height: clamp(480px, 66vh, 720px);
             overflow-y: auto;
             padding-right: 4px;
         }
@@ -232,8 +232,8 @@
         .bar-radio-catalogo {
             background: #1a1a22;
             border: 1px solid #2a2a36;
-            border-radius: 10px;
-            padding: 10px 13px;
+            border-radius: 12px;
+            padding: 12px 14px;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -241,7 +241,7 @@
             transition: all 0.2s ease;
             color: var(--text-main);
             font-weight: 600;
-            font-size: 12.5px;
+            font-size: 13px;
         }
 
         .bar-radio-catalogo:hover {
@@ -257,10 +257,10 @@
         }
 
         .bar-radio-catalogo .btn-add-icon {
-            font-size: 10.5px;
-            width: 19px;
-            height: 19px;
-            border-radius: 5px;
+            font-size: 11px;
+            width: 21px;
+            height: 21px;
+            border-radius: 6px;
             background: #272734;
             display: flex;
             align-items: center;
@@ -279,7 +279,7 @@
             grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 12px;
             width: 100%;
-            max-height: clamp(450px, 62vh, 680px);
+            max-height: clamp(480px, 66vh, 720px);
             overflow-y: auto;
             padding-right: 4px;
         }
@@ -354,19 +354,19 @@
             text-shadow: 0 1px 2px rgba(0,0,0,0.8);
         }
 
-        /* HORÓSCOPO DO DIA DINÂMICO */
+        /* HORÓSCOPO DO DIA DINÂMICO (AUMENTADO EM TAMANHO E ESPAÇAMENTO) */
         .signos-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 6px;
-            margin-bottom: 8px;
+            gap: 7px;
+            margin-bottom: 10px;
         }
 
         .signo-btn {
             background: #181822;
             border: 1px solid #2b2b3b;
-            border-radius: 8px;
-            padding: clamp(6px, 0.9vh, 9px) 3px;
+            border-radius: 10px;
+            padding: clamp(8px, 1.1vh, 12px) 4px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -384,30 +384,31 @@
         }
 
         .signo-btn.ativo {
-            box-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+            box-shadow: 0 0 12px rgba(168, 85, 247, 0.4);
         }
 
         .signo-btn i {
-            font-size: 15px;
-            margin-bottom: 2px;
+            font-size: 18px;
+            margin-bottom: 3px;
             color: #c084fc;
         }
 
         .signo-btn span {
-            font-size: 9.5px;
+            font-size: 10.5px;
             font-weight: 800;
+            letter-spacing: 0.3px;
         }
 
         .horoscopo-display {
             background: #0d0d12;
             border: 1px solid #2b2b3b;
-            border-radius: 10px;
-            padding: 10px;
-            font-size: 12.5px;
-            line-height: 1.4;
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 13.5px;
+            line-height: 1.5;
             color: #f1f5f9;
-            min-height: 70px;
-            max-height: 120px;
+            min-height: 110px;
+            max-height: 160px;
             overflow-y: auto;
             display: flex;
             align-items: center;
@@ -419,8 +420,8 @@
             font-weight: 800;
             color: #d8b4fe;
             display: block;
-            margin-bottom: 2px;
-            font-size: 13px;
+            margin-bottom: 4px;
+            font-size: 14.5px;
         }
 
         /* CHAT */
@@ -467,7 +468,7 @@
             display: flex;
             flex-direction: column;
             gap: 7px;
-            max-height: 150px;
+            max-height: 140px;
             overflow-y: auto;
             padding: 8px;
             background: #0d0d12;
@@ -786,9 +787,9 @@
             <!-- CARD 3: COLUNA DIREITA (HORÓSCOPO + CHAT) -->
             <div class="coluna-direita" style="display: flex; flex-direction: column; gap: 14px;">
                 
-                <!-- HORÓSCOPO DO DIA -->
-                <div class="card-box" style="padding: 14px;">
-                    <h3 style="margin-bottom: 8px; font-size: 12.5px;"><i class="fas fa-star-of-david" style="color: #c084fc;"></i> HORÓSCOPO DO DIA</h3>
+                <!-- HORÓSCOPO DO DIA (AUMENTADO) -->
+                <div class="card-box" style="padding: 16px;">
+                    <h3 style="margin-bottom: 10px; font-size: 13.5px;"><i class="fas fa-star-of-david" style="color: #c084fc;"></i> HORÓSCOPO DO DIA</h3>
                     <div class="signos-grid">
                         <div class="signo-btn" onclick="carregarHoroscopo('aries', this)"><i class="fas fa-aries"></i><span>ÁRIES</span></div>
                         <div class="signo-btn" onclick="carregarHoroscopo('taurus', this)"><i class="fas fa-taurus"></i><span>TOURO</span></div>
