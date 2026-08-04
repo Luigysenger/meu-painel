@@ -448,7 +448,7 @@
             letter-spacing: 1px;
         }
 
-        /* CAMPO VIRTUAL EMBAIXO DO JOGO */
+        /* CAMPO VIRTUAL EMBAIXO DO JOGO AO VIVO */
         .campo-virtual-box {
             background: linear-gradient(135deg, #09381e, #062412);
             border: 1px solid #14532d;
@@ -517,30 +517,6 @@
             font-size: 7px;
             box-shadow: 0 0 6px #fff;
             transition: left 1s ease-in-out;
-        }
-
-        .gols-artilheiros-box {
-            background: #111117;
-            border-top: 1px dashed #272736;
-            padding-top: 5px;
-            margin-top: 2px;
-            font-size: 10.5px;
-            color: #cbd5e1;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .gol-item-linha {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-weight: 600;
-        }
-
-        .gol-item-linha i {
-            color: #f59e0b;
-            font-size: 10px;
         }
 
         /* BOTÕES DE JOGOS ENCERRADOS NO TOPO */
@@ -1279,42 +1255,31 @@
         atualizarCarrosselClima();
         setInterval(atualizarCarrosselClima, 6000);
 
-        // JOGOS REAIS OFICIAIS DE 2026 (PRÓXIMOS / AO VIVO)
+        // JOGOS REAIS OFICIAIS (PRÓXIMAS PARTIDAS DA TABELA)
         const jogosReaisLista = [
             { 
                 id: 1,
                 campeonato: "Copa do Brasil (Oitavas)",
-                timeA: "Juventude", timeB: "Atlético-MG", data: "Hoje, 04/08", hora: "19:30", 
-                golsA: 0, golsB: 0, status: "AO VIVO", minuto: "35'", posseA: "48%", posseB: "52%", ataquePos: 55,
-                artilheiros: []
+                timeA: "Remo", timeB: "Santos", data: "Hoje, 04/08", hora: "21:30", 
+                golsA: 0, golsB: 0, status: "AGENDADO", minuto: "21:30", posseA: "50%", posseB: "50%", ataquePos: 50
             },
             { 
                 id: 2,
                 campeonato: "Copa do Brasil (Oitavas)",
-                timeA: "Remo", timeB: "Santos", data: "Hoje, 04/08", hora: "21:30", 
-                golsA: 0, golsB: 0, status: "AGENDADO", minuto: "21:30", posseA: "50%", posseB: "50%", ataquePos: 50,
-                artilheiros: []
+                timeA: "Cruzeiro", timeB: "Chapecoense", data: "Qua, 05/08", hora: "19:00", 
+                golsA: 0, golsB: 0, status: "AGENDADO", minuto: "19:00", posseA: "50%", posseB: "50%", ataquePos: 50
             },
             { 
                 id: 3,
                 campeonato: "Copa do Brasil (Oitavas)",
-                timeA: "Cruzeiro", timeB: "Chapecoense", data: "Qua, 05/08", hora: "19:00", 
-                golsA: 0, golsB: 0, status: "AGENDADO", minuto: "19:00", posseA: "50%", posseB: "50%", ataquePos: 50,
-                artilheiros: []
+                timeA: "Grêmio", timeB: "Mirassol", data: "Qua, 05/08", hora: "19:30", 
+                golsA: 0, golsB: 0, status: "AGENDADO", minuto: "19:30", posseA: "50%", posseB: "50%", ataquePos: 50
             },
             { 
                 id: 4,
-                campeonato: "Copa do Brasil (Oitavas)",
-                timeA: "Grêmio", timeB: "Mirassol", data: "Qua, 05/08", hora: "19:30", 
-                golsA: 0, golsB: 0, status: "AGENDADO", minuto: "19:30", posseA: "50%", posseB: "50%", ataquePos: 50,
-                artilheiros: []
-            },
-            { 
-                id: 5,
                 campeonato: "Brasileirão Série A",
                 timeA: "Grêmio", timeB: "São Paulo", data: "Sáb, 08/08", hora: "16:00", 
-                golsA: 0, golsB: 0, status: "AGENDADO", minuto: "16:00", posseA: "50%", posseB: "50%", ataquePos: 50,
-                artilheiros: []
+                golsA: 0, golsB: 0, status: "AGENDADO", minuto: "16:00", posseA: "50%", posseB: "50%", ataquePos: 50
             }
         ];
 
@@ -1325,21 +1290,6 @@
             jogosReaisLista.forEach(j => {
                 const aoVivo = j.status === "AO VIVO";
 
-                let htmlArtilheiros = "";
-                if (j.artilheiros && j.artilheiros.length > 0) {
-                    htmlArtilheiros += `<div class="gols-artilheiros-box">`;
-                    j.artilheiros.forEach(g => {
-                        htmlArtilheiros += `
-                            <div class="gol-item-linha">
-                                <i class="fas fa-futbol"></i>
-                                <span><strong>${g.min}</strong> - ${g.autor}</span>
-                            </div>
-                        `;
-                    });
-                    htmlArtilheiros += `</div>`;
-                }
-
-                // Campo virtual profissional em baixo de cada jogo ao vivo
                 let campoVirtualHtml = "";
                 if (aoVivo) {
                     campoVirtualHtml = `
@@ -1373,7 +1323,6 @@
                             <span class="time-nome-box away" title="${j.timeB}">${j.timeB}</span>
                         </div>
                         ${campoVirtualHtml}
-                        ${htmlArtilheiros}
                     </div>
                 `;
             });
@@ -1382,17 +1331,6 @@
         }
 
         carregarJogosEsportivos();
-
-        // Atualização contínua do campo virtual em tempo real
-        setInterval(() => {
-            jogosReaisLista.forEach(j => {
-                if (j.status === "AO VIVO") {
-                    let randomMov = Math.floor(Math.random() * 40) + 30;
-                    j.ataquePos = randomMov;
-                }
-            });
-            carregarJogosEsportivos();
-        }, 4000);
 
         // RESULTADOS REAIS DE JOGOS JÁ ENCERRADOS (TABELAS OFICIAIS 2026)
         const resultadosEncerradosBrasileirao = [
