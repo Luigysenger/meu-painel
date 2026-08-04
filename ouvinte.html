@@ -102,22 +102,27 @@
 
         .widget-item {
             background: #1a1a22;
-            padding: 8px 12px;
+            padding: 8px 14px;
             border-radius: 10px;
             border: 1px solid #2d2d38;
             display: flex;
             align-items: center;
-            gap: 7px;
+            gap: 8px;
+        }
+
+        /* HORA E TEMPERATURA AUMENTADAS PARA O TAMANHO DO NOTEBOOK */
+        .widget-item i {
+            font-size: 16px !important;
         }
 
         .relogio-box {
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 700;
             color: #fff;
         }
 
         .clima-box {
-            font-size: 13.5px;
+            font-size: 15.5px;
             font-weight: 600;
             color: #fff;
         }
@@ -742,12 +747,12 @@
 
             <div class="header-widgets">
                 <div class="widget-item">
-                    <i class="far fa-clock" style="color: var(--primary); font-size: 13.5px;"></i>
+                    <i class="far fa-clock" style="color: var(--primary);"></i>
                     <span id="relogio-digital" class="relogio-box">00:00:00</span>
                 </div>
                 
                 <div class="widget-item">
-                    <span id="icone-clima-dinamico"><i class="fas fa-sun" style="color: #eab308; font-size: 13.5px;"></i></span>
+                    <span id="icone-clima-dinamico"><i class="fas fa-sun" style="color: #eab308;"></i></span>
                     <span id="clima-cidade" class="clima-box">Carregando...</span>
                 </div>
                 
@@ -916,16 +921,16 @@
                     const temp = Math.round(climaData.current_weather.temperature);
                     const code = climaData.current_weather.weathercode;
 
-                    let iconeHTML = '<i class="fas fa-sun" style="color: #eab308; font-size: 13.5px;"></i>';
+                    let iconeHTML = '<i class="fas fa-sun" style="color: #eab308; font-size: 16px;"></i>';
 
                     if (code === 0 || code === 1) {
-                        iconeHTML = '<i class="fas fa-sun" style="color: #eab308; font-size: 13.5px;"></i>';
+                        iconeHTML = '<i class="fas fa-sun" style="color: #eab308; font-size: 16px;"></i>';
                     } else if (code === 2 || code === 3) {
-                        iconeHTML = '<i class="fas fa-cloud-sun" style="color: #f59e0b; font-size: 13.5px;"></i>';
+                        iconeHTML = '<i class="fas fa-cloud-sun" style="color: #f59e0b; font-size: 16px;"></i>';
                     } else if (code >= 51 && code <= 99) {
-                        iconeHTML = '<i class="fas fa-cloud-showers-heavy" style="color: #38bdf8; font-size: 13.5px;"></i>';
+                        iconeHTML = '<i class="fas fa-cloud-showers-heavy" style="color: #38bdf8; font-size: 16px;"></i>';
                     } else if (code === 45 || code === 48) {
-                        iconeHTML = '<i class="fas fa-cloud" style="color: #94a3b8; font-size: 13.5px;"></i>';
+                        iconeHTML = '<i class="fas fa-cloud" style="color: #94a3b8; font-size: 16px;"></i>';
                     }
 
                     document.getElementById('icone-clima-dinamico').innerHTML = iconeHTML;
