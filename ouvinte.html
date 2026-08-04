@@ -372,21 +372,23 @@
             display: flex;
             flex-direction: column;
             gap: 6px;
+            align-items: center; /* Centraliza o conteúdo horizontalmente */
+            text-align: center;
         }
 
-        /* ESTILO DO CAMPEONATO ACIMA DOS TIMES */
+        /* ESTILO DO CAMPEONATO CENTRALIZADO ACIMA DOS TIMES */
         .campeonato-badge-jogo {
             font-size: 10px;
             font-weight: 800;
             color: #c084fc;
             background: rgba(168, 85, 247, 0.1);
-            padding: 2px 6px;
+            padding: 2px 8px;
             border-radius: 4px;
             display: inline-block;
-            width: fit-content;
             border: 1px solid rgba(168, 85, 247, 0.25);
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            margin: 0 auto;
         }
 
         .jogo-header-info {
@@ -396,6 +398,7 @@
             font-size: 10.5px;
             color: var(--text-muted);
             font-weight: 700;
+            width: 100%;
         }
 
         .live-tag-badge {
@@ -423,6 +426,7 @@
             font-size: 12.5px;
             font-weight: 700;
             color: #fff;
+            width: 100%;
         }
 
         .time-nome-box {
@@ -458,6 +462,8 @@
             display: flex;
             flex-direction: column;
             gap: 2px;
+            width: 100%;
+            text-align: left;
         }
 
         .gol-item-linha {
@@ -713,7 +719,8 @@
 
         .novela-painel-resumo.aberto {
             padding: 14px;
-            max-height: 180px;
+            max-height: 220px;
+            overflow-y: auto;
         }
 
         /* CHAT */
@@ -1122,18 +1129,18 @@
                     </div>
                 </div>
 
-                <!-- PLANTÃO DE NOVELAS (COM BOTÕES DAS 3 NOVELAS E DESLIZAMENTO INTERativo) -->
+                <!-- PLANTÃO DE NOVELAS (COM NOMES REAIS E RESUMOS ESTILO G1) -->
                 <div class="card-box" style="padding: 16px;">
                     <h3 style="margin-bottom: 10px; font-size: 13.5px;"><i class="fas fa-tv" style="color: #ec4899;"></i> PLANTÃO DE NOVELAS</h3>
                     <div class="novelas-botoes-grid">
-                        <button class="btn-novela-tab" onclick="toggleNovela('novela18', this)">Novela das 18h</button>
-                        <button class="btn-novela-tab" onclick="toggleNovela('novela19', this)">Novela das 19h</button>
-                        <button class="btn-novela-tab" onclick="toggleNovela('novela21', this)">Novela das 21h</button>
+                        <button class="btn-novela-tab" onclick="toggleNovela('novela18', this)">Garota do Momento (18h)</button>
+                        <button class="btn-novela-tab" onclick="toggleNovela('novela19', this)">Volta por Cima (19h)</button>
+                        <button class="btn-novela-tab" onclick="toggleNovela('novela21', this)">Mania de Você (21h)</button>
                     </div>
                     
                     <div id="painel-novela-resumo" class="novela-painel-resumo">
-                        <div id="titulo-novela" style="font-size: 13.5px; font-weight: 800; color: #d8b4fe; margin-bottom: 5px;">Selecione uma novela</div>
-                        <p id="texto-resumo" style="margin: 0; font-size: 12px; line-height: 1.4; color: #cbd5e1;">Clique no botão acima para ver ou ocultar o resumo do capítulo.</p>
+                        <div id="titulo-novela" style="font-size: 13px; font-weight: 800; color: #d8b4fe; margin-bottom: 6px;">Selecione uma novela</div>
+                        <p id="texto-resumo" style="margin: 0; font-size: 11.5px; line-height: 1.45; color: #cbd5e1;">Clique em um dos botões acima para ver o resumo completo com os personagens.</p>
                     </div>
                 </div>
 
@@ -1235,20 +1242,20 @@
         setInterval(atualizarRelogio, 1000);
         atualizarRelogio();
 
-        // CONTROLE INTERATIVO DO PLANTÃO DE NOVELAS (ABRE E ENCOLHE AO CLICAR)
+        // CONTROLE INTERATIVO DO PLANTÃO DE NOVELAS (ESTILO G1 REAL COM NOMES E PERSONAGENS)
         let novelaAtivaAtual = null;
         const resumosNovelasData = {
             novela18: {
-                titulo: "Novela das 18h - Resumo do Capítulo",
-                texto: "Neste capítulo, a tensão aumenta quando os segredos do passado começam a vir à tona, colocando em risco o romance dos protagonistas e surpreendendo a todos na vila."
+                titulo: "Garota do Momento (18h) - Resumo do Capítulo",
+                texto: "Beatriz confronta Juliano após descobrir novas pistas sobre o passado de sua mãe, Clarice. Enquanto isso, Beto tenta apoiar Beatriz e se complica com Beatriz em meio às pressões da Perfumaria Carioca. Maristela arma uma nova estratégia para afastar os rivais e proteger os interesses da família Alencar."
             },
             novela19: {
-                titulo: "Novela das 19h - Resumo do Capítulo",
-                texto: "A reviravolta na vida dos personagens principais promete emocionar o público hoje. Uma aliança inesperada surge para desmascarar as armações do grande vilão."
+                titulo: "Volta por Cima (19h) - Resumo do Capítulo",
+                texto: "Madá se desentende com Jão após ver uma situação mal interpretada na empresa. Violeta pressiona Osmar a acertar suas contas pendentes, enquanto Roxelle tenta convencer Chico a tomar uma decisão definitiva sobre sua vida amorosa e profissional no bairro da Leopoldina."
             },
             novela21: {
-                titulo: "Novela das 21h - Resumo do Capítulo",
-                texto: "O plano arquitetado pelos vilões sofre uma grande ameaça após uma descoberta surpreendente. Segredos familiares profundos são revelados em uma cena emocionante."
+                titulo: "Mania de Você (21h) - Resumo do Capítulo",
+                texto: "Viola percebe as intenções manipuladoras de Mércia e decide dar um basta nas armações dentro do resort. Rudá e Luma se unem para encontrar provas decisivas contra Mavi, enquanto Iberê tenta alertar o irmão sobre os riscos de continuar aliado a Molina."
             }
         };
 
@@ -1257,7 +1264,6 @@
             const elTitulo = document.getElementById('titulo-novela');
             const elResumo = document.getElementById('texto-resumo');
 
-            // Se clicar no botão que já está ativo, ele encolhe e fecha
             if (novelaAtivaAtual === chaveNovela && painel.classList.contains('aberto')) {
                 painel.classList.remove('aberto');
                 elBtn.classList.remove('ativo');
@@ -1265,7 +1271,6 @@
                 return;
             }
 
-            // Caso contrário, abre ou troca para a nova novela escolhida
             document.querySelectorAll('.btn-novela-tab').forEach(b => b.classList.remove('ativo'));
             elBtn.classList.add('ativo');
 
@@ -1322,7 +1327,7 @@
         atualizarCarrosselClima();
         setInterval(atualizarCarrosselClima, 6000);
 
-        // JOGOS DA SEMANA COM CAMPEONATO EXIBIDO EM CIMA DOS TIMES
+        // JOGOS DA SEMANA COM CAMPEONATO CENTRALIZADO ACIMA DOS TIMES
         function carregarJogosBrasileiraoSemana() {
             const containerEsportes = document.getElementById('lista-jogos-esportes');
             
@@ -1393,9 +1398,7 @@
 
                 htmlJogos += `
                     <div class="jogo-card-item">
-                        <div>
-                            <span class="campeonato-badge-jogo"><i class="fas fa-trophy" style="font-size: 8.5px; margin-right: 3px;"></i> ${j.campeonato}</span>
-                        </div>
+                        <span class="campeonato-badge-jogo"><i class="fas fa-trophy" style="font-size: 8.5px; margin-right: 3px;"></i> ${j.campeonato}</span>
                         <div class="jogo-header-info">
                             <span><i class="far fa-calendar-alt"></i> ${j.data}</span>
                             ${aoVivo ? '<span class="live-tag-badge"><i class="fas fa-circle"></i> AO VIVO ' + tempoExibicao + '</span>' : '<span>' + (status === 'AGENDADO' ? 'Às ' + j.hora : 'Encerrado') + '</span>'}
@@ -1416,7 +1419,7 @@
         carregarJogosBrasileiraoSemana();
         setInterval(carregarJogosBrasileiraoSemana, 30000);
 
-        // DADOS REAIS DA CLASSIFICAÇÃO COM VARIAÇÃO DE POSIÇÕES (SETAS)
+        // DADOS REAIS DA CLASSIFICAÇÃO COM SETAS
         const tabelaBrasileiraoDados = [
             { pos: 1, var: 0, time: "Palmeiras", pts: 47, j: 21, v: 14, sg: 22 },
             { pos: 2, var: 0, time: "Flamengo", pts: 39, j: 20, v: 11, sg: 19 },
