@@ -509,7 +509,7 @@
         /* PLAYER RODAPÉ FLUTUANTE */
         .player-footer { 
             position: fixed; 
-            bottom: 50px; 
+            bottom: 58px; 
             left: 50%;
             transform: translateX(-50%);
             width: calc(100% - 40px);
@@ -591,15 +591,15 @@
             box-shadow: 0 0 25px var(--primary-glow);
         }
 
-        /* LETREIRO DE NOTÍCIAS FIXO NO RODAPÉ */
+        /* LETREIRO DE NOTÍCIAS FIXO NO RODAPÉ (FONTE AMPLIADA) */
         .news-ticker-bar {
             position: fixed;
             bottom: 0;
             left: 0;
             width: 100vw;
-            height: 38px;
+            height: 46px;
             background: #09090c;
-            border-top: 1px solid #1f1f2b;
+            border-top: 1px solid #232333;
             z-index: 1001;
             display: flex;
             align-items: center;
@@ -609,21 +609,22 @@
         .news-ticker-badge {
             background: #dc2626;
             color: #fff;
-            font-size: 11px;
+            font-size: 13px;
             font-weight: 800;
-            padding: 0 14px;
+            padding: 0 16px;
             height: 100%;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             white-space: nowrap;
             z-index: 2;
-            box-shadow: 5px 0 15px rgba(0,0,0,0.5);
-            letter-spacing: 0.5px;
+            box-shadow: 8px 0 20px rgba(0,0,0,0.6);
+            letter-spacing: 0.8px;
         }
 
         .news-ticker-badge i {
             animation: piscar 1.2s infinite ease-in-out;
+            font-size: 10px;
         }
 
         .news-ticker-content {
@@ -639,25 +640,26 @@
         }
 
         .news-item-link {
-            color: #d1d5db;
-            font-size: 12.5px;
-            font-weight: 600;
+            color: #f3f4f6;
+            font-size: 15px;
+            font-weight: 700;
             text-decoration: none;
-            margin-right: 40px;
+            margin-right: 45px;
             display: inline-flex;
             align-items: center;
             transition: color 0.2s ease;
+            letter-spacing: 0.2px;
         }
 
         .news-item-link:hover {
-            color: #a855f7;
+            color: #c084fc;
             text-decoration: underline;
         }
 
         .news-item-divider {
-            color: var(--primary);
-            margin-right: 12px;
-            font-size: 10px;
+            color: #a855f7;
+            margin-right: 14px;
+            font-size: 12px;
         }
 
         @keyframes ticker-slide {
@@ -752,7 +754,7 @@
         </div>
     </div>
 
-    <!-- LETREIRO DE NOTÍCIAS BRASIL -->
+    <!-- LETREIRO DE NOTÍCIAS BRASIL (DESTAQUE MAIOR) -->
     <div class="news-ticker-bar">
         <div class="news-ticker-badge">
             <i class="fas fa-circle"></i> NOTÍCIAS DO BRASIL
