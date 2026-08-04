@@ -358,7 +358,7 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
-            max-height: 240px;
+            max-height: 220px;
             overflow-y: auto;
             padding-right: 2px;
             margin-bottom: 10px;
@@ -372,18 +372,6 @@
             display: flex;
             flex-direction: column;
             gap: 6px;
-            transition: all 0.2s ease;
-        }
-
-        .jogo-card-item.ao-vivo-clicavel {
-            cursor: pointer;
-            border-color: rgba(34, 197, 94, 0.4);
-        }
-
-        .jogo-card-item.ao-vivo-clicavel:hover {
-            background: #1e1e2d;
-            border-color: #22c55e;
-            box-shadow: 0 0 12px rgba(34, 197, 94, 0.2);
         }
 
         .jogo-header-info {
@@ -393,18 +381,6 @@
             font-size: 10.5px;
             color: var(--text-muted);
             font-weight: 700;
-        }
-
-        .campeonato-tag-nome {
-            font-size: 10px;
-            color: #d8b4fe;
-            font-weight: 800;
-            background: rgba(147, 51, 234, 0.15);
-            padding: 1px 6px;
-            border-radius: 4px;
-            border: 1px solid rgba(147, 51, 234, 0.3);
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
         }
 
         .live-tag-badge {
@@ -479,81 +455,6 @@
         .gol-item-linha i {
             color: #f59e0b;
             font-size: 10px;
-        }
-
-        /* RADAR DO CAMPO DE FUTEBOL ANIMADO */
-        .campo-radar-container {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.35s ease-out, padding 0.35s ease-out;
-            padding: 0 4px;
-        }
-
-        .campo-radar-container.aberto {
-            max-height: 140px;
-            padding-top: 6px;
-            padding-bottom: 2px;
-        }
-
-        .campo-desenho {
-            width: 100%;
-            height: 110px;
-            background: linear-gradient(135deg, #0d381e, #134e29);
-            border: 1px solid #22c55e;
-            border-radius: 8px;
-            position: relative;
-            box-sizing: border-box;
-            overflow: hidden;
-        }
-
-        /* Linhas do campo */
-        .campo-desenho::before {
-            content: '';
-            position: absolute;
-            top: 50%; left: 0; right: 0;
-            height: 1px;
-            background: rgba(255, 255, 255, 0.35);
-        }
-
-        .circulo-central {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 32px; height: 32px;
-            border: 1px solid rgba(255, 255, 255, 0.35);
-            border-radius: 50%;
-        }
-
-        .area-penal-esq, .area-penal-dir {
-            position: absolute;
-            top: 25%;
-            width: 12px; height: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.35);
-        }
-        .area-penal-esq { left: 0; border-left: none; }
-        .area-penal-dir { right: 0; border-right: none; }
-
-        .bola-radar-ponto {
-            position: absolute;
-            width: 10px; height: 10px;
-            background: #facc15;
-            border-radius: 50%;
-            box-shadow: 0 0 8px #facc15, 0 0 12px #fff;
-            transform: translate(-50%, -50%);
-            transition: all 1s ease-in-out;
-            z-index: 5;
-        }
-
-        .radar-legenda {
-            font-size: 9.5px;
-            text-align: center;
-            color: #86efac;
-            margin-top: 4px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
         }
 
         /* BOTÕES DE TABELAS */
@@ -1113,7 +1014,7 @@
                 </div>
             </div>
 
-            <!-- CARD 3: COLUNA DIREITA (ESPORTES + BOTÕES DE TABELAS + HORÓSCOPO + CHAT) -->
+            <!-- CARD 3: COLUNA DIREITA (ESPORTES + BOTÕES DE TABELAS + HORÓSCOPO + PLANTÃO DE NOVELAS + CHAT) -->
             <div class="coluna-direita" style="display: flex; flex-direction: column; gap: 14px;">
                 
                 <!-- QUADRO DE FUTEBOL E BOTÕES PARA CONFERIR TABELAS -->
@@ -1155,6 +1056,15 @@
                     </div>
                     <div class="horoscopo-display" id="horoscopo-texto">
                         Clique em um signo acima para ver a previsão astral! ✨
+                    </div>
+                </div>
+
+                <!-- PLANTÃO DE NOVELAS (AUTOMÁTICO POR HORÁRIO) -->
+                <div class="card-box" style="padding: 16px;">
+                    <h3 style="margin-bottom: 10px; font-size: 13.5px;"><i class="fas fa-tv" style="color: #ec4899;"></i> PLANTÃO DE NOVELAS</h3>
+                    <div style="background: #0d0d12; border: 1px solid #2b2b3b; border-radius: 12px; padding: 14px;">
+                        <div id="titulo-novela" style="font-size: 14px; font-weight: 800; color: #d8b4fe; margin-bottom: 6px;">Carregando novela...</div>
+                        <p id="texto-resumo" style="margin: 0; font-size: 12.5px; line-height: 1.4; color: #cbd5e1;">Aguarde, atualizando programação...</p>
                     </div>
                 </div>
 
@@ -1256,6 +1166,43 @@
         setInterval(atualizarRelogio, 1000);
         atualizarRelogio();
 
+        // ATUALIZAÇÃO AUTOMÁTICA DE NOVELAS POR HORÁRIO (SEM F5)
+        function atualizarResumosAutomaticos() {
+            const agora = new Date();
+            const horaDecimal = agora.getHours() + (agora.getMinutes() / 60);
+
+            let nomeNovela = "Programação Normal";
+            let resumoNovela = "Fique ligado na nossa programação! Em breve o resumo da próxima novela.";
+
+            // Novela das 18h (Ex: 18:00 até 18:50)
+            if (horaDecimal >= 18.0 && horaDecimal < 18.83) {
+                nomeNovela = "Novela das 18h";
+                resumoNovela = "Neste capítulo, a tensão aumenta quando os segredos do passado começam a vir à tona...";
+            }
+            // Novela das 19h (Ex: 19:00 até 19:50)
+            else if (horaDecimal >= 19.0 && horaDecimal < 19.83) {
+                nomeNovela = "Novela das 19h";
+                resumoNovela = "A reviravolta na vida dos personagens principais promete emocionar o público hoje...";
+            }
+            // Novela das 21h (Ex: 21:00 até 22:00)
+            else if (horaDecimal >= 21.0 && horaDecimal < 22.0) {
+                nomeNovela = "Novela das 21h";
+                resumoNovela = "O plano arquitetado pelos vilões sofre uma grande ameaça após uma descoberta inesperada...";
+            }
+
+            const elTitulo = document.getElementById('titulo-novela');
+            const elResumo = document.getElementById('texto-resumo');
+
+            if (elTitulo && elResumo) {
+                if (elTitulo.innerText !== nomeNovela) {
+                    elTitulo.innerText = nomeNovela;
+                    elResumo.innerText = resumoNovela;
+                }
+            }
+        }
+        atualizarResumosAutomaticos();
+        setInterval(atualizarResumosAutomaticos, 60000);
+
         // CLIMA DAS CAPITAIS
         const cidadesClima = [
             { nome: 'Cascavel', lat: -24.9578, lon: -53.4595 },
@@ -1301,13 +1248,13 @@
         atualizarCarrosselClima();
         setInterval(atualizarCarrosselClima, 6000);
 
-        // JOGOS DA SEMANA COM CAMPEONATO E RADAR DE BOLA AO VIVO
+        // JOGOS DA SEMANA COM GOLS E ARTILHEIROS EM TEMPO REAL
         function carregarJogosBrasileiraoSemana() {
             const containerEsportes = document.getElementById('lista-jogos-esportes');
             
             const jogosBrasileirao = [
                 { 
-                    id: 1, campeonato: "Brasileirão Série A", timeA: "Grêmio", timeB: "São Paulo", data: "Sáb, 08/08", hora: "16:00", 
+                    timeA: "Grêmio", timeB: "São Paulo", data: "Sáb, 08/08", hora: "16:00", 
                     timestamp: new Date(2026, 7, 8, 16, 0).getTime(),
                     golsA: 1, golsB: 1,
                     artilheiros: [
@@ -1316,7 +1263,7 @@
                     ]
                 },
                 { 
-                    id: 2, campeonato: "Copa do Brasil", timeA: "Remo", timeB: "Atlético-MG", data: "Sáb, 08/08", hora: "18:30", 
+                    timeA: "Remo", timeB: "Atlético-MG", data: "Sáb, 08/08", hora: "18:30", 
                     timestamp: new Date(2026, 7, 8, 18, 30).getTime(),
                     golsA: 0, golsB: 2,
                     artilheiros: [
@@ -1324,14 +1271,14 @@
                         { min: "81'", autor: "Paulinho (Atlético-MG)" }
                     ]
                 },
-                { id: 3, campeonato: "Brasileirão Série B", timeA: "Coritiba", timeB: "Chapecoense", data: "Sáb, 08/08", hora: "20:30", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 8, 20, 30).getTime() },
-                { id: 4, campeonato: "Copa do Brasil", timeA: "Botafogo", timeB: "Fluminense", data: "Sáb, 08/08", hora: "21:00", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 8, 21, 0).getTime() },
-                { id: 5, campeonato: "Brasileirão Série A", timeA: "Cruzeiro", timeB: "Mirassol", data: "Dom, 09/08", hora: "11:00", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 11, 0).getTime() },
-                { id: 6, campeonato: "Brasileirão Série A", timeA: "Bahia", timeB: "Vasco", data: "Dom, 09/08", hora: "16:00", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 16, 0).getTime() },
-                { id: 7, campeonato: "Brasileirão Série A", timeA: "Palmeiras", timeB: "Internacional", data: "Dom, 09/08", hora: "16:00", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 16, 0).getTime() },
-                { id: 8, campeonato: "Brasileirão Série A", timeA: "Santos", timeB: "Athletico-PR", data: "Dom, 09/08", hora: "18:30", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 18, 30).getTime() },
-                { id: 9, campeonato: "Brasileirão Série A", timeA: "Red Bull Bragantino", timeB: "Corinthians", data: "Dom, 09/08", hora: "18:30", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 18, 30).getTime() },
-                { id: 10, campeonato: "Copa do Brasil", timeA: "Flamengo", timeB: "Vitória", data: "Dom, 09/08", hora: "19:30", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 19, 30).getTime() }
+                { timeA: "Coritiba", timeB: "Chapecoense", data: "Sáb, 08/08", hora: "20:30", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 8, 20, 30).getTime() },
+                { timeA: "Botafogo", timeB: "Fluminense", data: "Sáb, 08/08", hora: "21:00", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 8, 21, 0).getTime() },
+                { timeA: "Cruzeiro", timeB: "Mirassol", data: "Dom, 09/08", hora: "11:00", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 11, 0).getTime() },
+                { timeA: "Bahia", timeB: "Vasco", data: "Dom, 09/08", hora: "16:00", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 16, 0).getTime() },
+                { timeA: "Palmeiras", timeB: "Internacional", data: "Dom, 09/08", hora: "16:00", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 16, 0).getTime() },
+                { timeA: "Santos", timeB: "Athletico-PR", data: "Dom, 09/08", hora: "18:30", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 18, 30).getTime() },
+                { timeA: "Red Bull Bragantino", timeB: "Corinthians", data: "Dom, 09/08", hora: "18:30", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 18, 30).getTime() },
+                { timeA: "Flamengo", timeB: "Vitória", data: "Dom, 09/08", hora: "19:30", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 19, 30).getTime() }
             ];
 
             const agoraTime = new Date().getTime();
@@ -1368,20 +1315,10 @@
                     htmlArtilheiros += `</div>`;
                 }
 
-                // Posição dinâmica da bola baseada no ID e no minuto atual para simular o movimento no radar
-                let posLeftBola = 50;
-                let posTopBola = 50;
-                if (aoVivo) {
-                    const minInt = parseInt(tempoExibicao) || 10;
-                    posLeftBola = 20 + (minInt * 1.3) % 65;
-                    posTopBola = 30 + ((minInt * 7) % 40);
-                }
-
                 htmlJogos += `
-                    <div class="jogo-card-item ${aoVivo ? 'ao-vivo-clicavel' : ''}" ${aoVivo ? 'onclick="toggleRadarJogo(' + j.id + ')"' : ''}>
+                    <div class="jogo-card-item">
                         <div class="jogo-header-info">
                             <span><i class="far fa-calendar-alt"></i> ${j.data}</span>
-                            <span class="campeonato-tag-nome">${j.campeonato}</span>
                             ${aoVivo ? '<span class="live-tag-badge"><i class="fas fa-circle"></i> AO VIVO ' + tempoExibicao + '</span>' : '<span>' + (status === 'AGENDADO' ? 'Às ' + j.hora : 'Encerrado') + '</span>'}
                         </div>
                         <div class="jogo-placares-row">
@@ -1390,20 +1327,6 @@
                             <span class="time-nome-box away" title="${j.timeB}">${j.timeB}</span>
                         </div>
                         ${htmlArtilheiros}
-                        
-                        ${aoVivo ? `
-                            <div id="radar-container-${j.id}" class="campo-radar-container">
-                                <div class="campo-desenho">
-                                    <div class="circulo-central"></div>
-                                    <div class="area-penal-esq"></div>
-                                    <div class="area-penal-dir"></div>
-                                    <div class="bola-radar-ponto" style="left: ${posLeftBola}%; top: ${posTopBola}%;"></div>
-                                </div>
-                                <div class="radar-legenda">
-                                    <i class="fas fa-satellite-dish"></i> Toque para recolher • Posição da bola em tempo real (${j.timeA} x ${j.timeB})
-                                </div>
-                            </div>
-                        ` : ''}
                     </div>
                 `;
             });
@@ -1413,14 +1336,6 @@
 
         carregarJogosBrasileiraoSemana();
         setInterval(carregarJogosBrasileiraoSemana, 30000);
-
-        // FUNÇÃO PARA ABRIR/FECHAR O RADAR DA BOLA AO CLICAR NO JOGO AO VIVO
-        function toggleRadarJogo(id) {
-            const radarBox = document.getElementById('radar-container-' + id);
-            if (radarBox) {
-                radarBox.classList.toggle('aberto');
-            }
-        }
 
         // DADOS REAIS DA CLASSIFICAÇÃO COM VARIAÇÃO DE POSIÇÕES (SETAS)
         const tabelaBrasileiraoDados = [
