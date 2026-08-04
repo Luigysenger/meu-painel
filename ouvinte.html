@@ -591,7 +591,7 @@
             box-shadow: 0 0 25px var(--primary-glow);
         }
 
-        /* LETREIRO DE NOTÍCIAS FIXO NO RODAPÉ (FONTE 21px & ACELERADO) */
+        /* LETREIRO DE NOTÍCIAS FIXO NO RODAPÉ (LOOP INFINITO CONTÍNUO E FLUIDO) */
         .news-ticker-bar {
             position: fixed;
             bottom: 0;
@@ -632,7 +632,7 @@
             align-items: center;
             white-space: nowrap;
             will-change: transform;
-            animation: ticker-slide 40s linear infinite;
+            animation: ticker-slide 60s linear infinite;
         }
 
         .news-ticker-bar:hover .news-ticker-content {
@@ -754,7 +754,7 @@
         </div>
     </div>
 
-    <!-- LETREIRO DE NOTÍCIAS BRASIL (FONTE 21px & MAIS RÁPIDO) -->
+    <!-- LETREIRO DE NOTÍCIAS BRASIL (15 NOTÍCIAS SEM TRAVAR EM LOOP CONTÍNUO) -->
     <div class="news-ticker-bar">
         <div class="news-ticker-badge">
             <i class="fas fa-circle"></i> NOTÍCIAS DO BRASIL
@@ -840,7 +840,7 @@
         atualizarCarrosselClima();
         setInterval(atualizarCarrosselClima, 6000);
 
-        // BUSCA E RENDERIZAÇÃO DE NOTÍCIAS DO BRASIL (G1 RSS)
+        // BUSCA E RENDERIZAÇÃO DE NOTÍCIAS DO BRASIL (G1 RSS - 15 MENSAGENS EM LOOP PERFEITO)
         async function carregarNoticiasBrasil() {
             try {
                 const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fg1.globo.com%2Fdynamo%2Fbrasil%2Frss2.xml');
@@ -848,7 +848,10 @@
                 
                 if (data.status === 'ok' && data.items && data.items.length > 0) {
                     let htmlItems = '';
-                    data.items.slice(0, 15).forEach(item => {
+                    // Carrega até 15 notícias principais
+                    const manchetes = data.items.slice(0, 15);
+                    
+                    manchetes.forEach(item => {
                         htmlItems += `
                             <a href="${item.link}" target="_blank" class="news-item-link">
                                 <span class="news-item-divider">◆</span> ${item.title}
@@ -856,7 +859,7 @@
                         `;
                     });
 
-                    // Duplicamos o conteúdo para criar efeito de loop contínuo infinito
+                    // Duplicamos o bloco para criar um loop Seamless (infinito e contínuo, sem travar ao reiniciar)
                     document.getElementById('ticker-noticias-container').innerHTML = htmlItems + htmlItems;
                 }
             } catch (err) {
