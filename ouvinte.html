@@ -273,7 +273,7 @@
             color: #fff;
         }
 
-        /* PLAYLIST (GRID DE CARDS 3x3) - AJUSTADO PARA CORRESPONDER EXATAMENTE AO FORMATO DA FOTO */
+        /* PLAYLIST (GRID DE CARDS 3x3) - TAMANHO ORIGINAL DOS ÍCONES RESTAURADO */
         .playlist-grid-ouvinte {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -330,16 +330,14 @@
             box-shadow: 0 0 16px rgba(34, 197, 94, 0.5) !important;
         }
 
-        /* AJUSTE CIRÚRGICO DOS ÍCONES DOS CARDS IGUAL À FOTO DE REFERÊNCIA */
         .radio-card-quadrado i.icon-radio {
-            font-size: 20px;
-            margin-bottom: 10px;
-            opacity: 0.95;
+            font-size: clamp(28px, 3.2vw, 42px);
+            margin-bottom: 8px;
         }
 
         .antena-piscando {
             color: #22c55e;
-            font-size: 20px !important;
+            font-size: clamp(28px, 3.2vw, 42px) !important;
             animation: piscar 1.2s infinite ease-in-out;
         }
 
@@ -356,19 +354,19 @@
             text-shadow: 0 1px 2px rgba(0,0,0,0.8);
         }
 
-        /* HORÓSCOPO DO DIA DINÂMICO (MAIOR CONFORME SOLICITADO) */
+        /* HORÓSCOPO DO DIA DINÂMICO (QUADRO AINDA MAIOR NO PC) */
         .signos-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 8px;
-            margin-bottom: 12px;
+            margin-bottom: 14px;
         }
 
         .signo-btn {
             background: #181822;
             border: 1px solid #2b2b3b;
             border-radius: 10px;
-            padding: clamp(11px, 1.5vh, 15px) 4px;
+            padding: clamp(12px, 1.6vh, 16px) 4px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -390,13 +388,13 @@
         }
 
         .signo-btn i {
-            font-size: 20px;
-            margin-bottom: 4px;
+            font-size: 21px;
+            margin-bottom: 5px;
             color: #c084fc;
         }
 
         .signo-btn span {
-            font-size: 11px;
+            font-size: 11.5px;
             font-weight: 800;
             letter-spacing: 0.3px;
         }
@@ -405,12 +403,12 @@
             background: #0d0d12;
             border: 1px solid #2b2b3b;
             border-radius: 12px;
-            padding: 16px;
-            font-size: 14px;
-            line-height: 1.55;
+            padding: 18px;
+            font-size: 14.5px;
+            line-height: 1.6;
             color: #f1f5f9;
-            min-height: 135px;
-            max-height: 195px;
+            min-height: 160px;
+            max-height: 230px;
             overflow-y: auto;
             display: flex;
             align-items: center;
@@ -423,10 +421,10 @@
             color: #d8b4fe;
             display: block;
             margin-bottom: 6px;
-            font-size: 15px;
+            font-size: 15.5px;
         }
 
-        /* CHAT (CAMPO E ALTURA AMPLIADOS PARA APARECEREM BEM AS MENSAGENS) */
+        /* CHAT (CAMPO E ALTURA AMPLIADOS) */
         .input-msg { 
             width: 100%; 
             background: #0f0f14; 
@@ -616,7 +614,7 @@
             box-shadow: 0 0 15px var(--primary-glow);
         }
 
-        /* LETREIRO DE NOTÍCIAS BRASIL (FONTE AUMENTADA CONFORME SOLICITADO) */
+        /* LETREIRO DE NOTÍCIAS BRASIL (MAIS LENTO E FONTE AMPLIADA) */
         .news-ticker-bar {
             position: fixed;
             bottom: 0;
@@ -664,7 +662,7 @@
             display: flex;
             align-items: center;
             white-space: nowrap;
-            animation: ticker-slide 45s linear infinite;
+            animation: ticker-slide 75s linear infinite; /* VELOCIDADE MAIS LENTA SOLICITADA */
         }
 
         .news-ticker-bar:hover .news-ticker-content {
@@ -790,7 +788,7 @@
             <!-- CARD 3: COLUNA DIREITA (HORÓSCOPO + CHAT) -->
             <div class="coluna-direita" style="display: flex; flex-direction: column; gap: 14px;">
                 
-                <!-- HORÓSCOPO DO DIA (MAIOR) -->
+                <!-- HORÓSCOPO DO DIA (MAIOR NO PC) -->
                 <div class="card-box" style="padding: 18px;">
                     <h3 style="margin-bottom: 12px; font-size: 14px;"><i class="fas fa-star-of-david" style="color: #c084fc;"></i> HORÓSCOPO DO DIA</h3>
                     <div class="signos-grid">
@@ -812,7 +810,7 @@
                     </div>
                 </div>
 
-                <!-- CARD DE MENSAGENS (CHAT AMPLIADO) -->
+                <!-- CARD DE MENSAGENS -->
                 <div class="card-box" style="padding: 16px;">
                     <div class="banner-destaque-adm">
                         <i class="fas fa-paper-plane" style="margin-right: 4px;"></i> MANDE MENSAGEM PARA O ADM PARA PEDIR PARA ADICIONAR UMA RÁDIO QUE VOCÊ GOSTE
