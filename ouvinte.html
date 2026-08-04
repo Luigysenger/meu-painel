@@ -9,15 +9,15 @@
     <title>PAINEL OUVINTE - LUIGY</title>
     
     <!-- Fonts & Icons -->
-    <link rel="preconnect" href="[fonts.googleapis.com](https://fonts.googleapis.com)">
-    <link rel="preconnect" href="[fonts.gstatic.com](https://fonts.gstatic.com)" crossorigin>
-    <link href="[fonts.googleapis.com](https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap)" rel="stylesheet">
-    <link rel="stylesheet" href="[cdnjs.cloudflare.com](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css)">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Scripts Firebase & Sortable -->
-    <script src="[gstatic.com](https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js)"></script>
-    <script src="[gstatic.com](https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js)"></script>
-    <script src="[cdn.jsdelivr.net](https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js)"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     
     <style>
         *, *::before, *::after {
@@ -26,7 +26,7 @@
         }
 
         html {
-            width: 100% !important;
+            width: 100vw !important;
             overflow-x: hidden !important;
             overscroll-behavior-x: none !important;
             touch-action: pan-y !important;
@@ -53,7 +53,7 @@
             color: var(--text-main);
             margin: 0;
             padding: 20px;
-            width: 100% !important;
+            width: 100vw !important;
             overflow-x: hidden !important;
             overscroll-behavior-x: none !important;
             touch-action: pan-y !important;
@@ -73,12 +73,12 @@
             background: rgba(20, 20, 25, 0.7); 
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            padding: 16px 24px; 
+            padding: 14px 24px; 
             border-radius: 20px; 
             border: 1px solid var(--card-border); 
-            margin-bottom: 20px; 
+            margin-bottom: 16px; 
             width: 100%; 
-            max-width: 1200px; 
+            max-width: 1400px; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
@@ -87,13 +87,13 @@
             background: linear-gradient(135deg, #a855f7, #ec4899);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-size: 22px; 
+            font-size: 20px; 
             font-weight: 800;
             letter-spacing: -0.5px;
         }
 
         .user-name-title {
-            font-size: 14px !important;
+            font-size: 13px !important;
             font-weight: 600;
             color: var(--text-muted);
             margin-top: 2px;
@@ -109,7 +109,7 @@
 
         .widget-item {
             background: #1a1a22;
-            padding: 8px 16px;
+            padding: 7px 14px;
             border-radius: 12px;
             border: 1px solid #2d2d38;
             display: flex;
@@ -119,14 +119,14 @@
         }
 
         .relogio-box {
-            font-size: 15px !important;
+            font-size: 14px !important;
             font-weight: 700;
             color: #fff;
             letter-spacing: 0.5px;
         }
 
         .clima-box {
-            font-size: 14px !important;
+            font-size: 13px !important;
             font-weight: 600;
             color: #fff;
         }
@@ -135,10 +135,10 @@
             background: rgba(239, 68, 68, 0.1); 
             border: 1px solid rgba(239, 68, 68, 0.3); 
             color: #ef4444; 
-            padding: 9px 16px !important; 
+            padding: 8px 14px !important; 
             border-radius: 12px; 
             cursor: pointer; 
-            font-size: 13px !important; 
+            font-size: 12px !important; 
             font-weight: 700; 
             transition: all 0.2s ease;
             display: flex;
@@ -154,41 +154,41 @@
 
         .frase-centro-playlist {
             text-align: center;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 700;
             color: #d8b4fe;
             letter-spacing: 1.5px;
-            margin: 5px 0 25px 0;
+            margin: 0 0 20px 0;
             width: 100%;
-            max-width: 1200px;
+            max-width: 1400px;
             background: linear-gradient(90deg, rgba(147, 51, 234, 0), rgba(147, 51, 234, 0.15), rgba(147, 51, 234, 0));
-            padding: 12px;
+            padding: 10px;
             border-radius: 12px;
             border-top: 1px solid rgba(147, 51, 234, 0.2);
             border-bottom: 1px solid rgba(147, 51, 234, 0.2);
         }
 
-        /* LAYOUT PRINCIPAL */
+        /* LAYOUT PRINCIPAL AJUSTADO EXATAMENTE COMO A FOTO DO NOTEBOOK */
         .main-container { 
             display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); 
-            gap: 24px; 
+            grid-template-columns: 1fr 1.35fr 1.15fr; 
+            gap: 20px; 
             width: 100%; 
-            max-width: 1200px; 
-            margin: 0 auto 200px auto;
+            max-width: 1400px; 
+            margin-bottom: 200px; 
             align-items: start;
         }
 
-        .coluna-direita {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
+        @media (max-width: 1200px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
         }
 
         .card-box { 
             background: var(--card); 
-            border-radius: 24px; 
-            padding: 24px; 
+            border-radius: 22px; 
+            padding: 20px; 
             border: 1px solid var(--card-border); 
             width: 100%; 
             box-shadow: 0 15px 35px rgba(0,0,0,0.3);
@@ -196,21 +196,21 @@
 
         h3 { 
             color: var(--text-main); 
-            font-size: 15px; 
+            font-size: 14px; 
             font-weight: 800;
             letter-spacing: 0.5px; 
             margin-top: 0;
-            margin-bottom: 20px; 
+            margin-bottom: 16px; 
             text-align: center; 
             line-height: 1.4;
         }
 
         .sub-titulo-secao {
-            font-size: 13px !important;
+            font-size: 12px !important;
             font-weight: 700;
             text-align: left;
             color: #c084fc !important;
-            margin-bottom: 14px;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
             gap: 6px;
@@ -220,43 +220,28 @@
             background: linear-gradient(135deg, rgba(147, 51, 234, 0.15), rgba(255, 0, 127, 0.15));
             color: #f3e8ff;
             border: 1px solid rgba(168, 85, 247, 0.4);
-            border-radius: 16px;
-            padding: 16px;
-            font-size: 13px;
+            border-radius: 14px;
+            padding: 10px;
+            font-size: 11.5px;
             font-weight: 700;
             text-align: center;
-            line-height: 1.5;
-            margin-bottom: 18px;
+            line-height: 1.4;
+            margin-bottom: 10px;
             box-shadow: 0 4px 20px rgba(147, 51, 234, 0.15);
         }
 
         .radios-section-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
         }
 
-        @media (max-width: 768px) {
-            .radios-section-container {
-                grid-template-columns: 1fr;
-            }
-            .header {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-            .header-widgets {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-        }
-
-        /* CATÁLOGO E PLAYLIST */
+        /* CATÁLOGO */
         .catalogo-list {
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            max-height: 380px;
+            gap: 7px;
+            max-height: 440px;
             overflow-y: auto;
             padding-right: 4px;
         }
@@ -264,16 +249,16 @@
         .bar-radio-catalogo {
             background: #1a1a22;
             border: 1px solid #2a2a36;
-            border-radius: 12px;
-            padding: 12px 14px;
+            border-radius: 10px;
+            padding: 11px 12px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             cursor: pointer;
             transition: all 0.2s ease;
             color: var(--text-main);
             font-weight: 600;
-            font-size: 13px;
+            font-size: 12.5px;
         }
 
         .bar-radio-catalogo:hover {
@@ -289,15 +274,16 @@
         }
 
         .bar-radio-catalogo .btn-add-icon {
-            font-size: 14px;
-            width: 26px;
-            height: 26px;
-            border-radius: 8px;
+            font-size: 12px;
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
             background: #272734;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: 0.2s;
+            flex-shrink: 0;
         }
 
         .bar-radio-catalogo.adicionada .btn-add-icon {
@@ -305,12 +291,15 @@
             color: #fff;
         }
 
+        /* PLAYLIST (3 COLUNAS EXATAMENTE COMO NA FOTO) */
         .playlist-grid-ouvinte {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 10px;
             width: 100%;
-            min-height: 120px;
+            max-height: 460px;
+            overflow-y: auto;
+            padding-right: 4px;
         }
 
         .radio-card-quadrado {
@@ -327,8 +316,8 @@
             font-weight: 700;
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.12);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.45);
             overflow: hidden;
         }
 
@@ -346,8 +335,8 @@
         }
 
         .radio-card-quadrado:hover {
-            transform: translateY(-4px) scale(1.02);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 10px 22px rgba(0,0,0,0.65);
         }
 
         .radio-card-quadrado:active {
@@ -356,18 +345,18 @@
 
         .radio-card-quadrado.playing {
             border: 2px solid #22c55e !important;
-            box-shadow: 0 0 25px rgba(34, 197, 94, 0.5) !important;
+            box-shadow: 0 0 22px rgba(34, 197, 94, 0.55) !important;
         }
 
         .radio-card-quadrado i.icon-radio {
-            font-size: 24px;
+            font-size: 26px;
             margin-bottom: 8px;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+            filter: drop-shadow(0 2px 5px rgba(0,0,0,0.6));
         }
 
         .antena-piscando {
             color: #22c55e;
-            font-size: 24px !important;
+            font-size: 26px !important;
             animation: piscar 1.2s infinite ease-in-out;
         }
 
@@ -381,28 +370,22 @@
             font-weight: 800;
             line-height: 1.2;
             word-break: break-word;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+            text-shadow: 0 1px 3px rgba(0,0,0,0.85);
         }
 
-        /* HORÓSCOPO DO DIA (AMPLIADO) */
+        /* HORÓSCOPO DO DIA */
         .signos-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin-bottom: 18px;
-        }
-
-        @media (max-width: 480px) {
-            .signos-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
+            gap: 6px;
+            margin-bottom: 10px;
         }
 
         .signo-btn {
             background: #181822;
             border: 1px solid #2b2b3b;
-            border-radius: 14px;
-            padding: 12px 6px;
+            border-radius: 10px;
+            padding: 6px 2px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -420,30 +403,32 @@
         }
 
         .signo-btn.ativo {
-            box-shadow: 0 0 16px rgba(168, 85, 247, 0.45);
+            box-shadow: 0 0 12px rgba(168, 85, 247, 0.45);
         }
 
         .signo-btn i {
-            font-size: 22px;
-            margin-bottom: 6px;
+            font-size: 15px;
+            margin-bottom: 3px;
             color: #c084fc;
         }
 
         .signo-btn span {
-            font-size: 11px;
+            font-size: 9.5px;
             font-weight: 800;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.4px;
         }
 
         .horoscopo-display {
             background: #0d0d12;
             border: 1px solid #2b2b3b;
-            border-radius: 16px;
-            padding: 20px;
-            font-size: 16px;
-            line-height: 1.65;
+            border-radius: 12px;
+            padding: 10px;
+            font-size: 12.5px;
+            line-height: 1.4;
             color: #f1f5f9;
-            min-height: 110px;
+            min-height: 70px;
+            max-height: 110px;
+            overflow-y: auto;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -454,8 +439,8 @@
             font-weight: 800;
             color: #d8b4fe;
             display: block;
-            margin-bottom: 8px;
-            font-size: 17px;
+            margin-bottom: 2px;
+            font-size: 13.5px;
             letter-spacing: 0.5px;
         }
 
@@ -464,13 +449,13 @@
             width: 100%; 
             background: #0f0f14; 
             border: 1px solid #272734; 
-            border-radius: 14px; 
+            border-radius: 12px; 
             color: #fff; 
-            padding: 14px; 
-            margin-bottom: 12px; 
+            padding: 9px 12px; 
+            margin-bottom: 8px; 
             outline: none; 
             resize: none;
-            font-size: 14px;
+            font-size: 12.5px;
             font-family: inherit;
             transition: all 0.2s ease;
         }
@@ -484,10 +469,10 @@
             background: linear-gradient(135deg, var(--primary), #7e22ce); 
             color: #fff; 
             border: none; 
-            padding: 14px; 
-            border-radius: 14px; 
+            padding: 10px; 
+            border-radius: 12px; 
             font-weight: 700; 
-            font-size: 14px;
+            font-size: 12.5px;
             width: 100%; 
             cursor: pointer; 
             transition: all 0.2s ease;
@@ -503,12 +488,12 @@
         .chat-container {
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            max-height: 320px;
+            gap: 8px;
+            max-height: 140px;
             overflow-y: auto;
-            padding: 14px;
+            padding: 8px;
             background: #0d0d12;
-            border-radius: 16px;
+            border-radius: 12px;
             border: 1px solid #22222e;
         }
 
@@ -517,8 +502,8 @@
             background: linear-gradient(135deg, #2e1045, #1e0b2e);
             border: 1px solid rgba(168, 85, 247, 0.3);
             color: #fff;
-            padding: 12px 16px;
-            border-radius: 16px 16px 16px 4px;
+            padding: 8px 12px;
+            border-radius: 12px 12px 12px 4px;
             max-width: 85%;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             position: relative;
@@ -529,8 +514,8 @@
             background: linear-gradient(135deg, #063726, #032217);
             border: 1px solid rgba(34, 197, 94, 0.4);
             color: #fff;
-            padding: 12px 16px;
-            border-radius: 16px 16px 4px 16px;
+            padding: 8px 12px;
+            border-radius: 12px 12px 4px 12px;
             max-width: 85%;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
@@ -539,12 +524,12 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 6px;
+            gap: 10px;
+            margin-bottom: 3px;
         }
 
         .chat-sender-name {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 800;
             letter-spacing: 0.5px;
         }
@@ -558,16 +543,16 @@
         }
 
         .chat-text {
-            font-size: 13.5px;
-            line-height: 1.5;
+            font-size: 12px;
+            line-height: 1.35;
             word-break: break-word;
         }
 
         .chat-time {
-            font-size: 10px;
+            font-size: 9px;
             color: #94a3b8;
             text-align: right;
-            margin-top: 6px;
+            margin-top: 3px;
         }
 
         .btn-delete-chat {
@@ -575,11 +560,11 @@
             border: none;
             color: #f87171;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 10.5px;
             opacity: 0.7;
             transition: 0.2s;
             padding: 0;
-            margin-left: 8px;
+            margin-left: 6px;
         }
 
         .btn-delete-chat:hover {
@@ -598,8 +583,8 @@
             background: rgba(18, 18, 24, 0.85); 
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            padding: 14px 24px; 
-            border-radius: 20px;
+            padding: 12px 20px; 
+            border-radius: 18px;
             border: 1px solid rgba(255, 255, 255, 0.12); 
             z-index: 1000; 
             display: flex; 
@@ -616,7 +601,7 @@
         }
 
         #player-title {
-            font-size: 14px;
+            font-size: 13.5px;
             font-weight: 700;
             color: #fff;
             white-space: nowrap;
@@ -627,11 +612,709 @@
         .player-controls {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
         }
 
         .btn-control-step {
             background: #252532;
             color: #fff;
             border: 1px solid #3b3b4f;
-            width
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-control-step:hover {
+            background: #323244;
+            border-color: var(--primary);
+            color: var(--primary-hover);
+        }
+
+        .btn-play {
+            background: linear-gradient(135deg, var(--primary), #a855f7);
+            color: #fff;
+            border: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 0 20px var(--primary-glow);
+        }
+
+        .btn-play:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px var(--primary-glow);
+        }
+
+        /* LETREIRO DE NOTÍCIAS BRASIL */
+        .news-ticker-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100vw;
+            height: 60px;
+            background: #09090c;
+            border-top: 1px solid #2a2a3d;
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .news-ticker-badge {
+            background: #dc2626;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 800;
+            padding: 0 20px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            white-space: nowrap;
+            z-index: 10;
+            box-shadow: 15px 0 30px rgba(0,0,0,0.9);
+            letter-spacing: 1px;
+            flex-shrink: 0;
+        }
+
+        .news-ticker-badge i {
+            animation: piscar 1.2s infinite ease-in-out;
+            font-size: 11px;
+        }
+
+        .news-ticker-wrapper {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .news-ticker-content {
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+            will-change: transform;
+            animation: ticker-slide 45s linear infinite;
+        }
+
+        .news-ticker-bar:hover .news-ticker-content {
+            animation-play-state: paused;
+        }
+
+        .news-block-repeat {
+            display: flex;
+            align-items: center;
+            gap: 50px;
+            padding-right: 50px;
+            flex-shrink: 0;
+        }
+
+        .news-item-link {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            transition: color 0.2s ease;
+            letter-spacing: 0.4px;
+            white-space: nowrap;
+        }
+
+        .news-item-link:hover {
+            color: #c084fc;
+            text-decoration: underline;
+        }
+
+        .news-item-divider {
+            color: #a855f7;
+            font-size: 14px;
+        }
+
+        @keyframes ticker-slide {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #272736; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div>
+            <h2>Painel do Ouvinte</h2>
+            <span id="nome-ouvinte-display" class="user-name-title"></span>
+        </div>
+
+        <div class="header-widgets">
+            <div class="widget-item">
+                <i class="far fa-clock" style="color: var(--primary); font-size: 16px;"></i>
+                <span id="relogio-digital" class="relogio-box">00:00:00</span>
+            </div>
+            
+            <div class="widget-item">
+                <span id="icone-clima-dinamico"><i class="fas fa-sun" style="color: #eab308; font-size: 16px;"></i></span>
+                <span id="clima-cidade" class="clima-box">Carregando clima...</span>
+            </div>
+            
+            <button class="btn-sair" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> SAIR
+            </button>
+        </div>
+    </div>
+
+    <div class="frase-centro-playlist">
+        <i class="fas fa-headphones" style="margin-right: 8px;"></i> CURTA AQUI SUAS RÁDIOS PREFERIDAS
+    </div>
+
+    <div class="main-container">
+
+        <!-- CARD 1: ADICIONAR RÁDIOS -->
+        <div class="card-box">
+            <h3>GERENCIAR SUAS RÁDIOS PREFERIDAS</h3>
+            <div class="radios-section-container">
+                <div>
+                    <h3 class="sub-titulo-secao"><i class="fas fa-plus-circle"></i> 1. ADICIONE SUAS RÁDIOS</h3>
+                    <div id="catalogo-radios" class="catalogo-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD 2: SUAS RÁDIOS PREFERIDAS -->
+        <div class="card-box">
+            <h3>GERENCIAR SUAS RÁDIOS PREFERIDAS</h3>
+            <div class="radios-section-container">
+                <div>
+                    <h3 class="sub-titulo-secao"><i class="fas fa-sort"></i> 2. ARRASTE PARA REORDENAR</h3>
+                    <div id="grid-playlist" class="playlist-grid-ouvinte"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD 3: COLUNA DIREITA (HORÓSCOPO + CHAT COMPACTOS) -->
+        <div class="coluna-direita" style="display: flex; flex-direction: column; gap: 20px;">
+            
+            <!-- HORÓSCOPO DO DIA -->
+            <div class="card-box" style="padding: 16px;">
+                <h3 style="margin-bottom: 10px; font-size: 13px;"><i class="fas fa-star-of-david" style="color: #c084fc;"></i> HORÓSCOPO DO DIA</h3>
+                <div class="signos-grid">
+                    <div class="signo-btn" onclick="carregarHoroscopo('aries', this)"><i class="fas fa-aries"></i><span>ÁRIES</span></div>
+                    <div class="signo-btn" onclick="carregarHoroscopo('taurus', this)"><i class="fas fa-taurus"></i><span>TOURO</span></div>
+                    <div class="signo-btn" onclick="carregarHoroscopo('gemini', this)"><i class="fas fa-gemini"></i><span>GÊMEOS</span></div>
+                    <div class="signo-btn" onclick="carregarHoroscopo('cancer', this)"><i class="fas fa-cancer"></i><span>CÂNCER</span></div>
+                    <div class="signo-btn" onclick="carregarHoroscopo('leo', this)"><i class="fas fa-leo"></i><span>LEÃO</span></div>
+                    <div class="signo-btn" onclick="carregarHoroscopo('virgo', this)"><i class="fas fa-virgo"></i><span>VIRGEM</span></div>
+                    <div class="signo-btn" onclick="carregarHoroscopo('libra', this)"><i class="fas fa-libra"></i><span>LIBRA</span></div>
+                    <div class="signo-btn" onclick="carregarHoroscopo('scorpio', this)"><i class="fas fa-scorpio"></i><span>ESCORPIÃO</span></div>
+                    <div class="signo-btn" onclick="carregarHoroscopo('sagittarius', this)"><i class="fas fa-sagittarius"></i><span>SAGITÁRIO</span></div>
+                    <div class="signo-btn" onclick="carregarHoroscopo('capricorn', this)"><i class="fas fa-capricorn"></i><span>CAPRICÓRNIO</span></div>
+                    <div class="signo-btn" onclick="carregarHoroscopo('aquarius', this)"><i class="fas fa-aquarius"></i><span>AQUÁRIO</span></div>
+                    <div class="signo-btn" onclick="carregarHoroscopo('pisces', this)"><i class="fas fa-pisces"></i><span>PEIXES</span></div>
+                </div>
+                <div class="horoscopo-display" id="horoscopo-texto">
+                    Clique em um signo acima para ver a previsão astral! ✨
+                </div>
+            </div>
+
+            <!-- CARD DE MENSAGENS -->
+            <div class="card-box" style="padding: 16px;">
+                <div class="banner-destaque-adm">
+                    <i class="fas fa-paper-plane" style="margin-right: 4px;"></i> MANDE MENSAGEM PARA O ADM PARA PEDIR PARA ADICIONAR UMA RÁDIO QUE VOCÊ GOSTE
+                </div>
+
+                <textarea id="texto-mensagem" class="input-msg" rows="2" placeholder="Escreva seu recado ou pedido de rádio aqui... (Enter envia)" onkeydown="handleKeyDown(event)"></textarea>
+                <button class="btn-enviar" onclick="enviarMensagem()"><i class="fas fa-paper-plane"></i> Enviar Mensagem</button>
+
+                <h3 style="margin-top: 14px; margin-bottom: 8px; text-align: left; font-size: 13px;"><i class="fas fa-comments"></i> SUAS MENSAGENS E RESPOSTAS</h3>
+                <div id="lista-respostas-adm" class="chat-container"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- PLAYER RODAPÉ -->
+    <div class="player-footer">
+        <div class="player-info">
+            <div id="player-title">Nenhuma rádio selecionada</div>
+        </div>
+        
+        <div class="player-controls">
+            <button class="btn-control-step" title="Rádio Anterior" onclick="mudarRadio(-1)">
+                <i class="fas fa-step-backward"></i>
+            </button>
+            
+            <button id="btn-play" class="btn-play" onclick="togglePlay()">
+                <i class="fas fa-play"></i>
+            </button>
+            
+            <button class="btn-control-step" title="Próxima Rádio" onclick="mudarRadio(1)">
+                <i class="fas fa-step-forward"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- LETREIRO DE NOTÍCIAS BRASIL -->
+    <div class="news-ticker-bar">
+        <div class="news-ticker-badge">
+            <i class="fas fa-circle"></i> NOTÍCIAS DO BRASIL
+        </div>
+        <div class="news-ticker-wrapper">
+            <div class="news-ticker-content" id="ticker-noticias-container">
+                <div class="news-block-repeat">
+                    <span class="news-item-link">Carregando últimas manchetes do Brasil...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <audio id="audio-ouvinte"></audio>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
+            authDomain: "meu-painel-f2efe.firebaseapp.com",
+            databaseURL: "https://meu-painel-f2efe-default-rtdb.firebaseio.com/",
+            projectId: "meu-painel-f2efe"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const player = document.getElementById('audio-ouvinte');
+
+        const ouvinteId = localStorage.getItem('userId') || ('ouvinte_' + Date.now());
+        if (!localStorage.getItem('userId')) {
+            localStorage.setItem('userId', ouvinteId);
+        }
+        
+        let ouvinteNome = localStorage.getItem('usuarioNome') || localStorage.getItem('usuarioEmail') || 'Ouvinte Anônimo';
+        if (ouvinteNome.includes('@')) {
+            ouvinteNome = ouvinteNome.split('@')[0];
+        }
+        document.getElementById('nome-ouvinte-display').innerText = "Olá, " + ouvinteNome.toUpperCase();
+
+        function atualizarRelogio() {
+            const agora = new Date();
+            document.getElementById('relogio-digital').innerText = agora.toLocaleTimeString('pt-BR');
+        }
+        setInterval(atualizarRelogio, 1000);
+        atualizarRelogio();
+
+        // CLIMA DAS CAPITAIS
+        const cidadesClima = [
+            { nome: 'Cascavel', lat: -24.9578, lon: -53.4595 },
+            { nome: 'Curitiba', lat: -25.4284, lon: -49.2733 },
+            { nome: 'São Paulo', lat: -23.5505, lon: -46.6333 },
+            { nome: 'Rio de Janeiro', lat: -22.9068, lon: -43.1729 },
+            { nome: 'Florianópolis', lat: -27.5954, lon: -48.5480 },
+            { nome: 'Salvador', lat: -12.9777, lon: -38.5016 }
+        ];
+        let indiceClima = 0;
+
+        async function atualizarCarrosselClima() {
+            try {
+                const cidade = cidadesClima[indiceClima];
+                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${cidade.lat}&longitude=${cidade.lon}&current_weather=true`);
+                const climaData = await res.json();
+                
+                if (climaData.current_weather) {
+                    const temp = Math.round(climaData.current_weather.temperature);
+                    const code = climaData.current_weather.weathercode;
+
+                    let iconeHTML = '<i class="fas fa-sun" style="color: #eab308; font-size: 16px;"></i>';
+
+                    if (code === 0 || code === 1) {
+                        iconeHTML = '<i class="fas fa-sun" style="color: #eab308; font-size: 16px;"></i>';
+                    } else if (code === 2 || code === 3) {
+                        iconeHTML = '<i class="fas fa-cloud-sun" style="color: #f59e0b; font-size: 16px;"></i>';
+                    } else if (code >= 51 && code <= 99) {
+                        iconeHTML = '<i class="fas fa-cloud-showers-heavy" style="color: #38bdf8; font-size: 16px;"></i>';
+                    } else if (code === 45 || code === 48) {
+                        iconeHTML = '<i class="fas fa-cloud" style="color: #94a3b8; font-size: 16px;"></i>';
+                    }
+
+                    document.getElementById('icone-clima-dinamico').innerHTML = iconeHTML;
+                    document.getElementById('clima-cidade').innerText = `${cidade.nome}: ${temp}°C`;
+                }
+            } catch (e) {
+                document.getElementById('clima-cidade').innerText = "Clima indisponível";
+            }
+            indiceClima = (indiceClima + 1) % cidadesClima.length;
+        }
+
+        atualizarCarrosselClima();
+        setInterval(atualizarCarrosselClima, 6000);
+
+        // HORÓSCOPO DO DIA INTERATIVO
+        const nomesSignos = {
+            aries: 'Áries', taurus: 'Touro', gemini: 'Gêmeos', cancer: 'Câncer',
+            leo: 'Leão', virgo: 'Virgem', libra: 'Libra', scorpio: 'Escorpião',
+            sagittarius: 'Sagitário', capricorn: 'Capricórnio', aquarius: 'Aquário', pisces: 'Peixes'
+        };
+
+        const horoscopoBackup = {
+            aries: "Dia de energia renovada. Bom momento para tomar iniciativas e focar nos seus objetivos pessoais.",
+            taurus: "Estabilidade em alta. Mantenha os pés no chão e aproveite momentos de tranquilidade e conforto.",
+            gemini: "Comunicação afiada hoje! Ótima oportunidade para trocar ideias e fazer novos contatos.",
+            cancer: "Intuição aguçada. Volte a atenção para a família e para o que traz segurança emocional.",
+            leo: "Seu brilho pessoal está destacado. Confie no seu potencial para liderar e inspirar os outros.",
+            virgo: "Organização e foco nos detalhes trarão excelentes resultados nas suas tarefas diárias.",
+            libra: "Busque o equilíbrio em suas relações. Um dia favorável para harmonia e acordos amigáveis.",
+            scorpio: "Momento de transformação e foco profundo. Sua determinação vai te ajudar a superar desafios.",
+            sagittarius: "Espírito otimista e busca por novidades. Excelente dia para aprender algo novo ou planejar viagens.",
+            capricorn: "Foco no trabalho e nas metas de longo prazo. Sua disciplina continuará trazendo bons frutos.",
+            aquarius: "Ideias inovadoras em alta. Esteja aberto para colaborar com amigos e pensar no futuro.",
+            pisces: "Sensibilidade e criatividade elevadas. Confie nos seus sentimentos para tomar decisões."
+        };
+
+        async function carregarHoroscopo(signo, el) {
+            document.querySelectorAll('.signo-btn').forEach(b => b.classList.remove('ativo'));
+            if(el) el.classList.add('ativo');
+
+            const container = document.getElementById('horoscopo-texto');
+            container.innerHTML = `<i class="fas fa-spinner fa-spin" style="color:#c084fc;"></i> Consultando astros...`;
+
+            try {
+                const res = await fetch(`https://backend.astrolink.com.br/api/v1/horoscopo/${signo}/dia`);
+                if(res.ok) {
+                    const data = await res.json();
+                    if(data && (data.texto || data.text)) {
+                        const texto = data.texto || data.text;
+                        container.innerHTML = `<div><span class="signo-titulo">✨ ${nomesSignos[signo]}</span>${texto}</div>`;
+                        return;
+                    }
+                }
+                throw new Error("Fallback para horóscopo base");
+            } catch (err) {
+                container.innerHTML = `<div><span class="signo-titulo">✨ ${nomesSignos[signo]}</span>${horoscopoBackup[signo]}</div>`;
+            }
+        }
+
+        // CARREGADOR DE NOTÍCIAS BRASIL
+        async function carregarNoticiasBrasil() {
+            try {
+                const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fg1.globo.com%2Fdynamo%2Frss2.xml');
+                const data = await res.json();
+                
+                if (data.status === 'ok' && data.items && data.items.length > 0) {
+                    let htmlItens = '';
+                    const manchetes = data.items.slice(0, 15);
+                    
+                    manchetes.forEach(item => {
+                        let tituloLimpo = item.title.replace(/<[^>]*>?/gm, '').trim();
+                        if (tituloLimpo.length > 5) {
+                            htmlItens += `
+                                <a href="${item.link}" target="_blank" class="news-item-link">
+                                    <span class="news-item-divider"><i class="fas fa-diamond"></i></span> ${tituloLimpo}
+                                </a>
+                            `;
+                        }
+                    });
+
+                    const blocoOriginal = `<div class="news-block-repeat">${htmlItens}</div>`;
+                    document.getElementById('ticker-noticias-container').innerHTML = blocoOriginal + blocoOriginal;
+                }
+            } catch (err) {
+                const htmlFallback = `
+                    <div class="news-block-repeat">
+                        <span class="news-item-link"><span class="news-item-divider"><i class="fas fa-diamond"></i></span> Notícias do Brasil atualizadas diariamente no portal G1.</span>
+                    </div>
+                `;
+                document.getElementById('ticker-noticias-container').innerHTML = htmlFallback + htmlFallback;
+            }
+        }
+        carregarNoticiasBrasil();
+        setInterval(carregarNoticiasBrasil, 180000);
+
+        let todasRadios = [];
+        let playlistKeys = JSON.parse(localStorage.getItem('playlist_keys_ouvinte') || '[]');
+        let radioTocandoKey = null;
+
+        db.ref('ouvintes_preferencias/' + ouvinteId + '/playlist').once('value', snap => {
+            if (snap.exists()) {
+                playlistKeys = snap.val();
+                localStorage.setItem('playlist_keys_ouvinte', JSON.stringify(playlistKeys));
+                localStorage.setItem('playlist_iniciada', 'true');
+            }
+        });
+
+        function salvarPreferenciasOuvinte() {
+            localStorage.setItem('playlist_keys_ouvinte', JSON.stringify(playlistKeys));
+            db.ref('ouvintes_preferencias/' + ouvinteId).set({
+                ouvinte: ouvinteNome,
+                playlist: playlistKeys,
+                ultimaAtualizacao: firebase.database.ServerValue.TIMESTAMP
+            });
+        }
+
+        db.ref('radios').on('value', snap => {
+            todasRadios = [];
+            snap.forEach(child => {
+                todasRadios.push({ key: child.key, ...child.val() });
+            });
+
+            todasRadios.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
+
+            if (!localStorage.getItem('playlist_iniciada') && playlistKeys.length === 0) {
+                playlistKeys = todasRadios.map(r => r.key);
+                salvarPreferenciasOuvinte();
+                localStorage.setItem('playlist_iniciada', 'true');
+            }
+
+            renderizarPainelRadios();
+        });
+
+        function renderizarPainelRadios() {
+            renderizarCatologoEsquerda();
+            renderizarPlaylistDireita();
+        }
+
+        function renderizarCatologoEsquerda() {
+            const container = document.getElementById('catalogo-radios');
+            container.innerHTML = "";
+
+            if (todasRadios.length === 0) {
+                container.innerHTML = "<p style='color:#666; font-size:12px;'>Nenhuma rádio cadastrada.</p>";
+                return;
+            }
+
+            todasRadios.forEach(r => {
+                const estaNaPlaylist = playlistKeys.includes(r.key);
+
+                container.innerHTML += `
+                    <div class="bar-radio-catalogo ${estaNaPlaylist ? 'adicionada' : ''}" onclick="togglePlaylistRadio('${r.key}')">
+                        <span class="btn-add-icon"><i class="fas ${estaNaPlaylist ? 'fa-check' : 'fa-plus'}"></i></span>
+                        <span>${r.name}</span>
+                    </div>
+                `;
+            });
+        }
+
+        function renderizarPlaylistDireita() {
+            const container = document.getElementById('grid-playlist');
+            container.innerHTML = "";
+
+            const radiosPlaylist = playlistKeys
+                .map(key => todasRadios.find(r => r.key === key))
+                .filter(Boolean);
+
+            if (radiosPlaylist.length === 0) {
+                container.innerHTML = "<p style='color:#666; font-size:11px; grid-column: 1/-1; text-align:center; padding: 20px;'>Clique em '+' para adicionar rádios!</p>";
+                return;
+            }
+
+            radiosPlaylist.forEach((r) => {
+                const isPlaying = (radioTocandoKey === r.key);
+                const cardColor = r.color || '#9333ea';
+
+                container.innerHTML += `
+                    <div class="radio-card-quadrado ${isPlaying ? 'playing' : ''}" 
+                         style="background: ${cardColor};" 
+                         data-key="${r.key}"
+                         onclick="tocarRadioPorKey('${r.key}')">
+                        <i class="fas ${isPlaying ? 'fa-tower-broadcast antena-piscando' : 'fa-radio'} icon-radio"></i>
+                        <span class="radio-name">${r.name}</span>
+                    </div>
+                `;
+            });
+        }
+
+        function togglePlaylistRadio(key) {
+            const index = playlistKeys.indexOf(key);
+            if (index > -1) {
+                playlistKeys.splice(index, 1);
+            } else {
+                playlistKeys.push(key);
+            }
+
+            salvarPreferenciasOuvinte();
+            renderizarPainelRadios();
+        }
+
+        new Sortable(document.getElementById('grid-playlist'), {
+            animation: 150,
+            delay: 100,
+            delayOnTouchOnly: true,
+            onEnd: function() {
+                const novaOrdem = [];
+                document.querySelectorAll('#grid-playlist .radio-card-quadrado').forEach(el => {
+                    novaOrdem.push(el.getAttribute('data-key'));
+                });
+
+                playlistKeys = novaOrdem;
+                salvarPreferenciasOuvinte();
+            }
+        });
+
+        function tocarRadioPorKey(key) {
+            const radio = todasRadios.find(r => r.key === key);
+            if (!radio) return;
+
+            if (radioTocandoKey === key) {
+                togglePlay();
+            } else {
+                radioTocandoKey = key;
+                player.src = radio.url;
+                player.play().catch(() => {});
+                document.getElementById('player-title').innerText = radio.name;
+                document.getElementById('btn-play').innerHTML = '<i class="fas fa-pause"></i>';
+                renderizarPlaylistDireita();
+            }
+        }
+
+        function mudarRadio(direcao) {
+            const radiosPlaylist = playlistKeys
+                .map(key => todasRadios.find(r => r.key === key))
+                .filter(Boolean);
+
+            if (radiosPlaylist.length === 0) return;
+
+            let currentIndex = radiosPlaylist.findIndex(r => r.key === radioTocandoKey);
+            let nextIndex = currentIndex + direcao;
+
+            if (nextIndex >= radiosPlaylist.length) nextIndex = 0;
+            if (nextIndex < 0) nextIndex = radiosPlaylist.length - 1;
+
+            tocarRadioPorKey(radiosPlaylist[nextIndex].key);
+        }
+
+        function togglePlay() {
+            if (!player.src) return;
+            if (player.paused) {
+                player.play();
+                document.getElementById('btn-play').innerHTML = '<i class="fas fa-pause"></i>';
+            } else {
+                player.pause();
+                document.getElementById('btn-play').innerHTML = '<i class="fas fa-play"></i>';
+            }
+        }
+
+        function handleKeyDown(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                enviarMensagem();
+            }
+        }
+
+        function enviarMensagem() {
+            const texto = document.getElementById('texto-mensagem').value.trim();
+            if (!texto) return alert("Digite sua mensagem!");
+
+            db.ref('mensagens_ouvintes').push({
+                ouvinteId: ouvinteId,
+                ouvinte: ouvinteNome,
+                mensagem: texto,
+                dataHora: new Date().toLocaleString('pt-BR'),
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            }).then(() => {
+                document.getElementById('texto-mensagem').value = "";
+            });
+        }
+
+        function deletarMensagem(msgKey) {
+            if (confirm("Deseja apagar esta mensagem?")) {
+                db.ref('mensagens_ouvintes/' + msgKey).remove();
+            }
+        }
+
+        function carregarChatCompleto() {
+            db.ref('mensagens_ouvintes').on('value', snapMsgs => {
+                db.ref('respostas_adm').on('value', snapResps => {
+                    const container = document.getElementById('lista-respostas-adm');
+                    container.innerHTML = "";
+                    
+                    const msgs = snapMsgs.val() || {};
+                    const resps = snapResps.val() || {};
+
+                    let listaHistorico = [];
+
+                    for (let id in msgs) {
+                        const m = msgs[id];
+                        if (m.ouvinteId === ouvinteId || m.ouvinte === ouvinteNome) {
+                            listaHistorico.push({
+                                tipo: 'ouvinte',
+                                id: id,
+                                texto: m.mensagem,
+                                dataHora: m.dataHora || '',
+                                timestamp: m.timestamp || 0
+                            });
+                        }
+                    }
+
+                    for (let id in resps) {
+                        const r = resps[id];
+                        if (r.ouvinteId === ouvinteId || r.ouvinte === ouvinteNome) {
+                            listaHistorico.push({
+                                tipo: 'adm',
+                                id: id,
+                                texto: r.resposta,
+                                dataHora: r.dataHora || '',
+                                timestamp: r.timestamp || 0
+                            });
+                        }
+                    }
+
+                    listaHistorico.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+
+                    if (listaHistorico.length === 0) {
+                        container.innerHTML = "<p style='color:#666; text-align:center; font-size:12px; padding:15px;'>Nenhuma mensagem enviada.</p>";
+                        return;
+                    }
+
+                    listaHistorico.forEach(item => {
+                        if (item.tipo === 'ouvinte') {
+                            container.innerHTML += `
+                                <div class="chat-bubble-ouvinte">
+                                    <div class="chat-sender-header">
+                                        <span class="chat-sender-name ouvinte">Você</span>
+                                        <button class="btn-delete-chat" title="Apagar Mensagem" onclick="deletarMensagem('${item.id}')">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                    <div class="chat-text">${item.texto}</div>
+                                    <div class="chat-time">${item.dataHora}</div>
+                                </div>
+                            `;
+                        } else {
+                            container.innerHTML += `
+                                <div class="chat-bubble-adm">
+                                    <div class="chat-sender-header">
+                                        <span class="chat-sender-name adm"><i class="fas fa-user-shield"></i> ADM</span>
+                                    </div>
+                                    <div class="chat-text">${item.texto}</div>
+                                    <div class="chat-time">${item.dataHora}</div>
+                                    </div>
+                            `;
+                        }
+                    });
+
+                    container.scrollTop = container.scrollHeight;
+                });
+            });
+        }
+
+        carregarChatCompleto();
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
