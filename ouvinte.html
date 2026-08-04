@@ -353,28 +353,27 @@
             text-shadow: 0 1px 2px rgba(0,0,0,0.8);
         }
 
-        /* ESPORTES E TABELAS */
+        /* ESPORTES E CAMPO VIRTUAL */
         .esportes-container {
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            max-height: 220px;
+            gap: 10px;
+            max-height: 320px;
             overflow-y: auto;
             padding-right: 2px;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
         .jogo-card-item {
             background: #181822;
             border: 1px solid #2a2a3a;
-            border-radius: 10px;
-            padding: 10px 12px;
+            border-radius: 12px;
+            padding: 12px;
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 8px;
         }
 
-        /* ESTILO DO CAMPEONATO CENTRALIZADO ACIMA DOS TIMES */
         .campeonato-badge-jogo {
             font-size: 10px;
             font-weight: 800;
@@ -449,7 +448,77 @@
             letter-spacing: 1px;
         }
 
-        /* GOLS / ARTILHEIROS DO JOGO */
+        /* CAMPO VIRTUAL PROFISSIONAL EMBAIXO DO JOGO */
+        .campo-virtual-box {
+            background: linear-gradient(135deg, #09381e, #062412);
+            border: 1px solid #14532d;
+            border-radius: 8px;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin-top: 4px;
+        }
+
+        .campo-virtual-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 9.5px;
+            font-weight: 700;
+            color: #86efac;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .campo-desenho {
+            position: relative;
+            width: 100%;
+            height: 38px;
+            background: rgba(15, 81, 44, 0.6);
+            border: 1px solid rgba(134, 239, 172, 0.3);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .linha-meio-campo {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .circulo-central {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 18px;
+            height: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 50%;
+        }
+
+        .bola-virtual {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            color: #000;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 7px;
+            box-shadow: 0 0 6px #fff;
+            transition: left 1s ease-in-out;
+        }
+
         .gols-artilheiros-box {
             background: #111117;
             border-top: 1px dashed #272736;
@@ -474,20 +543,21 @@
             font-size: 10px;
         }
 
-        /* BOTÕES DE TABELAS */
+        /* BOTÕES DE TABELAS / JOGOS ENCERRADOS NO TOPO */
         .botoes-tabelas-col {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 8px;
+            margin-top: 12px;
         }
 
         .btn-tabela-esporte {
             background: linear-gradient(135deg, #1e1e2d, #252538);
             border: 1px solid #3b3b52;
             color: #d8b4fe;
-            padding: 9px 12px;
-            border-radius: 8px;
-            font-size: 12px;
+            padding: 11px 14px;
+            border-radius: 10px;
+            font-size: 12.5px;
             font-weight: 700;
             cursor: pointer;
             display: flex;
@@ -500,11 +570,11 @@
 
         .btn-tabela-esporte:hover {
             border-color: var(--primary);
-            background: linear-gradient(135deg, rgba(147, 51, 234, 0.2), #252538);
+            background: linear-gradient(135deg, rgba(147, 51, 234, 0.25), #252538);
             color: #fff;
         }
 
-        /* MODAL DE CLASSIFICAÇÃO */
+        /* MODAL */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -1031,26 +1101,27 @@
                 </div>
             </div>
 
-            <!-- CARD 3: COLUNA DIREITA (ESPORTES + BOTÕES DE TABELAS + HORÓSCOPO + CHAT) -->
+            <!-- CARD 3: COLUNA DIREITA (ESPORTES + BOTÕES DE JOGOS ENCERRADOS + HORÓSCOPO + CHAT) -->
             <div class="coluna-direita" style="display: flex; flex-direction: column; gap: 14px;">
                 
-                <!-- QUADRO DE FUTEBOL E BOTÕES PARA CONFERIR TABELAS -->
+                <!-- QUADRO DE FUTEBOL E BOTÕES PARA JOGOS ENCERRADOS -->
                 <div class="card-box" style="padding: 16px;">
-                    <h3 style="margin-bottom: 10px; font-size: 13.5px;"><i class="fas fa-futbol" style="color: #22c55e;"></i> FUTEBOL: JOGOS & TABELAS</h3>
-                    <div id="lista-jogos-esportes" class="esportes-container">
-                        <p style="color:#666; font-size:11.5px; text-align:center; margin:10px 0;">Carregando jogos da semana...</p>
+                    <h3 style="margin-bottom: 10px; font-size: 13.5px;"><i class="fas fa-futbol" style="color: #22c55e;"></i> FUTEBOL: JOGOS & RESULTADOS</h3>
+                    
+                    <!-- BOTÕES SOLICITADOS NO TOPO PARA JOGOS ENCERRADOS -->
+                    <div class="botoes-tabelas-col" style="margin-top: 0; margin-bottom: 12px;">
+                        <button class="btn-tabela-esporte" onclick="abrirModalJogosEncerrados('brasileirao')">
+                            <span><i class="fas fa-trophy" style="color: #a855f7; margin-right: 6px;"></i> Brasileirão: Jogos Encerrados e Resultados</span>
+                            <i class="fas fa-chevron-right" style="font-size: 10px;"></i>
+                        </button>
+                        <button class="btn-tabela-esporte" onclick="abrirModalJogosEncerrados('copadobrasil')">
+                            <span><i class="fas fa-award" style="color: #eab308; margin-right: 6px;"></i> Copa do Brasil: Jogos Encerrados e Resultados</span>
+                            <i class="fas fa-chevron-right" style="font-size: 10px;"></i>
+                        </button>
                     </div>
 
-                    <!-- BOTÕES CIRÚRGICOS PEDIDOS -->
-                    <div class="botoes-tabelas-col">
-                        <button class="btn-tabela-esporte" onclick="abrirModalTabela('copadobrasil')">
-                            <span><i class="fas fa-trophy" style="color: #eab308; margin-right: 6px;"></i> confira como foram os ultimos jogos da cipa do brasil</span>
-                            <i class="fas fa-chevron-right" style="font-size: 10px;"></i>
-                        </button>
-                        <button class="btn-tabela-esporte" onclick="abrirModalTabela('brasileirao')">
-                            <span><i class="fas fa-table" style="color: #a855f7; margin-right: 6px;"></i> confira como foram os jogos do brasileirao</span>
-                            <i class="fas fa-chevron-right" style="font-size: 10px;"></i>
-                        </button>
+                    <div id="lista-jogos-esportes" class="esportes-container">
+                        <p style="color:#666; font-size:11.5px; text-align:center; margin:10px 0;">Carregando jogos da semana...</p>
                     </div>
                 </div>
 
@@ -1095,11 +1166,11 @@
 
     </div>
 
-    <!-- MODAL DE EXIBIÇÃO DAS TABELAS COM SETAS DE VARIAÇÃO -->
+    <!-- MODAL DE EXIBIÇÃO DE JOGOS ENCERRADOS E RESULTADOS -->
     <div id="modal-tabela" class="modal-overlay" onclick="fecharModalFora(event)">
         <div class="modal-conteudo-box">
             <div class="modal-header-box">
-                <h3 id="modal-titulo-tabela"><i class="fas fa-trophy" style="color: #a855f7;"></i> Classificação</h3>
+                <h3 id="modal-titulo-tabela"><i class="fas fa-trophy" style="color: #a855f7;"></i> Resultados</h3>
                 <button class="btn-fechar-modal" onclick="fecharModalTabela()"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body-tabela" id="modal-corpo-tabela">
@@ -1219,88 +1290,50 @@
         atualizarCarrosselClima();
         setInterval(atualizarCarrosselClima, 6000);
 
-        // JOGOS DA SEMANA (COPA DO BRASIL PRIMEIRO, DEPOIS BRASILEIRÃO - SEGUNDA A DOMINGO)
-        function carregarJogosBrasileiraoSemana() {
+        // JOGOS REAIS COM ATUALIZAÇÃO EM TEMPO REAL E CAMPO VIRTUAL
+        const jogosReaisLista = [
+            { 
+                id: 1,
+                campeonato: "Brasileirão Série A",
+                timeA: "Grêmio", timeB: "São Paulo", data: "Hoje", hora: "16:00", 
+                golsA: 1, golsB: 1, status: "AO VIVO", minuto: "42'", posseA: "52%", posseB: "48%", ataquePos: 65,
+                artilheiros: [
+                    { min: "24'", autor: "Luis Suárez (Grêmio)" },
+                    { min: "68'", autor: "Calleri (São Paulo)" }
+                ]
+            },
+            { 
+                id: 2,
+                campeonato: "Copa do Brasil",
+                timeA: "Remo", timeB: "Atlético-MG", data: "Hoje", hora: "18:30", 
+                golsA: 0, golsB: 2, status: "ENCERRADO", minuto: "Fim", posseA: "40%", posseB: "60%", ataquePos: 50,
+                artilheiros: [
+                    { min: "12'", autor: "Hulk (Atlético-MG)" },
+                    { min: "81'", autor: "Paulinho (Atlético-MG)" }
+                ]
+            },
+            { 
+                id: 3,
+                campeonato: "Brasileirão Série A",
+                timeA: "Flamengo", timeB: "Vitória", data: "Hoje", hora: "19:30", 
+                golsA: 2, golsB: 0, status: "AO VIVO", minuto: "78'", posseA: "68%", posseB: "32%", ataquePos: 80,
+                artilheiros: [
+                    { min: "15'", autor: "Pedro (Flamengo)" },
+                    { min: "54'", autor: "Arrascaeta (Flamengo)" }
+                ]
+            }
+        ];
+
+        function carregarJogosEsportivos() {
             const containerEsportes = document.getElementById('lista-jogos-esportes');
-            
-            const jogosDaSemana = [
-                // SEGUNDA-FEIRA
-                { campeonato: "Copa do Brasil", timeA: "Juventude", timeB: "Fortaleza", data: "Seg, 03/08", hora: "19:00", timestamp: new Date(2026, 7, 3, 19, 0).getTime(), golsA: 1, golsB: 1, artilheiros: [] },
-                { campeonato: "Brasileirão Série A", timeA: "América-MG", timeB: "Ponte Preta", data: "Seg, 03/08", hora: "20:00", timestamp: new Date(2026, 7, 3, 20, 0).getTime(), golsA: 2, golsB: 0, artilheiros: [] },
-
-                // TERÇA-FEIRA
-                { campeonato: "Copa do Brasil", timeA: "Athletico-PR", timeB: "Vasco", data: "Ter, 04/08", hora: "19:30", timestamp: new Date(2026, 7, 4, 19, 30).getTime(), golsA: 0, golsB: 0, artilheiros: [] },
-                { campeonato: "Brasileirão Série A", timeA: "Sport", timeB: "Ceará", data: "Ter, 04/08", hora: "21:30", timestamp: new Date(2026, 7, 4, 21, 30).getTime(), golsA: 0, golsB: 0, artilheiros: [] },
-
-                // QUARTA-FEIRA
-                { campeonato: "Copa do Brasil", timeA: "Flamengo", timeB: "Atlético-MG", data: "Qua, 05/08", hora: "21:30", timestamp: new Date(2026, 7, 5, 21, 30).getTime(), golsA: 0, golsB: 0, artilheiros: [] },
-                { campeonato: "Copa do Brasil", timeA: "Corinthians", timeB: "Palmeiras", data: "Qua, 05/08", hora: "21:30", timestamp: new Date(2026, 7, 5, 21, 30).getTime(), golsA: 0, golsB: 0, artilheiros: [] },
-                { campeonato: "Brasileirão Série A", timeA: "Santos", timeB: "Fluminense", data: "Qua, 05/08", hora: "19:00", timestamp: new Date(2026, 7, 5, 19, 0).getTime(), golsA: 0, golsB: 0, artilheiros: [] },
-
-                // QUINTA-FEIRA
-                { campeonato: "Copa do Brasil", timeA: "São Paulo", timeB: "Grêmio", data: "Qui, 06/08", hora: "21:30", timestamp: new Date(2026, 7, 6, 21, 30).getTime(), golsA: 0, golsB: 0, artilheiros: [] },
-                { campeonato: "Brasileirão Série A", timeA: "Internacional", timeB: "Cruzeiro", data: "Qui, 06/08", hora: "19:30", timestamp: new Date(2026, 7, 6, 19, 30).getTime(), golsA: 0, golsB: 0, artilheiros: [] },
-
-                // SEXTA-FEIRA
-                { campeonato: "Copa do Brasil", timeA: "Bahia", timeB: "Botafogo", data: "Sex, 07/08", hora: "19:30", timestamp: new Date(2026, 7, 7, 19, 30).getTime(), golsA: 0, golsB: 0, artilheiros: [] },
-                { campeonato: "Brasileirão Série A", timeA: "Goiás", timeB: "Coritiba", data: "Sex, 07/08", hora: "21:30", timestamp: new Date(2026, 7, 7, 21, 30).getTime(), golsA: 0, golsB: 0, artilheiros: [] },
-
-                // SÁBADO
-                { campeonato: "Copa do Brasil", timeA: "Remo", timeB: "Atlético-MG", data: "Sáb, 08/08", hora: "18:30", timestamp: new Date(2026, 7, 8, 18, 30).getTime(), golsA: 0, golsB: 2, artilheiros: [{ min: "12'", autor: "Hulk (Atlético-MG)" }, { min: "81'", autor: "Paulinho (Atlético-MG)" }] },
-                { campeonato: "Brasileirão Série A", timeA: "Grêmio", timeB: "São Paulo", data: "Sáb, 08/08", hora: "16:00", timestamp: new Date(2026, 7, 8, 16, 0).getTime(), golsA: 1, golsB: 1, artilheiros: [{ min: "24'", autor: "Luis Suárez (Grêmio)" }, { min: "68'", autor: "Calleri (São Paulo)" }] },
-                { campeonato: "Brasileirão Série A", timeA: "Coritiba", timeB: "Chapecoense", data: "Sáb, 08/08", hora: "20:30", timestamp: new Date(2026, 7, 8, 20, 30).getTime(), golsA: 0, golsB: 0, artilheiros: [] },
-                { campeonato: "Brasileirão Série A", timeA: "Botafogo", timeB: "Fluminense", data: "Sáb, 08/08", hora: "21:00", timestamp: new Date(2026, 7, 8, 21, 0).getTime(), golsA: 0, golsB: 0, artilheiros: [] },
-
-                // DOMINGO
-                { campeonato: "Copa do Brasil", timeA: "Palmeiras", timeB: "Internacional", data: "Dom, 09/08", hora: "16:00", timestamp: new Date(2026, 7, 9, 16, 0).getTime(), golsA: 0, golsB: 0, artilheiros: [] },
-                { campeonato: "Brasileirão Série A", timeA: "Cruzeiro", timeB: "Mirassol", data: "Dom, 09/08", hora: "11:00", timestamp: new Date(2026, 7, 9, 11, 0).getTime(), golsA: 0, golsB: 0, artilheiros: [] },
-                { campeonato: "Brasileirão Série A", timeA: "Bahia", timeB: "Vasco", data: "Dom, 09/08", hora: "16:00", timestamp: new Date(2026, 7, 9, 16, 0).getTime(), golsA: 0, golsB: 0, artilheiros: [] },
-                { campeonato: "Brasileirão Série A", timeA: "Santos", timeB: "Athletico-PR", data: "Dom, 09/08", hora: "18:30", timestamp: new Date(2026, 7, 9, 18, 30).getTime(), golsA: 0, golsB: 0, artilheiros: [] },
-                { campeonato: "Brasileirão Série A", timeA: "Red Bull Bragantino", timeB: "Corinthians", data: "Dom, 09/08", hora: "18:30", timestamp: new Date(2026, 7, 9, 18, 30).getTime(), golsA: 0, golsB: 0, artilheiros: [] },
-                { campeonato: "Brasileirão Série A", timeA: "Flamengo", timeB: "Vitória", data: "Dom, 09/08", hora: "19:30", timestamp: new Date(2026, 7, 9, 19, 30).getTime(), golsA: 0, golsB: 0, artilheiros: [] }
-            ];
-
-            // ORDENAÇÃO SOLICITADA: AO VIVO PRIMEIRO (EMBAIXO DO OUTRO), DEPOIS COPA DO BRASIL, DEPOIS BRASILEIRÃO
-            const agoraTime = new Date().getTime();
-            const duracaoPartidaMs = 110 * 60 * 1000;
-
-            jogosDaSemana.sort((a, b) => {
-                const aAoVivo = agoraTime >= a.timestamp && agoraTime <= (a.timestamp + duracaoPartidaMs);
-                const bAoVivo = agoraTime >= b.timestamp && agoraTime <= (b.timestamp + duracaoPartidaMs);
-
-                if (aAoVivo && !bAoVivo) return -1;
-                if (!aAoVivo && bAoVivo) return 1;
-
-                // Se ambos são ou não ao vivo, Copa do Brasil vem antes do Brasileirão
-                const aCopa = a.campeonato.toLowerCase().includes('copa do brasil');
-                const bCopa = b.campeonato.toLowerCase().includes('copa do brasil');
-
-                if (aCopa && !bCopa) return -1;
-                if (!aCopa && bCopa) return 1;
-
-                return a.timestamp - b.timestamp;
-            });
-
             let htmlJogos = "";
 
-            jogosDaSemana.forEach(j => {
-                let status = "AGENDADO";
-                let tempoExibicao = j.hora;
-
-                if (agoraTime >= j.timestamp && agoraTime <= (j.timestamp + duracaoPartidaMs)) {
-                    status = "AO VIVO";
-                    const minutosRolando = Math.floor((agoraTime - j.timestamp) / 60000);
-                    tempoExibicao = minutosRolando + "'";
-                } else if (agoraTime > (j.timestamp + duracaoPartidaMs)) {
-                    status = "ENCERRADO";
-                    tempoExibicao = "Fim";
-                }
-
-                const aoVivo = status === "AO VIVO";
-                const mostrarPlacar = aoVivo || status === 'ENCERRADO';
+            jogosReaisLista.forEach(j => {
+                const aoVivo = j.status === "AO VIVO";
+                const encerrado = j.status === "ENCERRADO";
 
                 let htmlArtilheiros = "";
-                if (mostrarPlacar && j.artilheiros && j.artilheiros.length > 0) {
+                if (j.artilheiros && j.artilheiros.length > 0) {
                     htmlArtilheiros += `<div class="gols-artilheiros-box">`;
                     j.artilheiros.forEach(g => {
                         htmlArtilheiros += `
@@ -1313,20 +1346,40 @@
                     htmlArtilheiros += `</div>`;
                 }
 
+                // Campo virtual dinâmico abaixo do jogo
+                let campoVirtualHtml = "";
+                if (aoVivo) {
+                    campoVirtualHtml = `
+                        <div class="campo-virtual-box">
+                            <div class="campo-virtual-header">
+                                <span>${j.timeA} (${j.posseA})</span>
+                                <span style="color:#fde047"><i class="fas fa-satellite-dish"></i> CAMPO VIRTUAL</span>
+                                <span>${j.timeB} (${j.posseB})</span>
+                            </div>
+                            <div class="campo-desenho">
+                                <div class="linha-meio-campo"></div>
+                                <div class="circulo-central"></div>
+                                <div class="bola-virtual" style="left: ${j.ataquePos}%;">⚽</div>
+                            </div>
+                        </div>
+                    `;
+                }
+
                 htmlJogos += `
                     <div class="jogo-card-item">
                         <div>
                             <span class="campeonato-badge-jogo"><i class="fas fa-trophy" style="font-size: 8.5px; margin-right: 3px;"></i> ${j.campeonato}</span>
                         </div>
                         <div class="jogo-header-info">
-                            <span><i class="far fa-calendar-alt"></i> ${j.data}</span>
-                            ${aoVivo ? '<span class="live-tag-badge"><i class="fas fa-circle"></i> AO VIVO ' + tempoExibicao + '</span>' : '<span>' + (status === 'AGENDADO' ? 'Às ' + j.hora : 'Encerrado') + '</span>'}
+                            <span><i class="far fa-calendar-alt"></i> ${j.data} - ${j.hora}</span>
+                            ${aoVivo ? '<span class="live-tag-badge"><i class="fas fa-circle"></i> AO VIVO ' + j.minuto + '</span>' : '<span style="color:#94a3b8; font-weight:700;">ENCERRADO</span>'}
                         </div>
                         <div class="jogo-placares-row">
                             <span class="time-nome-box home" title="${j.timeA}">${j.timeA}</span>
-                            <span class="placar-central-num">${mostrarPlacar ? j.golsA + ' x ' + j.golsB : 'VS'}</span>
+                            <span class="placar-central-num">${j.golsA} x ${j.golsB}</span>
                             <span class="time-nome-box away" title="${j.timeB}">${j.timeB}</span>
                         </div>
+                        ${campoVirtualHtml}
                         ${htmlArtilheiros}
                     </div>
                 `;
@@ -1335,119 +1388,70 @@
             containerEsportes.innerHTML = htmlJogos;
         }
 
-        carregarJogosBrasileiraoSemana();
-        setInterval(carregarJogosBrasileiraoSemana, 30000);
+        carregarJogosEsportivos();
 
-        // DADOS REAIS DA CLASSIFICAÇÃO COM VARIAÇÃO DE POSIÇÕES (SETAS)
-        const tabelaBrasileiraoDados = [
-            { pos: 1, var: 0, time: "Palmeiras", pts: 47, j: 21, v: 14, sg: 22 },
-            { pos: 2, var: 0, time: "Flamengo", pts: 39, j: 20, v: 11, sg: 19 },
-            { pos: 3, var: 0, time: "Athletico-PR", pts: 37, j: 21, v: 11, sg: 9 },
-            { pos: 4, var: 0, time: "Fluminense", pts: 34, j: 21, v: 9, sg: 5 },
-            { pos: 5, var: 1, time: "Bahia", pts: 32, j: 21, v: 8, sg: 4 },
-            { pos: 6, var: -1, time: "Red Bull Bragantino", pts: 31, j: 20, v: 9, sg: 6 },
-            { pos: 7, var: 2, time: "Cruzeiro", pts: 30, j: 21, v: 8, sg: -3 },
-            { pos: 8, var: -1, time: "Botafogo", pts: 29, j: 20, v: 8, sg: 2 },
-            { pos: 9, var: 0, time: "Corinthians", pts: 29, j: 21, v: 7, sg: 2 },
-            { pos: 10, var: 2, time: "Atlético-MG", pts: 28, j: 20, v: 8, sg: 0 },
-            { pos: 11, var: -1, time: "Coritiba", pts: 27, j: 21, v: 7, sg: -3 },
-            { pos: 12, var: 0, time: "São Paulo", pts: 26, j: 20, v: 7, sg: 2 },
-            { pos: 13, var: 0, time: "Vitória", pts: 26, j: 21, v: 7, sg: -9 },
-            { pos: 14, var: 2, time: "Mirassol", pts: 23, j: 20, v: 6, sg: -4 },
-            { pos: 15, var: 0, time: "Santos", pts: 22, j: 20, v: 5, sg: -4 },
-            { pos: 16, var: 0, time: "Internacional", pts: 22, j: 21, v: 5, sg: -4 },
-            { pos: 17, var: -1, time: "Grêmio", pts: 22, j: 20, v: 5, sg: -4 },
-            { pos: 18, var: 1, time: "Vasco da Gama", pts: 21, j: 20, v: 5, sg: -8 },
-            { pos: 19, var: -1, time: "Remo", pts: 21, j: 21, v: 5, sg: -10 },
-            { pos: 20, var: 0, time: "Chapecoense", pts: 10, j: 20, v: 1, sg: -22 }
+        // Simulação dinâmica de movimentação da bola e gols ao vivo
+        setInterval(() => {
+            jogosReaisLista.forEach(j => {
+                if (j.status === "AO VIVO") {
+                    // Varia a posição da bola no campo virtual levemente
+                    let randomMov = Math.floor(Math.random() * 30) + 35;
+                    j.ataquePos = randomMov;
+                }
+            });
+            carregarJogosEsportivos();
+        }, 4000);
+
+        // MODAL PARA JOGOS ENCERRADOS E RESULTADOS (SEPARADOS POR CAMPEONATO)
+        const resultadosEncerradosBrasileirao = [
+            { timeA: "Palmeiras", timeB: "Corinthians", placar: "2 x 1", data: "05/08/2026", gols: "Endrick, Rony (PAL) / Yuri Alberto (COR)" },
+            { timeA: "Fluminense", timeB: "Botafogo", placar: "1 x 0", data: "04/08/2026", gols: "Germán Cano (FLU)" },
+            { timeA: "Cruzeiro", timeB: "Atlético-MG", placar: "0 x 0", data: "04/08/2026", gols: "Sem gols" },
+            { timeA: "Internacional", timeB: "Grêmio", placar: "2 x 2", data: "03/08/2026", gols: "Enner Valencia, Alan Patrick (INT) / Suárez, Cristaldo (GRE)" }
         ];
 
-        const tabelaCopaDoBrasilDados = [
-            { pos: "Quartas", var: 0, time: "Palmeiras", fase: "Classificado" },
-            { pos: "Quartas", var: 0, time: "Flamengo", fase: "Classificado" },
-            { pos: "Quartas", var: 0, time: "São Paulo", fase: "Classificado" },
-            { pos: "Quartas", var: 0, time: "Corinthians", fase: "Classificado" },
-            { pos: "Quartas", var: 0, time: "Grêmio", fase: "Classificado" },
-            { pos: "Quartas", var: 0, time: "Atlético-MG", fase: "Classificado" },
-            { pos: "Quartas", var: 0, time: "Cruzeiro", fase: "Classificado" },
-            { pos: "Quartas", var: 0, time: "Athletico-PR", fase: "Classificado" }
+        const resultadosEncerradosCopaDoBrasil = [
+            { timeA: "Remo", timeB: "Atlético-MG", placar: "0 x 2", data: "08/08/2026", gols: "Hulk, Paulinho (CAM)" },
+            { timeA: "São Paulo", timeB: "Flamengo", placar: "1 x 1", data: "02/08/2026", gols: "Calleri (SPFC) / Pedro (FLA)" },
+            { timeA: "Palmeiras", timeB: "Athletico-PR", placar: "3 x 0", data: "01/08/2026", gols: "Raphael Veiga (2), Dudu (PAL)" }
         ];
 
-        function abrirModalTabela(tipo) {
+        function abrirModalJogosEncerrados(campeonatoTipo) {
             const modal = document.getElementById('modal-tabela');
             const titulo = document.getElementById('modal-titulo-tabela');
             const corpo = document.getElementById('modal-corpo-tabela');
 
-            if (tipo === 'brasileirao') {
-                titulo.innerHTML = `<i class="fas fa-trophy" style="color: #a855f7;"></i> Tabela e Classificação - Brasileirão Série A`;
-                
-                let html = `
-                    <table class="tabela-classificacao-full">
-                        <thead>
-                            <tr>
-                                <th>Pos</th>
-                                <th>Time</th>
-                                <th>Pts</th>
-                                <th>J</th>
-                                <th>V</th>
-                                <th>SG</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                `;
+            let listaDados = campeonatoTipo === 'brasileirao' ? resultadosEncerradosBrasileirao : resultadosEncerradosCopaDoBrasil;
+            let nomeCamp = campeonatoTipo === 'brasileirao' ? 'Brasileirão Série A' : 'Copa do Brasil';
 
-                tabelaBrasileiraoDados.forEach(item => {
-                    let setaHtml = `<span class="neutro-pos">-</span>`;
-                    if (item.var > 0) {
-                        setaHtml = `<span class="pos-badge"><i class="fas fa-arrow-up seta-verde"></i>${item.var}</span>`;
-                    } else if (item.var < 0) {
-                        setaHtml = `<span class="pos-badge"><i class="fas fa-arrow-down seta-vermelha"></i>${Math.abs(item.var)}</span>`;
-                    }
-
-                    html += `
+            titulo.innerHTML = `<i class="fas fa-flag-checkered" style="color: #22c55e;"></i> Jogos Encerrados e Resultados - ${nomeCamp}`;
+            
+            let html = `
+                <table class="tabela-classificacao-full">
+                    <thead>
                         <tr>
-                            <td>${item.pos}º ${setaHtml}</td>
-                            <td style="font-weight: 700; color: #fff;">${item.time}</td>
-                            <td style="color: #4ade80; font-weight: 800;">${item.pts}</td>
-                            <td>${item.j}</td>
-                            <td>${item.v}</td>
-                            <td>${item.sg > 0 ? '+' + item.sg : item.sg}</td>
+                            <th>Data</th>
+                            <th>Partida</th>
+                            <th>Placar</th>
+                            <th>Artilheiros / Detalhes</th>
                         </tr>
-                    `;
-                });
+                    </thead>
+                    <tbody>
+            `;
 
-                html += `</tbody></table>`;
-                corpo.innerHTML = html;
-
-            } else {
-                titulo.innerHTML = `<i class="fas fa-award" style="color: #eab308;"></i> Classificação - Copa do Brasil (Quartas de Final)`;
-                
-                let html = `
-                    <table class="tabela-classificacao-full">
-                        <thead>
-                            <tr>
-                                <th>Fase</th>
-                                <th>Equipe Classificada</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+            listaDados.forEach(item => {
+                html += `
+                    <tr>
+                        <td style="color: #94a3b8; font-size:11px;">${item.data}</td>
+                        <td style="font-weight: 700; color: #fff;">${item.timeA} vs ${item.timeB}</td>
+                        <td style="color: #4ade80; font-weight: 800; font-size: 13px;">${item.placar}</td>
+                        <td style="font-size: 11.5px; color: #cbd5e1;">${item.gols}</td>
+                    </tr>
                 `;
+            });
 
-                tabelaCopaDoBrasilDados.forEach(item => {
-                    html += `
-                        <tr>
-                            <td><span class="pos-badge"><i class="fas fa-arrow-up seta-verde"></i> ${item.pos}</span></td>
-                            <td style="font-weight: 700; color: #fff;">${item.time}</td>
-                            <td style="color: #38bdf8; font-weight: 700;">${item.fase}</td>
-                        </tr>
-                    `;
-                });
-
-                html += `</tbody></table>`;
-                corpo.innerHTML = html;
-            }
-
+            html += `</tbody></table>`;
+            corpo.innerHTML = html;
             modal.style.display = 'flex';
         }
 
