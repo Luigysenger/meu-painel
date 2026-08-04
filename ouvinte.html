@@ -1023,8 +1023,7 @@
             const container = document.getElementById('horoscopo-texto');
             container.innerHTML = `<i class="fas fa-spinner fa-spin" style="color:#c084fc;"></i> Consultando astros...`;
 
-            // Gerador dinâmico baseado na data atual para mudar diariamente de forma autônoma
-            const hojeStr = new Date().toISOString().slice(0, 10); // ex: "2026-06-07"
+            const hojeStr = new Date().toISOString().slice(0, 10);
             let hashData = 0;
             for (let i = 0; i < hojeStr.length; i++) {
                 hashData += hojeStr.charCodeAt(i);
@@ -1079,7 +1078,6 @@
         let playlistKeys = JSON.parse(localStorage.getItem('playlist_keys_ouvinte') || '[]');
         let radioTocandoKey = null;
 
-        // SINCRONIZAÇÃO EM TEMPO REAL COM O FIREBASE PARA QUALQUER PC/NOTEBOOK LOGADO
         db.ref('ouvintes_preferencias/' + ouvinteId + '/playlist').on('value', snap => {
             if (snap.exists()) {
                 playlistKeys = snap.val();
