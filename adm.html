@@ -9,24 +9,39 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #1DB954; --bg: #000; --card: #121212; --text-muted: #b3b3b3; --purple-light: #a855f7; --blue-online: #38bdf8; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 10px; user-select: none; }
+        :root { 
+            --primary: #1DB954; 
+            --bg: #09090b; 
+            --card: rgba(18, 18, 20, 0.75); 
+            --card-solid: #121214;
+            --text-muted: #a1a1aa; 
+            --purple-light: #c084fc; 
+            --purple-glow: rgba(168, 85, 247, 0.15);
+            --blue-online: #38bdf8; 
+            --border-glass: rgba(255, 255, 255, 0.08);
+        }
+
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: #f4f4f5; margin: 0; padding: 15px; user-select: none; }
         
-        .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 15px 20px; border-radius: 15px; border: 1px solid #282828; margin-bottom: 20px; gap: 15px; flex-wrap: wrap; }
-        .header-brand { display: flex; flex-direction: column; gap: 2px; }
-        .header-title { font-size: 20px; font-weight: 900; color: #a855f7; letter-spacing: 1px; margin: 0; text-transform: uppercase; }
-        .header-sub { font-size: 13px; color: #e5e7eb; font-weight: 600; margin: 0; }
+        /* HEADER MODERNO */
+        .header { display: flex; justify-content: space-between; align-items: center; background: var(--card-solid); padding: 18px 24px; border-radius: 20px; border: 1px solid var(--border-glass); margin-bottom: 25px; gap: 15px; flex-wrap: wrap; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .header-brand { display: flex; flex-direction: column; gap: 4px; }
+        .header-title { font-size: 22px; font-weight: 900; background: linear-gradient(135deg, #c084fc, #e879f9); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 1px; margin: 0; text-transform: uppercase; }
+        .header-sub { font-size: 13px; color: var(--text-muted); font-weight: 500; margin: 0; }
         
         .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
         
-        .info-pill { background: #1e1e1e; border: 1px solid #333; padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: bold; color: #fff; display: flex; align-items: center; gap: 8px; }
-        .info-pill i { color: #a855f7; }
+        .info-pill { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-glass); padding: 8px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; color: #fff; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(10px); }
+        .info-pill i { color: var(--purple-light); }
         
-        .btn-msg-notif { background: #ff4444; color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; font-size: 13px; }
-        .btn-msg-notif span { background: white; color: #ff4444; padding: 2px 6px; border-radius: 50%; font-size: 12px; }
-        .btn-header { background: #1e1e1e; border: 1px solid #333; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
-        .btn-header:hover { background: #2a2a2a; }
-        .btn-sair { color: #ff4444; border-color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+        .btn-msg-notif { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 9px 16px; border-radius: 10px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; font-size: 13px; box-shadow: 0 4px 15px rgba(239, 68, 68,.3); transition: transform 0.2s; }
+        .btn-msg-notif:hover { transform: translateY(-2px); }
+        .btn-msg-notif span { background: white; color: #ef4444; padding: 2px 6px; border-radius: 50%; font-size: 11px; font-weight: 900; }
+        
+        .btn-header { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-glass); color: white; padding: 9px 14px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
+        .btn-header:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.2); }
+        .btn-sair { color: #f87171; border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.08); }
         .btn-sair:hover { background: rgba(239, 68, 68, 0.2); }
 
         @media (max-width: 850px) {
@@ -35,86 +50,98 @@
             .header-right { justify-content: center; }
         }
 
-        #container-mensagens-adm { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out; }
+        #container-mensagens-adm { max-height: 0; overflow: hidden; transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
         #container-mensagens-adm.aberto { max-height: 2000px; margin-bottom: 25px; }
         
-        /* ESTILOS DO CHAT REFORMULADO */
-        .msg-grid-adm { display: flex; flex-direction: column; gap: 10px; padding: 10px; background: #080808; border-radius: 15px; border: 1px solid #222; }
+        /* CHAT REFORMULADO */
+        .msg-grid-adm { display: flex; flex-direction: column; gap: 10px; padding: 5px; background: rgba(0,0,0,0.3); border-radius: 14px; }
+        .chat-accordion-card { background: var(--card-solid); border: 1px solid var(--border-glass); border-radius: 12px; overflow: hidden; transition: border-color 0.2s; }
+        .chat-accordion-card:hover { border-color: rgba(255,255,255,0.15); }
+        .chat-header { padding: 14px 18px; background: rgba(255,255,255,0.02); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .chat-user-title { font-weight: 700; font-size: 14px; color: var(--purple-light); display: flex; align-items: center; gap: 10px; }
         
-        .chat-accordion-card { background: #141414; border: 1px solid #282828; border-radius: 10px; overflow: hidden; }
-        .chat-header { padding: 12px 15px; background: #181818; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
-        .chat-header:hover { background: #202020; }
-        .chat-user-title { font-weight: bold; font-size: 14px; color: var(--purple-light); display: flex; align-items: center; gap: 8px; }
-        
-        .chat-body-wrapper { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-in-out, padding 0.3s ease; background: #0d0d0d; }
-        .chat-accordion-card.open .chat-body-wrapper { max-height: 1000px; padding: 15px; border-top: 1px solid #222; }
+        .chat-body-wrapper { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.3s ease; background: #0c0c0e; }
+        .chat-accordion-card.open .chat-body-wrapper { max-height: 1000px; padding: 18px; border-top: 1px solid var(--border-glass); }
         .chat-accordion-card.open .chevron-chat { transform: rotate(180deg); color: #fff; }
-        .chevron-chat { font-size: 12px; color: #666; transition: transform 0.3s; }
+        .chevron-chat { font-size: 12px; color: var(--text-muted); transition: transform 0.3s; }
         
-        .chat-history { display: flex; flex-direction: column; gap: 10px; max-height: 350px; overflow-y: auto; padding-right: 5px; margin-bottom: 12px; }
+        .chat-history { display: flex; flex-direction: column; gap: 12px; max-height: 350px; overflow-y: auto; padding-right: 5px; margin-bottom: 15px; }
+        .chat-bubble { max-width: 80%; padding: 12px 14px; border-radius: 12px; font-size: 13px; line-height: 1.5; word-break: break-word; }
+        .chat-bubble.ouvinte { align-self: flex-start; background: #1f1f23; color: #fff; border-left: 3px solid var(--purple-light); }
+        .chat-bubble.adm { align-self: flex-end; background: rgba(29, 185, 84, 0.15); color: #e2f8eb; border-right: 3px solid var(--primary); border: 1px solid rgba(29,185,84,0.2); }
+        .chat-meta { font-size: 10px; color: var(--text-muted); margin-bottom: 6px; display: flex; justify-content: space-between; gap: 15px; }
         
-        .chat-bubble { max-width: 80%; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.4; word-break: break-word; }
-        .chat-bubble.ouvinte { align-self: flex-start; background: #222; color: #fff; border-left: 3px solid var(--purple-light); }
-        .chat-bubble.adm { align-self: flex-end; background: #1e3a29; color: #e2f8eb; border-right: 3px solid var(--primary); }
-        
-        .chat-meta { font-size: 10px; color: #aaa; margin-bottom: 4px; display: flex; justify-content: space-between; gap: 10px; }
-        .chat-input-area { display: flex; gap: 8px; margin-top: 10px; }
-        .chat-input-area textarea { flex: 1; background: #111; border: 1px solid #333; border-radius: 6px; color: #fff; padding: 8px; font-size: 12px; resize: none; outline: none; }
-        .btn-send-chat { background: var(--primary); color: #000; border: none; padding: 0 15px; border-radius: 6px; font-weight: bold; font-size: 12px; cursor: pointer; }
+        .chat-input-area { display: flex; gap: 10px; }
+        .chat-input-area textarea { flex: 1; background: #161619; border: 1px solid var(--border-glass); border-radius: 10px; color: #fff; padding: 10px 14px; font-size: 13px; resize: none; outline: none; transition: border-color 0.2s; }
+        .chat-input-area textarea:focus { border-color: var(--primary); }
+        .btn-send-chat { background: var(--primary); color: #000; border: none; padding: 0 18px; border-radius: 10px; font-weight: 800; font-size: 12px; cursor: pointer; transition: opacity 0.2s; }
+        .btn-send-chat:hover { opacity: 0.9; }
 
-        .main-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; max-width: 1400px; margin: 0 auto; }
+        /* GRID PRINCIPAL */
+        .main-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 25px; max-width: 1400px; margin: 0 auto; }
         @media (max-width: 1024px) { .main-grid { grid-template-columns: 1fr; } }
-        .card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid #282828; margin-bottom: 20px; }
-        h3 { color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; }
+        
+        .card { background: var(--card); backdrop-filter: blur(12px); border-radius: 24px; padding: 24px; border: 1px solid var(--border-glass); margin-bottom: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); }
+        h3 { color: var(--primary); font-size: 12px; text-transform: uppercase; letter-spacing: 2.5px; margin-bottom: 20px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
 
-        .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
-        @media (max-width: 480px) { .radio-grid { grid-template-columns: repeat(2, 1fr); } }
-
-        .radio-item { aspect-ratio: 1/1; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #000; font-weight: bold; font-size: 12px; text-align: center; padding: 10px; cursor: grab; transition: transform 0.2s, box-shadow 0.2s; position: relative; border: 2px solid transparent; -webkit-tap-highlight-color: transparent; }
+        /* EMISSORAS / RÁDIOS */
+        .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
+        .radio-item { aspect-ratio: 1/1; border-radius: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #000; font-weight: 800; font-size: 12px; text-align: center; padding: 10px; cursor: grab; transition: transform 0.2s, box-shadow 0.2s; position: relative; border: 2px solid transparent; }
         .radio-item:active { cursor: grabbing; }
-        .radio-item.sortable-ghost { opacity: 0.4; border: 2px dashed #1DB954; }
-        .radio-item.active { background: #000 !important; color: var(--primary) !important; border-color: var(--primary); box-shadow: 0 0 15px rgba(29, 185, 84, 0.3); }
-        .radio-actions { position: absolute; top: 5px; right: 5px; display: flex; gap: 5px; z-index: 10; }
-        .radio-actions i { cursor: pointer; padding: 4px; background: rgba(0,0,0,0.1); border-radius: 4px; font-size: 11px; }
+        .radio-item.sortable-ghost { opacity: 0.3; border: 2px dashed var(--primary); }
+        .radio-item.active { background: #121214 !important; color: var(--primary) !important; border-color: var(--primary); box-shadow: 0 0 20px rgba(29, 185, 84, 0.35); }
+        .radio-actions { position: absolute; top: 8px; right: 8px; display: flex; gap: 5px; z-index: 10; }
+        .radio-actions i { cursor: pointer; padding: 6px; background: rgba(0,0,0,0.15); border-radius: 6px; font-size: 11px; color: inherit; transition: background 0.2s; }
+        .radio-actions i:hover { background: rgba(0,0,0,0.3); }
 
-        .antena { font-size: 24px; margin-bottom: 8px; display: none; color: var(--primary); }
+        .antena { font-size: 26px; margin-bottom: 8px; display: none; color: var(--primary); }
         .active .antena { display: block !important; animation: antenaPisca 0.8s infinite alternate !important; }
-        @keyframes antenaPisca { from { opacity: 1; transform: scale(1.1); } to { opacity: 0.1; transform: scale(0.9); } }
+        @keyframes antenaPisca { from { opacity: 1; transform: scale(1.1); } to { opacity: 0.2; transform: scale(0.9); } }
 
-        .speaker-icon { color: #38bdf8; margin-right: 8px; animation: speakerPisca 0.8s infinite alternate; }
-        @keyframes speakerPisca { from { opacity: 1; transform: scale(1.2); } to { opacity: 0.2; transform: scale(0.9); } }
+        .speaker-icon { color: var(--blue-online); margin-right: 6px; animation: speakerPisca 0.8s infinite alternate; }
+        @keyframes speakerPisca { from { opacity: 1; transform: scale(1.2); } to { opacity: 0.3; transform: scale(0.9); } }
 
-        .player-footer { margin-top: 20px; background: #111; padding: 20px; border-radius: 20px; border: 1px solid #222; text-align: center; }
+        .player-footer { margin-top: 20px; background: rgba(0,0,0,0.3); padding: 18px; border-radius: 16px; border: 1px solid var(--border-glass); text-align: center; }
         .controls-row { display: flex; align-items: center; justify-content: center; gap: 25px; }
-        .btn-nav { background: none; border: none; color: #b3b3b3; font-size: 24px; cursor: pointer; }
-        .btn-spotify-play { width: 55px; height: 55px; background: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: black; cursor: pointer; }
+        .btn-nav { background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer; transition: color 0.2s; }
+        .btn-nav:hover { color: #fff; }
+        .btn-spotify-play { width: 50px; height: 50px; background: #fff; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #000; cursor: pointer; box-shadow: 0 4px 15px rgba(255,255,255,0.2); transition: transform 0.2s; }
+        .btn-spotify-play:hover { transform: scale(1.05); }
 
         .pub-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
         @media (max-width: 600px) { .pub-container { grid-template-columns: 1fr; } }
-        .pub-preview { width: 100%; max-height: 120px; object-fit: contain; margin-top: 10px; border-radius: 10px; border: 1px dashed #444; display: none; }
+        .pub-preview { width: 100%; max-height: 120px; object-fit: contain; margin-top: 10px; border-radius: 10px; border: 1px dashed var(--border-glass); display: none; }
 
-        /* MONITOR DE OUVINTES (RETRÁTIL/SANFONA) */
-        .user-item { background: #141414; margin-bottom: 10px; border-radius: 10px; border: 1px solid #222; overflow: hidden; transition: all 0.3s ease; }
-        .user-item.online { border-left: 4px solid var(--blue-online); background: #181818; }
-        .user-item.offline { border-left: 4px solid var(--purple-light); opacity: 0.85; }
-        
-        .user-header-bar { width: 100%; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; cursor: pointer; user-select: none; }
-        .user-header-bar:hover { background: rgba(255, 255, 255, 0.03); }
-        .user-title { color: white; font-weight: bold; font-size: 13px; display: flex; align-items: center; gap: 8px; }
-        
-        .status-on { color: var(--blue-online); font-weight: 900; font-size: 10px; background: rgba(56, 189, 248, 0.1); padding: 3px 8px; border-radius: 6px; }
-        .status-off { color: var(--purple-light); font-weight: 900; font-size: 10px; background: rgba(168, 85, 247, 0.1); padding: 3px 8px; border-radius: 6px; }
-        
-        /* DETALHES RETRÁTEIS (FECHADO POR PADRÃO) */
-        .user-details-wrapper { max-height: 0; overflow: hidden; transition: max-height 0.35s ease-in-out, padding 0.35s ease; background: #0d0d0d; }
-        .user-item.open .user-details-wrapper { max-height: 200px; padding: 12px 15px; border-top: 1px solid #222; }
+        /* MONITOR DE OUVINTES (MODERNO E RETRÁTIL) */
+        .monitor-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .btn-trash-all { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; padding: 6px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: background 0.2s; }
+        .btn-trash-all:hover { background: rgba(239, 68, 68, 0.25); }
 
-        .user-details-bar { font-size: 12px; color: #ccc; line-height: 1.8; }
-        .chevron-icon { font-size: 11px; color: #666; transition: transform 0.3s; margin-left: 8px; }
+        .user-item { background: rgba(20, 20, 24, 0.6); margin-bottom: 12px; border-radius: 14px; border: 1px solid var(--border-glass); overflow: hidden; transition: all 0.3s ease; }
+        .user-item.online { border-left: 4px solid var(--blue-online); background: rgba(20, 25, 35, 0.7); }
+        .user-item.offline { border-left: 4px solid var(--purple-light); opacity: 0.8; }
+        
+        .user-header-bar { width: 100%; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; cursor: pointer; }
+        .user-header-bar:hover { background: rgba(255, 255, 255, 0.02); }
+        .user-title { color: #fff; font-weight: 700; font-size: 13px; display: flex; align-items: center; gap: 8px; }
+        
+        .status-on { color: var(--blue-online); font-weight: 900; font-size: 10px; background: rgba(56, 189, 248, 0.12); padding: 4px 10px; border-radius: 20px; letter-spacing: 0.5px; }
+        .status-off { color: var(--purple-light); font-weight: 900; font-size: 10px; background: rgba(168, 85, 247, 0.12); padding: 4px 10px; border-radius: 20px; letter-spacing: 0.5px; }
+        
+        .user-details-wrapper { max-height: 0; overflow: hidden; transition: max-height 0.35s ease, padding 0.35s ease; background: rgba(10, 10, 12, 0.5); }
+        .user-item.open .user-details-wrapper { max-height: 200px; padding: 14px 16px; border-top: 1px solid var(--border-glass); }
+
+        .user-details-bar { font-size: 12px; color: var(--text-muted); line-height: 1.9; }
+        .chevron-icon { font-size: 11px; color: var(--text-muted); transition: transform 0.3s; margin-left: 6px; }
         .user-item.open .chevron-icon { transform: rotate(180deg); color: #fff; }
 
-        input, select { padding: 12px; background: #2a2a2a; border: none; color: white; border-radius: 8px; margin-bottom: 10px; width: -webkit-fill-available; outline: none; font-size: 14px; }
-        .btn-save { padding: 12px; background: var(--primary); border: none; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; }
+        .action-icon-delete { color: #f87171; background: rgba(239, 68, 68, 0.1); padding: 8px; border-radius: 8px; cursor: pointer; font-size: 12px; transition: background 0.2s, transform 0.2s; }
+        .action-icon-delete:hover { background: rgba(239, 68, 68, 0.25); transform: scale(1.05); }
+
+        input, select { padding: 12px 14px; background: #161619; border: 1px solid var(--border-glass); color: white; border-radius: 10px; margin-bottom: 12px; width: 100%; outline: none; font-size: 13px; transition: border-color 0.2s; }
+        input:focus, select:focus { border-color: var(--primary); }
+        .btn-save { padding: 12px; background: var(--primary); color: #000; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; width: 100%; font-size: 13px; transition: opacity 0.2s, transform 0.1s; }
+        .btn-save:hover { opacity: 0.9; transform: translateY(-1px); }
     </style>
 </head>
 <body>
@@ -122,7 +149,7 @@
     <div class="header">
         <div class="header-brand">
             <h2 class="header-title">PAINEL ADM</h2>
-            <p class="header-sub">Seja bem vindo ADM</p>
+            <p class="header-sub">Gerenciamento Supremo de Rádios e Ouvintes</p>
         </div>
 
         <div class="header-right">
@@ -163,17 +190,17 @@
     <div class="main-grid">
         <div class="col-left">
             <div class="card">
-                <h3>GERENCIAR EMISSORA</h3>
+                <h3><i class="fas fa-broadcast-tower"></i> GERENCIAR EMISSORA</h3>
                 <div class="input-group">
                     <input type="hidden" id="r-key">
                     <input type="text" id="r-name" placeholder="Nome da Rádio">
-                    <input type="text" id="r-url" placeholder="Link .mp3">
-                    <button class="btn-save" id="btn-radio-action" onclick="addRadio()">SALVAR</button>
+                    <input type="text" id="r-url" placeholder="Link .mp3 / Stream">
+                    <button class="btn-save" id="btn-radio-action" onclick="addRadio()">SALVAR RÁDIO</button>
                 </div>
-                <h3>GRADE DE RÁDIOS (ARRASTE PARA ORGANIZAR)</h3>
+                <h3 style="margin-top:25px;">GRADE DE RÁDIOS (ARRASTE PARA ORGANIZAR)</h3>
                 <div id="radio-list" class="radio-grid"></div>
                 <div class="player-footer">
-                    <div id="now-title" style="font-size:10px; color:#888; margin-bottom:15px;">SELECIONE UMA RÁDIO</div>
+                    <div id="now-title" style="font-size:11px; color:var(--text-muted); margin-bottom:12px; font-weight:600;">SELECIONE UMA RÁDIO</div>
                     <div class="controls-row">
                         <button class="btn-nav" onclick="prevRadio()"><i class="fas fa-step-backward"></i></button>
                         <button class="btn-spotify-play" onclick="togglePlay()"><i class="fas fa-play" id="play-icon"></i></button>
@@ -183,7 +210,7 @@
             </div>
 
             <div class="card">
-                <h3>GERENCIAR PUBLICIDADE</h3>
+                <h3><i class="fas fa-bullhorn"></i> GERENCIAR PUBLICIDADE</h3>
                 <div class="pub-container">
                     <input type="hidden" id="pub-key">
                     <div>
@@ -200,14 +227,20 @@
                         <input type="text" id="pub-manual" placeholder="NOME DO OUVINTE" style="display:none;">
                     </div>
                 </div>
-                <button class="btn-save" id="btn-pub-action" onclick="savePub()">LANÇAR CAMPANHA</button>
+                <button class="btn-save" onclick="savePub()">LANÇAR CAMPANHA</button>
                 <div id="pub-list-admin" style="margin-top:20px;"></div>
             </div>
         </div>
 
         <div class="col-right">
             <div class="card">
-                <h3><i class="fas fa-users"></i> MONITOR DE OUVINTES</h3>
+                <div class="monitor-header-flex">
+                    <h3><i class="fas fa-users"></i> MONITOR DE OUVINTES</h3>
+                    <!-- Botão global para excluir todos os ouvintes e forçar novo login -->
+                    <button class="btn-trash-all" onclick="excluirTodosOuvintes()" title="Excluir todos e forçar novo login">
+                        <i class="fas fa-trash-alt"></i> EXCLUIR TODOS
+                    </button>
+                </div>
                 <div id="user-list"></div>
             </div>
         </div>
@@ -227,10 +260,10 @@
         const player = document.getElementById('audio-player');
         let radioData = [], activeIndex = -1, imgBase64 = "", sortableInstance = null;
         let rawContas = {}, rawPreferencias = {}, rawOnlineState = {};
-        let openCards = {}; // Guarda quais cards o ADM expandiu
-        let openChatCards = {}; // Guarda quais chats o ADM expandiu
+        let openCards = {}; 
+        let openChatCards = {}; 
 
-        // Relógio e Atualização de Cronômetros
+        // Relógio e Cronômetros
         setInterval(() => {
             const hElement = document.getElementById('hora');
             if(hElement) hElement.innerText = new Date().toLocaleTimeString('pt-BR');
@@ -271,12 +304,10 @@
         }
         fetchWeather();
 
-        function logout() { if(confirm("Sair?")) { localStorage.removeItem('usuarioNome'); window.location.href = 'index.html'; } }
+        function logout() { if(confirm("Deseja sair do painel?")) { localStorage.removeItem('usuarioNome'); window.location.href = 'index.html'; } }
         function toggleMensagens() { document.getElementById('container-mensagens-adm').classList.toggle('aberto'); }
 
-        // =======================================================
-        // SISTEMA DE CHAT AGRUPADO POR OUVINTE (SEQUÊNCIA ESTILO WHATSAPP)
-        // =======================================================
+        // CHAT REFORMULADO
         let allMensagens = {};
         let allRespostas = {};
 
@@ -300,7 +331,6 @@
 
             const ouvintesMap = {};
 
-            // Mapeia Mensagens dos Ouvintes
             for(let key in allMensagens) {
                 const m = allMensagens[key];
                 const nome = m.ouvinte || m.nome || 'Ouvinte';
@@ -318,7 +348,6 @@
                 ouvintesMap[nome].keys.push(key);
             }
 
-            // Mapeia Respostas do ADM
             for(let key in allRespostas) {
                 const r = allRespostas[key];
                 const nome = r.ouvinte || 'Ouvinte';
@@ -339,14 +368,12 @@
             if(countElem) countElem.innerText = ouvintesNomes.length;
 
             if(ouvintesNomes.length === 0) {
-                container.innerHTML = `<div style="text-align:center; padding:20px; color:#666; font-size:12px;">Nenhuma mensagem recebida.</div>`;
+                container.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:12px;">Nenhuma mensagem recebida.</div>`;
                 return;
             }
 
             ouvintesNomes.forEach(nome => {
                 const dados = ouvintesMap[nome];
-                
-                // ORDENAÇÃO ESTILO WHATSAPP: Mensagens antigas no topo, novas no final (cronológico crescente)
                 dados.msgs.sort((a,b) => a.ts - b.ts);
 
                 const isOpen = !!openChatCards[nome];
@@ -374,8 +401,8 @@
                             <i class="fas fa-comments"></i> ${nome}
                             <i class="fas fa-chevron-down chevron-chat"></i>
                         </span>
-                        <i class="fas fa-trash-alt" style="color:#ff4444; cursor:pointer; font-size:13px;" 
-                           title="Excluir Histórico de Conversa" onclick="event.stopPropagation(); deletarConversaOuvinte('${nome}')"></i>
+                        <i class="fas fa-trash-alt" style="color:#f87171; cursor:pointer; font-size:13px;" 
+                           title="Excluir Histórico" onclick="event.stopPropagation(); deletarConversaOuvinte('${nome}')"></i>
                     </div>
                     <div class="chat-body-wrapper">
                         <div class="chat-history" id="chat-hist-${safeNome}">
@@ -387,10 +414,8 @@
                         </div>
                     </div>
                 `;
-
                 container.appendChild(card);
                 
-                // Rola automaticamente para o final da conversa (última mensagem recebida/enviada)
                 if(isOpen) {
                     setTimeout(() => {
                         const histDiv = document.getElementById(`chat-hist-${safeNome}`);
@@ -437,13 +462,11 @@
                         updates['respostas_adm/' + key] = null;
                     }
                 }
-                db.ref().update(updates).then(() => {
-                    alert("Conversa removida!");
-                });
+                db.ref().update(updates);
             }
         }
 
-        // CARREGA E HABILITA RÁDIOS
+        // RÁDIOS
         db.ref('radios').on('value', snap => {
             radioData = []; snap.forEach(c => { radioData.push({ ...c.val(), key: c.key }); });
             radioData.sort((a,b) => (a.posicao || 0) - (b.posicao || 0));
@@ -456,7 +479,7 @@
             radioData.forEach((r, i) => {
                 const div = document.createElement('div');
                 div.className = `radio-item ${activeIndex === i ? 'active' : ''}`;
-                div.style.background = r.color || '#ece4db';
+                div.style.background = r.color || '#e4e4e7';
                 div.dataset.key = r.key;
                 div.onclick = () => playRadio(i);
                 div.innerHTML = `<div class="radio-actions"><i class="fas fa-pencil-alt" onclick="event.stopPropagation(); prepareEditRadio('${r.key}','${r.name}','${r.url}')"></i><i class="fas fa-times" onclick="event.stopPropagation(); if(confirm('Excluir?')) db.ref('radios/${r.key}').remove()"></i></div><i class="fas fa-tower-broadcast antena"></i><span>${r.name}</span>`;
@@ -491,7 +514,7 @@
             const n = document.getElementById('r-name').value, u = document.getElementById('r-url').value, k = document.getElementById('r-key').value;
             if(n && u) {
                 if(k) db.ref('radios/'+k).update({name:n, url:u});
-                else db.ref('radios').push({ name: n, url: u, color: '#ece4db', posicao: radioData.length });
+                else db.ref('radios').push({ name: n, url: u, color: '#e4e4e7', posicao: radioData.length });
                 document.getElementById('r-name').value = ""; document.getElementById('r-url').value = ""; document.getElementById('r-key').value = "";
             }
         }
@@ -507,21 +530,18 @@
             if(!imgBase64 || !i) return;
             const d = { imagem: imgBase64, inicio: new Date(i).getTime(), fim: new Date(f).getTime(), destino: document.getElementById('pub-target').value, ouvinteAlvo: document.getElementById('pub-manual').value || 'TODOS' };
             if(k) db.ref('publicidade/'+k).update(d); else db.ref('publicidade').push(d);
-            document.getElementById('pub-key').value = ""; document.getElementById('pub-view').style.display="none"; alert("OK");
+            document.getElementById('pub-key').value = ""; document.getElementById('pub-view').style.display="none"; alert("Campanha salva com sucesso!");
         }
 
         // =======================================================
-        // MONITOR DE OUVINTES (RETRÁTIL + CHECKER AVANÇADO ONLINE)
+        // MONITOR DE OUVINTES (COM LIXEIRA INDIVIDUAL E GLOBAL)
         // =======================================================
         function toggleUserCard(key) {
             openCards[key] = !openCards[key];
             const itemElem = document.getElementById(`user-card-${key.replace(/[^a-zA-Z0-9]/g, '_')}`);
             if (itemElem) {
-                if (openCards[key]) {
-                    itemElem.classList.add('open');
-                } else {
-                    itemElem.classList.remove('open');
-                }
+                if (openCards[key]) itemElem.classList.add('open');
+                else itemElem.classList.remove('open');
             }
         }
 
@@ -537,10 +557,6 @@
             return 0;
         }
 
-        function updateLiveTimers() {
-            // Atualiza cronômetros se necessário
-        }
-
         function renderOuvintes() {
             const container = document.getElementById('user-list'); 
             if(!container) return;
@@ -549,6 +565,11 @@
             container.innerHTML = "";
 
             const allKeys = new Set([...Object.keys(rawContas), ...Object.keys(rawPreferencias), ...Object.keys(rawOnlineState)]);
+
+            if(allKeys.size === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:12px;">Nenhum ouvinte registrado.</div>`;
+                return;
+            }
 
             allKeys.forEach(k => {
                 const conta = rawContas[k] || {};
@@ -561,38 +582,119 @@
                 const t1 = parseTimestamp(pref.lastActive);
                 const t2 = parseTimestamp(pref.timestamp);
                 const t3 = parseTimestamp(pref.ultimaAtividade);
+                const t4 = parseTimestamp(onState.lastActive);
+                const t5 = parseTimestamp(onState.timestamp);
+                
+                const lastActive = Math.max(t1, t2, t3, t4, t5);
+
+                const explicitStatus = (pref.status || onState.status || '').toLowerCase();
+                const explicitOnline = (pref.online === true || onState.online === true);
+                const isOnline = (explicitStatus === 'online' || explicitOnline || (lastActive > 0 && (agora - lastActive < 30000)));
+
+                const radioTocando = isOnline ? (pref.radioAtual || onState.radioAtual || pref.radio || 'Ouvindo Rádio') : 'Nenhuma';
+                const sessionStart = pref.sessionStart || onState.sessionStart || (isOnline ? (lastActive || agora) : agora);
+                const radioStart = pref.radioStart || onState.radioStart || (isOnline ? (lastActive || agora) : agora);
 
                 const isOpen = !!openCards[k];
-                const isOnline = onState.isOnline || (agora - Math.max(t1, t2, t3) < 30000);
 
-                const itemDiv = document.createElement('div');
-                itemDiv.id = `user-card-${safeKey}`;
-                itemDiv.className = `user-item ${isOnline ? 'online' : 'offline'} ${isOpen ? 'open' : ''}`;
+                const div = document.createElement('div');
+                div.id = `user-card-${safeKey}`;
+                div.className = `user-item ${isOnline ? 'online' : 'offline'} ${isOpen ? 'open' : ''}`;
+                
+                const iconSpeaker = isOnline ? `<i class="fas fa-volume-high speaker-icon"></i>` : '';
 
-                itemDiv.innerHTML = `
+                div.innerHTML = `
                     <div class="user-header-bar" onclick="toggleUserCard('${k}')">
                         <span class="user-title">
-                            <i class="fas fa-user"></i> ${nome}
-                        </span>
-                        <div>
-                            <span class="${isOnline ? 'status-on' : 'status-off'}">${isOnline ? 'ONLINE' : 'OFFLINE'}</span>
+                            ${iconSpeaker} ${nome}
                             <i class="fas fa-chevron-down chevron-icon"></i>
+                        </span>
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <span class="${isOnline ? 'status-on' : 'status-off'}">${isOnline ? '● ONLINE' : 'OFF'}</span>
+                            <!-- Ícone de Lixeira Individual para cada ouvinte[cite: 3] -->
+                            <i class="fas fa-trash-alt action-icon-delete" 
+                               title="Excluir Ouvinte (Forçar Login)" onclick="event.stopPropagation(); deletarOuvinte('${k}')"></i>
                         </div>
                     </div>
                     <div class="user-details-wrapper">
                         <div class="user-details-bar">
-                            <strong>Usuário:</strong> ${k}<br>
-                            <strong>Status:</strong> ${isOnline ? 'Conectado agora' : 'Desconectado'}
+                            <div>Rádio Atual: <b style="color:var(--primary)">${radioTocando}</b></div>
+                            <div>Tempo de Sessão: <b style="color:var(--blue-online)" id="ts-${safeKey}" data-start="${sessionStart}" data-online="${isOnline}">00:00:00</b></div>
+                            <div>Tempo nesta Rádio: <b style="color:var(--purple-light)" id="tr-${safeKey}" data-start="${radioStart}" data-online="${isOnline}">00:00:00</b></div>
                         </div>
-                    </div>
-                `;
-                container.appendChild(itemDiv);
+                    </div>`;
+                container.appendChild(div);
+            });
+
+            updateLiveTimers();
+        }
+
+        function updateLiveTimers() {
+            const agora = Date.now();
+            document.querySelectorAll('[id^="ts-"]').forEach(elem => {
+                const isOnline = elem.getAttribute('data-online') === 'true';
+                const start = parseInt(elem.getAttribute('data-start') || agora);
+                elem.innerText = isOnline ? formatMs(agora - start) : '00:00:00';
+            });
+            document.querySelectorAll('[id^="tr-"]').forEach(elem => {
+                const isOnline = elem.getAttribute('data-online') === 'true';
+                const start = parseInt(elem.getAttribute('data-start') || agora);
+                elem.innerText = isOnline ? formatMs(agora - start) : '00:00:00';
             });
         }
 
-        db.ref('contas').on('value', snap => { rawContas = snap.val() || {}; renderOuvintes(); });
-        db.ref('preferencias').on('value', snap => { rawPreferencias = snap.val() || {}; renderOuvintes(); });
-        db.ref('online_state').on('value', snap => { rawOnlineState = snap.val() || {}; renderOuvintes(); });
+        function formatMs(ms) {
+            if (!ms || ms < 0) ms = 0;
+            const totalSeg = Math.floor(ms / 1000);
+            const h = Math.floor(totalSeg / 3600);
+            const m = Math.floor((totalSeg % 3600) / 60);
+            const s = totalSeg % 60;
+            return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        }
+
+        // Função para deletar um ouvinte específico[cite: 3]
+        function deletarOuvinte(keyConta) {
+            if(confirm(`Deseja excluir o ouvinte "${keyConta}"? Ele precisará fazer login novamente[cite: 3].`)) {
+                const updates = {};
+                updates['contas/' + keyConta] = null;
+                updates['ouvintes_preferencias/' + keyConta] = null;
+                updates['ouvintes_online/' + keyConta] = null;
+
+                db.ref().update(updates).then(() => {
+                    // Feedback visual instantâneo
+                });
+            }
+        }
+
+        // Função para excluir TODOS os ouvintes de uma vez[cite: 3]
+        function excluirTodosOuvintes() {
+            if(confirm("ATENÇÃO: Deseja excluir TODOS os ouvintes cadastrados? Todos serão desconectados e obrigados a fazer login de volta[cite: 3].")) {
+                const updates = {};
+                updates['contas'] = null;
+                updates['ouvintes_preferencias'] = null;
+                updates['ouvintes_online'] = null;
+
+                db.ref().update(updates).then(() => {
+                    alert("Todos os ouvintes foram removidos com sucesso[cite: 3]!");
+                });
+            }
+        }
+
+        // LISTENERS DO FIREBASE
+        db.ref('contas').on('value', snap => {
+            rawContas = snap.val() || {};
+            renderOuvintes();
+        });
+
+        db.ref('ouvintes_preferencias').on('value', snap => {
+            rawPreferencias = snap.val() || {};
+            renderOuvintes();
+        });
+
+        db.ref('ouvintes_online').on('value', snap => {
+            rawOnlineState = snap.val() || {};
+            renderOuvintes();
+        });
     </script>
 </body>
 </html>
