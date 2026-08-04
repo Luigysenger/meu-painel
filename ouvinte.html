@@ -47,12 +47,12 @@
             overflow-x: hidden;
         }
 
-        /* CONTAINER PADRÃO IDÊNTICO AO NOTEBOOK */
+        /* CONTAINER RESPONSIVO FLUIDO (SE AUTO-AJUSTA EM NOTEBOOK, PC E TABLET) */
         .wrapper-notebook {
             width: 100%;
-            max-width: 1520px;
+            max-width: 1750px;
             margin: 0 auto;
-            padding: 20px 24px;
+            padding: 20px clamp(16px, 2.5vw, 36px);
             display: flex;
             flex-direction: column;
             box-sizing: border-box;
@@ -159,11 +159,11 @@
             box-sizing: border-box;
         }
 
-        /* GRID PRINCIPAL EM 3 COLUNAS FIXAS DA FOTO PERFEITA */
+        /* GRID PRINCIPAL EM 3 COLUNAS PROPORCIONAIS E AMPLIÁVEIS */
         .main-container { 
             display: grid; 
-            grid-template-columns: 1fr 1.45fr 1.15fr; 
-            gap: 16px; 
+            grid-template-columns: minmax(280px, 1fr) minmax(380px, 1.45fr) minmax(300px, 1.15fr); 
+            gap: 18px; 
             width: 100%; 
             margin-bottom: 130px; 
             align-items: start;
@@ -172,7 +172,7 @@
         .card-box { 
             background: var(--card); 
             border-radius: 18px; 
-            padding: 18px; 
+            padding: clamp(14px, 1.5vw, 20px); 
             border: 1px solid var(--card-border); 
             width: 100%; 
             box-shadow: 0 12px 30px rgba(0,0,0,0.3);
@@ -224,7 +224,7 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
-            max-height: 500px;
+            max-height: clamp(400px, 52vh, 580px);
             overflow-y: auto;
             padding-right: 4px;
         }
@@ -273,13 +273,13 @@
             color: #fff;
         }
 
-        /* PLAYLIST (GRID DE CARDS) */
+        /* PLAYLIST (GRID DE CARDS 3x3 FLUIDO) */
         .playlist-grid-ouvinte {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 12px;
             width: 100%;
-            max-height: 510px;
+            max-height: clamp(400px, 52vh, 580px);
             overflow-y: auto;
             padding-right: 4px;
         }
@@ -331,13 +331,13 @@
         }
 
         .radio-card-quadrado i.icon-radio {
-            font-size: 30px;
+            font-size: clamp(24px, 2.5vw, 32px);
             margin-bottom: 8px;
         }
 
         .antena-piscando {
             color: #22c55e;
-            font-size: 30px !important;
+            font-size: clamp(24px, 2.5vw, 32px) !important;
             animation: piscar 1.2s infinite ease-in-out;
         }
 
@@ -347,14 +347,14 @@
         }
 
         .radio-card-quadrado .radio-name {
-            font-size: 12.5px;
+            font-size: clamp(11px, 1.1vw, 13px);
             font-weight: 800;
             line-height: 1.3;
             word-break: break-word;
             text-shadow: 0 1px 2px rgba(0,0,0,0.8);
         }
 
-        /* HORÓSCOPO */
+        /* HORÓSCOPO DO DIA DINÂMICO */
         .signos-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -366,7 +366,7 @@
             background: #181822;
             border: 1px solid #2b2b3b;
             border-radius: 9px;
-            padding: 9px 5px;
+            padding: clamp(7px, 1vh, 10px) 4px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -406,8 +406,8 @@
             font-size: 13px;
             line-height: 1.4;
             color: #f1f5f9;
-            min-height: 70px;
-            max-height: 115px;
+            min-height: 75px;
+            max-height: 130px;
             overflow-y: auto;
             display: flex;
             align-items: center;
@@ -467,7 +467,7 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
-            max-height: 145px;
+            max-height: 160px;
             overflow-y: auto;
             padding: 9px;
             background: #0d0d12;
@@ -540,8 +540,7 @@
             bottom: 58px; 
             left: 50%;
             transform: translateX(-50%);
-            width: 800px;
-            max-width: 92%;
+            width: min(820px, 92vw);
             background: rgba(18, 18, 24, 0.92); 
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
@@ -702,10 +701,22 @@
             100% { transform: translateX(-50%); }
         }
 
-        /* RESPONSIVO PARA DISPOSITIVOS MENORES */
+        /* MEDIA QUERIES PARA AUTO-AJUSTE FLUIDO EM TABLETS E DISPOSITIVOS MENORES */
         @media (max-width: 1024px) {
             .main-container {
                 grid-template-columns: 1fr;
+            }
+            .playlist-grid-ouvinte {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 600px) {
+            .playlist-grid-ouvinte {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            .signos-grid {
+                grid-template-columns: repeat(3, 1fr);
             }
         }
 
