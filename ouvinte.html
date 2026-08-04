@@ -26,7 +26,7 @@
         }
 
         html {
-            width: 100%;
+            width: 100% !important;
             overflow-x: hidden !important;
             overscroll-behavior-x: none !important;
             touch-action: pan-y !important;
@@ -53,7 +53,7 @@
             color: var(--text-main);
             margin: 0;
             padding: 20px;
-            width: 100%;
+            width: 100% !important;
             overflow-x: hidden !important;
             overscroll-behavior-x: none !important;
             touch-action: pan-y !important;
@@ -69,17 +69,16 @@
         .header { 
             display: flex; 
             justify-content: space-between; 
-            align-items: center;
-            gap: 16px;
+            align-items: center; 
             background: rgba(20, 20, 25, 0.7); 
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            padding: 14px 24px; 
+            padding: 16px 24px; 
             border-radius: 20px; 
             border: 1px solid var(--card-border); 
-            margin-bottom: 16px; 
+            margin-bottom: 20px; 
             width: 100%; 
-            max-width: 1400px; 
+            max-width: 1200px; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
@@ -88,13 +87,13 @@
             background: linear-gradient(135deg, #a855f7, #ec4899);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-size: 20px; 
+            font-size: 22px; 
             font-weight: 800;
             letter-spacing: -0.5px;
         }
 
         .user-name-title {
-            font-size: 13px !important;
+            font-size: 14px !important;
             font-weight: 600;
             color: var(--text-muted);
             margin-top: 2px;
@@ -106,13 +105,11 @@
             align-items: center;
             gap: 12px;
             color: #ccc;
-            flex-wrap: wrap;
-            justify-content: flex-end;
         }
 
         .widget-item {
             background: #1a1a22;
-            padding: 7px 14px;
+            padding: 8px 16px;
             border-radius: 12px;
             border: 1px solid #2d2d38;
             display: flex;
@@ -122,14 +119,14 @@
         }
 
         .relogio-box {
-            font-size: 14px !important;
+            font-size: 15px !important;
             font-weight: 700;
             color: #fff;
             letter-spacing: 0.5px;
         }
 
         .clima-box {
-            font-size: 13px !important;
+            font-size: 14px !important;
             font-weight: 600;
             color: #fff;
         }
@@ -138,10 +135,10 @@
             background: rgba(239, 68, 68, 0.1); 
             border: 1px solid rgba(239, 68, 68, 0.3); 
             color: #ef4444; 
-            padding: 8px 14px !important; 
+            padding: 9px 16px !important; 
             border-radius: 12px; 
             cursor: pointer; 
-            font-size: 12px !important; 
+            font-size: 13px !important; 
             font-weight: 700; 
             transition: all 0.2s ease;
             display: flex;
@@ -157,49 +154,41 @@
 
         .frase-centro-playlist {
             text-align: center;
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 700;
             color: #d8b4fe;
             letter-spacing: 1.5px;
-            margin: 0 0 20px 0;
+            margin: 5px 0 25px 0;
             width: 100%;
-            max-width: 1400px;
+            max-width: 1200px;
             background: linear-gradient(90deg, rgba(147, 51, 234, 0), rgba(147, 51, 234, 0.15), rgba(147, 51, 234, 0));
-            padding: 10px;
+            padding: 12px;
             border-radius: 12px;
             border-top: 1px solid rgba(147, 51, 234, 0.2);
             border-bottom: 1px solid rgba(147, 51, 234, 0.2);
         }
 
-        /* LAYOUT PRINCIPAL AJUSTADO */
+        /* LAYOUT PRINCIPAL */
         .main-container { 
             display: grid; 
-            grid-template-columns: minmax(320px, 1fr) minmax(420px, 1.35fr) minmax(320px, 1.05fr);
-            gap: 20px; 
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); 
+            gap: 24px; 
             width: 100%; 
-            max-width: 1400px; 
-            margin: 0 auto 200px auto; 
+            max-width: 1200px; 
+            margin: 0 auto 200px auto;
             align-items: start;
         }
 
-        @media (max-width: 1200px) {
-            .main-container {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (min-width: 1401px) {
-            .main-container,
-            .header,
-            .frase-centro-playlist {
-                max-width: 1380px;
-            }
+        .coluna-direita {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
         }
 
         .card-box { 
             background: var(--card); 
-            border-radius: 22px; 
-            padding: 20px; 
+            border-radius: 24px; 
+            padding: 24px; 
             border: 1px solid var(--card-border); 
             width: 100%; 
             box-shadow: 0 15px 35px rgba(0,0,0,0.3);
@@ -207,21 +196,21 @@
 
         h3 { 
             color: var(--text-main); 
-            font-size: 14px; 
+            font-size: 15px; 
             font-weight: 800;
             letter-spacing: 0.5px; 
             margin-top: 0;
-            margin-bottom: 16px; 
+            margin-bottom: 20px; 
             text-align: center; 
             line-height: 1.4;
         }
 
         .sub-titulo-secao {
-            font-size: 12px !important;
+            font-size: 13px !important;
             font-weight: 700;
             text-align: left;
             color: #c084fc !important;
-            margin-bottom: 10px;
+            margin-bottom: 14px;
             display: flex;
             align-items: center;
             gap: 6px;
@@ -231,28 +220,43 @@
             background: linear-gradient(135deg, rgba(147, 51, 234, 0.15), rgba(255, 0, 127, 0.15));
             color: #f3e8ff;
             border: 1px solid rgba(168, 85, 247, 0.4);
-            border-radius: 14px;
-            padding: 10px;
-            font-size: 11.5px;
+            border-radius: 16px;
+            padding: 16px;
+            font-size: 13px;
             font-weight: 700;
             text-align: center;
-            line-height: 1.4;
-            margin-bottom: 10px;
+            line-height: 1.5;
+            margin-bottom: 18px;
             box-shadow: 0 4px 20px rgba(147, 51, 234, 0.15);
         }
 
         .radios-section-container {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
         }
 
-        /* CATÁLOGO */
+        @media (max-width: 768px) {
+            .radios-section-container {
+                grid-template-columns: 1fr;
+            }
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            .header-widgets {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+
+        /* CATÁLOGO E PLAYLIST */
         .catalogo-list {
             display: flex;
             flex-direction: column;
-            gap: 7px;
-            max-height: 440px;
+            gap: 8px;
+            max-height: 380px;
             overflow-y: auto;
             padding-right: 4px;
         }
@@ -260,16 +264,16 @@
         .bar-radio-catalogo {
             background: #1a1a22;
             border: 1px solid #2a2a36;
-            border-radius: 10px;
-            padding: 11px 12px;
+            border-radius: 12px;
+            padding: 12px 14px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             cursor: pointer;
             transition: all 0.2s ease;
             color: var(--text-main);
             font-weight: 600;
-            font-size: 12.5px;
+            font-size: 13px;
         }
 
         .bar-radio-catalogo:hover {
@@ -285,16 +289,15 @@
         }
 
         .bar-radio-catalogo .btn-add-icon {
-            font-size: 12px;
-            width: 22px;
-            height: 22px;
-            border-radius: 6px;
+            font-size: 14px;
+            width: 26px;
+            height: 26px;
+            border-radius: 8px;
             background: #272734;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: 0.2s;
-            flex-shrink: 0;
         }
 
         .bar-radio-catalogo.adicionada .btn-add-icon {
@@ -302,20 +305,16 @@
             color: #fff;
         }
 
-        /* PLAYLIST */
         .playlist-grid-ouvinte {
             display: grid;
-            grid-template-columns: repeat(3, minmax(120px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
             gap: 10px;
             width: 100%;
-            max-height: 460px;
-            overflow-y: auto;
-            padding-right: 4px;
+            min-height: 120px;
         }
 
         .radio-card-quadrado {
             aspect-ratio: 1 / 1;
-            min-height: 120px;
             border-radius: 16px;
             display: flex;
             flex-direction: column;
@@ -328,8 +327,8 @@
             font-weight: 700;
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
-            border: 1px solid rgba(255,255,255,0.12);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.45);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
             overflow: hidden;
         }
 
@@ -347,8 +346,8 @@
         }
 
         .radio-card-quadrado:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 10px 22px rgba(0,0,0,0.65);
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
         }
 
         .radio-card-quadrado:active {
@@ -357,18 +356,18 @@
 
         .radio-card-quadrado.playing {
             border: 2px solid #22c55e !important;
-            box-shadow: 0 0 22px rgba(34, 197, 94, 0.55) !important;
+            box-shadow: 0 0 25px rgba(34, 197, 94, 0.5) !important;
         }
 
         .radio-card-quadrado i.icon-radio {
-            font-size: 26px;
+            font-size: 24px;
             margin-bottom: 8px;
-            filter: drop-shadow(0 2px 5px rgba(0,0,0,0.6));
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
         }
 
         .antena-piscando {
             color: #22c55e;
-            font-size: 26px !important;
+            font-size: 24px !important;
             animation: piscar 1.2s infinite ease-in-out;
         }
 
@@ -382,22 +381,28 @@
             font-weight: 800;
             line-height: 1.2;
             word-break: break-word;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.85);
+            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
         }
 
-        /* HORÓSCOPO DO DIA */
+        /* HORÓSCOPO DO DIA (AMPLIADO) */
         .signos-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 6px;
-            margin-bottom: 10px;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        @media (max-width: 480px) {
+            .signos-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
         }
 
         .signo-btn {
             background: #181822;
             border: 1px solid #2b2b3b;
-            border-radius: 10px;
-            padding: 6px 2px;
+            border-radius: 14px;
+            padding: 12px 6px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -415,32 +420,30 @@
         }
 
         .signo-btn.ativo {
-            box-shadow: 0 0 12px rgba(168, 85, 247, 0.45);
+            box-shadow: 0 0 16px rgba(168, 85, 247, 0.45);
         }
 
         .signo-btn i {
-            font-size: 15px;
-            margin-bottom: 3px;
+            font-size: 22px;
+            margin-bottom: 6px;
             color: #c084fc;
         }
 
         .signo-btn span {
-            font-size: 9.5px;
+            font-size: 11px;
             font-weight: 800;
-            letter-spacing: 0.4px;
+            letter-spacing: 0.5px;
         }
 
         .horoscopo-display {
             background: #0d0d12;
             border: 1px solid #2b2b3b;
-            border-radius: 12px;
-            padding: 10px;
-            font-size: 12.5px;
-            line-height: 1.4;
+            border-radius: 16px;
+            padding: 20px;
+            font-size: 16px;
+            line-height: 1.65;
             color: #f1f5f9;
-            min-height: 70px;
-            max-height: 110px;
-            overflow-y: auto;
+            min-height: 110px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -451,8 +454,8 @@
             font-weight: 800;
             color: #d8b4fe;
             display: block;
-            margin-bottom: 2px;
-            font-size: 13.5px;
+            margin-bottom: 8px;
+            font-size: 17px;
             letter-spacing: 0.5px;
         }
 
@@ -461,13 +464,13 @@
             width: 100%; 
             background: #0f0f14; 
             border: 1px solid #272734; 
-            border-radius: 12px; 
+            border-radius: 14px; 
             color: #fff; 
-            padding: 9px 12px; 
-            margin-bottom: 8px; 
+            padding: 14px; 
+            margin-bottom: 12px; 
             outline: none; 
             resize: none;
-            font-size: 12.5px;
+            font-size: 14px;
             font-family: inherit;
             transition: all 0.2s ease;
         }
@@ -481,10 +484,10 @@
             background: linear-gradient(135deg, var(--primary), #7e22ce); 
             color: #fff; 
             border: none; 
-            padding: 10px; 
-            border-radius: 12px; 
+            padding: 14px; 
+            border-radius: 14px; 
             font-weight: 700; 
-            font-size: 12.5px;
+            font-size: 14px;
             width: 100%; 
             cursor: pointer; 
             transition: all 0.2s ease;
@@ -500,83 +503,83 @@
         .chat-container {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-        }
-
-        .chat-lista {
-            background: #0d0d12;
-            border: 1px solid #2b2b3b;
-            border-radius: 14px;
-            padding: 10px;
-            min-height: 130px;
-            max-height: 160px;
+            gap: 12px;
+            max-height: 320px;
             overflow-y: auto;
-        }
-
-        .chat-bubble-ouvinte,
-        .chat-bubble-adm {
-            max-width: 85%;
-            padding: 10px 12px;
-            border-radius: 14px;
-            margin-bottom: 10px;
-            position: relative;
-            font-size: 12px;
-            line-height: 1.4;
-            word-break: break-word;
+            padding: 14px;
+            background: #0d0d12;
+            border-radius: 16px;
+            border: 1px solid #22222e;
         }
 
         .chat-bubble-ouvinte {
-            background: linear-gradient(135deg, rgba(147, 51, 234, 0.25), rgba(126, 34, 206, 0.25));
+            align-self: flex-start;
+            background: linear-gradient(135deg, #2e1045, #1e0b2e);
             border: 1px solid rgba(168, 85, 247, 0.3);
-            margin-right: auto;
+            color: #fff;
+            padding: 12px 16px;
+            border-radius: 16px 16px 16px 4px;
+            max-width: 85%;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            position: relative;
         }
 
         .chat-bubble-adm {
-            background: linear-gradient(135deg, rgba(34, 197, 94, 0.18), rgba(22, 163, 74, 0.18));
-            border: 1px solid rgba(34, 197, 94, 0.3);
-            margin-left: auto;
+            align-self: flex-end;
+            background: linear-gradient(135deg, #063726, #032217);
+            border: 1px solid rgba(34, 197, 94, 0.4);
+            color: #fff;
+            padding: 12px 16px;
+            border-radius: 16px 16px 4px 16px;
+            max-width: 85%;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
 
         .chat-sender-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 8px;
-            margin-bottom: 4px;
+            gap: 12px;
+            margin-bottom: 6px;
         }
 
         .chat-sender-name {
             font-size: 11px;
             font-weight: 800;
-        }
-
-        .chat-sender-name.ouvinte {
-            color: #f0abfc;
+            letter-spacing: 0.5px;
         }
 
         .chat-sender-name.adm {
             color: #4ade80;
         }
 
+        .chat-sender-name.ouvinte {
+            color: #e9d5ff;
+        }
+
         .chat-text {
-            color: #fff;
-            font-size: 12.5px;
+            font-size: 13.5px;
+            line-height: 1.5;
+            word-break: break-word;
         }
 
         .chat-time {
             font-size: 10px;
-            color: #9ca3af;
-            margin-top: 5px;
+            color: #94a3b8;
+            text-align: right;
+            margin-top: 6px;
         }
 
         .btn-delete-chat {
-            background: transparent;
-            color: #f87171;
+            background: none;
             border: none;
+            color: #f87171;
             cursor: pointer;
-            font-size: 11px;
-            opacity: 0.75;
-            transition: all 0.2s ease;
+            font-size: 12px;
+            opacity: 0.7;
+            transition: 0.2s;
+            padding: 0;
+            margin-left: 8px;
         }
 
         .btn-delete-chat:hover {
@@ -584,258 +587,51 @@
             transform: scale(1.15);
         }
 
-        /* PLAYER FIXO */
-        .player-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 60px;
-            background: #09090c;
-            border-top: 1px solid #23232b;
-            display: flex;
-            align-items: center;
+        /* PLAYER RODAPÉ FLUTUANTE */
+        .player-footer { 
+            position: fixed; 
+            bottom: 72px; 
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 40px);
+            max-width: 800px;
+            background: rgba(18, 18, 24, 0.85); 
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 14px 24px; 
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.12); 
+            z-index: 1000; 
+            display: flex; 
+            align-items: center; 
             justify-content: space-between;
-            padding: 0 16px;
-            z-index: 999;
-            box-shadow: 0 -8px 20px rgba(0,0,0,0.35);
+            gap: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.7);
         }
 
-        .player-title {
-            color: #f3f4f6;
-            font-size: 13px;
+        .player-info { 
+            text-align: left;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        #player-title {
+            font-size: 14px;
             font-weight: 700;
+            color: #fff;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            padding-right: 10px;
         }
 
         .player-controls {
             display: flex;
             align-items: center;
-            gap: 10px;
-            flex-shrink: 0;
+            gap: 14px;
         }
 
-        .player-btn-mini,
-        .btn-play {
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .player-btn-mini {
-            width: 34px;
-            height: 34px;
-            background: #1d1d27;
+        .btn-control-step {
+            background: #252532;
             color: #fff;
-            border: 1px solid #2f2f3d;
-        }
-
-        .btn-play {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
-            color: #fff;
-            box-shadow: 0 0 18px var(--primary-glow);
-        }
-
-        .btn-play:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 25px var(--primary-glow);
-        }
-
-        /* TICKER DE NOTÍCIAS */
-        .news-ticker-bar {
-            position: fixed;
-            bottom: 60px;
-            left: 0;
-            width: 100%;
-            height: 38px;
-            background: #050507;
-            border-top: 1px solid #1f1f28;
-            z-index: 998;
-            display: flex;
-            align-items: center;
-            overflow: hidden;
-        }
-
-        .news-label {
-            background: #ef4444;
-            color: #fff;
-            font-size: 12px;
-            font-weight: 800;
-            padding: 0 16px;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            white-space: nowrap;
-            z-index: 2;
-            flex-shrink: 0;
-        }
-
-        .news-ticker-wrap {
-            overflow: hidden;
-            position: relative;
-            width: 100%;
-            height: 100%;
-        }
-
-        .news-ticker-track {
-            display: flex;
-            align-items: center;
-            width: max-content;
-            white-space: nowrap;
-            animation: tickerMove 70s linear infinite;
-            height: 100%;
-        }
-
-        .news-block-repeat {
-            display: inline-flex;
-            align-items: center;
-        }
-
-        .news-item-link {
-            color: #f3f4f6;
-            text-decoration: none;
-            font-size: 12px;
-            font-weight: 700;
-            display: inline-flex;
-            align-items: center;
-            padding: 0 22px;
-        }
-
-        .news-item-divider {
-            color: #a855f7;
-            margin-right: 12px;
-            font-size: 10px;
-        }
-
-        @keyframes tickerMove {
-            from { transform: translateX(0); }
-            to { transform: translateX(-50%); }
-        }
-
-        /* SCROLL */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #101015;
-            border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #3b2a52;
-            border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #6b21a8;
-        }
-
-        /* RESPONSIVO */
-        @media (max-width: 900px) {
-            body {
-                padding: 14px;
-            }
-
-            .header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .header-widgets {
-                width: 100%;
-                justify-content: flex-start;
-            }
-
-            .playlist-grid-ouvinte {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .signos-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        @media (max-width: 640px) {
-            .playlist-grid-ouvinte {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .radio-card-quadrado {
-                min-height: 105px;
-            }
-
-            .signos-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .player-title {
-                font-size: 12px;
-                max-width: 45vw;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <div>
-            <h2>Painel do Ouvinte</h2>
-            <span id="nome-ouvinte-display" class="user-name-title">Olá, OUVINTE ANÔNIMO</span>
-        </div>
-
-        <div class="header-widgets">
-            <div class="widget-item">
-                <i class="far fa-clock" style="color:#a855f7;"></i>
-                <span id="relogio-digital" class="relogio-box">00:00:00</span>
-            </div>
-
-            <div class="widget-item">
-                <span id="icone-clima-dinamico"><i class="fas fa-sun" style="color: #eab308; font-size: 16px;"></i></span>
-                <span id="clima-cidade" class="clima-box">Clima...</span>
-            </div>
-
-            <button class="btn-sair" onclick="logout()">
-                <i class="fas fa-right-from-bracket"></i> SAIR
-            </button>
-        </div>
-    </div>
-
-    <div class="frase-centro-playlist">
-        <i class="fas fa-headphones"></i> CURTA AQUI SUAS RÁDIOS PREFERIDAS
-    </div>
-
-    <div class="main-container">
-
-        <!-- CARD 1 -->
-        <div class="card-box">
-            <h3>GERENCIAR SUAS RÁDIOS PREFERIDAS</h3>
-            <div class="sub-titulo-secao"><i class="fas fa-circle-plus"></i> 1. ADICIONE SUAS RÁDIOS</div>
-            <div id="catalogo-radios" class="catalogo-list"></div>
-        </div>
-
-        <!-- CARD 2 -->
-        <div class="card-box">
-            <h3>GERENCIAR SUAS RÁDIOS PREFERIDAS</h3>
-            <div class="sub-titulo-secao"><i class="fas fa-sort"></i> 2. ARRASTE PARA REORDENAR</div>
-            <div id="grid-playlist" class="playlist-grid-ouvinte"></div>
-        </div>
-
-        <!-- CARD 3 -->
-        <div style="display:flex; flex-direction:column; gap:18px;">
-            <div class="card-box">
-                <h3><i class="fas fa-star-of-life" style="color:#c084fc;"></i> HORÓSCOPO DO DIA</h3>
-                <div class="signos-grid">
-                    <div class="signo-btn" onclick="carregarHoroscopo('aries', this)"><span>ÁRIES</span></div>
-                    <div class="signo-btn" onclick="carregarHoroscopo('taurus', this)"><span>TOURO</span></div>
-                    <div class="signo-btn" onclick="carregarHoroscopo('gemini', this)"><span>GÊMEOS</span></div>
-                    <div class="signo-btn" onclick="carregarHoroscopo('cancer', this)"><span>CÂNCER</span></div>
-                    <div class="signo-btn" onclick="carregarHoroscopo('leo', this)"><span>LEÃO</span></div>
-                    <div class="signo-btn" onclick="carregarHoroscopo('virgo', this)"><span>VIRGEM</span></div>
-                    <div class="signo-btn" onclick="carregarHor
+            border: 1px solid #3b3b4f;
+            width
