@@ -102,44 +102,45 @@
 
         .widget-item {
             background: #1a1a22;
-            padding: 8px 14px;
+            padding: 10px 16px;
             border-radius: 10px;
             border: 1px solid #2d2d38;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 9px;
         }
 
-        /* HORA E TEMPERATURA AUMENTADAS PARA O TAMANHO DO NOTEBOOK */
+        /* HORA E TEMPERATURA AUMENTADAS UM POUCO MAIS */
         .widget-item i {
-            font-size: 16px !important;
+            font-size: 18px !important;
         }
 
         .relogio-box {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 700;
             color: #fff;
         }
 
         .clima-box {
-            font-size: 15.5px;
+            font-size: 17.5px;
             font-weight: 600;
             color: #fff;
         }
 
+        /* BOTÃO SAIR AUMENTADO UM POUCO MAIS */
         .btn-sair { 
             background: rgba(239, 68, 68, 0.1); 
             border: 1px solid rgba(239, 68, 68, 0.3); 
             color: #ef4444; 
-            padding: 8px 14px; 
+            padding: 11px 18px; 
             border-radius: 10px; 
             cursor: pointer; 
-            font-size: 12.5px; 
+            font-size: 14px; 
             font-weight: 700; 
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 7px;
         }
 
         .btn-sair:hover {
@@ -619,7 +620,7 @@
             box-shadow: 0 0 15px var(--primary-glow);
         }
 
-        /* LETREIRO DE NOTÍCIAS BRASIL (MAIS LENTO E FONTE AMPLIADA) */
+        /* LETREIRO DE NOTÍCIAS BRASIL (FONTE AUMENTADA) */
         .news-ticker-bar {
             position: fixed;
             bottom: 0;
@@ -637,7 +638,7 @@
         .news-ticker-badge {
             background: #dc2626;
             color: #fff;
-            font-size: 12.5px;
+            font-size: 13px;
             font-weight: 800;
             padding: 0 16px;
             height: 100%;
@@ -667,7 +668,7 @@
             display: flex;
             align-items: center;
             white-space: nowrap;
-            animation: ticker-slide 75s linear infinite; /* VELOCIDADE MAIS LENTA SOLICITADA */
+            animation: ticker-slide 75s linear infinite;
         }
 
         .news-ticker-bar:hover .news-ticker-content {
@@ -684,7 +685,7 @@
 
         .news-item-link {
             color: #ffffff;
-            font-size: 15px;
+            font-size: 17px; /* FONTE DA NOTÍCIA AUMENTADA */
             font-weight: 700;
             text-decoration: none;
             display: inline-flex;
@@ -700,7 +701,7 @@
 
         .news-item-divider {
             color: #a855f7;
-            font-size: 11px;
+            font-size: 12px;
         }
 
         @keyframes ticker-slide {
@@ -921,16 +922,16 @@
                     const temp = Math.round(climaData.current_weather.temperature);
                     const code = climaData.current_weather.weathercode;
 
-                    let iconeHTML = '<i class="fas fa-sun" style="color: #eab308; font-size: 16px;"></i>';
+                    let iconeHTML = '<i class="fas fa-sun" style="color: #eab308; font-size: 18px;"></i>';
 
                     if (code === 0 || code === 1) {
-                        iconeHTML = '<i class="fas fa-sun" style="color: #eab308; font-size: 16px;"></i>';
+                        iconeHTML = '<i class="fas fa-sun" style="color: #eab308; font-size: 18px;"></i>';
                     } else if (code === 2 || code === 3) {
-                        iconeHTML = '<i class="fas fa-cloud-sun" style="color: #f59e0b; font-size: 16px;"></i>';
+                        iconeHTML = '<i class="fas fa-cloud-sun" style="color: #f59e0b; font-size: 18px;"></i>';
                     } else if (code >= 51 && code <= 99) {
-                        iconeHTML = '<i class="fas fa-cloud-showers-heavy" style="color: #38bdf8; font-size: 16px;"></i>';
+                        iconeHTML = '<i class="fas fa-cloud-showers-heavy" style="color: #38bdf8; font-size: 18px;"></i>';
                     } else if (code === 45 || code === 48) {
-                        iconeHTML = '<i class="fas fa-cloud" style="color: #94a3b8; font-size: 16px;"></i>';
+                        iconeHTML = '<i class="fas fa-cloud" style="color: #94a3b8; font-size: 18px;"></i>';
                     }
 
                     document.getElementById('icone-clima-dinamico').innerHTML = iconeHTML;
@@ -945,26 +946,74 @@
         atualizarCarrosselClima();
         setInterval(atualizarCarrosselClima, 6000);
 
-        // HORÓSCOPO DO DIA
+        // HORÓSCOPO DO DIA DINÂMICO COM ROTAÇÃO DIÁRIA AUTOMÁTICA
         const nomesSignos = {
             aries: 'Áries', taurus: 'Touro', gemini: 'Gêmeos', cancer: 'Câncer',
             leo: 'Leão', virgo: 'Virgem', libra: 'Libra', scorpio: 'Escorpião',
             sagittarius: 'Sagitário', capricorn: 'Capricórnio', aquarius: 'Aquário', pisces: 'Peixes'
         };
 
-        const horoscopoBackup = {
-            aries: "Dia de energia renovada. Bom momento para tomar iniciativas e focar nos seus objetivos pessoais.",
-            taurus: "Estabilidade em alta. Mantenha os pés no chão e aproveite momentos de tranquilidade e conforto.",
-            gemini: "Comunicação afiada hoje! Ótima oportunidade para trocar ideias e fazer novos contatos.",
-            cancer: "Intuição aguçada. Volte a atenção para a família e para o que traz segurança emocional.",
-            leo: "Seu brilho pessoal está destacado. Confie no seu potencial para liderar e inspirar os outros.",
-            virgo: "Organização e foco nos detalhes trarão excelentes resultados nas suas tarefas diárias.",
-            libra: "Busque o equilíbrio em suas relações. Um dia favorável para harmonia e acordos amigáveis.",
-            scorpio: "Momento de transformação e foco profundo. Sua determinação vai te ajudar a superar desafios.",
-            sagittarius: "Espírito otimista e busca por novidades. Excelente dia para aprender algo novo ou planejar viagens.",
-            capricorn: "Foco no trabalho e nas metas de longo prazo. Sua disciplina continuará trazendo bons frutos.",
-            aquarius: "Ideias inovadoras em alta. Esteja aberto para colaborar com amigos e pensar no futuro.",
-            pisces: "Sensibilidade e criatividade elevadas. Confie nos seus sentimentos para tomar decisões."
+        const baseHoroscopoDinamico = {
+            aries: [
+                "Dia de energia renovada. Bom momento para tomar iniciativas e focar nos seus objetivos pessoais.",
+                "Sua ousadia trará novas oportunidades profissionais hoje. Não hesite em dar o primeiro passo.",
+                "A Lua em aspecto dinâmico pede cautela com a impulsividade, mas favorece esportes e desafios físicos."
+            ],
+            taurus: [
+                "Estabilidade em alta. Mantenha os pés no chão e aproveite momentos de tranquilidade e conforto.",
+                "Foco total nas finanças e investimentos. O dia favorece a organização material e segurança a longo prazo.",
+                "Sua paciência será testada, mas sua persistência garantirá vitórias sólidas até o fim do dia."
+            ],
+            gemini: [
+                "Comunicação afiada hoje! Ótima oportunidade para trocar ideias e fazer novos contatos.",
+                "Sua curiosidade natural está em alta. Aproveite para estudar algo novo ou iniciar um projeto criativo.",
+                "Evite dispersar sua energia com muitos assuntos ao mesmo tempo. Priorize o que é essencial."
+            ],
+            cancer: [
+                "Intuição aguçada. Volte a atenção para a família e para o que traz segurança emocional.",
+                "Momento propício para curar velhas feridas e fortalecer laços afetivos verdadeiros.",
+                "Sua sensibilidade estará à flor da pele; use-a a favor da sua criatividade e empatia."
+            ],
+            leo: [
+                "Seu brilho pessoal está destacado. Confie no seu potencial para liderar e inspirar os outros.",
+                "O reconhecimento que você tanto esperava no trabalho pode chegar de forma surpreendente hoje.",
+                "Divirta-se mais e leve as cobranças alheias com leveza. Seu sorriso é sua maior arma."
+            ],
+            virgo: [
+                "Organização e foco nos detalhes trarão excelentes resultados nas suas tarefas diárias.",
+                "Sua saúde pede um pouco mais de atenção; priorize uma boa noite de sono e alimentação equilibrada.",
+                "Um problema antigo no trabalho encontra uma solução prática graças à sua inteligência analítica."
+            ],
+            libra: [
+                "Busque o equilíbrio em suas relações. Um dia favorável para harmonia e acordos amigáveis.",
+                "Sua diplomacia abrirá portas importantes em parcerias comerciais ou afetivas.",
+                "Momento ideal para cuidar da estética, do visual e de ambientes que tragam paz interior."
+            ],
+            scorpio: [
+                "Momento de transformação e foco profundo. Sua determinação vai te ajudar a superar desafios.",
+                "Segredos podem vir à tona, revelando verdades importantes para o seu crescimento pessoal.",
+                "Sua intuição magnética está fortíssima. Confie nos seus instintos antes de fechar qualquer acordo."
+            ],
+            sagittarius: [
+                "Espírito otimista e busca por novidades. Excelente dia para aprender algo novo ou planejar viagens.",
+                "Sua alegria contagiante atrai pessoas benéficas para o seu círculo social e profissional.",
+                "Expanda seus horizontes intelectuais; leituras e conversas profundas trarão grandes insights."
+            ],
+            capricorn: [
+                "Foco no trabalho e nas metas de longo prazo. Sua disciplina continuará trazendo bons frutos.",
+                "Recompensa financeira ou profissional à vista pelo esforço dedicado nas últimas semanas.",
+                "Permita-se relaxar um pouco ao lado de quem você ama; nem só de trabalho vive o capricorniano."
+            ],
+            aquarius: [
+                "Ideias inovadoras em alta. Esteja aberto para colaborar com amigos e pensar no futuro.",
+                "Sua originalidade se destaca em reuniões e debates. Proponha soluções fora da caixa.",
+                "Um projeto coletivo ganha forte impulso hoje. Conecte-se com pessoas que compartilham dos mesmos ideais."
+            ],
+            pisces: [
+                "Sensibilidade e criatividade elevadas. Confie nos seus sentimentos para tomar decisões.",
+                "Sua empatia tocará o coração de alguém que precisa de apoio neste momento.",
+                "Momento mágico para a arte, a música e a conexão espiritual. Escute sua voz interior."
+            ]
         };
 
         async function carregarHoroscopo(signo, el) {
@@ -974,20 +1023,20 @@
             const container = document.getElementById('horoscopo-texto');
             container.innerHTML = `<i class="fas fa-spinner fa-spin" style="color:#c084fc;"></i> Consultando astros...`;
 
-            try {
-                const res = await fetch(`https://backend.astrolink.com.br/api/v1/horoscopo/${signo}/dia`);
-                if(res.ok) {
-                    const data = await res.json();
-                    if(data && (data.texto || data.text)) {
-                        const texto = data.texto || data.text;
-                        container.innerHTML = `<div><span class="signo-titulo">✨ ${nomesSignos[signo]}</span>${texto}</div>`;
-                        return;
-                    }
-                }
-                throw new Error("Fallback horóscopo");
-            } catch (err) {
-                container.innerHTML = `<div><span class="signo-titulo">✨ ${nomesSignos[signo]}</span>${horoscopoBackup[signo]}</div>`;
+            // Gerador dinâmico baseado na data atual para mudar diariamente de forma autônoma
+            const hojeStr = new Date().toISOString().slice(0, 10); // ex: "2026-06-07"
+            let hashData = 0;
+            for (let i = 0; i < hojeStr.length; i++) {
+                hashData += hojeStr.charCodeAt(i);
             }
+
+            const listaFrases = baseHoroscopoDinamico[signo] || baseHoroscopoDinamico['aries'];
+            const indiceDoDia = hashData % listaFrases.length;
+            const textoDoDia = listaFrases[indiceDoDia];
+
+            setTimeout(() => {
+                container.innerHTML = `<div><span class="signo-titulo">✨ ${nomesSignos[signo]}</span>${textoDoDia}</div>`;
+            }, 300);
         }
 
         // NOTÍCIAS BRASIL
