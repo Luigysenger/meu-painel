@@ -279,7 +279,7 @@
             color: #fff;
         }
 
-        /* PLAYLIST (GRID DE CARDS 3x3) - TAMANHO ORIGINAL DOS ÍCONES RESTAURADO */
+        /* PLAYLIST (GRID DE CARDS 3x3) - ÍCONES E NOMES AUMENTADOS COMO NO NOTEBOOK */
         .playlist-grid-ouvinte {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -337,13 +337,13 @@
         }
 
         .radio-card-quadrado i.icon-radio {
-            font-size: clamp(28px, 3.2vw, 42px);
+            font-size: clamp(36px, 4.2vw, 54px);
             margin-bottom: 8px;
         }
 
         .antena-piscando {
             color: #22c55e;
-            font-size: clamp(28px, 3.2vw, 42px) !important;
+            font-size: clamp(36px, 4.2vw, 54px) !important;
             animation: piscar 1.2s infinite ease-in-out;
         }
 
@@ -353,7 +353,7 @@
         }
 
         .radio-card-quadrado .radio-name {
-            font-size: clamp(12px, 1.35vw, 15px);
+            font-size: clamp(15px, 1.7vw, 19px);
             font-weight: 800;
             line-height: 1.3;
             word-break: break-word;
@@ -1079,11 +1079,13 @@
         let playlistKeys = JSON.parse(localStorage.getItem('playlist_keys_ouvinte') || '[]');
         let radioTocandoKey = null;
 
-        db.ref('ouvintes_preferencias/' + ouvinteId + '/playlist').once('value', snap => {
+        // SINCRONIZAÇÃO EM TEMPO REAL COM O FIREBASE PARA QUALQUER PC/NOTEBOOK LOGADO
+        db.ref('ouvintes_preferencias/' + ouvinteId + '/playlist').on('value', snap => {
             if (snap.exists()) {
                 playlistKeys = snap.val();
                 localStorage.setItem('playlist_keys_ouvinte', JSON.stringify(playlistKeys));
                 localStorage.setItem('playlist_iniciada', 'true');
+                renderizarPainelRadios();
             }
         });
 
