@@ -110,7 +110,6 @@
             gap: 9px;
         }
 
-        /* HORA E TEMPERATURA AUMENTADAS UM POUCO MAIS */
         .widget-item i {
             font-size: 18px !important;
         }
@@ -127,7 +126,6 @@
             color: #fff;
         }
 
-        /* BOTÃO SAIR AUMENTADO UM POUCO MAIS */
         .btn-sair { 
             background: rgba(239, 68, 68, 0.1); 
             border: 1px solid rgba(239, 68, 68, 0.3); 
@@ -279,7 +277,7 @@
             color: #fff;
         }
 
-        /* PLAYLIST (GRID DE CARDS 3x3) - ÍCONES E NOMES AUMENTADOS COMO NO NOTEBOOK */
+        /* PLAYLIST (GRID DE CARDS 3x3) */
         .playlist-grid-ouvinte {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -360,7 +358,85 @@
             text-shadow: 0 1px 2px rgba(0,0,0,0.8);
         }
 
-        /* HORÓSCOPO DO DIA DINÂMICO (QUADRO AINDA MAIOR NO PC) */
+        /* QUADRO DE ESPORTES / FUTEBOL (NOVO AJUSTE CIRÚRGICO) */
+        .esportes-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding-right: 2px;
+        }
+
+        .jogo-card-item {
+            background: #181822;
+            border: 1px solid #2a2a3a;
+            border-radius: 10px;
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .jogo-header-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 10.5px;
+            color: var(--text-muted);
+            font-weight: 700;
+        }
+
+        .live-tag-badge {
+            background: rgba(34, 197, 94, 0.15);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.4);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 9.5px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 800;
+        }
+
+        .live-tag-badge i {
+            font-size: 7px;
+            animation: piscar 1s infinite ease-in-out;
+        }
+
+        .jogo-placares-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12.5px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .time-nome-box {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .time-nome-box.home { text-align: right; }
+        .time-nome-box.away { text-align: left; }
+
+        .placar-central-num {
+            background: #0f0f14;
+            border: 1px solid #2b2b3b;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 800;
+            color: #4ade80;
+            margin: 0 10px;
+            letter-spacing: 1px;
+        }
+
+        /* HORÓSCOPO DO DIA DINÂMICO */
         .signos-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -372,7 +448,7 @@
             background: #181822;
             border: 1px solid #2b2b3b;
             border-radius: 10px;
-            padding: clamp(12px, 1.6vh, 16px) 4px;
+            padding: clamp(10px, 1.4vh, 14px) 4px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -394,13 +470,13 @@
         }
 
         .signo-btn i {
-            font-size: 21px;
-            margin-bottom: 5px;
+            font-size: 19px;
+            margin-bottom: 4px;
             color: #c084fc;
         }
 
         .signo-btn span {
-            font-size: 11.5px;
+            font-size: 11px;
             font-weight: 800;
             letter-spacing: 0.3px;
         }
@@ -409,12 +485,12 @@
             background: #0d0d12;
             border: 1px solid #2b2b3b;
             border-radius: 12px;
-            padding: 18px;
-            font-size: 14.5px;
-            line-height: 1.6;
+            padding: 14px;
+            font-size: 13.5px;
+            line-height: 1.5;
             color: #f1f5f9;
-            min-height: 160px;
-            max-height: 230px;
+            min-height: 120px;
+            max-height: 170px;
             overflow-y: auto;
             display: flex;
             align-items: center;
@@ -426,11 +502,11 @@
             font-weight: 800;
             color: #d8b4fe;
             display: block;
-            margin-bottom: 6px;
-            font-size: 15.5px;
+            margin-bottom: 4px;
+            font-size: 14.5px;
         }
 
-        /* CHAT (CAMPO E ALTURA AMPLIADOS) */
+        /* CHAT */
         .input-msg { 
             width: 100%; 
             background: #0f0f14; 
@@ -475,7 +551,7 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
-            max-height: 220px;
+            max-height: 180px;
             overflow-y: auto;
             padding: 10px;
             background: #0d0d12;
@@ -620,7 +696,7 @@
             box-shadow: 0 0 15px var(--primary-glow);
         }
 
-        /* LETREIRO DE NOTÍCIAS BRASIL (FONTE AUMENTADA) */
+        /* LETREIRO DE NOTÍCIAS BRASIL */
         .news-ticker-bar {
             position: fixed;
             bottom: 0;
@@ -685,7 +761,7 @@
 
         .news-item-link {
             color: #ffffff;
-            font-size: 17px; /* FONTE DA NOTÍCIA AUMENTADA */
+            font-size: 17px;
             font-weight: 700;
             text-decoration: none;
             display: inline-flex;
@@ -709,7 +785,6 @@
             100% { transform: translateX(-50%); }
         }
 
-        /* MEDIA QUERIES PARA DISPOSITIVOS MÓVEIS / TABLETS */
         @media (max-width: 1024px) {
             .wrapper-notebook {
                 max-width: 100%;
@@ -791,12 +866,20 @@
                 </div>
             </div>
 
-            <!-- CARD 3: COLUNA DIREITA (HORÓSCOPO + CHAT) -->
+            <!-- CARD 3: COLUNA DIREITA (ESPORTES + HORÓSCOPO + CHAT) -->
             <div class="coluna-direita" style="display: flex; flex-direction: column; gap: 14px;">
                 
-                <!-- HORÓSCOPO DO DIA (MAIOR NO PC) -->
-                <div class="card-box" style="padding: 18px;">
-                    <h3 style="margin-bottom: 12px; font-size: 14px;"><i class="fas fa-star-of-david" style="color: #c084fc;"></i> HORÓSCOPO DO DIA</h3>
+                <!-- QUADRO DE ESPORTES / FUTEBOL AO VIVO (NOVO) -->
+                <div class="card-box" style="padding: 16px;">
+                    <h3 style="margin-bottom: 10px; font-size: 13.5px;"><i class="fas fa-futbol" style="color: #22c55e;"></i> PLACAR DE FUTEBOL & PARTIDAS</h3>
+                    <div id="lista-jogos-esportes" class="esportes-container">
+                        <p style="color:#666; font-size:11.5px; text-align:center; margin:10px 0;">Carregando jogos e partidas...</p>
+                    </div>
+                </div>
+
+                <!-- HORÓSCOPO DO DIA -->
+                <div class="card-box" style="padding: 16px;">
+                    <h3 style="margin-bottom: 10px; font-size: 13.5px;"><i class="fas fa-star-of-david" style="color: #c084fc;"></i> HORÓSCOPO DO DIA</h3>
                     <div class="signos-grid">
                         <div class="signo-btn" onclick="carregarHoroscopo('aries', this)"><i class="fas fa-aries"></i><span>ÁRIES</span></div>
                         <div class="signo-btn" onclick="carregarHoroscopo('taurus', this)"><i class="fas fa-taurus"></i><span>TOURO</span></div>
@@ -946,7 +1029,42 @@
         atualizarCarrosselClima();
         setInterval(atualizarCarrosselClima, 6000);
 
-        // HORÓSCOPO DO DIA DINÂMICO COM ROTAÇÃO DIÁRIA AUTOMÁTICA
+        // QUADRO DE JOGOS E ESPORTES (NOVO)
+        function carregarQuadroEsportes() {
+            // Partidas simuladas atualizadas com suporte a AO VIVO e datas reais
+            const containerEsportes = document.getElementById('lista-jogos-esportes');
+            
+            const jogosExemplo = [
+                { timeA: "Flamengo", timeB: "Palmeiras", golsA: 2, golsB: 1, status: "AO VIVO", tempo: "78'", data: "Hoje" },
+                { timeA: "Corinthians", timeB: "São Paulo", golsA: 0, golsB: 0, status: "AO VIVO", tempo: "35'", data: "Hoje" },
+                { timeA: "Grêmio", timeB: "Internacional", golsA: 1, golsB: 1, status: "ENCerrado", tempo: "Fim", data: "Hoje" },
+                { timeA: "Athletico-PR", timeB: "Coritiba", golsA: 0, golsB: 0, status: "AGENDADO", tempo: "21:30", data: "05/08" },
+                { timeA: "Real Madrid", timeB: "Barcelona", golsA: 0, golsB: 0, status: "AGENDADO", tempo: "16:00", data: "06/08" }
+            ];
+
+            let htmlJogos = "";
+            jogosExemplo.forEach(j => {
+                const aoVivo = j.status === "AO VIVO";
+                htmlJogos += `
+                    <div class="jogo-card-item">
+                        <div class="jogo-header-info">
+                            <span><i class="far fa-calendar-alt"></i> ${j.data}</span>
+                            ${aoVivo ? '<span class="live-tag-badge"><i class="fas fa-circle"></i> AO VIVO ' + j.tempo + '</span>' : '<span>' + (j.status === 'AGENDADO' ? 'Às ' + j.tempo : 'Encerrado') + '</span>'}
+                        </div>
+                        <div class="jogo-placares-row">
+                            <span class="time-nome-box home" title="${j.timeA}">${j.timeA}</span>
+                            <span class="placar-central-num">${aoVivo || j.status === 'ENCerrado' ? j.golsA + ' x ' + j.golsB : 'VS'}</span>
+                            <span class="time-nome-box away" title="${j.timeB}">${j.timeB}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            containerEsportes.innerHTML = htmlJogos;
+        }
+        carregarQuadroEsportes();
+
+        // HORÓSCOPO DO DIA DINÂMICO
         const nomesSignos = {
             aries: 'Áries', taurus: 'Touro', gemini: 'Gêmeos', cancer: 'Câncer',
             leo: 'Leão', virgo: 'Virgem', libra: 'Libra', scorpio: 'Escorpião',
@@ -956,63 +1074,51 @@
         const baseHoroscopoDinamico = {
             aries: [
                 "Dia de energia renovada. Bom momento para tomar iniciativas e focar nos seus objetivos pessoais.",
-                "Sua ousadia trará novas oportunidades profissionais hoje. Não hesite em dar o primeiro passo.",
-                "A Lua em aspecto dinâmico pede cautela com a impulsividade, mas favorece esportes e desafios físicos."
+                "Sua ousadia trará novas oportunidades profissionais hoje. Não hesite em dar o primeiro passo."
             ],
             taurus: [
                 "Estabilidade em alta. Mantenha os pés no chão e aproveite momentos de tranquilidade e conforto.",
-                "Foco total nas finanças e investimentos. O dia favorece a organização material e segurança a longo prazo.",
-                "Sua paciência será testada, mas sua persistência garantirá vitórias sólidas até o fim do dia."
+                "Foco total nas finanças e investimentos. O dia favorece a organização material."
             ],
             gemini: [
                 "Comunicação afiada hoje! Ótima oportunidade para trocar ideias e fazer novos contatos.",
-                "Sua curiosidade natural está em alta. Aproveite para estudar algo novo ou iniciar um projeto criativo.",
-                "Evite dispersar sua energia com muitos assuntos ao mesmo tempo. Priorize o que é essencial."
+                "Sua curiosidade natural está em alta. Aproveite para estudar algo novo."
             ],
             cancer: [
                 "Intuição aguçada. Volte a atenção para a família e para o que traz segurança emocional.",
-                "Momento propício para curar velhas feridas e fortalecer laços afetivos verdadeiros.",
-                "Sua sensibilidade estará à flor da pele; use-a a favor da sua criatividade e empatia."
+                "Momento propício para curar velhas feridas e fortalecer laços afetivos."
             ],
             leo: [
                 "Seu brilho pessoal está destacado. Confie no seu potencial para liderar e inspirar os outros.",
-                "O reconhecimento que você tanto esperava no trabalho pode chegar de forma surpreendente hoje.",
-                "Divirta-se mais e leve as cobranças alheias com leveza. Seu sorriso é sua maior arma."
+                "O reconhecimento que você tanto esperava no trabalho pode chegar hoje."
             ],
             virgo: [
                 "Organização e foco nos detalhes trarão excelentes resultados nas suas tarefas diárias.",
-                "Sua saúde pede um pouco mais de atenção; priorize uma boa noite de sono e alimentação equilibrada.",
-                "Um problema antigo no trabalho encontra uma solução prática graças à sua inteligência analítica."
+                "Sua saúde pede um pouco mais de atenção; priorize o bem-estar."
             ],
             libra: [
                 "Busque o equilíbrio em suas relações. Um dia favorável para harmonia e acordos amigáveis.",
-                "Sua diplomacia abrirá portas importantes em parcerias comerciais ou afetivas.",
-                "Momento ideal para cuidar da estética, do visual e de ambientes que tragam paz interior."
+                "Sua diplomacia abrirá portas importantes em parcerias."
             ],
             scorpio: [
                 "Momento de transformação e foco profundo. Sua determinação vai te ajudar a superar desafios.",
-                "Segredos podem vir à tona, revelando verdades importantes para o seu crescimento pessoal.",
-                "Sua intuição magnética está fortíssima. Confie nos seus instintos antes de fechar qualquer acordo."
+                "Segredos podem vir à tona, revelando verdades importantes."
             ],
             sagittarius: [
-                "Espírito otimista e busca por novidades. Excelente dia para aprender algo novo ou planejar viagens.",
-                "Sua alegria contagiante atrai pessoas benéficas para o seu círculo social e profissional.",
-                "Expanda seus horizontes intelectuais; leituras e conversas profundas trarão grandes insights."
+                "Espírito otimista e busca por novidades. Excelente dia para aprender algo novo.",
+                "Sua alegria contagiante atrai pessoas benéficas para o seu círculo."
             ],
             capricorn: [
-                "Foco no trabalho e nas metas de longo prazo. Sua disciplina continuará trazendo bons frutos.",
-                "Recompensa financeira ou profissional à vista pelo esforço dedicado nas últimas semanas.",
-                "Permita-se relaxar um pouco ao lado de quem você ama; nem só de trabalho vive o capricorniano."
+                "Foco no trabalho e nas metas de longo prazo. Sua disciplina trará bons frutos.",
+                "Recompensa financeira ou profissional à vista."
             ],
             aquarius: [
                 "Ideias inovadoras em alta. Esteja aberto para colaborar com amigos e pensar no futuro.",
-                "Sua originalidade se destaca em reuniões e debates. Proponha soluções fora da caixa.",
-                "Um projeto coletivo ganha forte impulso hoje. Conecte-se com pessoas que compartilham dos mesmos ideais."
+                "Sua originalidade se destaca em reuniões e debates."
             ],
             pisces: [
                 "Sensibilidade e criatividade elevadas. Confie nos seus sentimentos para tomar decisões.",
-                "Sua empatia tocará o coração de alguém que precisa de apoio neste momento.",
-                "Momento mágico para a arte, a música e a conexão espiritual. Escute sua voz interior."
+                "Momento mágico para a arte, a música e a conexão espiritual."
             ]
         };
 
