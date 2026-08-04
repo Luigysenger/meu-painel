@@ -2,148 +2,182 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LOGIN - LUIGY</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login e Cadastro - Rádio</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
     <style>
-        *, *::before, *::after { box-sizing: border-box !important; }
+        :root {
+            --primary: #1DB954;
+            --bg: #09090b;
+            --card: rgba(18, 18, 20, 0.85);
+            --card-solid: #121214;
+            --text-muted: #a1a1aa;
+            --purple-light: #c084fc;
+            --border-glass: rgba(255, 255, 255, 0.08);
+        }
+
+        * { box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', sans-serif;
-            background: #000;
-            color: white;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: #f4f4f5;
             margin: 0;
-            padding: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            padding: 20px;
         }
 
         .login-card {
-            background: #121212;
-            border: 1px solid #282828;
-            border-radius: 20px;
-            padding: 30px;
+            background: var(--card);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glass);
+            border-radius: 24px;
+            padding: 35px;
             width: 100%;
             max-width: 420px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
             text-align: center;
         }
 
-        h2 {
-            color: #A020F0;
-            margin-top: 0;
-            margin-bottom: 5px;
+        .login-title {
+            font-size: 24px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #c084fc, #e879f9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
         }
 
-        p.sub {
-            color: #777;
-            font-size: 12px;
+        .login-sub {
+            font-size: 13px;
+            color: var(--text-muted);
             margin-bottom: 25px;
         }
 
-        .field-group {
+        .input-group {
+            margin-bottom: 16px;
             text-align: left;
-            margin-bottom: 15px;
         }
 
-        label {
-            font-size: 10px;
-            color: #aaa;
-            text-transform: uppercase;
-            font-weight: bold;
+        .input-group label {
             display: block;
-            margin-bottom: 5px;
-            letter-spacing: 1px;
-        }
-
-        .input-login {
-            width: 100%;
-            background: #1a1a1a;
-            border: 1px solid #333;
-            border-radius: 10px;
-            color: #fff;
-            padding: 12px 15px;
-            font-size: 14px;
-            outline: none;
-            transition: 0.3s;
-        }
-
-        .input-login:focus {
-            border-color: #A020F0;
-            box-shadow: 0 0 10px rgba(160, 32, 240, 0.3);
-        }
-
-        .btn-entrar {
-            width: 100%;
-            background: #A020F0;
-            color: white;
-            border: none;
-            padding: 14px;
-            border-radius: 10px;
-            font-weight: 900;
-            font-size: 13px;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 10px;
-            transition: 0.3s;
-        }
-
-        .btn-entrar:hover {
-            background: #b23bf2;
-            box-shadow: 0 0 15px rgba(160, 32, 240, 0.5);
-        }
-
-        .toggle-link {
-            margin-top: 20px;
             font-size: 12px;
-            color: #aaa;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            font-weight: 600;
         }
 
-        .toggle-link span {
-            color: #FFB6C1;
-            font-weight: bold;
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            background: #161619;
+            border: 1px solid var(--border-glass);
+            color: white;
+            border-radius: 12px;
+            outline: none;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+        }
+
+        .btn-action {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary);
+            color: #000;
+            border: none;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 14px;
             cursor: pointer;
+            margin-top: 10px;
+            transition: opacity 0.2s, transform 0.1s;
+            box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+        }
+
+        .btn-action:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .toggle-mode {
+            margin-top: 20px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .toggle-mode span {
+            color: var(--purple-light);
+            cursor: pointer;
+            font-weight: 700;
             text-decoration: underline;
+        }
+
+        .toggle-mode span:hover {
+            color: #d8b4fe;
+        }
+
+        .error-msg {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            margin-bottom: 15px;
+            display: none;
         }
     </style>
 </head>
 <body>
 
     <div class="login-card">
-        <h2 id="titulo-form">BEM-VINDO</h2>
-        <p class="sub" id="sub-form">Informe seus dados para acessar o painel</p>
+        <div id="card-header">
+            <h1 class="login-title" id="titulo-form">Acesso ao Sistema</h1>
+            <p class="login-sub" id="sub-form">Entre com suas credenciais para continuar</p>
+        </div>
 
-        <form id="form-login" onsubmit="processarAcao(event)">
-            <div class="field-group" id="group-nome" style="display: none;">
-                <label>SEU NOME COMPLETO</label>
-                <input type="text" id="nome-cadastro" class="input-login" placeholder="Ex: João Silva">
+        <div id="error-alert" class="error-msg"></div>
+
+        <!-- FORMULÁRIO -->
+        <div id="form-container">
+            <!-- Campos específicos de Cadastro -->
+            <div class="input-group" id="group-nome" style="display: none;">
+                <label>Primeiro Nome</label>
+                <input type="text" id="txt-nome" placeholder="Digite seu primeiro nome" onkeydown="handleEnter(event)">
             </div>
 
-            <div class="field-group">
-                <label>NOME DE USUÁRIO / E-MAIL</label>
-                <input type="text" id="usuario" class="input-login" placeholder="Digite seu usuário ou e-mail" required>
+            <div class="input-group">
+                <label>E-mail</label>
+                <input type="email" id="txt-email" placeholder="seu@email.com" onkeydown="handleEnter(event)">
             </div>
 
-            <div class="field-group">
-                <label>SENHA</label>
-                <input type="password" id="senha" class="input-login" placeholder="••••••" required>
+            <div class="input-group">
+                <label>Senha</label>
+                <input type="password" id="txt-senha" placeholder="********" onkeydown="handleEnter(event)">
             </div>
 
-            <button type="submit" id="btn-submit" class="btn-entrar">ENTRAR NO PAINEL</button>
-        </form>
+            <!-- Confirmação de Senha (Apenas no Cadastro) -->
+            <div class="input-group" id="group-confirma" style="display: none;">
+                <label>Confirmar Senha</label>
+                <input type="password" id="txt-confirma" placeholder="********" onkeydown="handleEnter(event)">
+            </div>
 
-        <div class="toggle-link" id="box-toggle">
-            Não tem uma conta? <span onclick="mudarModo('cadastro')">Criar nova conta</span>
+            <button class="btn-action" id="btn-submit" onclick="executarAcao()">ENTRAR</button>
+        </div>
+
+        <!-- Alternador de Telas -->
+        <div class="toggle-mode" id="div-toggle">
+            Não tenho cadastro? <span onclick="alternarModo()">Cadastre-se</span>
         </div>
     </div>
 
@@ -157,63 +191,114 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let modoAtual = 'login';
+        let modoCadastro = false;
 
-        function mudarModo(modo) {
-            modoAtual = modo;
-            if (modo === 'cadastro') {
-                document.getElementById('titulo-form').innerText = "CRIAR CONTA";
-                document.getElementById('sub-form').innerText = "Preencha os dados abaixo para se cadastrar";
-                document.getElementById('group-nome').style.display = "block";
-                document.getElementById('btn-submit').innerText = "CRIAR MINHA CONTA";
-                document.getElementById('box-toggle').innerHTML = 'Já possui uma conta? <span onclick="mudarModo(\'login\')">Fazer Login</span>';
+        function alternarModo() {
+            modoCadastro = !modoCadastro;
+            document.getElementById('error-alert').style.display = 'none';
+
+            const groupNome = document.getElementById('group-nome');
+            const groupConfirma = document.getElementById('group-confirma');
+            const titulo = document.getElementById('titulo-form');
+            const sub = document.getElementById('sub-form');
+            const btn = document.getElementById('btn-submit');
+            const toggleDiv = document.getElementById('div-toggle');
+
+            if (modoCadastro) {
+                titulo.innerText = "Criar Cadastro";
+                sub.innerText = "Preencha os campos para se registrar";
+                groupNome.style.display = "block";
+                groupConfirma.style.display = "block";
+                btn.innerText = "CADASTRAR";
+                toggleDiv.innerHTML = 'Já tenho cadastro? <span onclick="alternarModo()">Entrar</span>';
             } else {
-                document.getElementById('titulo-form').innerText = "BEM-VINDO";
-                document.getElementById('sub-form').innerText = "Informe seus dados para acessar o painel";
-                document.getElementById('group-nome').style.display = "none";
-                document.getElementById('btn-submit').innerText = "ENTRAR NO PAINEL";
-                document.getElementById('box-toggle').innerHTML = 'Não tem uma conta? <span onclick="mudarModo(\'cadastro\')">Criar nova conta</span>';
+                titulo.innerText = "Acesso ao Sistema";
+                sub.innerText = "Entre com suas credenciais para continuar";
+                groupNome.style.display = "none";
+                groupConfirma.style.display = "none";
+                btn.innerText = "ENTRAR";
+                toggleDiv.innerHTML = 'Não tenho cadastro? <span onclick="alternarModo()">Cadastre-se</span>';
             }
         }
 
-        function processarAcao(event) {
-            event.preventDefault();
+        function mostrarErro(msg) {
+            const err = document.getElementById('error-alert');
+            err.innerText = msg;
+            err.style.display = 'block';
+        }
 
-            const usuarioInput = document.getElementById('usuario').value.trim();
-            const senhaInput = document.getElementById('senha').value.trim();
-            const nomeInput = document.getElementById('nome-cadastro').value.trim();
-            const userLower = usuarioInput.toLowerCase();
+        function handleEnter(event) {
+            if (event.key === 'Enter') {
+                executarAcao();
+            }
+        }
 
-            // ROTA DE ENTRADA DO ADMINISTRADOR
-            if (userLower === 'admin' || userLower === 'senger.luigy@gmail.com') {
-                localStorage.setItem('userId', 'admin');
-                localStorage.setItem('usuarioNome', 'ADMINISTRADOR');
-                window.location.href = 'adm.html';
+        function executarAcao() {
+            const email = document.getElementById('txt-email').value.trim();
+            const senha = document.getElementById('txt-senha').value.trim();
+
+            if (!email || !senha) {
+                return mostrarErro("Preencha todos os campos obrigatórios.");
+            }
+
+            // LOGIN DO ADMINISTRADOR FIXO (Exemplo mantido do seu sistema)
+            if (!modoCadastro && email === "admin@radio.com" && senha === "admin123") {
+                localStorage.setItem('usuarioNome', 'Administrador');
+                window.location.href = "painel_adm.html";
                 return;
             }
 
-            // MODO DE CADASTRO DE OUVINTE
-            if (modoAtual === 'cadastro') {
-                if (!nomeInput) return alert("Por favor, digite seu nome!");
+            // Normaliza a chave do banco baseada no email para evitar erros com caracteres especiais
+            const emailKey = email.replace(/[.#$\/\[\]]/g, "_");
 
-                const idUser = 'ouvinte_' + Date.now();
-                db.ref('contas/' + idUser).set({
-                    nome: nomeInput,
-                    usuario: usuarioInput,
-                    senha: senhaInput,
-                    status: "online",
-                    criadoEm: new Date().toLocaleString('pt-BR')
-                }).then(() => {
-                    localStorage.setItem('userId', idUser);
-                    localStorage.setItem('usuarioNome', nomeInput);
-                    window.location.href = 'ouvinte.html';
+            if (modoCadastro) {
+                const nome = document.getElementById('txt-nome').value.trim();
+                const confirma = document.getElementById('txt-confirma').value.trim();
+
+                if (!nome) {
+                    return mostrarErro("Por favor, preencha o seu primeiro nome.");
+                }
+                if (senha !== confirma) {
+                    return mostrarErro("As senhas não coincidem.");
+                }
+
+                // Verifica se o email já existe
+                db.ref('contas/' + emailKey).once('value', snapshot => {
+                    if (snapshot.exists()) {
+                        mostrarErro("Este e-mail já está cadastrado.");
+                    } else {
+                        // Salva o novo usuário no Firebase
+                        db.ref('contas/' + emailKey).set({
+                            nome: nome,
+                            email: email,
+                            senha: senha,
+                            criadoEm: Date.now()
+                        }).then(() => {
+                            alert("Cadastro realizado com sucesso! Faça login.");
+                            alternarModo(); // Retorna para a tela de login
+                            document.getElementById('txt-email').value = email;
+                            document.getElementById('txt-senha').value = "";
+                        }).catch(err => {
+                            mostrarErro("Erro ao cadastrar. Tente novamente.");
+                        });
+                    }
                 });
+
             } else {
-                // MODO DE LOGIN DE OUVINTE
-                const idUser = userLower.replace(/[^a-z0-9]/g, '_');
-                localStorage.setItem('userId', idUser);
-                localStorage.setItem('usuarioNome', usuarioInput);
-                window.location.href = 'ouvinte.html';
+                // FLUXO DE LOGIN
+                db.ref('contas/' + emailKey).once('value', snapshot => {
+                    if (snapshot.exists()) {
+                        const dados = snapshot.val();
+                        if (dados.senha === senha) {
+                            localStorage.setItem('usuarioNome', dados.nome);
+                            window.location.href = "ouvinte.html"; // Redireciona para o painel do ouvinte
+                        } else {
+                            mostrarErro("Senha incorreta.");
+                        }
+                    } else {
+                        mostrarErro("E-mail não encontrado ou não cadastrado.");
+                    }
+                });
             }
         }
     </script>
