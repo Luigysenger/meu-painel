@@ -73,12 +73,12 @@
             background: rgba(20, 20, 25, 0.7); 
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            padding: 16px 24px; 
+            padding: 14px 24px; 
             border-radius: 20px; 
             border: 1px solid var(--card-border); 
-            margin-bottom: 20px; 
+            margin-bottom: 16px; 
             width: 100%; 
-            max-width: 1200px; 
+            max-width: 1300px; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
@@ -87,13 +87,13 @@
             background: linear-gradient(135deg, #a855f7, #ec4899);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-size: 22px; 
+            font-size: 20px; 
             font-weight: 800;
             letter-spacing: -0.5px;
         }
 
         .user-name-title {
-            font-size: 14px !important;
+            font-size: 13px !important;
             font-weight: 600;
             color: var(--text-muted);
             margin-top: 2px;
@@ -109,7 +109,7 @@
 
         .widget-item {
             background: #1a1a22;
-            padding: 8px 16px;
+            padding: 7px 14px;
             border-radius: 12px;
             border: 1px solid #2d2d38;
             display: flex;
@@ -119,14 +119,14 @@
         }
 
         .relogio-box {
-            font-size: 15px !important;
+            font-size: 14px !important;
             font-weight: 700;
             color: #fff;
             letter-spacing: 0.5px;
         }
 
         .clima-box {
-            font-size: 14px !important;
+            font-size: 13px !important;
             font-weight: 600;
             color: #fff;
         }
@@ -135,10 +135,10 @@
             background: rgba(239, 68, 68, 0.1); 
             border: 1px solid rgba(239, 68, 68, 0.3); 
             color: #ef4444; 
-            padding: 9px 16px !important; 
+            padding: 8px 14px !important; 
             border-radius: 12px; 
             cursor: pointer; 
-            font-size: 13px !important; 
+            font-size: 12px !important; 
             font-weight: 700; 
             transition: all 0.2s ease;
             display: flex;
@@ -154,41 +154,41 @@
 
         .frase-centro-playlist {
             text-align: center;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 700;
             color: #d8b4fe;
             letter-spacing: 1.5px;
-            margin: 5px 0 25px 0;
+            margin: 0 0 20px 0;
             width: 100%;
-            max-width: 1200px;
+            max-width: 1300px;
             background: linear-gradient(90deg, rgba(147, 51, 234, 0), rgba(147, 51, 234, 0.15), rgba(147, 51, 234, 0));
-            padding: 12px;
+            padding: 10px;
             border-radius: 12px;
             border-top: 1px solid rgba(147, 51, 234, 0.2);
             border-bottom: 1px solid rgba(147, 51, 234, 0.2);
         }
 
-        /* LAYOUT PRINCIPAL */
+        /* LAYOUT PRINCIPAL: 3 COLUNAS DE CARDS */
         .main-container { 
             display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); 
-            gap: 24px; 
+            grid-template-columns: 1.1fr 1fr 1fr; 
+            gap: 20px; 
             width: 100%; 
-            max-width: 1200px; 
+            max-width: 1300px; 
             margin-bottom: 200px; 
             align-items: start;
         }
 
-        .coluna-direita {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
         }
 
         .card-box { 
             background: var(--card); 
-            border-radius: 24px; 
-            padding: 24px; 
+            border-radius: 22px; 
+            padding: 20px; 
             border: 1px solid var(--card-border); 
             width: 100%; 
             box-shadow: 0 15px 35px rgba(0,0,0,0.3);
@@ -196,21 +196,21 @@
 
         h3 { 
             color: var(--text-main); 
-            font-size: 15px; 
+            font-size: 14px; 
             font-weight: 800;
             letter-spacing: 0.5px; 
             margin-top: 0;
-            margin-bottom: 20px; 
+            margin-bottom: 16px; 
             text-align: center; 
             line-height: 1.4;
         }
 
         .sub-titulo-secao {
-            font-size: 13px !important;
+            font-size: 12px !important;
             font-weight: 700;
             text-align: left;
             color: #c084fc !important;
-            margin-bottom: 14px;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
             gap: 6px;
@@ -220,43 +220,28 @@
             background: linear-gradient(135deg, rgba(147, 51, 234, 0.15), rgba(255, 0, 127, 0.15));
             color: #f3e8ff;
             border: 1px solid rgba(168, 85, 247, 0.4);
-            border-radius: 16px;
-            padding: 16px;
-            font-size: 13px;
+            border-radius: 14px;
+            padding: 12px;
+            font-size: 12px;
             font-weight: 700;
             text-align: center;
-            line-height: 1.5;
-            margin-bottom: 18px;
+            line-height: 1.4;
+            margin-bottom: 14px;
             box-shadow: 0 4px 20px rgba(147, 51, 234, 0.15);
         }
 
         .radios-section-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        @media (max-width: 768px) {
-            .radios-section-container {
-                grid-template-columns: 1fr;
-            }
-            .header {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-            .header-widgets {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
         }
 
         /* CATÁLOGO E PLAYLIST */
         .catalogo-list {
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            max-height: 380px;
+            gap: 6px;
+            max-height: 250px;
             overflow-y: auto;
             padding-right: 4px;
         }
@@ -264,16 +249,16 @@
         .bar-radio-catalogo {
             background: #1a1a22;
             border: 1px solid #2a2a36;
-            border-radius: 12px;
-            padding: 12px 14px;
+            border-radius: 10px;
+            padding: 10px 12px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             cursor: pointer;
             transition: all 0.2s ease;
             color: var(--text-main);
             font-weight: 600;
-            font-size: 13px;
+            font-size: 12.5px;
         }
 
         .bar-radio-catalogo:hover {
@@ -289,10 +274,10 @@
         }
 
         .bar-radio-catalogo .btn-add-icon {
-            font-size: 14px;
-            width: 26px;
-            height: 26px;
-            border-radius: 8px;
+            font-size: 12px;
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
             background: #272734;
             display: flex;
             align-items: center;
@@ -307,21 +292,23 @@
 
         .playlist-grid-ouvinte {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+            gap: 8px;
             width: 100%;
-            min-height: 120px;
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 2px;
         }
 
         .radio-card-quadrado {
             aspect-ratio: 1 / 1;
-            border-radius: 16px;
+            border-radius: 14px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 10px;
+            padding: 8px;
             cursor: grab;
             color: #fff;
             font-weight: 700;
@@ -346,7 +333,7 @@
         }
 
         .radio-card-quadrado:hover {
-            transform: translateY(-4px) scale(1.02);
+            transform: translateY(-3px) scale(1.02);
             box-shadow: 0 8px 20px rgba(0,0,0,0.6);
         }
 
@@ -356,18 +343,18 @@
 
         .radio-card-quadrado.playing {
             border: 2px solid #22c55e !important;
-            box-shadow: 0 0 25px rgba(34, 197, 94, 0.5) !important;
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.5) !important;
         }
 
         .radio-card-quadrado i.icon-radio {
-            font-size: 24px;
-            margin-bottom: 8px;
+            font-size: 20px;
+            margin-bottom: 6px;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
         }
 
         .antena-piscando {
             color: #22c55e;
-            font-size: 24px !important;
+            font-size: 20px !important;
             animation: piscar 1.2s infinite ease-in-out;
         }
 
@@ -377,19 +364,19 @@
         }
 
         .radio-card-quadrado .radio-name {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 800;
-            line-height: 1.2;
+            line-height: 1.15;
             word-break: break-word;
             text-shadow: 0 1px 3px rgba(0,0,0,0.8);
         }
 
-        /* HORÓSCOPO DO DIA */
+        /* HORÓSCOPO DO DIA (COMPACTO) */
         .signos-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin-bottom: 18px;
+            gap: 8px;
+            margin-bottom: 12px;
         }
 
         @media (max-width: 480px) {
@@ -401,8 +388,8 @@
         .signo-btn {
             background: #181822;
             border: 1px solid #2b2b3b;
-            border-radius: 14px;
-            padding: 12px 6px;
+            border-radius: 12px;
+            padding: 8px 4px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -420,17 +407,17 @@
         }
 
         .signo-btn.ativo {
-            box-shadow: 0 0 16px rgba(168, 85, 247, 0.45);
+            box-shadow: 0 0 14px rgba(168, 85, 247, 0.45);
         }
 
         .signo-btn i {
-            font-size: 22px;
-            margin-bottom: 6px;
+            font-size: 18px;
+            margin-bottom: 4px;
             color: #c084fc;
         }
 
         .signo-btn span {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 800;
             letter-spacing: 0.5px;
         }
@@ -438,12 +425,14 @@
         .horoscopo-display {
             background: #0d0d12;
             border: 1px solid #2b2b3b;
-            border-radius: 16px;
-            padding: 20px;
-            font-size: 16px;
-            line-height: 1.65;
+            border-radius: 14px;
+            padding: 14px;
+            font-size: 13.5px;
+            line-height: 1.5;
             color: #f1f5f9;
-            min-height: 110px;
+            min-height: 90px;
+            max-height: 140px;
+            overflow-y: auto;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -454,23 +443,23 @@
             font-weight: 800;
             color: #d8b4fe;
             display: block;
-            margin-bottom: 8px;
-            font-size: 17px;
+            margin-bottom: 4px;
+            font-size: 15px;
             letter-spacing: 0.5px;
         }
 
-        /* CHAT E MENSAGENS */
+        /* CHAT E MENSAGENS (COMPACTO) */
         .input-msg { 
             width: 100%; 
             background: #0f0f14; 
             border: 1px solid #272734; 
-            border-radius: 14px; 
+            border-radius: 12px; 
             color: #fff; 
-            padding: 14px; 
-            margin-bottom: 12px; 
+            padding: 10px 12px; 
+            margin-bottom: 10px; 
             outline: none; 
             resize: none;
-            font-size: 14px;
+            font-size: 13px;
             font-family: inherit;
             transition: all 0.2s ease;
         }
@@ -484,10 +473,10 @@
             background: linear-gradient(135deg, var(--primary), #7e22ce); 
             color: #fff; 
             border: none; 
-            padding: 14px; 
-            border-radius: 14px; 
+            padding: 11px; 
+            border-radius: 12px; 
             font-weight: 700; 
-            font-size: 14px;
+            font-size: 13px;
             width: 100%; 
             cursor: pointer; 
             transition: all 0.2s ease;
@@ -503,12 +492,12 @@
         .chat-container {
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            max-height: 320px;
+            gap: 10px;
+            max-height: 180px;
             overflow-y: auto;
-            padding: 14px;
+            padding: 10px;
             background: #0d0d12;
-            border-radius: 16px;
+            border-radius: 14px;
             border: 1px solid #22222e;
         }
 
@@ -517,8 +506,8 @@
             background: linear-gradient(135deg, #2e1045, #1e0b2e);
             border: 1px solid rgba(168, 85, 247, 0.3);
             color: #fff;
-            padding: 12px 16px;
-            border-radius: 16px 16px 16px 4px;
+            padding: 10px 14px;
+            border-radius: 14px 14px 14px 4px;
             max-width: 85%;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             position: relative;
@@ -529,8 +518,8 @@
             background: linear-gradient(135deg, #063726, #032217);
             border: 1px solid rgba(34, 197, 94, 0.4);
             color: #fff;
-            padding: 12px 16px;
-            border-radius: 16px 16px 4px 16px;
+            padding: 10px 14px;
+            border-radius: 14px 14px 4px 14px;
             max-width: 85%;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
@@ -539,12 +528,12 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 6px;
+            gap: 10px;
+            margin-bottom: 4px;
         }
 
         .chat-sender-name {
-            font-size: 11px;
+            font-size: 10.5px;
             font-weight: 800;
             letter-spacing: 0.5px;
         }
@@ -558,16 +547,16 @@
         }
 
         .chat-text {
-            font-size: 13.5px;
-            line-height: 1.5;
+            font-size: 12.5px;
+            line-height: 1.4;
             word-break: break-word;
         }
 
         .chat-time {
-            font-size: 10px;
+            font-size: 9.5px;
             color: #94a3b8;
             text-align: right;
-            margin-top: 6px;
+            margin-top: 4px;
         }
 
         .btn-delete-chat {
@@ -575,11 +564,11 @@
             border: none;
             color: #f87171;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 11px;
             opacity: 0.7;
             transition: 0.2s;
             padding: 0;
-            margin-left: 8px;
+            margin-left: 6px;
         }
 
         .btn-delete-chat:hover {
@@ -598,8 +587,8 @@
             background: rgba(18, 18, 24, 0.85); 
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            padding: 14px 24px; 
-            border-radius: 20px;
+            padding: 12px 20px; 
+            border-radius: 18px;
             border: 1px solid rgba(255, 255, 255, 0.12); 
             z-index: 1000; 
             display: flex; 
@@ -616,7 +605,7 @@
         }
 
         #player-title {
-            font-size: 14px;
+            font-size: 13.5px;
             font-weight: 700;
             color: #fff;
             white-space: nowrap;
@@ -627,20 +616,20 @@
         .player-controls {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
         }
 
         .btn-control-step {
             background: #252532;
             color: #fff;
             border: 1px solid #3b3b4f;
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
+            font-size: 13px;
             cursor: pointer;
             transition: all 0.2s ease;
         }
@@ -655,13 +644,13 @@
             background: linear-gradient(135deg, var(--primary), #a855f7);
             color: #fff;
             border: none;
-            width: 48px;
-            height: 48px;
-            border-radius: 14px;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
+            font-size: 16px;
             cursor: pointer;
             transition: all 0.2s ease;
             box-shadow: 0 0 20px var(--primary-glow);
@@ -672,13 +661,13 @@
             box-shadow: 0 0 25px var(--primary-glow);
         }
 
-        /* LETREIRO DE NOTÍCIAS BRASIL - REFORMULADO E ADEQUADO A TODOS OS TAMANHOS DE TELA */
+        /* LETREIRO DE NOTÍCIAS BRASIL */
         .news-ticker-bar {
             position: fixed;
             bottom: 0;
             left: 0;
             width: 100vw;
-            height: 64px;
+            height: 60px;
             background: #09090c;
             border-top: 1px solid #2a2a3d;
             z-index: 1001;
@@ -690,9 +679,9 @@
         .news-ticker-badge {
             background: #dc2626;
             color: #fff;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 800;
-            padding: 0 22px;
+            padding: 0 20px;
             height: 100%;
             display: flex;
             align-items: center;
@@ -706,7 +695,7 @@
 
         .news-ticker-badge i {
             animation: piscar 1.2s infinite ease-in-out;
-            font-size: 12px;
+            font-size: 11px;
         }
 
         .news-ticker-wrapper {
@@ -739,7 +728,7 @@
 
         .news-item-link {
             color: #ffffff;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
             text-decoration: none;
             display: inline-flex;
@@ -757,7 +746,7 @@
 
         .news-item-divider {
             color: #a855f7;
-            font-size: 16px;
+            font-size: 14px;
         }
 
         @keyframes ticker-slide {
@@ -780,12 +769,12 @@
 
         <div class="header-widgets">
             <div class="widget-item">
-                <i class="far fa-clock" style="color: var(--primary); font-size: 18px;"></i>
+                <i class="far fa-clock" style="color: var(--primary); font-size: 16px;"></i>
                 <span id="relogio-digital" class="relogio-box">00:00:00</span>
             </div>
             
             <div class="widget-item">
-                <span id="icone-clima-dinamico"><i class="fas fa-sun" style="color: #eab308; font-size: 18px;"></i></span>
+                <span id="icone-clima-dinamico"><i class="fas fa-sun" style="color: #eab308; font-size: 16px;"></i></span>
                 <span id="clima-cidade" class="clima-box">Carregando clima...</span>
             </div>
             
@@ -801,29 +790,34 @@
 
     <div class="main-container">
 
-        <!-- COLUNA DA ESQUERDA: RÁDIOS -->
+        <!-- CARD 1: ADICIONAR RÁDIOS -->
         <div class="card-box">
-            <h3>GERENCIAR SUAS RÁDIOS PREFERIDAS</h3>
-            
+            <h3>ADICIONAR RÁDIOS</h3>
             <div class="radios-section-container">
                 <div>
-                    <h3 class="sub-titulo-secao"><i class="fas fa-plus-circle"></i> 1. ADICIONE SUAS RÁDIOS</h3>
+                    <h3 class="sub-titulo-secao"><i class="fas fa-plus-circle"></i> CATÁLOGO DISPONÍVEL</h3>
                     <div id="catalogo-radios" class="catalogo-list"></div>
                 </div>
+            </div>
+        </div>
 
+        <!-- CARD 2: SUAS RÁDIOS PREFERIDAS (3 FILEIRAS) -->
+        <div class="card-box">
+            <h3>SUAS RÁDIOS PREFERIDAS</h3>
+            <div class="radios-section-container">
                 <div>
-                    <h3 class="sub-titulo-secao"><i class="fas fa-sort"></i> 2. ARRASTE PARA REORDENAR</h3>
+                    <h3 class="sub-titulo-secao"><i class="fas fa-sort"></i> ARRASTE PARA REORDENAR</h3>
                     <div id="grid-playlist" class="playlist-grid-ouvinte"></div>
                 </div>
             </div>
         </div>
 
-        <!-- COLUNA DA DIREITA: HORÓSCOPO + CHAT -->
-        <div class="coluna-direita">
+        <!-- CARD 3: COLUNA DIREITA COMPACTA (HORÓSCOPO + CHAT) -->
+        <div class="coluna-direita" style="display: flex; flex-direction: column; gap: 20px;">
             
-            <!-- CARD DO HORÓSCOPO DO DIA -->
-            <div class="card-box">
-                <h3 style="margin-bottom: 18px;"><i class="fas fa-star-of-david" style="color: #c084fc;"></i> HORÓSCOPO DO DIA</h3>
+            <!-- HORÓSCOPO DO DIA -->
+            <div class="card-box" style="padding: 16px;">
+                <h3 style="margin-bottom: 12px; font-size: 13px;"><i class="fas fa-star-of-david" style="color: #c084fc;"></i> HORÓSCOPO DO DIA</h3>
                 <div class="signos-grid">
                     <div class="signo-btn" onclick="carregarHoroscopo('aries', this)"><i class="fas fa-aries"></i><span>ÁRIES</span></div>
                     <div class="signo-btn" onclick="carregarHoroscopo('taurus', this)"><i class="fas fa-taurus"></i><span>TOURO</span></div>
@@ -839,20 +833,20 @@
                     <div class="signo-btn" onclick="carregarHoroscopo('pisces', this)"><i class="fas fa-pisces"></i><span>PEIXES</span></div>
                 </div>
                 <div class="horoscopo-display" id="horoscopo-texto">
-                    Clique em um signo acima para ver a previsão astral do dia! ✨
+                    Clique em um signo acima para ver a previsão astral! ✨
                 </div>
             </div>
 
             <!-- CARD DE MENSAGENS -->
-            <div class="card-box">
-                <div class="banner-destaque-adm">
-                    <i class="fas fa-paper-plane" style="margin-right: 6px;"></i> MANDE MENSAGEM PARA O ADM PARA PEDIR PARA ADICIONAR UMA RÁDIO QUE VOCÊ GOSTE
+            <div class="card-box" style="padding: 16px;">
+                <div class="banner-destaque-adm" style="font-size: 11.5px; padding: 10px; margin-bottom: 10px;">
+                    <i class="fas fa-paper-plane" style="margin-right: 4px;"></i> PEDIR NOVA RÁDIO AO ADM
                 </div>
 
-                <textarea id="texto-mensagem" class="input-msg" rows="3" placeholder="Escreva seu recado ou pedido de rádio aqui... (Enter envia)" onkeydown="handleKeyDown(event)"></textarea>
-                <button class="btn-enviar" onclick="enviarMensagem()"><i class="fas fa-paper-plane"></i> Enviar Mensagem</button>
+                <textarea id="texto-mensagem" class="input-msg" rows="2" placeholder="Escreva seu pedido aqui... (Enter envia)" onkeydown="handleKeyDown(event)"></textarea>
+                <button class="btn-enviar" onclick="enviarMensagem()"><i class="fas fa-paper-plane"></i> Enviar Recado</button>
 
-                <h3 style="margin-top: 25px; text-align: left;"><i class="fas fa-comments"></i> SUAS MENSAGENS E RESPOSTAS</h3>
+                <h3 style="margin-top: 16px; margin-bottom: 10px; text-align: left; font-size: 13px;"><i class="fas fa-comments"></i> MENSAGENS E RESPOSTAS</h3>
                 <div id="lista-respostas-adm" class="chat-container"></div>
             </div>
 
@@ -947,16 +941,16 @@
                     const temp = Math.round(climaData.current_weather.temperature);
                     const code = climaData.current_weather.weathercode;
 
-                    let iconeHTML = '<i class="fas fa-sun" style="color: #eab308; font-size: 18px;"></i>';
+                    let iconeHTML = '<i class="fas fa-sun" style="color: #eab308; font-size: 16px;"></i>';
 
                     if (code === 0 || code === 1) {
-                        iconeHTML = '<i class="fas fa-sun" style="color: #eab308; font-size: 18px;"></i>';
+                        iconeHTML = '<i class="fas fa-sun" style="color: #eab308; font-size: 16px;"></i>';
                     } else if (code === 2 || code === 3) {
-                        iconeHTML = '<i class="fas fa-cloud-sun" style="color: #f59e0b; font-size: 18px;"></i>';
+                        iconeHTML = '<i class="fas fa-cloud-sun" style="color: #f59e0b; font-size: 16px;"></i>';
                     } else if (code >= 51 && code <= 99) {
-                        iconeHTML = '<i class="fas fa-cloud-showers-heavy" style="color: #38bdf8; font-size: 18px;"></i>';
+                        iconeHTML = '<i class="fas fa-cloud-showers-heavy" style="color: #38bdf8; font-size: 16px;"></i>';
                     } else if (code === 45 || code === 48) {
-                        iconeHTML = '<i class="fas fa-cloud" style="color: #94a3b8; font-size: 18px;"></i>';
+                        iconeHTML = '<i class="fas fa-cloud" style="color: #94a3b8; font-size: 16px;"></i>';
                     }
 
                     document.getElementById('icone-clima-dinamico').innerHTML = iconeHTML;
@@ -1016,7 +1010,7 @@
             }
         }
 
-        // CARREGADOR DE NOTÍCIAS BRASIL PERFEITAMENTE AJUSTADO PARA NOTEBOOKS E MONITORES GRANDES
+        // CARREGADOR DE NOTÍCIAS BRASIL
         async function carregarNoticiasBrasil() {
             try {
                 const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fg1.globo.com%2Fdynamo%2Frss2.xml');
@@ -1038,7 +1032,6 @@
                     });
 
                     const blocoOriginal = `<div class="news-block-repeat">${htmlItens}</div>`;
-                    // Duplicamos o bloco de notícias para garantir um loop contínuo perfeito em qualquer tela
                     document.getElementById('ticker-noticias-container').innerHTML = blocoOriginal + blocoOriginal;
                 }
             } catch (err) {
@@ -1126,7 +1119,7 @@
                 .filter(Boolean);
 
             if (radiosPlaylist.length === 0) {
-                container.innerHTML = "<p style='color:#666; font-size:12px; grid-column: 1/-1; text-align:center; padding: 20px;'>Clique no '+' ao lado para montar sua playlist!</p>";
+                container.innerHTML = "<p style='color:#666; font-size:11px; grid-column: 1/-1; text-align:center; padding: 20px;'>Clique em '+' para adicionar rádios!</p>";
                 return;
             }
 
@@ -1284,7 +1277,7 @@
                     listaHistorico.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
 
                     if (listaHistorico.length === 0) {
-                        container.innerHTML = "<p style='color:#666; text-align:center; font-size:13px; padding:20px;'>Você ainda não enviou mensagens.</p>";
+                        container.innerHTML = "<p style='color:#666; text-align:center; font-size:12px; padding:15px;'>Nenhuma mensagem enviada.</p>";
                         return;
                     }
 
