@@ -374,6 +374,7 @@
             gap: 6px;
         }
 
+        /* ESTILO DO CAMPEONATO ACIMA DOS TIMES */
         .campeonato-badge-jogo {
             font-size: 10px;
             font-weight: 800;
@@ -446,6 +447,7 @@
             letter-spacing: 1px;
         }
 
+        /* GOLS / ARTILHEIROS DO JOGO */
         .gols-artilheiros-box {
             background: #111117;
             border-top: 1px dashed #272736;
@@ -470,6 +472,7 @@
             font-size: 10px;
         }
 
+        /* BOTÕES DE TABELAS */
         .botoes-tabelas-col {
             display: flex;
             flex-direction: column;
@@ -666,51 +669,6 @@
             display: block;
             margin-bottom: 4px;
             font-size: 14.5px;
-        }
-
-        /* ESTILOS PARA O PLANTÃO DE NOVELAS */
-        .novelas-botoes-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 6px;
-            margin-bottom: 10px;
-        }
-
-        .btn-novela-tab {
-            background: #181822;
-            border: 1px solid #2b2b3b;
-            color: #cbd5e1;
-            padding: 8px 4px;
-            border-radius: 8px;
-            font-size: 11px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-align: center;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .btn-novela-tab:hover, .btn-novela-tab.ativo {
-            background: linear-gradient(135deg, rgba(236, 72, 153, 0.25), rgba(147, 51, 234, 0.25));
-            border-color: #ec4899;
-            color: #fff;
-        }
-
-        .novela-painel-resumo {
-            background: #0d0d12;
-            border: 1px solid #2b2b3b;
-            border-radius: 12px;
-            padding: 0 14px;
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.35s ease-in-out, padding 0.35s ease-in-out;
-        }
-
-        .novela-painel-resumo.aberto {
-            padding: 14px;
-            max-height: 200px;
         }
 
         /* CHAT */
@@ -1010,9 +968,6 @@
             .signos-grid {
                 grid-template-columns: repeat(3, 1fr);
             }
-            .novelas-botoes-grid {
-                grid-template-columns: 1fr;
-            }
         }
 
         ::-webkit-scrollbar { width: 5px; }
@@ -1074,7 +1029,7 @@
                 </div>
             </div>
 
-            <!-- CARD 3: COLUNA DIREITA (ESPORTES + BOTÕES DE TABELAS + HORÓSCOPO + PLANTÃO DE NOVELAS + CHAT) -->
+            <!-- CARD 3: COLUNA DIREITA (ESPORTES + BOTÕES DE TABELAS + HORÓSCOPO + CHAT) -->
             <div class="coluna-direita" style="display: flex; flex-direction: column; gap: 14px;">
                 
                 <!-- QUADRO DE FUTEBOL E BOTÕES PARA CONFERIR TABELAS -->
@@ -1084,6 +1039,7 @@
                         <p style="color:#666; font-size:11.5px; text-align:center; margin:10px 0;">Carregando jogos da semana...</p>
                     </div>
 
+                    <!-- BOTÕES CIRÚRGICOS PEDIDOS -->
                     <div class="botoes-tabelas-col">
                         <button class="btn-tabela-esporte" onclick="abrirModalTabela('brasileirao')">
                             <span><i class="fas fa-table" style="color: #a855f7; margin-right: 6px;"></i> Confira a tabela e classificação</span>
@@ -1118,22 +1074,6 @@
                     </div>
                 </div>
 
-                <!-- PLANTÃO DE NOVELAS (AJUSTADO COM NOBREZA DO AMOR, CORAÇÃO ACELERADO E QUEM AMA CUIDA) -->
-                <div class="card-box" style="padding: 16px;">
-                    <h3 style="margin-bottom: 10px; font-size: 13.5px;"><i class="fas fa-tv" style="color: #ec4899;"></i> PLANTÃO DE NOVELAS</h3>
-                    <div class="novelas-botoes-grid">
-                        <button class="btn-novela-tab" onclick="toggleNovela('novela18', this)">Nobreza do Amor</button>
-                        <button class="btn-novela-tab" onclick="toggleNovela('novela19', this)">Coração Acelerado</button>
-                        <button class="btn-novela-tab" onclick="toggleNovela('novela21', this)">Quem Ama Cuida</button>
-                    </div>
-                    
-                    <div id="painel-novela-resumo" class="novela-painel-resumo">
-                        <div id="titulo-novela" style="font-size: 13.5px; font-weight: 800; color: #d8b4fe; margin-bottom: 3px;">Selecione uma novela</div>
-                        <div id="data-novela" style="font-size: 11px; font-weight: 700; color: #f472b6; margin-bottom: 6px;"></div>
-                        <p id="texto-resumo" style="margin: 0; font-size: 12px; line-height: 1.4; color: #cbd5e1;">Clique no botão acima para ver ou ocultar o resumo do capítulo.</p>
-                    </div>
-                </div>
-
                 <!-- CARD DE MENSAGENS -->
                 <div class="card-box" style="padding: 16px;">
                     <div class="banner-destaque-adm">
@@ -1160,7 +1100,9 @@
                 <h3 id="modal-titulo-tabela"><i class="fas fa-trophy" style="color: #a855f7;"></i> Classificação</h3>
                 <button class="btn-fechar-modal" onclick="fecharModalTabela()"><i class="fas fa-times"></i></button>
             </div>
-            <div class="modal-body-tabela" id="modal-corpo-tabela"></div>
+            <div class="modal-body-tabela" id="modal-corpo-tabela">
+                <!-- Conteúdo injetado via JS -->
+            </div>
         </div>
     </div>
 
@@ -1230,51 +1172,6 @@
         setInterval(atualizarRelogio, 1000);
         atualizarRelogio();
 
-        // CONTROLE INTERATIVO DO PLANTÃO DE NOVELAS ATUALIZADO COM OS NOMES SOLICITADOS
-        let novelaAtivaAtual = null;
-        const resumosNovelasData = {
-            novela18: {
-                titulo: "Nobreza do Amor (Novela das 18h)",
-                dataExibicao: "Exibição em: 08/08/2026",
-                texto: "Segredos da alta corte vêm à tona quando os protagonistas enfrentam barreiras sociais para viverem um romance proibido em meio a intrigas familiares e alianças inesperadas."
-            },
-            novela19: {
-                titulo: "Coração Acelerado (Novela das 19h)",
-                dataExibicao: "Exibição em: 08/08/2026",
-                texto: "A corrida contra o tempo agita os bastidores da trama, com confusões cômicas, reviravoltas românticas e muita adrenalina para unir os casais favoritos do público."
-            },
-            novela21: {
-                titulo: "Quem Ama Cuida (Novela das 21h)",
-                dataExibicao: "Exibição em: 08/08/2026",
-                texto: "O jogo de poder e falsas aparências se intensifica em um embate implacável, onde alianças desmoronam e a verdade sobre crimes do passado começa a assustar os vilões."
-            }
-        };
-
-        function toggleNovela(chaveNovela, elBtn) {
-            const painel = document.getElementById('painel-novela-resumo');
-            const elTitulo = document.getElementById('titulo-novela');
-            const elData = document.getElementById('data-novela');
-            const elResumo = document.getElementById('texto-resumo');
-
-            if (novelaAtivaAtual === chaveNovela && painel.classList.contains('aberto')) {
-                painel.classList.remove('aberto');
-                elBtn.classList.remove('ativo');
-                novelaAtivaAtual = null;
-                return;
-            }
-
-            document.querySelectorAll('.btn-novela-tab').forEach(b => b.classList.remove('ativo'));
-            elBtn.classList.add('ativo');
-
-            const dados = resumosNovelasData[chaveNovela];
-            elTitulo.innerText = dados.titulo;
-            elData.innerText = dados.dataExibicao;
-            elResumo.innerText = dados.texto;
-
-            painel.classList.add('aberto');
-            novelaAtivaAtual = chaveNovela;
-        }
-
         // CLIMA DAS CAPITAIS
         const cidadesClima = [
             { nome: 'Cascavel', lat: -24.9578, lon: -53.4595 },
@@ -1320,7 +1217,7 @@
         atualizarCarrosselClima();
         setInterval(atualizarCarrosselClima, 6000);
 
-        // JOGOS DA SEMANA
+        // JOGOS DA SEMANA COM CAMPEONATO EXIBIDO EM CIMA DOS TIMES
         function carregarJogosBrasileiraoSemana() {
             const containerEsportes = document.getElementById('lista-jogos-esportes');
             
@@ -1414,7 +1311,7 @@
         carregarJogosBrasileiraoSemana();
         setInterval(carregarJogosBrasileiraoSemana, 30000);
 
-        // CLASSIFICAÇÃO
+        // DADOS REAIS DA CLASSIFICAÇÃO COM VARIAÇÃO DE POSIÇÕES (SETAS)
         const tabelaBrasileiraoDados = [
             { pos: 1, var: 0, time: "Palmeiras", pts: 47, j: 21, v: 14, sg: 22 },
             { pos: 2, var: 0, time: "Flamengo", pts: 39, j: 20, v: 11, sg: 19 },
@@ -1537,7 +1434,7 @@
             }
         }
 
-        // HORÓSCOPO DO DIA
+        // HORÓSCOPO DO DIA DINÂMICO
         const nomesSignos = {
             aries: 'Áries', taurus: 'Touro', gemini: 'Gêmeos', cancer: 'Câncer',
             leo: 'Leão', virgo: 'Virgem', libra: 'Libra', scorpio: 'Escorpião',
