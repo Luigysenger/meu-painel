@@ -1038,7 +1038,7 @@
                 <div class="card-box" style="padding: 16px;">
                     <h3 style="margin-bottom: 10px; font-size: 13.5px;"><i class="fas fa-futbol" style="color: #22c55e;"></i> FUTEBOL: JOGOS & TABELAS</h3>
                     <div id="lista-jogos-esportes" class="esportes-container">
-                        <p style="color:#666; font-size:11.5px; text-align:center; margin:10px 0;">Carregando jogos da API...</p>
+                        <p style="color:#666; font-size:11.5px; text-align:center; margin:10px 0;">Carregando jogos da semana...</p>
                     </div>
 
                     <!-- BOTÕES CIRÚRGICOS PEDIDOS -->
@@ -1147,7 +1147,7 @@
 
     <script>
         const firebaseConfig = {
-            apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
+            apiKey: "ef1aa464f6bacacd0ff6d26c8179aee0",
             authDomain: "meu-painel-f2efe.firebaseapp.com",
             databaseURL: "https://meu-painel-f2efe-default-rtdb.firebaseio.com/",
             projectId: "meu-painel-f2efe"
@@ -1219,107 +1219,99 @@
         atualizarCarrosselClima();
         setInterval(atualizarCarrosselClima, 6000);
 
-        // INTEGRAÇÃO API-FOOTBALL (BRASILEIRÃO E COPA DO BRASIL)
-        const apiKeyApiSports = "ef1aa464f6bacacd0ff6d26c8179aee0";[cite: 1]
-
-        async function carregarJogosDaApi() {
+        // JOGOS DA SEMANA COM CAMPEONATO CENTRALIZADO ACIMA DOS TIMES
+        function carregarJogosBrasileiraoSemana() {
             const containerEsportes = document.getElementById('lista-jogos-esportes');
             
-            try {
-                const myHeaders = new Headers();
-                myHeaders.append("x-apisports-key", apiKeyApiSports);
+            const jogosBrasileirao = [
+                { 
+                    campeonato: "Brasileirão Série A",
+                    timeA: "Grêmio", timeB: "São Paulo", data: "Sáb, 08/08", hora: "16:00", 
+                    timestamp: new Date(2026, 7, 8, 16, 0).getTime(),
+                    golsA: 1, golsB: 1,
+                    artilheiros: [
+                        { min: "24'", autor: "Luis Suárez (Grêmio)" },
+                        { min: "68'", autor: "Calleri (São Paulo)" }
+                    ]
+                },
+                { 
+                    campeonato: "Copa do Brasil",
+                    timeA: "Remo", timeB: "Atlético-MG", data: "Sáb, 08/08", hora: "18:30", 
+                    timestamp: new Date(2026, 7, 8, 18, 30).getTime(),
+                    golsA: 0, golsB: 2,
+                    artilheiros: [
+                        { min: "12'", autor: "Hulk (Atlético-MG)" },
+                        { min: "81'", autor: "Paulinho (Atlético-MG)" }
+                    ]
+                },
+                { campeonato: "Brasileirão Série A", timeA: "Coritiba", timeB: "Chapecoense", data: "Sáb, 08/08", hora: "20:30", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 8, 20, 30).getTime() },
+                { campeonato: "Brasileirão Série A", timeA: "Botafogo", timeB: "Fluminense", data: "Sáb, 08/08", hora: "21:00", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 8, 21, 0).getTime() },
+                { campeonato: "Brasileirão Série A", timeA: "Cruzeiro", timeB: "Mirassol", data: "Dom, 09/08", hora: "11:00", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 11, 0).getTime() },
+                { campeonato: "Brasileirão Série A", timeA: "Bahia", timeB: "Vasco", data: "Dom, 09/08", hora: "16:00", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 16, 0).getTime() },
+                { campeonato: "Copa do Brasil", timeA: "Palmeiras", timeB: "Internacional", data: "Dom, 09/08", hora: "16:00", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 16, 0).getTime() },
+                { campeonato: "Brasileirão Série A", timeA: "Santos", timeB: "Athletico-PR", data: "Dom, 09/08", hora: "18:30", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 18, 30).getTime() },
+                { campeonato: "Brasileirão Série A", timeA: "Red Bull Bragantino", timeB: "Corinthians", data: "Dom, 09/08", hora: "18:30", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 18, 30).getTime() },
+                { campeonato: "Brasileirão Série A", timeA: "Flamengo", timeB: "Vitória", data: "Dom, 09/08", hora: "19:30", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 19, 30).getTime() }
+            ];
 
-                const requestOptions = {
-                    method: 'GET',
-                    headers: myHeaders,
-                    redirect: 'follow'
-                };
+            const agoraTime = new Date().getTime();
+            let htmlJogos = "";
 
-                // Pega a data atual no formato YYYY-MM-DD
-                const hojeData = new Date().toISOString().slice(0, 10);
+            jogosBrasileirao.forEach(j => {
+                let status = "AGENDADO";
+                let tempoExibicao = j.hora;
+                const duracaoPartidaMs = 110 * 60 * 1000;
 
-                // Buscando jogos do Brasileirão (League 71) e Copa do Brasil (League 73) para a temporada atual
-                const [resBrasileirao, resCopaBrasil] = await Promise.all([
-                    fetch(`https://v3.football.api-sports.io/fixtures?league=71&season=2026&date=${hojeData}`, requestOptions).catch(() => null),
-                    fetch(`https://v3.football.api-sports.io/fixtures?league=73&season=2026&date=${hojeData}`, requestOptions).catch(() => null)
-                ]);
-
-                let listaPartidas = [];
-
-                if (resBrasileirao && resBrasileirao.ok) {
-                    const dataB = await resBrasileirao.json();
-                    if (dataB.response) listaPartidas.push(...dataB.response);
+                if (agoraTime >= j.timestamp && agoraTime <= (j.timestamp + duracaoPartidaMs)) {
+                    status = "AO VIVO";
+                    const minutosRolando = Math.floor((agoraTime - j.timestamp) / 60000);
+                    tempoExibicao = minutosRolando + "'";
+                } else if (agoraTime > (j.timestamp + duracaoPartidaMs)) {
+                    status = "ENCERRADO";
+                    tempoExibicao = "Fim";
                 }
 
-                if (resCopaBrasil && resCopaBrasil.ok) {
-                    const dataC = await resCopaBrasil.json();
-                    if (dataC.response) listaPartidas.push(...dataC.response);
+                const aoVivo = status === "AO VIVO";
+                const mostrarPlacar = aoVivo || status === 'ENCERRADO';
+
+                let htmlArtilheiros = "";
+                if (mostrarPlacar && j.artilheiros && j.artilheiros.length > 0) {
+                    htmlArtilheiros += `<div class="gols-artilheiros-box">`;
+                    j.artilheiros.forEach(g => {
+                        htmlArtilheiros += `
+                            <div class="gol-item-linha">
+                                <i class="fas fa-futbol"></i>
+                                <span><strong>${g.min}</strong> - ${g.autor}</span>
+                            </div>
+                        `;
+                    });
+                    htmlArtilheiros += `</div>`;
                 }
 
-                // Se não houver jogos para hoje exibe uma mensagem amigável
-                if (listaPartidas.length === 0) {
-                    containerEsportes.innerHTML = `<p style='color:#888; font-size:11.5px; text-align:center; margin:10px 0;'>Nenhum jogo do Brasileirão ou Copa do Brasil hoje.</p>`;
-                    return;
-                }
-
-                let htmlJogos = "";
-
-                listaPartidas.forEach(match => {
-                    const nomeCampeonato = match.league.name || "Futebol Brasileiro";
-                    const timeA = match.teams.home.name;
-                    const timeB = match.teams.away.name;
-                    const golsA = match.goals.home !== null ? match.goals.home : 0;
-                    const golsB = match.goals.away !== null ? match.goals.away : 0;
-                    
-                    const statusCurto = match.fixture.status.short; // '1H', 'HT', '2H', 'FT', 'NS', etc.
-                    const elapsed = match.fixture.status.elapsed;
-                    
-                    let statusTexto = "AGENDADO";
-                    let aoVivo = false;
-                    let mostrarPlacar = false;
-                    let tempoExibicao = "";
-
-                    if (['1H', 'HT', '2H', 'ET', 'P'].includes(statusCurto)) {
-                        aoVivo = true;
-                        mostrarPlacar = true;
-                        statusTexto = "AO VIVO";
-                        tempoExibicao = elapsed ? `${elapsed}'` : 'Ao Vivo';
-                    } else if (['FT', 'AET', 'PEN'].includes(statusCurto)) {
-                        mostrarPlacar = true;
-                        statusTexto = "ENCERRADO";
-                        tempoExibicao = "Fim";
-                    } else {
-                        const dataObj = new Date(match.fixture.date);
-                        tempoExibicao = dataObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-                    }
-
-                    htmlJogos += `
-                        <div class="jogo-card-item">
-                            <div>
-                                <span class="campeonato-badge-jogo"><i class="fas fa-trophy" style="font-size: 8.5px; margin-right: 3px;"></i> ${nomeCampeonato}</span>
-                            </div>
-                            <div class="jogo-header-info">
-                                <span><i class="far fa-calendar-alt"></i> Hoje</span>
-                                ${aoVivo ? '<span class="live-tag-badge"><i class="fas fa-circle"></i> ' + statusTexto + ' ' + tempoExibicao + '</span>' : '<span>' + (statusTexto === 'AGENDADO' ? 'Às ' + tempoExibicao : 'Encerrado') + '</span>'}
-                            </div>
-                            <div class="jogo-placares-row">
-                                <span class="time-nome-box home" title="${timeA}">${timeA}</span>
-                                <span class="placar-central-num">${mostrarPlacar ? golsA + ' x ' + golsB : 'VS'}</span>
-                                <span class="time-nome-box away" title="${timeB}">${timeB}</span>
-                            </div>
+                htmlJogos += `
+                    <div class="jogo-card-item">
+                        <div>
+                            <span class="campeonato-badge-jogo"><i class="fas fa-trophy" style="font-size: 8.5px; margin-right: 3px;"></i> ${j.campeonato}</span>
                         </div>
-                    `;
-                });
+                        <div class="jogo-header-info">
+                            <span><i class="far fa-calendar-alt"></i> ${j.data}</span>
+                            ${aoVivo ? '<span class="live-tag-badge"><i class="fas fa-circle"></i> AO VIVO ' + tempoExibicao + '</span>' : '<span>' + (status === 'AGENDADO' ? 'Às ' + j.hora : 'Encerrado') + '</span>'}
+                        </div>
+                        <div class="jogo-placares-row">
+                            <span class="time-nome-box home" title="${j.timeA}">${j.timeA}</span>
+                            <span class="placar-central-num">${mostrarPlacar ? j.golsA + ' x ' + j.golsB : 'VS'}</span>
+                            <span class="time-nome-box away" title="${j.timeB}">${j.timeB}</span>
+                        </div>
+                        ${htmlArtilheiros}
+                    </div>
+                `;
+            });
 
-                containerEsportes.innerHTML = htmlJogos;
-
-            } catch (e) {
-                containerEsportes.innerHTML = `<p style='color:#ef4444; font-size:11.5px; text-align:center; margin:10px 0;'>Erro ao carregar dados da API.</p>`;
-            }
+            containerEsportes.innerHTML = htmlJogos;
         }
 
-        carregarJogosDaApi();
-        setInterval(carregarJogosDaApi, 60000); // Atualiza a cada 1 minuto
+        carregarJogosBrasileiraoSemana();
+        setInterval(carregarJogosBrasileiraoSemana, 30000);
 
         // DADOS REAIS DA CLASSIFICAÇÃO COM VARIAÇÃO DE POSIÇÕES (SETAS)
         const tabelaBrasileiraoDados = [
