@@ -236,8 +236,7 @@
             <div class="card">
                 <div class="monitor-header-flex">
                     <h3><i class="fas fa-users"></i> MONITOR DE OUVINTES</h3>
-                    <!-- Botão global para excluir todos os ouvintes e forçar novo login -->
-                    <button class="btn-trash-all" onclick="excluirTodosOuvintes()" title="Excluir todos e forçar novo login">
+                    <button class="btn-trash-all" onclick="excluirTodosOuvintes()" title="Excluir todos os ouvintes e forçar novo login">
                         <i class="fas fa-trash-alt"></i> EXCLUIR TODOS
                     </button>
                 </div>
@@ -263,7 +262,6 @@
         let openCards = {}; 
         let openChatCards = {}; 
 
-        // Relógio e Cronômetros
         setInterval(() => {
             const hElement = document.getElementById('hora');
             if(hElement) hElement.innerText = new Date().toLocaleTimeString('pt-BR');
@@ -307,7 +305,6 @@
         function logout() { if(confirm("Deseja sair do painel?")) { localStorage.removeItem('usuarioNome'); window.location.href = 'index.html'; } }
         function toggleMensagens() { document.getElementById('container-mensagens-adm').classList.toggle('aberto'); }
 
-        // CHAT REFORMULADO
         let allMensagens = {};
         let allRespostas = {};
 
@@ -466,7 +463,6 @@
             }
         }
 
-        // RÁDIOS
         db.ref('radios').on('value', snap => {
             radioData = []; snap.forEach(c => { radioData.push({ ...c.val(), key: c.key }); });
             radioData.sort((a,b) => (a.posicao || 0) - (b.posicao || 0));
@@ -534,11 +530,11 @@
         }
 
         // =======================================================
-        // MONITOR DE OUVINTES (COM LIXEIRA INDIVIDUAL E GLOBAL)
+        // MONITOR DE OUVINTES (FILTRANDO ADMIN & CORRIGINDO CHAVES)
         // =======================================================
         function toggleUserCard(key) {
             openCards[key] = !openCards[key];
-            const itemElem = document.getElementById(`user-card-${key.replace(/[^a-zA-Z0-9]/g, '_')}`);
+            const itemElem = document.getElementById(`user-card-${CSS.escape(key)}`);
             if (itemElem) {
                 if (openCards[key]) itemElem.classList.add('open');
                 else itemElem.classList.remove('open');
@@ -566,12 +562,25 @@
 
             const allKeys = new Set([...Object.keys(rawContas), ...Object.keys(rawPreferencias), ...Object.keys(rawOnlineState)]);
 
-            if(allKeys.size === 0) {
+            // Filtra o administrador para que ele nunca apareça no monitor de ouvintes
+            const keysFiltradas = Array.from(allKeys).filter(k => {
+                const conta = rawContas[k] || {};
+                const pref = rawPreferencias[k] || {};
+                const nome = (conta.nome || conta.usuario || pref.nome || k).trim().toLowerCase();
+                
+                // Exclui se o nome for explicitamente admin ou se a chave contiver 'admin'
+                if(nome === 'admin' || k.toLowerCase().includes('admin')) {
+                    return false;
+                }
+                return true;
+            });
+
+            if(keysFiltradas.length === 0) {
                 container.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:12px;">Nenhum ouvinte registrado.</div>`;
                 return;
             }
 
-            allKeys.forEach(k => {
+            keysFiltradas.forEach(k => {
                 const conta = rawContas[k] || {};
                 const pref = rawPreferencias[k] || {};
                 const onState = rawOnlineState[k] || {};
@@ -611,7 +620,6 @@
                         </span>
                         <div style="display:flex; align-items:center; gap:12px;">
                             <span class="${isOnline ? 'status-on' : 'status-off'}">${isOnline ? '● ONLINE' : 'OFF'}</span>
-                            <!-- Ícone de Lixeira Individual para cada ouvinte[cite: 3] -->
                             <i class="fas fa-trash-alt action-icon-delete" 
                                title="Excluir Ouvinte (Forçar Login)" onclick="event.stopPropagation(); deletarOuvinte('${k}')"></i>
                         </div>
@@ -652,35 +660,50 @@
             return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
         }
 
-        // Função para deletar um ouvinte específico[cite: 3]
+        // Correção cirúrgica na exclusão individual usando .set(null) para garantir remoção no Firebase Realtime Database
         function deletarOuvinte(keyConta) {
-            if(confirm(`Deseja excluir o ouvinte "${keyConta}"? Ele precisará fazer login novamente[cite: 3].`)) {
-                const updates = {};
-                updates['contas/' + keyConta] = null;
-                updates['ouvintes_preferencias/' + keyConta] = null;
-                updates['ouvintes_online/' + keyConta] = null;
+            if(confirm(`Deseja excluir o ouvinte "${keyConta}"? Ele precisará fazer login novamente.`)) {
+                const promises = [
+                    db.ref('contas/' + keyConta).set(null),
+                    db.ref('ouvintes_preferencias/' + keyConta).set(null),
+                    db.ref('ouvintes_online/' + keyConta).set(null)
+                ];
 
-                db.ref().update(updates).then(() => {
-                    // Feedback visual instantâneo
+                Promise.all(promises).then(() => {
+                    // Atualização local imediata para feedback fluido
+                    delete rawContas[keyConta];
+                    delete rawPreferencias[keyConta];
+                    delete rawOnlineState[keyConta];
+                    renderOuvintes();
+                }).catch(err => {
+                    console.error("Erro ao excluir:", err);
+                    alert("Erro ao excluir ouvinte do banco de dados.");
                 });
             }
         }
 
-        // Função para excluir TODOS os ouvintes de uma vez[cite: 3]
+        // Correção cirúrgica na exclusão global limpando os nós corretamente com .set(null)
         function excluirTodosOuvintes() {
-            if(confirm("ATENÇÃO: Deseja excluir TODOS os ouvintes cadastrados? Todos serão desconectados e obrigados a fazer login de volta[cite: 3].")) {
-                const updates = {};
-                updates['contas'] = null;
-                updates['ouvintes_preferencias'] = null;
-                updates['ouvintes_online'] = null;
+            if(confirm("ATENÇÃO: Deseja excluir TODOS os ouvintes cadastrados? Todos serão desconectados e obrigados a fazer login de volta.")) {
+                const promises = [
+                    db.ref('contas').set(null),
+                    db.ref('ouvintes_preferencias').set(null),
+                    db.ref('ouvintes_online').set(null)
+                ];
 
-                db.ref().update(updates).then(() => {
-                    alert("Todos os ouvintes foram removidos com sucesso[cite: 3]!");
+                Promise.all(promises).then(() => {
+                    rawContas = {};
+                    rawPreferencias = {};
+                    rawOnlineState = {};
+                    renderOuvintes();
+                    alert("Todos os ouvintes foram removidos com sucesso!");
+                }).catch(err => {
+                    console.error("Erro ao excluir todos:", err);
+                    alert("Erro ao remover os ouvintes.");
                 });
             }
         }
 
-        // LISTENERS DO FIREBASE
         db.ref('contas').on('value', snap => {
             rawContas = snap.val() || {};
             renderOuvintes();
