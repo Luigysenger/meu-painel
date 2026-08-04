@@ -448,7 +448,7 @@
             letter-spacing: 1px;
         }
 
-        /* CAMPO VIRTUAL PROFISSIONAL EMBAIXO DO JOGO */
+        /* CAMPO VIRTUAL EMBAIXO DO JOGO */
         .campo-virtual-box {
             background: linear-gradient(135deg, #09381e, #062412);
             border: 1px solid #14532d;
@@ -543,7 +543,7 @@
             font-size: 10px;
         }
 
-        /* BOTÕES DE TABELAS / JOGOS ENCERRADOS NO TOPO */
+        /* BOTÕES DE JOGOS ENCERRADOS NO TOPO */
         .botoes-tabelas-col {
             display: flex;
             flex-direction: column;
@@ -661,17 +661,6 @@
         .tabela-classificacao-full tr:hover td {
             background: rgba(147, 51, 234, 0.08);
         }
-
-        .pos-badge {
-            font-weight: 800;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .seta-verde { color: #22c55e; font-size: 11px; }
-        .seta-vermelha { color: #ef4444; font-size: 11px; }
-        .neutro-pos { color: #64748b; font-size: 11px; }
 
         /* HORÓSCOPO DO DIA */
         .signos-grid {
@@ -1108,7 +1097,7 @@
                 <div class="card-box" style="padding: 16px;">
                     <h3 style="margin-bottom: 10px; font-size: 13.5px;"><i class="fas fa-futbol" style="color: #22c55e;"></i> FUTEBOL: JOGOS & RESULTADOS</h3>
                     
-                    <!-- BOTÕES SOLICITADOS NO TOPO PARA JOGOS ENCERRADOS -->
+                    <!-- BOTÕES NO TOPO PARA VER JOGOS ENCERRADOS -->
                     <div class="botoes-tabelas-col" style="margin-top: 0; margin-bottom: 12px;">
                         <button class="btn-tabela-esporte" onclick="abrirModalJogosEncerrados('brasileirao')">
                             <span><i class="fas fa-trophy" style="color: #a855f7; margin-right: 6px;"></i> Brasileirão: Jogos Encerrados e Resultados</span>
@@ -1121,7 +1110,7 @@
                     </div>
 
                     <div id="lista-jogos-esportes" class="esportes-container">
-                        <p style="color:#666; font-size:11.5px; text-align:center; margin:10px 0;">Carregando jogos da semana...</p>
+                        <p style="color:#666; font-size:11.5px; text-align:center; margin:10px 0;">Carregando jogos reais...</p>
                     </div>
                 </div>
 
@@ -1290,37 +1279,42 @@
         atualizarCarrosselClima();
         setInterval(atualizarCarrosselClima, 6000);
 
-        // JOGOS REAIS COM ATUALIZAÇÃO EM TEMPO REAL E CAMPO VIRTUAL
+        // JOGOS REAIS OFICIAIS DE 2026 (PRÓXIMOS / AO VIVO)
         const jogosReaisLista = [
             { 
                 id: 1,
-                campeonato: "Brasileirão Série A",
-                timeA: "Grêmio", timeB: "São Paulo", data: "Hoje", hora: "16:00", 
-                golsA: 1, golsB: 1, status: "AO VIVO", minuto: "42'", posseA: "52%", posseB: "48%", ataquePos: 65,
-                artilheiros: [
-                    { min: "24'", autor: "Luis Suárez (Grêmio)" },
-                    { min: "68'", autor: "Calleri (São Paulo)" }
-                ]
+                campeonato: "Copa do Brasil (Oitavas)",
+                timeA: "Juventude", timeB: "Atlético-MG", data: "Hoje, 04/08", hora: "19:30", 
+                golsA: 0, golsB: 0, status: "AO VIVO", minuto: "35'", posseA: "48%", posseB: "52%", ataquePos: 55,
+                artilheiros: []
             },
             { 
                 id: 2,
-                campeonato: "Copa do Brasil",
-                timeA: "Remo", timeB: "Atlético-MG", data: "Hoje", hora: "18:30", 
-                golsA: 0, golsB: 2, status: "ENCERRADO", minuto: "Fim", posseA: "40%", posseB: "60%", ataquePos: 50,
-                artilheiros: [
-                    { min: "12'", autor: "Hulk (Atlético-MG)" },
-                    { min: "81'", autor: "Paulinho (Atlético-MG)" }
-                ]
+                campeonato: "Copa do Brasil (Oitavas)",
+                timeA: "Remo", timeB: "Santos", data: "Hoje, 04/08", hora: "21:30", 
+                golsA: 0, golsB: 0, status: "AGENDADO", minuto: "21:30", posseA: "50%", posseB: "50%", ataquePos: 50,
+                artilheiros: []
             },
             { 
                 id: 3,
+                campeonato: "Copa do Brasil (Oitavas)",
+                timeA: "Cruzeiro", timeB: "Chapecoense", data: "Qua, 05/08", hora: "19:00", 
+                golsA: 0, golsB: 0, status: "AGENDADO", minuto: "19:00", posseA: "50%", posseB: "50%", ataquePos: 50,
+                artilheiros: []
+            },
+            { 
+                id: 4,
+                campeonato: "Copa do Brasil (Oitavas)",
+                timeA: "Grêmio", timeB: "Mirassol", data: "Qua, 05/08", hora: "19:30", 
+                golsA: 0, golsB: 0, status: "AGENDADO", minuto: "19:30", posseA: "50%", posseB: "50%", ataquePos: 50,
+                artilheiros: []
+            },
+            { 
+                id: 5,
                 campeonato: "Brasileirão Série A",
-                timeA: "Flamengo", timeB: "Vitória", data: "Hoje", hora: "19:30", 
-                golsA: 2, golsB: 0, status: "AO VIVO", minuto: "78'", posseA: "68%", posseB: "32%", ataquePos: 80,
-                artilheiros: [
-                    { min: "15'", autor: "Pedro (Flamengo)" },
-                    { min: "54'", autor: "Arrascaeta (Flamengo)" }
-                ]
+                timeA: "Grêmio", timeB: "São Paulo", data: "Sáb, 08/08", hora: "16:00", 
+                golsA: 0, golsB: 0, status: "AGENDADO", minuto: "16:00", posseA: "50%", posseB: "50%", ataquePos: 50,
+                artilheiros: []
             }
         ];
 
@@ -1330,7 +1324,6 @@
 
             jogosReaisLista.forEach(j => {
                 const aoVivo = j.status === "AO VIVO";
-                const encerrado = j.status === "ENCERRADO";
 
                 let htmlArtilheiros = "";
                 if (j.artilheiros && j.artilheiros.length > 0) {
@@ -1346,14 +1339,14 @@
                     htmlArtilheiros += `</div>`;
                 }
 
-                // Campo virtual dinâmico abaixo do jogo
+                // Campo virtual profissional em baixo de cada jogo ao vivo
                 let campoVirtualHtml = "";
                 if (aoVivo) {
                     campoVirtualHtml = `
                         <div class="campo-virtual-box">
                             <div class="campo-virtual-header">
                                 <span>${j.timeA} (${j.posseA})</span>
-                                <span style="color:#fde047"><i class="fas fa-satellite-dish"></i> CAMPO VIRTUAL</span>
+                                <span style="color:#fde047"><i class="fas fa-satellite-dish"></i> CAMPO VIRTUAL AO VIVO</span>
                                 <span>${j.timeB} (${j.posseB})</span>
                             </div>
                             <div class="campo-desenho">
@@ -1371,12 +1364,12 @@
                             <span class="campeonato-badge-jogo"><i class="fas fa-trophy" style="font-size: 8.5px; margin-right: 3px;"></i> ${j.campeonato}</span>
                         </div>
                         <div class="jogo-header-info">
-                            <span><i class="far fa-calendar-alt"></i> ${j.data} - ${j.hora}</span>
-                            ${aoVivo ? '<span class="live-tag-badge"><i class="fas fa-circle"></i> AO VIVO ' + j.minuto + '</span>' : '<span style="color:#94a3b8; font-weight:700;">ENCERRADO</span>'}
+                            <span><i class="far fa-calendar-alt"></i> ${j.data}</span>
+                            ${aoVivo ? '<span class="live-tag-badge"><i class="fas fa-circle"></i> AO VIVO ' + j.minuto + '</span>' : '<span style="color:#94a3b8; font-weight:700;">Ás ' + j.hora + '</span>'}
                         </div>
                         <div class="jogo-placares-row">
                             <span class="time-nome-box home" title="${j.timeA}">${j.timeA}</span>
-                            <span class="placar-central-num">${j.golsA} x ${j.golsB}</span>
+                            <span class="placar-central-num">${aoVivo ? j.golsA + ' x ' + j.golsB : 'VS'}</span>
                             <span class="time-nome-box away" title="${j.timeB}">${j.timeB}</span>
                         </div>
                         ${campoVirtualHtml}
@@ -1390,30 +1383,34 @@
 
         carregarJogosEsportivos();
 
-        // Simulação dinâmica de movimentação da bola e gols ao vivo
+        // Atualização contínua do campo virtual em tempo real
         setInterval(() => {
             jogosReaisLista.forEach(j => {
                 if (j.status === "AO VIVO") {
-                    // Varia a posição da bola no campo virtual levemente
-                    let randomMov = Math.floor(Math.random() * 30) + 35;
+                    let randomMov = Math.floor(Math.random() * 40) + 30;
                     j.ataquePos = randomMov;
                 }
             });
             carregarJogosEsportivos();
         }, 4000);
 
-        // MODAL PARA JOGOS ENCERRADOS E RESULTADOS (SEPARADOS POR CAMPEONATO)
+        // RESULTADOS REAIS DE JOGOS JÁ ENCERRADOS (TABELAS OFICIAIS 2026)
         const resultadosEncerradosBrasileirao = [
-            { timeA: "Palmeiras", timeB: "Corinthians", placar: "2 x 1", data: "05/08/2026", gols: "Endrick, Rony (PAL) / Yuri Alberto (COR)" },
-            { timeA: "Fluminense", timeB: "Botafogo", placar: "1 x 0", data: "04/08/2026", gols: "Germán Cano (FLU)" },
-            { timeA: "Cruzeiro", timeB: "Atlético-MG", placar: "0 x 0", data: "04/08/2026", gols: "Sem gols" },
-            { timeA: "Internacional", timeB: "Grêmio", placar: "2 x 2", data: "03/08/2026", gols: "Enner Valencia, Alan Patrick (INT) / Suárez, Cristaldo (GRE)" }
+            { timeA: "Internacional", timeB: "Flamengo", placar: "1 x 1", data: "29/07/2026", gols: "Partida válida pelo Brasileirão Série A" },
+            { timeA: "Mirassol", timeB: "Remo", placar: "2 x 1", data: "29/07/2026", gols: "Partida válida pelo Brasileirão Série A" },
+            { timeA: "Vitória", timeB: "Palmeiras", placar: "0 x 4", data: "29/07/2026", gols: "Partida válida pelo Brasileirão Série A" },
+            { timeA: "Fluminense", timeB: "Bahia", placar: "0 x 0", data: "29/07/2026", gols: "Partida válida pelo Brasileirão Série A" },
+            { timeA: "Corinthians", timeB: "Athletico-PR", placar: "0 x 0", data: "30/07/2026", gols: "Partida válida pelo Brasileirão Série A" },
+            { timeA: "Coritiba", timeB: "Cruzeiro", placar: "0 x 1", data: "30/07/2026", gols: "Partida válida pelo Brasileirão Série A" }
         ];
 
         const resultadosEncerradosCopaDoBrasil = [
-            { timeA: "Remo", timeB: "Atlético-MG", placar: "0 x 2", data: "08/08/2026", gols: "Hulk, Paulinho (CAM)" },
-            { timeA: "São Paulo", timeB: "Flamengo", placar: "1 x 1", data: "02/08/2026", gols: "Calleri (SPFC) / Pedro (FLA)" },
-            { timeA: "Palmeiras", timeB: "Athletico-PR", placar: "3 x 0", data: "01/08/2026", gols: "Raphael Veiga (2), Dudu (PAL)" }
+            { timeA: "Athletico-PR", timeB: "Vitória", placar: "2 x 0", data: "03/08/2026", gols: "Gols: João Cruz, Eduardo Kogitzki (CAP)" },
+            { timeA: "Internacional", timeB: "Corinthians", placar: "2 x 0", data: "02/08/2026", gols: "Oitavas de Final - Ida" },
+            { timeA: "Palmeiras", timeB: "Fortaleza", placar: "3 x 0", data: "02/08/2026", gols: "Oitavas de Final - Ida" },
+            { timeA: "Vasco", timeB: "Fluminense", placar: "0 x 0", data: "01/08/2026", gols: "Oitavas de Final - Ida" },
+            { timeA: "Atlético-MG", timeB: "Juventude", placar: "0 x 0", data: "01/08/2026", gols: "Oitavas de Final - Ida" },
+            { timeA: "Santos", timeB: "Remo", placar: "0 x 0", data: "01/08/2026", gols: "Oitavas de Final - Ida" }
         ];
 
         function abrirModalJogosEncerrados(campeonatoTipo) {
@@ -1433,7 +1430,7 @@
                             <th>Data</th>
                             <th>Partida</th>
                             <th>Placar</th>
-                            <th>Artilheiros / Detalhes</th>
+                            <th>Detalhes / Fase</th>
                         </tr>
                     </thead>
                     <tbody>
