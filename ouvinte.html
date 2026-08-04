@@ -1161,11 +1161,14 @@
             localStorage.setItem('userId', ouvinteId);
         }
         
-        let ouvinteNome = localStorage.getItem('usuarioNome') || localStorage.getItem('usuarioEmail') || 'Ouvinte Anônimo';
-        if (ouvinteNome.includes('@')) {
-            ouvinteNome = ouvinteNome.split('@')[0];
+        let ouvinteNomeBruto = localStorage.getItem('usuarioNome') || localStorage.getItem('usuarioEmail') || 'Ouvinte Anônimo';
+        if (ouvinteNomeBruto.includes('@')) {
+            ouvinteNomeBruto = ouvinteNomeBruto.split('@')[0];
         }
-        document.getElementById('nome-ouvinte-display').innerText = "Olá, " + ouvinteNome.toUpperCase();
+        // Ajuste cirúrgico: pega apenas o primeiro nome (separado por espaço)
+        let ouvinteNome = ouvinteNomeBruto.trim().split(' ')[0];
+
+        document.getElementById('nome-ouvinte-display').innerText = "OLÁ, " + ouvinteNome.toUpperCase();
 
         function atualizarRelogio() {
             const agora = new Date();
