@@ -353,25 +353,25 @@
             text-shadow: 0 1px 2px rgba(0,0,0,0.8);
         }
 
-        /* ESPORTES E CAMPO VIRTUAL */
+        /* ESPORTES E TABELAS */
         .esportes-container {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            max-height: 320px;
+            gap: 8px;
+            max-height: 220px;
             overflow-y: auto;
             padding-right: 2px;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .jogo-card-item {
             background: #181822;
             border: 1px solid #2a2a3a;
-            border-radius: 12px;
-            padding: 12px;
+            border-radius: 10px;
+            padding: 10px 12px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
         }
 
         .campeonato-badge-jogo {
@@ -448,126 +448,19 @@
             letter-spacing: 1px;
         }
 
-        /* BOTÃO PARA DESLIZAR / MOSTRAR O CAMPO VIRTUAL */
-        .btn-toggle-pressao {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.15));
-            border: 1px solid rgba(52, 211, 153, 0.4);
-            color: #34d399;
-            width: 100%;
-            padding: 7px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            transition: all 0.2s ease;
-            margin-top: 4px;
-        }
-
-        .btn-toggle-pressao:hover {
-            background: rgba(16, 185, 129, 0.25);
-            color: #fff;
-        }
-
-        /* CAMPO VIRTUAL EMBAIXO DO JOGO AO VIVO (COM TRANSIÇÃO / DESLIZE) */
-        .campo-virtual-box {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.4s ease-out, padding 0.4s ease-out;
-            background: linear-gradient(135deg, #09381e, #062412);
-            border: 1px solid transparent;
-            border-radius: 8px;
-            padding: 0 8px;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            margin-top: 0;
-        }
-
-        .campo-virtual-box.visivel {
-            max-height: 120px;
-            border-color: #14532d;
-            padding: 8px;
-            margin-top: 6px;
-        }
-
-        .campo-virtual-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 9.5px;
-            font-weight: 700;
-            color: #86efac;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .campo-desenho {
-            position: relative;
-            width: 100%;
-            height: 38px;
-            background: rgba(15, 81, 44, 0.6);
-            border: 1px solid rgba(134, 239, 172, 0.3);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .linha-meio-campo {
-            position: absolute;
-            left: 50%;
-            top: 0;
-            bottom: 0;
-            width: 1px;
-            background: rgba(255, 255, 255, 0.25);
-        }
-
-        .circulo-central {
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            width: 18px;
-            height: 18px;
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            border-radius: 50%;
-        }
-
-        .bola-virtual {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #fff;
-            color: #000;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 7px;
-            box-shadow: 0 0 6px #fff;
-            transition: left 1s ease-in-out;
-        }
-
-        /* BOTÕES DE JOGOS ENCERRADOS NO TOPO */
         .botoes-tabelas-col {
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            margin-top: 12px;
+            gap: 6px;
         }
 
         .btn-tabela-esporte {
             background: linear-gradient(135deg, #1e1e2d, #252538);
             border: 1px solid #3b3b52;
             color: #d8b4fe;
-            padding: 11px 14px;
-            border-radius: 10px;
-            font-size: 12.5px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            font-size: 12px;
             font-weight: 700;
             cursor: pointer;
             display: flex;
@@ -580,11 +473,10 @@
 
         .btn-tabela-esporte:hover {
             border-color: var(--primary);
-            background: linear-gradient(135deg, rgba(147, 51, 234, 0.25), #252538);
+            background: linear-gradient(135deg, rgba(147, 51, 234, 0.2), #252538);
             color: #fff;
         }
 
-        /* MODAL */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -672,7 +564,6 @@
             background: rgba(147, 51, 234, 0.08);
         }
 
-        /* HORÓSCOPO DO DIA */
         .signos-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -742,7 +633,6 @@
             font-size: 14.5px;
         }
 
-        /* CHAT */
         .input-msg { 
             width: 100%; 
             background: #0f0f14; 
@@ -1100,27 +990,25 @@
                 </div>
             </div>
 
-            <!-- CARD 3: COLUNA DIREITA (ESPORTES + BOTÕES DE JOGOS ENCERRADOS + HORÓSCOPO + CHAT) -->
+            <!-- CARD 3: COLUNA DIREITA (ESPORTES + BOTÕES DE TABELAS + HORÓSCOPO + CHAT) -->
             <div class="coluna-direita" style="display: flex; flex-direction: column; gap: 14px;">
                 
-                <!-- QUADRO DE FUTEBOL E BOTÕES PARA JOGOS ENCERRADOS -->
+                <!-- QUADRO DE FUTEBOL E BOTÕES PARA CONFERIR TABELAS -->
                 <div class="card-box" style="padding: 16px;">
-                    <h3 style="margin-bottom: 10px; font-size: 13.5px;"><i class="fas fa-futbol" style="color: #22c55e;"></i> FUTEBOL: JOGOS DA SEMANA (SEG - DOM)</h3>
-                    
-                    <!-- BOTÕES NO TOPO PARA VER JOGOS ENCERRADOS -->
-                    <div class="botoes-tabelas-col" style="margin-top: 0; margin-bottom: 12px;">
-                        <button class="btn-tabela-esporte" onclick="abrirModalJogosEncerrados('brasileirao')">
-                            <span><i class="fas fa-trophy" style="color: #a855f7; margin-right: 6px;"></i> Brasileirão: Jogos Encerrados e Resultados</span>
-                            <i class="fas fa-chevron-right" style="font-size: 10px;"></i>
-                        </button>
-                        <button class="btn-tabela-esporte" onclick="abrirModalJogosEncerrados('copadobrasil')">
-                            <span><i class="fas fa-award" style="color: #eab308; margin-right: 6px;"></i> Copa do Brasil: Jogos Encerrados e Resultados</span>
-                            <i class="fas fa-chevron-right" style="font-size: 10px;"></i>
-                        </button>
-                    </div>
-
+                    <h3 style="margin-bottom: 10px; font-size: 13.5px;"><i class="fas fa-futbol" style="color: #22c55e;"></i> FUTEBOL: JOGOS & TABELAS</h3>
                     <div id="lista-jogos-esportes" class="esportes-container">
                         <p style="color:#666; font-size:11.5px; text-align:center; margin:10px 0;">Carregando jogos da semana...</p>
+                    </div>
+
+                    <div class="botoes-tabelas-col">
+                        <button class="btn-tabela-esporte" onclick="abrirModalTabela('brasileirao')">
+                            <span><i class="fas fa-table" style="color: #a855f7; margin-right: 6px;"></i> Confira a tabela e classificação</span>
+                            <i class="fas fa-chevron-right" style="font-size: 10px;"></i>
+                        </button>
+                        <button class="btn-tabela-esporte" onclick="abrirModalTabela('copadobrasil')">
+                            <span><i class="fas fa-trophy" style="color: #eab308; margin-right: 6px;"></i> Confira aqui a tabela e classificação da Copa do Brasil</span>
+                            <i class="fas fa-chevron-right" style="font-size: 10px;"></i>
+                        </button>
                     </div>
                 </div>
 
@@ -1165,11 +1053,11 @@
 
     </div>
 
-    <!-- MODAL DE EXIBIÇÃO DE JOGOS ENCERRADOS E RESULTADOS -->
+    <!-- MODAL DE EXIBIÇÃO DAS TABELAS COM API REAL -->
     <div id="modal-tabela" class="modal-overlay" onclick="fecharModalFora(event)">
         <div class="modal-conteudo-box">
             <div class="modal-header-box">
-                <h3 id="modal-titulo-tabela"><i class="fas fa-trophy" style="color: #a855f7;"></i> Resultados</h3>
+                <h3 id="modal-titulo-tabela"><i class="fas fa-trophy" style="color: #a855f7;"></i> Classificação</h3>
                 <button class="btn-fechar-modal" onclick="fecharModalTabela()"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body-tabela" id="modal-corpo-tabela">
@@ -1216,6 +1104,8 @@
     <audio id="audio-ouvinte"></audio>
 
     <script>
+        const API_KEY_FOOTBALL = "ef1aa464f6bacacd0ff6d26c8179aee0";
+
         const firebaseConfig = {
             apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
             authDomain: "meu-painel-f2efe.firebaseapp.com",
@@ -1244,7 +1134,6 @@
         setInterval(atualizarRelogio, 1000);
         atualizarRelogio();
 
-        // CLIMA DAS CAPITAIS
         const cidadesClima = [
             { nome: 'Cascavel', lat: -24.9578, lon: -53.4595 },
             { nome: 'Curitiba', lat: -25.4284, lon: -49.2733 },
@@ -1289,154 +1178,161 @@
         atualizarCarrosselClima();
         setInterval(atualizarCarrosselClima, 6000);
 
-        // BANCO DE JOGOS SEMANAIS (SEGUNDA A DOMINGO) - ROTATIVOS AUTOMÁTICOS POR SEMANA DO ANO
-        const bancosSemanaisJogos = [
-            // Semana 1 (Ex: Início de Agosto de 2026)
-            [
-                { id: 1, campeonato: "Copa do Brasil", timeA: "Remo", timeB: "Santos", diaSemana: 1, dataStr: "Seg, 03/08", hora: "21:30", status: "ENCERRADO", golsA: 0, golsB: 0 },
-                { id: 2, campeonato: "Brasileirão Série A", timeA: "Internacional", timeB: "Flamengo", diaSemana: 3, dataStr: "Qua, 05/08", hora: "19:00", status: "AO VIVO", golsA: 1, golsB: 1, minuto: "72'", posseA: "48%", posseB: "52%", ataquePos: 58 },
-                { id: 3, campeonato: "Copa do Brasil", timeA: "Cruzeiro", timeB: "Chapecoense", diaSemana: 4, dataStr: "Qui, 06/08", hora: "19:30", status: "AGENDADO", golsA: 0, golsB: 0 },
-                { id: 4, campeonato: "Brasileirão Série A", timeA: "Grêmio", timeB: "São Paulo", diaSemana: 6, dataStr: "Sáb, 08/08", hora: "16:00", status: "AGENDADO", golsA: 0, golsB: 0 },
-                { id: 5, campeonato: "Brasileirão Série A", timeA: "Palmeiras", timeB: "Corinthians", diaSemana: 0, dataStr: "Dom, 09/08", hora: "16:00", status: "AGENDADO", golsA: 0, golsB: 0 }
-            ],
-            // Semana 2
-            [
-                { id: 6, campeonato: "Brasileirão Série A", timeA: "Botafogo", timeB: "Fluminense", diaSemana: 1, dataStr: "Seg, 10/08", hora: "20:00", status: "AGENDADO", golsA: 0, golsB: 0 },
-                { id: 7, campeonato: "Copa do Brasil", timeA: "São Paulo", timeB: "Atlético-MG", diaSemana: 3, dataStr: "Qua, 12/08", hora: "21:30", status: "AGENDADO", golsA: 0, golsB: 0 },
-                { id: 8, campeonato: "Copa do Brasil", timeA: "Flamengo", timeB: "Palmeiras", diaSemana: 4, dataStr: "Qui, 13/08", hora: "21:30", status: "AGENDADO", golsA: 0, golsB: 0 },
-                { id: 9, campeonato: "Brasileirão Série A", timeA: "Bahia", timeB: "Vitória", diaSemana: 6, dataStr: "Sáb, 16/08", hora: "18:30", status: "AGENDADO", golsA: 0, golsB: 0 },
-                { id: 10, campeonato: "Brasileirão Série A", timeA: "Vasco", timeB: "Santos", diaSemana: 0, dataStr: "Dom, 16/08", hora: "16:00", status: "AGENDADO", golsA: 0, golsB: 0 }
-            ]
-        ];
-
-        // FUNÇÃO PARA CALCULAR O NÚMERO DA SEMANA ATUAL E OBTER OS JOGOS DE SEGUNDA A DOMINGO AUTOMATICAMENTE
-        function obterJogosDaSemanaAtual() {
-            const agora = new Date();
-            const inicioAno = new Date(agora.getFullYear(), 0, 1);
-            const diasDecorridos = Math.floor((agora - inicioAno) / (24 * 60 * 60 * 1000));
-            const numeroSemana = Math.floor(diasDecorridos / 7);
-            
-            // Alterna automaticamente entre as listas semanais cadastradas
-            const indiceLista = numeroSemana % bancosSemanaisJogos.length;
-            return bancosSemanaisJogos[indiceLista];
-        }
-
-        function carregarJogosEsportivos() {
+        async function carregarJogosBrasileiraoSemana() {
             const containerEsportes = document.getElementById('lista-jogos-esportes');
-            const jogosDaSemana = obterJogosDaSemanaAtual();
-            let htmlJogos = "";
+            containerEsportes.innerHTML = `<p style="color:#a855f7; font-size:11.5px; text-align:center; margin:10px 0;"><i class="fas fa-spinner fa-spin"></i> Buscando jogos...</p>`;
 
-            jogosDaSemana.forEach(j => {
-                const aoVivo = j.status === "AO VIVO";
+            try {
+                const response = await fetch("https://v3.football.api-sports.io/fixtures?league=71&season=2026&live=all", {
+                    method: "GET",
+                    headers: {
+                        "x-apisports-key": API_KEY_FOOTBALL
+                    }
+                });
 
-                let campoVirtualHtml = "";
-                if (aoVivo) {
-                    campoVirtualHtml = `
-                        <button class="btn-toggle-pressao" onclick="toggleCampoVirtual(${j.id})">
-                            <i class="fas fa-chart-line"></i> Confira a pressão do jogo (Campo Virtual)
-                        </button>
-                        <div id="campo-box-${j.id}" class="campo-virtual-box">
-                            <div class="campo-virtual-header">
-                                <span>${j.timeA} (${j.posseA})</span>
-                                <span style="color:#fde047"><i class="fas fa-satellite-dish"></i> AO VIVO</span>
-                                <span>${j.timeB} (${j.posseB})</span>
+                const data = await response.json();
+                
+                if (!data.response || data.response.length === 0) {
+                    containerEsportes.innerHTML = `<p style="color:#888; font-size:11.5px; text-align:center; margin:10px 0;">Nenhum jogo ao vivo no momento.</p>`;
+                    return;
+                }
+
+                let htmlJogos = "";
+                data.response.forEach(item => {
+                    const jogo = item.fixture;
+                    const teams = item.teams;
+                    const goals = item.goals;
+                    const league = item.league;
+
+                    const statusLong = jogo.status.long;
+                    const elapsed = jogo.status.elapsed;
+                    const isLive = jogo.status.short === "1H" || jogo.status.short === "2H" || jogo.status.short === "HT";
+
+                    htmlJogos += `
+                        <div class="jogo-card-item">
+                            <div>
+                                <span class="campeonato-badge-jogo"><i class="fas fa-trophy" style="font-size: 8.5px; margin-right: 3px;"></i> ${league.name}</span>
                             </div>
-                            <div class="campo-desenho">
-                                <div class="linha-meio-campo"></div>
-                                <div class="circulo-central"></div>
-                                <div class="bola-virtual" style="left: ${j.ataquePos}%;">⚽</div>
+                            <div class="jogo-header-info">
+                                <span><i class="far fa-calendar-alt"></i> ${new Date(jogo.date).toLocaleDateString('pt-BR')}</span>
+                                ${isLive ? '<span class="live-tag-badge"><i class="fas fa-circle"></i> AO VIVO ' + (elapsed ? elapsed + "'" : '') + '</span>' : '<span>' + statusLong + '</span>'}
+                            </div>
+                            <div class="jogo-placares-row">
+                                <span class="time-nome-box home" title="${teams.home.name}">${teams.home.name}</span>
+                                <span class="placar-central-num">${goals.home ?? 0} x ${goals.away ?? 0}</span>
+                                <span class="time-nome-box away" title="${teams.away.name}">${teams.away.name}</span>
                             </div>
                         </div>
                     `;
-                }
+                });
 
-                htmlJogos += `
-                    <div class="jogo-card-item">
-                        <div>
-                            <span class="campeonato-badge-jogo"><i class="fas fa-trophy" style="font-size: 8.5px; margin-right: 3px;"></i> ${j.campeonato}</span>
-                        </div>
-                        <div class="jogo-header-info">
-                            <span><i class="far fa-calendar-alt"></i> ${j.dataStr}</span>
-                            ${aoVivo ? '<span class="live-tag-badge"><i class="fas fa-circle"></i> AO VIVO ' + j.minuto + '</span>' : '<span style="color:#94a3b8; font-weight:700;">Ás ' + j.hora + '</span>'}
-                        </div>
-                        <div class="jogo-placares-row">
-                            <span class="time-nome-box home" title="${j.timeA}">${j.timeA}</span>
-                            <span class="placar-central-num">${aoVivo ? j.golsA + ' x ' + j.golsB : 'VS'}</span>
-                            <span class="time-nome-box away" title="${j.timeB}">${j.timeB}</span>
-                        </div>
-                        ${campoVirtualHtml}
-                    </div>
-                `;
-            });
+                containerEsportes.innerHTML = htmlJogos;
 
-            containerEsportes.innerHTML = htmlJogos;
-        }
-
-        function toggleCampoVirtual(id) {
-            const caixa = document.getElementById(`campo-box-${id}`);
-            if (caixa) {
-                caixa.classList.toggle('visivel');
+            } catch (error) {
+                console.error("Erro ao buscar jogos:", error);
+                containerEsportes.innerHTML = `<p style="color:#ef4444; font-size:11.5px; text-align:center; margin:10px 0;">Erro ao carregar dados da API.</p>`;
             }
         }
 
-        carregarJogosEsportivos();
+        carregarJogosBrasileiraoSemana();
+        setInterval(carregarJogosBrasileiraoSemana, 60000);
 
-        // RESULTADOS REAIS DE JOGOS JÁ ENCERRADOS (TABELAS OFICIAIS 2026)
-        const resultadosEncerradosBrasileirao = [
-            { timeA: "Internacional", timeB: "Flamengo", placar: "1 x 1", data: "29/07/2026", gols: "Partida válida pelo Brasileirão Série A" },
-            { timeA: "Mirassol", timeB: "Remo", placar: "2 x 1", data: "29/07/2026", gols: "Partida válida pelo Brasileirão Série A" },
-            { timeA: "Vitória", timeB: "Palmeiras", placar: "0 x 4", data: "29/07/2026", gols: "Partida válida pelo Brasileirão Série A" },
-            { timeA: "Fluminense", timeB: "Bahia", placar: "0 x 0", data: "29/07/2026", gols: "Partida válida pelo Brasileirão Série A" },
-            { timeA: "Corinthians", timeB: "Athletico-PR", placar: "0 x 0", data: "30/07/2026", gols: "Partida válida pelo Brasileirão Série A" },
-            { timeA: "Coritiba", timeB: "Cruzeiro", placar: "0 x 1", data: "30/07/2026", gols: "Partida válida pelo Brasileirão Série A" }
-        ];
-
-        const resultadosEncerradosCopaDoBrasil = [
-            { timeA: "Athletico-PR", timeB: "Vitória", placar: "2 x 0", data: "03/08/2026", gols: "Gols: João Cruz, Eduardo Kogitzki (CAP)" },
-            { timeA: "Internacional", timeB: "Corinthians", placar: "2 x 0", data: "02/08/2026", gols: "Oitavas de Final - Ida" },
-            { timeA: "Palmeiras", timeB: "Fortaleza", placar: "3 x 0", data: "02/08/2026", gols: "Oitavas de Final - Ida" },
-            { timeA: "Vasco", timeB: "Fluminense", placar: "0 x 0", data: "01/08/2026", gols: "Oitavas de Final - Ida" },
-            { timeA: "Atlético-MG", timeB: "Juventude", placar: "0 x 0", data: "01/08/2026", gols: "Oitavas de Final - Ida" },
-            { timeA: "Santos", timeB: "Remo", placar: "0 x 0", data: "01/08/2026", gols: "Oitavas de Final - Ida" }
-        ];
-
-        function abrirModalJogosEncerrados(campeonatoTipo) {
+        async function abrirModalTabela(tipo) {
             const modal = document.getElementById('modal-tabela');
             const titulo = document.getElementById('modal-titulo-tabela');
             const corpo = document.getElementById('modal-corpo-tabela');
 
-            let listaDados = campeonatoTipo === 'brasileirao' ? resultadosEncerradosBrasileirao : resultadosEncerradosCopaDoBrasil;
-            let nomeCamp = campeonatoTipo === 'brasileirao' ? 'Brasileirão Série A' : 'Copa do Brasil';
-
-            titulo.innerHTML = `<i class="fas fa-flag-checkered" style="color: #22c55e;"></i> Jogos Encerrados e Resultados - ${nomeCamp}`;
-            
-            let html = `
-                <table class="tabela-classificacao-full">
-                    <thead>
-                        <tr>
-                            <th>Data</th>
-                            <th>Partida</th>
-                            <th>Placar</th>
-                            <th>Detalhes / Fase</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-
-            listaDados.forEach(item => {
-                html += `
-                    <tr>
-                        <td style="color: #94a3b8; font-size:11px;">${item.data}</td>
-                        <td style="font-weight: 700; color: #fff;">${item.timeA} vs ${item.timeB}</td>
-                        <td style="color: #4ade80; font-weight: 800; font-size: 13px;">${item.placar}</td>
-                        <td style="font-size: 11.5px; color: #cbd5e1;">${item.gols}</td>
-                    </tr>
-                `;
-            });
-
-            html += `</tbody></table>`;
-            corpo.innerHTML = html;
             modal.style.display = 'flex';
+            corpo.innerHTML = `<div style="text-align:center; padding: 30px;"><i class="fas fa-spinner fa-spin" style="color:#a855f7; font-size: 24px;"></i><p style="color:#ccc; margin-top:10px;">Carregando tabela oficial...</p></div>`;
+
+            const leagueId = (tipo === 'brasileirao') ? 71 : 73; 
+
+            try {
+                const response = await fetch(`https://v3.football.api-sports.io/standings?league=${leagueId}&season=2026`, {
+                    method: "GET",
+                    headers: {
+                        "x-apisports-key": API_KEY_FOOTBALL
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (!data.response || data.response.length === 0) {
+                    corpo.innerHTML = `<p style="color:#ef4444; text-align:center;">Não foi encontrada classificação para esta liga no momento.</p>`;
+                    return;
+                }
+
+                const standings = data.response[0].league.standings[0];
+
+                if (tipo === 'brasileirao') {
+                    titulo.innerHTML = `<i class="fas fa-trophy" style="color: #a855f7;"></i> Tabela e Classificação - Brasileirão Série A`;
+                    
+                    let html = `
+                        <table class="tabela-classificacao-full">
+                            <thead>
+                                <tr>
+                                    <th>Pos</th>
+                                    <th>Time</th>
+                                    <th>Pts</th>
+                                    <th>J</th>
+                                    <th>V</th>
+                                    <th>SG</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+
+                    standings.forEach(item => {
+                        html += `
+                            <tr>
+                                <td>${item.rank}º</td>
+                                <td style="font-weight: 700; color: #fff; display: flex; align-items: center; gap: 6px;">
+                                    <img src="${item.team.logo}" width="16" height="16" style="border-radius: 50%;"> ${item.team.name}
+                                </td>
+                                <td style="color: #4ade80; font-weight: 800;">${item.points}</td>
+                                <td>${item.all.played}</td>
+                                <td>${item.all.win}</td>
+                                <td>${item.goalsDiff > 0 ? '+' + item.goalsDiff : item.goalsDiff}</td>
+                            </tr>
+                        `;
+                    });
+
+                    html += `</tbody></table>`;
+                    corpo.innerHTML = html;
+
+                } else {
+                    titulo.innerHTML = `<i class="fas fa-award" style="color: #eab308;"></i> Classificação - Copa do Brasil`;
+                    
+                    let html = `
+                        <table class="tabela-classificacao-full">
+                            <thead>
+                                <tr>
+                                    <th>Pos</th>
+                                    <th>Equipe</th>
+                                    <th>Pts</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+
+                    standings.forEach(item => {
+                        html += `
+                            <tr>
+                                <td>${item.rank}º</td>
+                                <td style="font-weight: 700; color: #fff;">${item.team.name}</td>
+                                <td style="color: #38bdf8; font-weight: 700;">${item.points}</td>
+                            </tr>
+                        `;
+                    });
+
+                    html += `</tbody></table>`;
+                    corpo.innerHTML = html;
+                }
+
+            } catch (err) {
+                console.error("Erro ao buscar tabela:", err);
+                corpo.innerHTML = `<p style="color:#ef4444; text-align:center;">Erro ao conectar com a API de esportes.</p>`;
+            }
         }
 
         function fecharModalTabela() {
@@ -1449,7 +1345,6 @@
             }
         }
 
-        // HORÓSCOPO DO DIA DINÂMICO
         const nomesSignos = {
             aries: 'Áries', taurus: 'Touro', gemini: 'Gêmeos', cancer: 'Câncer',
             leo: 'Leão', virgo: 'Virgem', libra: 'Libra', scorpio: 'Escorpião',
@@ -1529,7 +1424,6 @@
             }, 300);
         }
 
-        // NOTÍCIAS BRASIL
         async function carregarNoticiasBrasil() {
             try {
                 const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fg1.globo.com%2Fdynamo%2Frss2.xml');
@@ -1785,7 +1679,7 @@
                         const r = resps[id];
                         if (r.ouvinteId === ouvinteId || r.ouvinte === ouvinteNome) {
                             listaHistorico.push({
-                                type: 'adm',
+                                tipo: 'adm',
                                 id: id,
                                 texto: r.resposta,
                                 dataHora: r.dataHora || '',
