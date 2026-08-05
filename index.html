@@ -296,7 +296,6 @@
         function executarAcao() {
             const emailRaw = document.getElementById('txt-email').value;
             const emailInput = emailRaw ? emailRaw.trim() : '';
-            // Ajuste cirúrgico universal: remove espaços ocultos, converte para minúsculas e remove qualquer caractere de controle gerado por teclados virtuais móveis
             const emailLimpo = emailInput.toLowerCase().replace(/[\u200B-\u200D\uFEFF]/g, '').trim();
             const emailKey = emailInput.replace(/[.#$\/\[\]]/g, "_");
 
@@ -308,10 +307,10 @@
                     return mostrarErro("Preencha todos os campos obrigatórios.");
                 }
 
-                // Verificação unificada do Administrador com limpeza profunda para celular, tablet e notebook
+                // LOGIN DO ADMINISTRADOR AJUSTADO PARA O ARQUIVO adm.html
                 if (emailLimpo === "senger.luigy@gmail.com" && senha === "104528") {
                     localStorage.setItem('usuarioNome', 'Administrador');
-                    window.location.href = "painel_adm.html";
+                    window.location.href = "adm.html";
                     return;
                 }
 
