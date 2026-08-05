@@ -916,6 +916,87 @@
             margin-top: 4px;
         }
 
+        /* PAINEL DE DISPUTA DE OUVINTES */
+        .disputa-ouvintes-card {
+            background: linear-gradient(135deg, #181427, #121217);
+            border: 1px solid #7c3aed;
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 12px;
+            box-shadow: 0 0 15px rgba(124, 58, 237, 0.25);
+        }
+
+        .disputa-titulo {
+            font-size: 13px;
+            font-weight: 800;
+            color: #e9d5ff;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .ranking-ouvintes-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-height: 160px;
+            overflow-y: auto;
+            padding-right: 2px;
+        }
+
+        .ranking-ouvinte-item {
+            background: #1b1b26;
+            border: 1px solid #2b2b3d;
+            border-radius: 8px;
+            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+
+        .ranking-ouvinte-item.destaque-usuario {
+            border-color: #a855f7;
+            background: rgba(168, 85, 247, 0.12);
+        }
+
+        .ranking-info-esq {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .ranking-posicao {
+            font-size: 11px;
+            font-weight: 800;
+            background: #272738;
+            color: #c084fc;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .ranking-badges-dir {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .premio-ouvinte-tag {
+            background: rgba(234, 179, 8, 0.15);
+            border: 1px solid rgba(234, 179, 8, 0.4);
+            color: #facc15;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
         .player-footer { 
             position: fixed; 
             bottom: 54px; 
@@ -1148,6 +1229,17 @@
             <i class="fas fa-headphones" style="margin-right: 6px;"></i> CURTA AQUI SUAS RADIOS PREFERIDAS
         </div>
 
+        <!-- PAINEL DE DISPUTA DE OUVINTES (MOSTRANDO LUDGINS E PREMIOS EM TODOS OS PAINEIS) -->
+        <div class="disputa-ouvintes-card">
+            <div class="disputa-titulo">
+                <span><i class="fas fa-fire" style="color: #f59e0b; margin-right: 6px;"></i> DISPUTA DE OUVINTES & PRÊMIOS DA SEMANA</span>
+                <span style="font-size: 11px; color: #9ca3af; font-weight: 600;">Quem acumular mais Ludgins lidera!</span>
+            </div>
+            <div class="ranking-ouvintes-lista" id="container-ranking-ouvintes">
+                <!-- Preenchido via Firebase em tempo real -->
+            </div>
+        </div>
+
         <!-- LOJA VIRTUAL DE DESBLOQUEIO -->
         <div class="loja-virtual-card">
             <div class="loja-titulo">
@@ -1172,13 +1264,20 @@
                 </div>
             </div>
 
-            <!-- CARD 2: SUAS RADIOS PREFERIDAS -->
+            <!-- CARD 2: SUAS RADIOS PREFERIDAS (COM BOTÃO LUDGINS CENTRALIZADO) -->
             <div class="card-box" id="card-box-playlist">
                 <h3>GERENCIAR SUAS RADIOS PREFERIDAS</h3>
                 <div class="radios-section-container">
                     <div>
                         <h3 class="sub-titulo-secao"><i class="fas fa-sort"></i> 2. ARRASTE PARA REORDENAR</h3>
                         <div id="grid-playlist" class="playlist-grid-ouvinte"></div>
+                        
+                        <!-- BOTÃO LUDGINS CENTRALIZADO ABAIXO DAS RÁDIOS PREFERIDAS -->
+                        <div style="display: flex; justify-content: center; width: 100%; margin-top: 16px;">
+                            <button onclick="resgatarBonusLudginsCentral()" style="background: linear-gradient(135deg, #7c3aed, #db2777); color: #fff; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 800; font-size: 13.5px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(219, 39, 119, 0.4); transition: transform 0.2s;">
+                                <i class="fas fa-gem" style="font-size: 16px;"></i> Resgatar Bônus de Ludgins Diário
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1430,6 +1529,76 @@
             });
         }
         sincronizarFirebaseOuvinteOnline();
+
+        // RESGATE DO BOTÃO CENTRALIZADO DE LUDGINS
+        function resgatarBonusLudginsCentral() {
+            const hoje = new Date().toDateString();
+            const ultimoResgate = localStorage.getItem('ultimo_resgate_bonus_' + ouvinteId);
+
+            if (ultimoResgate === hoje) {
+                alert("Você já resgatou seu bônus diário de Ludgins hoje! Volte amanhã.");
+                return;
+            }
+
+            meusLudgins += 5;
+            localStorage.setItem('ultimo_resgate_bonus_' + ouvinteId, hoje);
+            salvarProgressoLudgins();
+
+            if (typeof confetti === 'function') {
+                confetti({ particleCount: 180, spread: 90, origin: { y: 0.7 } });
+            }
+            alert("Parabéns! Você resgatou +5 Ludgins bônus para a sua disputa!");
+        }
+
+        // ESCUTA EM TEMPO REAL DO RANKING DE DISPUTA DE OUVINTES (MOSTRANDO LUDGINS E PRÊMIOS)
+        db.ref('ouvintes_online').on('value', snap => {
+            const containerRanking = document.getElementById('container-ranking-ouvintes');
+            if (!containerRanking) return;
+
+            if (!snap.exists()) {
+                containerRanking.innerHTML = "<p style='color:#666; text-align:center; font-size:12px; padding:10px;'>Nenhum ouvinte online no momento.</p>";
+                return;
+            }
+
+            let ouvintesArray = [];
+            snap.forEach(child => {
+                ouvintesArray.push({ id: child.key, ...child.val() });
+            });
+
+            // Ordenar por quantidade de Ludgins (maior para menor) para gerar a disputa
+            ouvintesArray.sort((a, b) => (b.ludgins || 0) - (a.ludgins || 0));
+
+            let htmlRanking = "";
+            ouvintesArray.forEach((o, index) => {
+                let posicao = index + 1;
+                let ehVoce = o.id === ouvinteId;
+                let premioTexto = "";
+
+                // Atribuindo prêmios dinâmicos para gerar a disputa competitiva
+                if (posicao === 1) {
+                    premioTexto = `<span class="premio-ouvinte-tag"><i class="fas fa-crown"></i> 1º Lugar (Prêmio: VIP + 50 Ludgins)</span>`;
+                } else if (posicao === 2) {
+                    premioTexto = `<span class="premio-ouvinte-tag"><i class="fas fa-medal"></i> 2º Lugar (Prêmio: 25 Ludgins)</span>`;
+                } else if (posicao === 3) {
+                    premioTexto = `<span class="premio-ouvinte-tag"><i class="fas fa-award"></i> 3º Lugar (Prêmio: 10 Ludgins)</span>`;
+                }
+
+                htmlRanking += `
+                    <div class="ranking-ouvinte-item ${ehVoce ? 'destaque-usuario' : ''}">
+                        <div class="ranking-info-esq">
+                            <span class="ranking-posicao">${posicao}º</span>
+                            <span>${o.nome || 'Ouvinte'} ${ehVoce ? '(Você)' : ''}</span>
+                        </div>
+                        <div class="ranking-badges-dir">
+                            ${premioTexto}
+                            <span class="ludgins-badge-wallet" style="font-size: 10.5px; padding: 2px 8px;"><i class="fas fa-gem"></i> ${o.ludgins || 0} Ludgins</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            containerRanking.innerHTML = htmlRanking;
+        });
 
         // RENDERIZACAO DA LOJA VIRTUAL
         function renderizarLojaVirtual() {
@@ -1792,7 +1961,7 @@
         const nomesSignos = {
             aries: 'Aries', taurus: 'Touro', gemini: 'Gemeos', cancer: 'Cancer',
             leo: 'Leao', virgo: 'Virgem', libra: 'Libra', scorpio: 'Escorpiao',
-            sagittarius: 'Sagitario', capricorn: 'Capricornio', aquarius: 'Aquario', pisces: 'Peixes'
+            sagittarius: 'Sagitario', capricorn: 'Capricornio', aquarius: 'Aquarius', pisces: 'Peixes'
         };
 
         const baseHoroscopoDinamico = {
