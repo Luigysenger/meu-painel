@@ -101,8 +101,11 @@
         .user-item.offline { border-color: var(--gray-border); opacity: 0.9; }
         
         .user-header-bar { width: 100%; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
-        .user-title { color: white; font-weight: bold; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+        .user-title { color: white; font-weight: bold; font-size: 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         
+        /* Estilo para a badge de nível ao lado do nome */
+        .badge-nivel { font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid currentColor; background: rgba(0,0,0,0.3); }
+
         .status-badge { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
         .status-badge.online { background: rgba(29, 185, 84, 0.15); color: var(--primary); }
         .status-badge.offline { background: rgba(113, 113, 122, 0.15); color: var(--gray-text); }
@@ -503,6 +506,19 @@
         }
 
         // =======================================================
+        // FUNÇÃO DE PATENTES E NÍVEIS
+        // =======================================================
+        function obterNivelPatente(ludgins) {
+            const pts = Number(ludgins) || 0;
+            if (pts >= 100) return { nome: 'Carretel de Joias', cor: '#38bdf8' }; // Azul brilhante
+            if (pts >= 75)  return { nome: 'Rubi', cor: '#ef4444' };              // Vermelho Rubi
+            if (pts >= 50)  return { nome: 'Diamante', cor: '#a855f7' };          // Roxo / Diamante
+            if (pts >= 30)  return { nome: 'Ouro', cor: '#f59e0b' };              // Dourado
+            if (pts >= 15)  return { nome: 'Prata', cor: '#94a3b8' };             // Prateado
+            return { nome: 'Bronze', cor: '#b45309' };                            // Bronze / Marrom
+        }
+
+        // =======================================================
         // MONITOR DE OUVINTES (BASEADO NAS CONTAS E PREFERÊNCIAS)
         // =======================================================
         function toggleUserCard(key) {
@@ -546,6 +562,9 @@
                 const email = conta.email || pref.email || 'Não informado';
                 const criadoEm = parseTimestamp(conta.criadoEm || 0);
 
+                // Captura os ludgins armazenados na conta ou preferências
+                const ludgins = Number(conta.ludgins || pref.ludgins || 0);
+
                 const t1 = parseTimestamp(pref.lastActive);
                 const t2 = parseTimestamp(pref.timestamp);
                 const t3 = parseTimestamp(pref.ultimaAtividade);
@@ -553,8 +572,6 @@
 
                 const explicitStatus = (pref.status || '').toLowerCase();
                 const explicitOnline = (pref.online === true);
-                
-                // Valida o status online considerando o sinal enviado pelo ouvinte ou heartbeat recente
                 const isOnline = (explicitStatus === 'online' || explicitOnline || (lastActive > 0 && (agora - lastActive < 90000)));
 
                 const loginTimestamp = parseTimestamp(pref.loginTimestamp || (isOnline ? (lastActive || criadoEm || agora) : 0));
@@ -569,6 +586,7 @@
                     nome: nome,
                     email: email,
                     criadoEm: criadoEm,
+                    ludgins: ludgins,
                     isOnline: isOnline,
                     loginTimestamp: loginTimestamp,
                     radioAtual: radioAtual,
@@ -595,6 +613,8 @@
                 const safeKey = k.replace(/[^a-zA-Z0-9]/g, '_');
                 const isOpen = !!openCards[k];
 
+                const patente = obterNivelPatente(ouvinte.ludgins);
+
                 let tempoSessaoSegundos = 0;
                 if (ouvinte.isOnline && ouvinte.loginTimestamp) {
                     tempoSessaoSegundos = Math.floor((agora - ouvinte.loginTimestamp) / 1000);
@@ -620,6 +640,7 @@
                     <div class="user-header-bar" onclick="toggleUserCard('${k}')">
                         <span class="user-title">
                             ${iconHeader} ${ouvinte.nome}
+                            <span class="badge-nivel" style="color: ${patente.cor}; border-color: ${patente.cor};">${patente.nome}</span>
                             <i class="fas fa-chevron-down chevron-icon"></i>
                         </span>
                         <div style="display:flex; align-items:center; gap:10px;">
@@ -631,6 +652,7 @@
                     <div class="user-details-wrapper">
                         <div class="user-details-bar">
                             <div>E-mail: <strong>${ouvinte.email}</strong></div>
+                            <div>Ludgins: <strong style="color: #f59e0b;">${ouvinte.ludgins}</strong></div>
                             <div>Nome da Rádio: <strong class="radio-destaque">${displayUltimaRadio}</strong></div>
                             <div>Tempo de Sessão: <b style="color:#38bdf8" id="ts-${safeKey}" data-login="${ouvinte.loginTimestamp}" data-salvo="${ouvinte.tempoSessaoCompletoSalvo}" data-online="${ouvinte.isOnline}">${formatarTempo(tempoSessaoSegundos)}</b></div>
                             <div>Tempo nessa Rádio: <b style="color:#a855f7" id="tr-${safeKey}" data-radio-start="${ouvinte.radioStart}" data-salvo="${ouvinte.tempoRadioSegundos}" data-online="${ouvinte.isOnline}">${formatarTempo(tempoRadioAtualSegundos)}</b></div>
