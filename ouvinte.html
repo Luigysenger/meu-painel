@@ -1794,7 +1794,7 @@
 
         function comprarItemLoja(idItem, custo) {
             if (meusLudgins < custo) {
-                alert(`Ludgins insuficientes! Você tem ${meusLudgins} Ludgins e precisa de ${custo} Ludgins.`);
+                alert(`Ludgins insuficientes! Você tem ${meusLudgins} Ludgins e precisa de ${custo} Ludgins para liberar essa função.`);
                 return;
             }
 
@@ -1838,7 +1838,7 @@
                     div.innerHTML = `
                         <i class="fas fa-lock"></i>
                         <p style="font-size:13.5px; color:#fff; margin-bottom:4px;">${nomeRecurso} Bloqueado</p>
-                        <p>Junte <strong style="color:#c084fc;">${custoReq} Ludgins</strong> ou compre na Loja Virtual para liberar para sempre!</p>
+                        <p>Você não tem saldo ainda para liberar essa função! Junte <strong style="color:#c084fc;">${custoReq} Ludgins</strong> ou compre na Loja Virtual para liberar para sempre!</p>
                     `;
                     elementoCard.style.position = 'relative';
                     elementoCard.appendChild(div);
@@ -2143,7 +2143,7 @@
 
         async function carregarHoroscopo(signo, el) {
             if (!desbloqueios.horoscopo) {
-                alert("Horoscopo bloqueado! Adquira o recurso na sua Loja Virtual acima.");
+                alert("Horoscopo bloqueado! Você não tem saldo ainda para liberar essa função ou precisa adquiri-la na sua Loja Virtual acima.");
                 return;
             }
 
@@ -2306,7 +2306,8 @@
                     htmlIcone = `<i class="fas ${isPlaying ? 'fa-tower-broadcast antena-piscando' : 'fa-radio'} icon-radio"></i>`;
                 }
 
-                // Botão de pincel só aparece se o ouvinte comprou o painel de personalização (30 ludgins)
+                // Botão de pincel só aparece se o ouvinte já liberou/comprou o painel de personalização (30 ludgins). 
+                // Se não liberou, o botão não aparece e ao tentar buscar feedback a loja avisa que ele não tem saldo ainda.
                 let htmlPincel = '';
                 if (desbloqueios.cores) {
                     htmlPincel = `<button class="btn-pincel-card" title="Personalizar card" onclick="event.stopPropagation(); abrirModalPersonalizacao('${r.key}')"><i class="fas fa-paint-brush"></i></button>`;
@@ -2330,6 +2331,11 @@
         const lista10Emojis = ['📻', '🎵', '🎧', '🎸', '🎷', '🎤', '🎹', '🎶', '🌟', '🔥'];
 
         function abrirModalPersonalizacao(key) {
+            if (!desbloqueios.cores) {
+                alert("Você não tem saldo ainda para liberar essa função! Adquira o Painel de Personalização na Loja Virtual por 30 Ludgins.");
+                return;
+            }
+
             cardSendoEditadoKey = key;
             const modal = document.getElementById('modal-personalizacao');
             
@@ -2483,7 +2489,7 @@
 
         function enviarMensagem() {
             if (!desbloqueios.chat) {
-                alert("O Chat está bloqueado! Adquira o acesso na Loja Virtual por 20 Ludgins.");
+                alert("O Chat está bloqueado! Você não tem saldo ainda para liberar essa função ou precisa adquiri-la na Loja Virtual por 20 Ludgins.");
                 return;
             }
 
