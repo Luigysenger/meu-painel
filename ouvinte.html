@@ -14,10 +14,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Scripts Firebase & Sortable -->
+    <!-- Scripts Firebase, Sortable & Confetti -->
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
     <style>
         :root { 
@@ -178,6 +179,7 @@
             width: 100%; 
             box-shadow: 0 12px 30px rgba(0,0,0,0.3);
             box-sizing: border-box;
+            position: relative;
         }
 
         h3 { 
@@ -374,7 +376,6 @@
             gap: 6px;
         }
 
-        /* ESTILO DO CAMPEONATO CENTRALIZADO ACIMA DOS TIMES */
         .campeonato-badge-jogo {
             font-size: 10px;
             font-weight: 800;
@@ -449,7 +450,6 @@
             letter-spacing: 1px;
         }
 
-        /* GOLS / ARTILHEIROS DO JOGO */
         .gols-artilheiros-box {
             background: #111117;
             border-top: 1px dashed #272736;
@@ -474,7 +474,6 @@
             font-size: 10px;
         }
 
-        /* BOTÕES DE TABELAS */
         .botoes-tabelas-col {
             display: flex;
             flex-direction: column;
@@ -785,6 +784,116 @@
             padding: 0;
         }
 
+        /* ESTILOS DA LOJA VIRTUAL E BLOQUEIOS */
+        .loja-virtual-card {
+            background: linear-gradient(135deg, #1b112d, #14141c);
+            border: 1px solid #9333ea;
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 12px;
+            box-shadow: 0 0 15px rgba(147, 51, 234, 0.2);
+        }
+
+        .loja-titulo {
+            font-size: 13px;
+            font-weight: 800;
+            color: #e9d5ff;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .loja-itens-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+
+        .loja-item-btn {
+            background: #231934;
+            border: 1px solid #4c1d95;
+            color: #fff;
+            padding: 10px 12px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 12px;
+            font-weight: 700;
+            text-align: left;
+        }
+
+        .loja-item-btn:hover {
+            background: #3b0764;
+            border-color: #a855f7;
+            transform: translateY(-1px);
+        }
+
+        .loja-item-btn.comprado {
+            background: rgba(34, 197, 94, 0.15);
+            border-color: #22c55e;
+            color: #4ade80;
+            cursor: default;
+        }
+
+        .bloqueado-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(11, 11, 14, 0.88);
+            backdrop-filter: blur(5px);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            border-radius: 18px;
+            box-sizing: border-box;
+        }
+
+        .bloqueado-overlay i {
+            font-size: 32px;
+            color: #f59e0b;
+            margin-bottom: 8px;
+        }
+
+        .bloqueado-overlay p {
+            font-size: 12.5px;
+            font-weight: 700;
+            color: #cbd5e1;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .ludgins-badge-wallet {
+            background: linear-gradient(135deg, #7c3aed, #db2777);
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 0 0 10px rgba(219, 39, 119, 0.4);
+        }
+
+        .patente-tag-header {
+            font-size: 11.5px;
+            font-weight: 800;
+            color: #facc15;
+            background: rgba(250, 204, 21, 0.1);
+            padding: 3px 8px;
+            border-radius: 6px;
+            border: 1px solid rgba(250, 204, 21, 0.3);
+            display: inline-block;
+            margin-top: 4px;
+        }
+
         .player-footer { 
             position: fixed; 
             bottom: 54px; 
@@ -984,9 +1093,14 @@
             <div>
                 <h2>Painel do Ouvinte</h2>
                 <span id="nome-ouvinte-display" class="user-name-title"></span>
+                <span id="patente-ouvinte-badge" class="patente-tag-header">🥉 Bronze</span>
             </div>
 
             <div class="header-widgets">
+                <div class="widget-item">
+                    <span class="ludgins-badge-wallet"><i class="fas fa-gem"></i> <span id="contador-ludgins">0</span> Ludgins</span>
+                </div>
+
                 <div class="widget-item">
                     <i class="far fa-clock" style="color: var(--primary);"></i>
                     <span id="relogio-digital" class="relogio-box">00:00:00</span>
@@ -1007,6 +1121,17 @@
             <i class="fas fa-headphones" style="margin-right: 6px;"></i> CURTA AQUI SUAS RÁDIOS PREFERIDAS
         </div>
 
+        <!-- LOJA VIRTUAL DE DESBLOQUEIO -->
+        <div class="loja-virtual-card">
+            <div class="loja-titulo">
+                <span><i class="fas fa-store" style="color: #a855f7; margin-right: 6px;"></i> SUA LOJA VIRTUAL PARA DESBLOQUEAR MAIS FUNÇÕES NO PAINEL</span>
+                <span style="font-size: 11px; color: #9ca3af; font-weight: 600;">Ouça a rádio para farmar Ludgins!</span>
+            </div>
+            <div class="loja-itens-grid" id="container-loja-itens">
+                <!-- Gerado via JS dinamicamente -->
+            </div>
+        </div>
+
         <div class="main-container">
 
             <!-- CARD 1: ADICIONAR RÁDIOS -->
@@ -1021,7 +1146,7 @@
             </div>
 
             <!-- CARD 2: SUAS RÁDIOS PREFERIDAS -->
-            <div class="card-box">
+            <div class="card-box" id="card-box-playlist">
                 <h3>GERENCIAR SUAS RÁDIOS PREFERIDAS</h3>
                 <div class="radios-section-container">
                     <div>
@@ -1035,7 +1160,7 @@
             <div class="coluna-direita" style="display: flex; flex-direction: column; gap: 14px;">
                 
                 <!-- QUADRO DE FUTEBOL E BOTÕES PARA CONFERIR TABELAS -->
-                <div class="card-box" style="padding: 16px;">
+                <div class="card-box" id="card-box-esportes" style="padding: 16px;">
                     <h3 style="margin-bottom: 10px; font-size: 13.5px;"><i class="fas fa-futbol" style="color: #22c55e;"></i> FUTEBOL: JOGOS & TABELAS</h3>
                     <div id="lista-jogos-esportes" class="esportes-container">
                         <p style="color:#666; font-size:11.5px; text-align:center; margin:10px 0;">Carregando jogos da semana...</p>
@@ -1055,7 +1180,7 @@
                 </div>
 
                 <!-- HORÓSCOPO DO DIA -->
-                <div class="card-box" style="padding: 16px;">
+                <div class="card-box" id="card-box-horoscopo" style="padding: 16px;">
                     <h3 style="margin-bottom: 10px; font-size: 13.5px;"><i class="fas fa-star-of-david" style="color: #c084fc;"></i> HORÓSCOPO DO DIA</h3>
                     <div class="signos-grid">
                         <div class="signo-btn" onclick="carregarHoroscopo('aries', this)"><i class="fas fa-aries"></i><span>ÁRIES</span></div>
@@ -1077,7 +1202,7 @@
                 </div>
 
                 <!-- CARD DE MENSAGENS -->
-                <div class="card-box" style="padding: 16px;">
+                <div class="card-box" id="card-box-chat" style="padding: 16px;">
                     <div class="banner-destaque-adm">
                         <i class="fas fa-paper-plane" style="margin-right: 4px;"></i> MANDE MENSAGEM PARA O ADM PARA PEDIR PARA ADICIONAR UMA RÁDIO QUE VOCÊ GOSTE
                     </div>
@@ -1169,6 +1294,174 @@
 
         document.getElementById('nome-ouvinte-display').innerText = "OLÁ, " + ouvinteNome.toUpperCase();
 
+        // SISTEMA DE LUDGINS, TEMPO ONLINE E LOJA VIRTUAL
+        let segundosConectados = 0;
+        let meusLudgins = parseInt(localStorage.getItem('ludgins_ouvinte_' + ouvinteId)) || 0;
+        let patenteAtual = localStorage.getItem('patente_ouvinte_' + ouvinteId) || '🥉 Bronze';
+
+        // Desbloqueios salvos no localStorage
+        let desbloqueios = JSON.parse(localStorage.getItem('desbloqueios_ouvinte_' + ouvinteId)) || {
+            chat: false,
+            cores: false,
+            horoscopo: false,
+            esportes: false
+        };
+
+        function atualizarInterfaceLudginsEPatente() {
+            document.getElementById('contador-ludgins').innerText = meusLudgins;
+            document.getElementById('patente-ouvinte-badge').innerText = patenteAtual;
+            renderizarLojaVirtual();
+            aplicarTravaBloqueios();
+        }
+
+        // Cronômetro principal de ganho de Ludgins por tempo online
+        setInterval(() => {
+            segundosConectados++;
+
+            // A cada 10 minutos (600 segundos), ganha +1 Ludgin
+            if (segundosConectados % 600 === 0) {
+                meusLudgins += 1;
+                salvarProgressoLudgins();
+            }
+
+            // A cada 30 minutos (1800 segundos), ganha +3 Ludgins extras (totalizando o dobro do ciclo) e confete
+            if (segundosConectados % 1800 === 0) {
+                meusLudgins += 3;
+                salvarProgressoLudgins();
+                if (typeof confetti === 'function') {
+                    confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+                }
+            }
+
+            verificarPatentePorTempo();
+        }, 1000);
+
+        function verificarPatentePorTempo() {
+            let novaPatente = patenteAtual;
+            if (meusLudgins >= 100) novaPatente = '👑 Carretel de Joias';
+            else if (meusLudgins >= 75) novaPatente = '🔴 Rubi';
+            else if (meusLudgins >= 50) novaPatente = '💎 Diamante';
+            else if (meusLudgins >= 30) novaPatente = '🥇 Ouro';
+            else if (meusLudgins >= 15) novaPatente = '🥈 Prata';
+            else novaPatente = '🥉 Bronze';
+
+            if (novaPatente !== patenteAtual) {
+                patenteAtual = novaPatente;
+                salvarProgressoLudgins();
+                if (typeof confetti === 'function') {
+                    confetti({ particleCount: 200, spread: 100 });
+                }
+            }
+        }
+
+        function salvarProgressoLudgins() {
+            localStorage.setItem('ludgins_ouvinte_' + ouvinteId, meusLudgins);
+            localStorage.setItem('patente_ouvinte_' + ouvinteId, patenteAtual);
+            atualizarInterfaceLudginsEPatente();
+            sincronizarFirebaseOuvinteOnline();
+        }
+
+        function sincronizarFirebaseOuvinteOnline() {
+            db.ref('ouvintes_online/' + ouvinteId).update({
+                nome: ouvinteNome,
+                ludgins: meusLudgins,
+                patente: patenteAtual,
+                ultimaAtividade: firebase.database.ServerValue.TIMESTAMP
+            });
+        }
+        sincronizarFirebaseOuvinteOnline();
+
+        // RENDERIZAÇÃO DA LOJA VIRTUAL
+        function renderizarLojaVirtual() {
+            const container = document.getElementById('container-loja-itens');
+            
+            const itensLoja = [
+                { id: 'chat', nome: '💬 Desbloquear Chat de Pedidos de Rádios', custo: 10, adquirido: desbloqueios.chat },
+                { id: 'cores', nome: '🎨 Desbloquear Cores Personalizadas nos Cards', custo: 20, adquirido: desbloqueios.cores },
+                { id: 'horoscopo', nome: '✨ Desbloquear Horóscopo do Dia', custo: 30, adquirido: desbloqueios.horoscopo },
+                { id: 'esportes', nome: '⚽ Desbloquear Seção de Esportes e Jogos', custo: 50, adquirido: desbloqueios.esportes }
+            ];
+
+            let html = "";
+            itensLoja.forEach(item => {
+                if (item.adquirido) {
+                    html += `
+                        <div class="loja-item-btn comprado">
+                            <span><i class="fas fa-check-circle"></i> ${item.nome}</span>
+                            <span><strong>DESBLOQUEADO</strong></span>
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="loja-item-btn" onclick="comprarItemLoja('${item.id}', ${item.custo})">
+                            <span>${item.nome}</span>
+                            <span class="ludgins-badge-wallet"><i class="fas fa-gem"></i> ${item.custo} Ludgins</span>
+                        </div>
+                    `;
+                }
+            });
+            container.innerHTML = html;
+        }
+
+        function comprarItemLoja(idItem, custo) {
+            if (meusLudgins < custo) {
+                alert(`💎 Ludgins insuficientes! Você tem ${meusLudgins} Ludgins e precisa de ${custo} Ludgins para desbloquear.`);
+                return;
+            }
+
+            if (confirm(`Deseja gastar ${custo} Ludgins para desbloquear este recurso permanentemente?`)) {
+                meusLudgins -= custo;
+                desbloqueios[idItem] = true;
+                
+                localStorage.setItem('desbloqueios_ouvinte_' + ouvinteId, JSON.stringify(desbloqueios));
+                salvarProgressoLudgins();
+
+                if (typeof confetti === 'function') {
+                    confetti({ particleCount: 120, spread: 70 });
+                }
+                alert("🎉 Recurso desbloqueado com sucesso!");
+            }
+        }
+
+        function aplicarTravaBloqueios() {
+            // Trava Chat (10 Ludgins)
+            const cardChat = document.getElementById('card-box-chat');
+            gerenciarOverlay(cardChat, desbloqueios.chat, '💬 Chat de Pedidos', 10);
+
+            // Trava Horóscopo (30 Ludgins)
+            const cardHoroscopo = document.getElementById('card-box-horoscopo');
+            gerenciarOverlay(cardHoroscopo, desbloqueios.horoscopo, '✨ Horóscopo do Dia', 30);
+
+            // Trava Esportes (50 Ludgins)
+            const cardEsportes = document.getElementById('card-box-esportes');
+            gerenciarOverlay(cardEsportes, desbloqueios.esportes, '⚽ Futebol & Esportes', 50);
+        }
+
+        function gerenciarOverlay(elementoCard, statusDesbloqueado, nomeRecurso, custoReq) {
+            if (!elementoCard) return;
+            let overlayId = 'overlay_' + elementoCard.id;
+            let overlayExistente = document.getElementById(overlayId);
+
+            if (!statusDesbloqueado) {
+                if (!overlayExistente) {
+                    const div = document.createElement('div');
+                    div.id = overlayId;
+                    div.className = 'bloqueado-overlay';
+                    div.innerHTML = `
+                        <i class="fas fa-lock"></i>
+                        <p style="font-size:13.5px; color:#fff; margin-bottom:4px;">${nomeRecurso} Bloqueado</p>
+                        <p>Junte <strong style="color:#c084fc;">${custoReq} Ludgins</strong> na sua carteira ou compre na Loja Virtual acima para desbloquear!</p>
+                    `;
+                    elementoCard.style.position = 'relative';
+                    elementoCard.appendChild(div);
+                }
+            } else {
+                if (overlayExistente) {
+                    overlayExistente.remove();
+                }
+            }
+        }
+
         function atualizarRelogio() {
             const agora = new Date();
             document.getElementById('relogio-digital').innerText = agora.toLocaleTimeString('pt-BR');
@@ -1221,6 +1514,7 @@
         atualizarCarrosselClima();
         setInterval(atualizarCarrosselClima, 6000);
 
+        // JOGOS DA SEMANA COM CAMPEONATO CENTRALIZADO ACIMA DOS TIMES
         function carregarJogosBrasileiraoSemana() {
             const containerEsportes = document.getElementById('lista-jogos-esportes');
             
@@ -1314,6 +1608,7 @@
         carregarJogosBrasileiraoSemana();
         setInterval(carregarJogosBrasileiraoSemana, 30000);
 
+        // DADOS REAIS DA CLASSIFICAÇÃO COM VARIAÇÃO DE POSIÇÕES (SETAS)
         const tabelaBrasileiraoDados = [
             { pos: 1, var: 0, time: "Palmeiras", pts: 47, j: 21, v: 14, sg: 22 },
             { pos: 2, var: 0, time: "Flamengo", pts: 39, j: 20, v: 11, sg: 19 },
@@ -1436,6 +1731,7 @@
             }
         }
 
+        // HORÓSCOPO DO DIA DINÂMICO
         const nomesSignos = {
             aries: 'Áries', taurus: 'Touro', gemini: 'Gêmeos', cancer: 'Câncer',
             leo: 'Leão', virgo: 'Virgem', libra: 'Libra', scorpio: 'Escorpião',
@@ -1494,6 +1790,11 @@
         };
 
         async function carregarHoroscopo(signo, el) {
+            if (!desbloqueios.horoscopo) {
+                alert("🔒 Horóscopo bloqueado! Adquira o recurso na sua Loja Virtual acima.");
+                return;
+            }
+
             document.querySelectorAll('.signo-btn').forEach(b => b.classList.remove('ativo'));
             if(el) el.classList.add('ativo');
 
@@ -1515,6 +1816,7 @@
             }, 300);
         }
 
+        // NOTÍCIAS BRASIL
         async function carregarNoticiasBrasil() {
             try {
                 const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fg1.globo.com%2Fdynamo%2Frss2.xml');
@@ -1632,16 +1934,36 @@
                 const isPlaying = (radioTocandoKey === r.key);
                 const cardColor = r.color || '#9333ea';
 
+                let clickAcao = `tocarRadioPorKey('${r.key}')`;
+                let cursorEstilo = 'cursor: grab;';
+                let dicaCor = '';
+
+                if (desbloqueios.cores) {
+                    dicaCor = ` title="Clique duas vezes para escolher a cor personalizada do card" ondblclick="abrirSeletorCorCard('${r.key}')"`;
+                }
+
                 container.innerHTML += `
                     <div class="radio-card-quadrado ${isPlaying ? 'playing' : ''}" 
-                         style="background: ${cardColor};" 
+                         style="background: ${cardColor}; ${cursorEstilo}" 
                          data-key="${r.key}"
-                         onclick="tocarRadioPorKey('${r.key}')">
+                         onclick="${clickAcao}" ${dicaCor}>
                         <i class="fas ${isPlaying ? 'fa-tower-broadcast antena-piscando' : 'fa-radio'} icon-radio"></i>
                         <span class="radio-name">${r.name}</span>
+                        ${desbloqueios.cores ? '<span style="font-size:9px; opacity:0.8; margin-top:2px;">(Duplo clique p/ cor)</span>' : ''}
                     </div>
                 `;
             });
+        }
+
+        // Função para customizar a cor do card caso tenha comprado por 20 Ludgins
+        function abrirSeletorCorCard(key) {
+            if (!desbloqueios.cores) return;
+            let novaCor = prompt("Digite o código da cor desejada (ex: #ff007f, #00ffff, #3b82f6) ou nome em inglês:", "#9333ea");
+            if (novaCor) {
+                db.ref('ouvintes_preferencias/' + ouvinteId + '/cores_cards/' + key).set(novaCor);
+                alert("🎨 Cor do card atualizada!");
+                renderizarPlaylistDireita();
+            }
         }
 
         function togglePlaylistRadio(key) {
@@ -1722,12 +2044,19 @@
         }
 
         function enviarMensagem() {
+            if (!desbloqueios.chat) {
+                alert("🔒 O Chat de Pedidos está bloqueado! Adquira o acesso na Loja Virtual por 10 Ludgins.");
+                return;
+            }
+
             const texto = document.getElementById('texto-mensagem').value.trim();
             if (!texto) return alert("Digite sua mensagem!");
 
             db.ref('mensagens_ouvintes').push({
                 ouvinteId: ouvinteId,
                 ouvinte: ouvinteNome,
+                patente: patenteAtual,
+                ludgins: meusLudgins,
                 mensagem: texto,
                 dataHora: new Date().toLocaleString('pt-BR'),
                 timestamp: firebase.database.ServerValue.TIMESTAMP
@@ -1791,7 +2120,7 @@
                             container.innerHTML += `
                                 <div class="chat-bubble-ouvinte">
                                     <div class="chat-sender-header">
-                                        <span class="chat-sender-name ouvinte">Você</span>
+                                        <span class="chat-sender-name ouvinte">Você (${patenteAtual})</span>
                                         <button class="btn-delete-chat" title="Apagar" onclick="deletarMensagem('${item.id}')">
                                             <i class="fas fa-trash-alt"></i>
                                         </button>
@@ -1819,14 +2148,12 @@
         }
 
         carregarChatCompleto();
+        atualizarInterfaceLudginsEPatente();
 
         function logout() {
-            localStorage.removeItem('usuarioNome');
-            localStorage.removeItem('usuarioEmail');
-            localStorage.removeItem('userRole');
+            localStorage.clear();
             window.location.href = 'index.html';
         }
     </script>
 </body>
 </html>
-```[cite: 4]
