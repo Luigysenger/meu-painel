@@ -537,7 +537,6 @@
             let listaOuvintesMonitor = [];
 
             allKeys.forEach(k => {
-                // Ignora o usuario admin principal se desejar mostrar apenas ouvintes
                 if(k === 'admin') return;
 
                 const conta = rawContas[k] || {};
@@ -555,7 +554,7 @@
                 const explicitStatus = (pref.status || '').toLowerCase();
                 const explicitOnline = (pref.online === true);
                 
-                // Considera online se o status for explícito ou se houve atividade nos últimos 90 segundos
+                // Valida o status online considerando o sinal enviado pelo ouvinte ou heartbeat recente
                 const isOnline = (explicitStatus === 'online' || explicitOnline || (lastActive > 0 && (agora - lastActive < 90000)));
 
                 const loginTimestamp = parseTimestamp(pref.loginTimestamp || (isOnline ? (lastActive || criadoEm || agora) : 0));
