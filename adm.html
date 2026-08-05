@@ -97,7 +97,7 @@
         @media (max-width: 600px) { .pub-container { grid-template-columns: 1fr; } }
         .pub-preview { width: 100%; max-height: 120px; object-fit: contain; margin-top: 10px; border-radius: 10px; border: 1px dashed #444; display: none; }
 
-        /* MONITOR DE OUVINTES (ATUALIZADO RIGOROSAMENTE CONFORME PEDIDO) */
+        /* MONITOR DE OUVINTES AJUSTADO */
         .user-item { background: #141414; margin-bottom: 10px; border-radius: 14px; border: 1px solid var(--gray-border); overflow: hidden; transition: all 0.3s ease; cursor: pointer; }
         .user-item.online { border-color: var(--primary); box-shadow: 0 0 12px rgba(29, 185, 84, 0.25); background: #161619; }
         .user-item.offline { border-color: var(--gray-border); opacity: 0.9; }
@@ -506,7 +506,7 @@
         }
 
         // =======================================================
-        // MONITOR DE OUVINTES (RIGOROSAMENTE AJUSTADO CONFORME PEDIDO)
+        // MONITOR DE OUVINTES (CORRIGIDO E ROBUSTO)
         // =======================================================
         function toggleUserCard(key) {
             openCards[key] = !openCards[key];
@@ -539,6 +539,7 @@
             const agora = Date.now();
             container.innerHTML = "";
 
+            // Recolhe todas as chaves (IDs ou nomes normalizados) de todas as fontes possíveis
             const allKeys = new Set([...Object.keys(rawContas), ...Object.keys(rawPreferencias), ...Object.keys(rawOnlineState)]);
 
             let listaOuvintesMonitor = [];
@@ -548,7 +549,7 @@
                 const pref = rawPreferencias[k] || {};
                 const onState = rawOnlineState[k] || {};
 
-                const nome = conta.nome || conta.usuario || pref.nome || k;
+                const nome = conta.nome || conta.usuario || pref.nome || onState.nome || k;
                 const criadoEm = parseTimestamp(conta.criadoEm || conta.timestamp || 0);
 
                 const t1 = parseTimestamp(pref.lastActive);
@@ -560,14 +561,16 @@
 
                 const explicitStatus = (pref.status || onState.status || '').toLowerCase();
                 const explicitOnline = (pref.online === true || onState.online === true);
-                const isOnline = (explicitStatus === 'online' || explicitOnline || (lastActive > 0 && (agora - lastActive < 30000)));
+                
+                // Correção robusta: Considera online se explicitamente marcado ou se teve atividade recente (ex: últimos 60 segundos)
+                const isOnline = (explicitStatus === 'online' || explicitOnline || (lastActive > 0 && (agora - lastActive < 60000)));
 
-                const loginTimestamp = parseTimestamp(pref.loginTimestamp || onState.loginTimestamp || (isOnline ? lastActive : 0));
+                const loginTimestamp = parseTimestamp(pref.loginTimestamp || onState.loginTimestamp || (isOnline ? (lastActive || criadoEm || agora) : 0));
                 const radioAtual = pref.radioAtual || onState.radioAtual || pref.radio || 'Nenhuma';
                 const ultimaRadioSalva = pref.ultimaRadioSalva || onState.ultimaRadioSalva || 'Nenhuma';
                 const tempoSessaoCompletoSalvo = pref.tempoSessaoCompletoSalvo || onState.tempoSessaoCompletoSalvo || 0;
                 const tempoRadioSegundos = pref.tempoRadioSegundos || onState.tempoRadioSegundos || 0;
-                const radioStart = parseTimestamp(pref.radioStart || onState.radioStart || lastActive);
+                const radioStart = parseTimestamp(pref.radioStart || onState.radioStart || (isOnline ? loginTimestamp : 0));
 
                 listaOuvintesMonitor.push({
                     key: k,
@@ -583,15 +586,14 @@
                 });
             });
 
-            // REQUISITO: Novos cadastros sem sessão ou offline ficam sempre por último em ordem de cadastro.
-            // Os online sobem por ordem de entrada no sistema.
+            // REQUISITO: Ordenação: Online primeiro (por ordem de entrada/login), Offline/Cadastrados por último em cinza
             listaOuvintesMonitor.sort((a, b) => {
                 if (a.isOnline && !b.isOnline) return -1;
                 if (!a.isOnline && b.isOnline) return 1;
                 if (a.isOnline && b.isOnline) {
-                    return a.loginTimestamp - b.loginTimestamp; 
+                    return (a.loginTimestamp || 0) - (b.loginTimestamp || 0); 
                 }
-                return a.criadoEm - b.criadoEm;
+                return (a.criadoEm || 0) - (b.criadoEm || 0);
             });
 
             if (listaOuvintesMonitor.length === 0) {
@@ -624,7 +626,7 @@
                 div.id = `user-card-${safeKey}`;
                 div.className = `user-item ${ouvinte.isOnline ? 'online' : 'offline'} ${isOpen ? 'open' : ''}`;
                 
-                // REQUISITO: Ícone de alto-falante piscando para online, usuário cinza para offline
+                // REQUISITO: Ícone de alto-falante piscando para online, ícone padrão cinza para offline
                 const iconHeader = ouvinte.isOnline ? `<i class="fas fa-volume-high speaker-icon"></i>` : `<i class="fas fa-user" style="color: var(--gray-text); margin-right: 8px;"></i>`;
 
                 div.innerHTML = `
