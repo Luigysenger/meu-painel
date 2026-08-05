@@ -1264,7 +1264,7 @@
                 </div>
             </div>
 
-            <!-- CARD 2: SUAS RADIOS PREFERIDAS (COM BOTÃO LUDGINS CENTRALIZADO) -->
+            <!-- CARD 2: SUAS RADIOS PREFERIDAS (COM BOTÃO LUDGINS CENTRALIZADO E MAIOR) -->
             <div class="card-box" id="card-box-playlist">
                 <h3>GERENCIAR SUAS RADIOS PREFERIDAS</h3>
                 <div class="radios-section-container">
@@ -1272,10 +1272,10 @@
                         <h3 class="sub-titulo-secao"><i class="fas fa-sort"></i> 2. ARRASTE PARA REORDENAR</h3>
                         <div id="grid-playlist" class="playlist-grid-ouvinte"></div>
                         
-                        <!-- BOTÃO LUDGINS CENTRALIZADO ABAIXO DAS RÁDIOS PREFERIDAS -->
-                        <div style="display: flex; justify-content: center; width: 100%; margin-top: 16px;">
-                            <button onclick="resgatarBonusLudginsCentral()" style="background: linear-gradient(135deg, #7c3aed, #db2777); color: #fff; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 800; font-size: 13.5px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(219, 39, 119, 0.4); transition: transform 0.2s;">
-                                <i class="fas fa-gem" style="font-size: 16px;"></i> Resgatar Bônus de Ludgins Diário
+                        <!-- BOTÃO LUDGINS CENTRALIZADO E UM POUCO MAIOR ABAIXO DAS RÁDIOS PREFERIDAS -->
+                        <div style="display: flex; justify-content: center; width: 100%; margin-top: 18px;">
+                            <button onclick="resgatarBonusLudginsCentral()" style="background: linear-gradient(135deg, #7c3aed, #db2777); color: #fff; border: none; padding: 16px 32px; border-radius: 14px; font-weight: 800; font-size: 15px; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 6px 20px rgba(219, 39, 119, 0.5); transition: transform 0.2s;">
+                                <i class="fas fa-gem" style="font-size: 18px;"></i> Resgatar Bônus de Ludgins Diário
                             </button>
                         </div>
                     </div>
@@ -1460,28 +1460,23 @@
 
                 const alertaBox = document.getElementById('alerta-cronometro');
 
-                // Mensagem de 5 minutos para o primeiro ludgin (300 segundos)
                 if (segundosConectados === 300) {
                     alertaBox.style.display = 'inline-block';
                     alertaBox.innerText = "Ei ligadao, mais 5 minutos ouvindo voce fatura seu primeiro ludgins";
                 } 
-                // Mensagem para dobrar (Exemplo aos 570 segundos / 9 min e 30s ou marco desejado)
                 else if (segundosConectados === 570) {
                     alertaBox.style.display = 'inline-block';
                     alertaBox.innerText = "Ei ligadao, mais 3 minutos vc pode dobrar seus ludigins";
                 } 
-                // Ocultar apos alguns segundos para nao poluir
                 else if (segundosConectados === 360 || segundosConectados === 630) {
                     alertaBox.style.display = 'none';
                 }
 
-                // A cada 10 minutos (600 segundos), ganha +1 Ludgin
                 if (segundosConectados % 600 === 0) {
                     meusLudgins += 1;
                     salvarProgressoLudgins();
                 }
 
-                // A cada 30 minutos (1800 segundos), ganha +3 Ludgins extras e confete
                 if (segundosConectados % 1800 === 0) {
                     meusLudgins += 3;
                     salvarProgressoLudgins();
@@ -1530,7 +1525,7 @@
         }
         sincronizarFirebaseOuvinteOnline();
 
-        // RESGATE DO BOTÃO CENTRALIZADO DE LUDGINS
+        // RESGATE DO BÔNUS DE LUDGINS DIÁRIO AJUSTADO (15 min = 2, 30 min = 4, 50 min = 5 - uma vez por dia)
         function resgatarBonusLudginsCentral() {
             const hoje = new Date().toDateString();
             const ultimoResgate = localStorage.getItem('ultimo_resgate_bonus_' + ouvinteId);
@@ -1540,17 +1535,36 @@
                 return;
             }
 
-            meusLudgins += 5;
+            // Exemplo baseado no tempo conectado do dia ou validação de tempo ouvindo
+            let minutosAtivo = Math.floor(segundosConectados / 60);
+            let qtdResgate = 0;
+
+            if (minutosAtivo >= 50) {
+                qtdResgate = 5;
+            } else if (minutosAtivo >= 30) {
+                qtdResgate = 4;
+            } else if (minutosAtivo >= 15) {
+                qtdResgate = 2;
+            } else {
+                alert(`Você precisa de pelo menos 15 minutos ouvindo a rádio para resgatar o bônus diário! Tempo atual: ${minutosAtivo} min.`);
+                return;
+            }
+
+            meusLudgins += qtdResgate;
             localStorage.setItem('ultimo_resgate_bonus_' + ouvinteId, hoje);
             salvarProgressoLudgins();
 
             if (typeof confetti === 'function') {
                 confetti({ particleCount: 180, spread: 90, origin: { y: 0.7 } });
             }
-            alert("Parabéns! Você resgatou +5 Ludgins bônus para a sua disputa!");
+            alert(`Parabéns! Você resgatou +${qtdResgate} Ludgins bônus pelo seu tempo de escuta hoje!`);
         }
 
-        // ESCUTA EM TEMPO REAL DO RANKING DE DISPUTA DE OUVINTES (MOSTRANDO LUDGINS E PRÊMIOS)
+        // SISTEMA DE RODÍZIO AUTOMÁTICO DE OUVINTES NO PAINEL (Muda a cada 4 segundos)
+        let listaOuvintesGlobal = [];
+        let indiceOuvinteAtual = 0;
+        let rodizioIntervaloId = null;
+
         db.ref('ouvintes_online').on('value', snap => {
             const containerRanking = document.getElementById('container-ranking-ouvintes');
             if (!containerRanking) return;
@@ -1560,31 +1574,52 @@
                 return;
             }
 
-            let ouvintesArray = [];
+            listaOuvintesGlobal = [];
             snap.forEach(child => {
-                ouvintesArray.push({ id: child.key, ...child.val() });
+                listaOuvintesGlobal.push({ id: child.key, ...child.val() });
             });
 
-            // Ordenar por quantidade de Ludgins (maior para menor) para gerar a disputa
-            ouvintesArray.sort((a, b) => (b.ludgins || 0) - (a.ludgins || 0));
+            // Ordenar por Ludgins
+            listaOuvintesGlobal.sort((a, b) => (b.ludgins || 0) - (a.ludgins || 0));
+
+            renderizarPainelDisputaDinamico();
+
+            if (!rodizioIntervaloId && listaOuvintesGlobal.length > 1) {
+                rodizioIntervaloId = setInterval(() => {
+                    if (listaOuvintesGlobal.length === 0) return;
+                    indiceOuvinteAtual = (indiceOuvinteAtual + 1) % listaOuvintesGlobal.length;
+                    renderizarPainelDisputaDinamico();
+                }, 4000); // 4 segundos
+            }
+        });
+
+        function renderizarPainelDisputaDinamico() {
+            const containerRanking = document.getElementById('container-ranking-ouvintes');
+            if (!containerRanking || listaOuvintesGlobal.length === 0) return;
+
+            if (indiceOuvinteAtual >= listaOuvintesGlobal.length) {
+                indiceOuvinteAtual = 0;
+            }
 
             let htmlRanking = "";
-            ouvintesArray.forEach((o, index) => {
+            listaOuvintesGlobal.forEach((o, index) => {
                 let posicao = index + 1;
                 let ehVoce = o.id === ouvinteId;
                 let premioTexto = "";
 
-                // Atribuindo prêmios dinâmicos para gerar a disputa competitiva
                 if (posicao === 1) {
-                    premioTexto = `<span class="premio-ouvinte-tag"><i class="fas fa-crown"></i> 1º Lugar (Prêmio: VIP + 50 Ludgins)</span>`;
+                    premioTexto = `<span class="premio-ouvinte-tag"><i class="fas fa-crown"></i> 1º Lugar (VIP + 50 Ludgins)</span>`;
                 } else if (posicao === 2) {
-                    premioTexto = `<span class="premio-ouvinte-tag"><i class="fas fa-medal"></i> 2º Lugar (Prêmio: 25 Ludgins)</span>`;
+                    premioTexto = `<span class="premio-ouvinte-tag"><i class="fas fa-medal"></i> 2º Lugar (25 Ludgins)</span>`;
                 } else if (posicao === 3) {
-                    premioTexto = `<span class="premio-ouvinte-tag"><i class="fas fa-award"></i> 3º Lugar (Prêmio: 10 Ludgins)</span>`;
+                    premioTexto = `<span class="premio-ouvinte-tag"><i class="fas fa-award"></i> 3º Lugar (10 Ludgins)</span>`;
                 }
 
+                // Destaca visualmente o ouvinte da vez no rodizio de 4 segundos
+                let destaqueRodizio = (index === indiceOuvinteAtual) ? 'border-color: #f59e0b; background: rgba(245, 158, 11, 0.15);' : '';
+
                 htmlRanking += `
-                    <div class="ranking-ouvinte-item ${ehVoce ? 'destaque-usuario' : ''}">
+                    <div class="ranking-ouvinte-item ${ehVoce ? 'destaque-usuario' : ''}" style="${destaqueRodizio} transition: all 0.4s ease;">
                         <div class="ranking-info-esq">
                             <span class="ranking-posicao">${posicao}º</span>
                             <span>${o.nome || 'Ouvinte'} ${ehVoce ? '(Você)' : ''}</span>
@@ -1598,7 +1633,7 @@
             });
 
             containerRanking.innerHTML = htmlRanking;
-        });
+        }
 
         // RENDERIZACAO DA LOJA VIRTUAL
         function renderizarLojaVirtual() {
@@ -2232,7 +2267,6 @@
             }
         }
 
-        // Eventos nativos do player para capturar play/pause com precisao
         player.addEventListener('play', () => {
             isRadioTocando = true;
             document.getElementById('btn-play').innerHTML = '<i class="fas fa-pause"></i>';
