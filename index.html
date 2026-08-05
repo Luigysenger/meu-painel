@@ -169,7 +169,7 @@
 
             <div class="input-group" id="group-email">
                 <label>E-mail</label>
-                <input type="email" id="txt-email" placeholder="seu@email.com" onkeydown="handleEnter(event)">
+                <input type="email" id="txt-email" autocapitalize="none" autocomplete="email" placeholder="seu@email.com" onkeydown="handleEnter(event)">
             </div>
 
             <div class="input-group" id="group-senha">
@@ -294,18 +294,22 @@
         }
 
         function executarAcao() {
-            const emailInput = document.getElementById('txt-email').value.trim();
+            const emailRaw = document.getElementById('txt-email').value;
+            const emailInput = emailRaw ? emailRaw.trim() : '';
+            // Ajuste cirúrgico universal: remove espaços ocultos, converte para minúsculas e remove qualquer caractere de controle gerado por teclados virtuais móveis
+            const emailLimpo = emailInput.toLowerCase().replace(/[\u200B-\u200D\uFEFF]/g, '').trim();
             const emailKey = emailInput.replace(/[.#$\/\[\]]/g, "_");
 
             if (modoAtual === 'login') {
-                const senha = document.getElementById('txt-senha').value.trim();
+                const senhaRaw = document.getElementById('txt-senha').value;
+                const senha = senhaRaw ? senhaRaw.trim() : '';
 
                 if (!emailInput || !senha) {
                     return mostrarErro("Preencha todos os campos obrigatórios.");
                 }
 
-                // LOGIN DO ADMINISTRADOR EXCLUSIVO (Verificação rigorosa ignorando maiúsculas/minúsculas no e-mail)
-                if (emailInput.toLowerCase() === "senger.luigy@gmail.com" && senha === "104528") {
+                // Verificação unificada do Administrador com limpeza profunda para celular, tablet e notebook
+                if (emailLimpo === "senger.luigy@gmail.com" && senha === "104528") {
                     localStorage.setItem('usuarioNome', 'Administrador');
                     window.location.href = "painel_adm.html";
                     return;
