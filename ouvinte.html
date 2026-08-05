@@ -1161,14 +1161,25 @@
             localStorage.setItem('userId', ouvinteId);
         }
         
-        let ouvinteNomeBruto = localStorage.getItem('usuarioNome') || localStorage.getItem('usuarioEmail') || 'Ouvinte Anônimo';
-        if (ouvinteNomeBruto.includes('@')) {
-            ouvinteNomeBruto = ouvinteNomeBruto.split('@')[0];
+        let ouvinteNome = localStorage.getItem('usuarioNome') || localStorage.getItem('usuarioEmail') || 'Ouvinte Anônimo';
+        if (ouvinteNome.includes('@')) {
+            ouvinteNome = ouvinteNome.split('@')[0];
         }
-        // Ajuste cirúrgico: pega apenas o primeiro nome (separado por espaço)
-        let ouvinteNome = ouvinteNomeBruto.trim().split(' ')[0];
+        document.getElementById('nome-ouvinte-display').innerText = "Olá, " + ouvinteNome.toUpperCase();
 
-        document.getElementById('nome-ouvinte-display').innerText = "OLÁ, " + ouvinteNome.toUpperCase();
+        // Configuração de Status Online e Desconexão Automática
+        const statusRef = db.ref('ouvintes_preferencias/' + ouvinteId);
+        statusRef.update({
+            ouvinte: ouvinteNome,
+            online: true,
+            status: "Online",
+            ultimaAtualizacao: firebase.database.ServerValue.TIMESTAMP
+        });
+        statusRef.onDisconnect().update({
+            online: false,
+            status: "Offline",
+            ultimaAtualizacao: firebase.database.ServerValue.TIMESTAMP
+        });
 
         function atualizarRelogio() {
             const agora = new Date();
@@ -1570,9 +1581,11 @@
 
         function salvarPreferenciasOuvinte() {
             localStorage.setItem('playlist_keys_ouvinte', JSON.stringify(playlistKeys));
-            db.ref('ouvintes_preferencias/' + ouvinteId).set({
+            db.ref('ouvintes_preferencias/' + ouvinteId).update({
                 ouvinte: ouvinteNome,
                 playlist: playlistKeys,
+                online: true,
+                status: "Online",
                 ultimaAtualizacao: firebase.database.ServerValue.TIMESTAMP
             });
         }
@@ -1826,8 +1839,15 @@
         carregarChatCompleto();
 
         function logout() {
-            localStorage.clear();
-            window.location.href = 'index.html';
+            // Marca explicitamente como offline ao sair
+            db.ref('ouvintes_preferencias/' + ouvinteId).update({
+                online: false,
+                status: "Offline",
+                ultimaAtualizacao: firebase.database.ServerValue.TIMESTAMP
+            }).then(() => {
+                localStorage.clear();
+                window.location.href = 'index.html';
+            });
         }
     </script>
 </body>
