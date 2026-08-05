@@ -3,249 +3,219 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PAINEL ADM SUPREMO - LUIGY</title>
+    <title>Painel Administrativo - LMS de Rádios Online</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { 
-            --primary: #1DB954; 
-            --bg: #09090b; 
-            --card: rgba(18, 18, 20, 0.75); 
-            --card-solid: #121214;
-            --text-muted: #a1a1aa; 
-            --purple-light: #c084fc; 
-            --purple-glow: rgba(168, 85, 247, 0.15);
-            --blue-online: #38bdf8; 
+        :root {
+            --primary: #1DB954;
+            --bg: #09090b;
+            --card: rgba(18, 18, 20, 0.85);
+            --text-muted: #a1a1aa;
+            --purple-light: #c084fc;
             --border-glass: rgba(255, 255, 255, 0.08);
+            --gray-border: #52525b;
+            --gray-text: #71717a;
         }
 
         * { box-sizing: border-box; }
-        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: #f4f4f5; margin: 0; padding: 15px; user-select: none; }
-        
-        /* HEADER MODERNO */
-        .header { display: flex; justify-content: space-between; align-items: center; background: var(--card-solid); padding: 18px 24px; border-radius: 20px; border: 1px solid var(--border-glass); margin-bottom: 25px; gap: 15px; flex-wrap: wrap; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .header-brand { display: flex; flex-direction: column; gap: 4px; }
-        .header-title { font-size: 22px; font-weight: 900; background: linear-gradient(135deg, #c084fc, #e879f9); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 1px; margin: 0; text-transform: uppercase; }
-        .header-sub { font-size: 13px; color: var(--text-muted); font-weight: 500; margin: 0; }
-        
-        .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        
-        .info-pill { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-glass); padding: 8px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; color: #fff; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(10px); }
-        .info-pill i { color: var(--purple-light); }
-        
-        .btn-msg-notif { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 9px 16px; border-radius: 10px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; font-size: 13px; box-shadow: 0 4px 15px rgba(239, 68, 68,.3); transition: transform 0.2s; }
-        .btn-msg-notif:hover { transform: translateY(-2px); }
-        .btn-msg-notif span { background: white; color: #ef4444; padding: 2px 6px; border-radius: 50%; font-size: 11px; font-weight: 900; }
-        
-        .btn-header { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-glass); color: white; padding: 9px 14px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
-        .btn-header:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.2); }
-        .btn-sair { color: #f87171; border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.08); }
-        .btn-sair:hover { background: rgba(239, 68, 68, 0.2); }
-
-        @media (max-width: 850px) {
-            .header { flex-direction: column; align-items: stretch; text-align: center; }
-            .header-brand { align-items: center; }
-            .header-right { justify-content: center; }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: #f4f4f5;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
         }
 
-        #container-mensagens-adm { max-height: 0; overflow: hidden; transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-        #container-mensagens-adm.aberto { max-height: 2000px; margin-bottom: 25px; }
-        
-        /* CHAT REFORMULADO */
-        .msg-grid-adm { display: flex; flex-direction: column; gap: 10px; padding: 5px; background: rgba(0,0,0,0.3); border-radius: 14px; }
-        .chat-accordion-card { background: var(--card-solid); border: 1px solid var(--border-glass); border-radius: 12px; overflow: hidden; transition: border-color 0.2s; }
-        .chat-accordion-card:hover { border-color: rgba(255,255,255,0.15); }
-        .chat-header { padding: 14px 18px; background: rgba(255,255,255,0.02); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-        .chat-user-title { font-weight: 700; font-size: 14px; color: var(--purple-light); display: flex; align-items: center; gap: 10px; }
-        
-        .chat-body-wrapper { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.3s ease; background: #0c0c0e; }
-        .chat-accordion-card.open .chat-body-wrapper { max-height: 1000px; padding: 18px; border-top: 1px solid var(--border-glass); }
-        .chat-accordion-card.open .chevron-chat { transform: rotate(180deg); color: #fff; }
-        .chevron-chat { font-size: 12px; color: var(--text-muted); transition: transform 0.3s; }
-        
-        .chat-history { display: flex; flex-direction: column; gap: 12px; max-height: 350px; overflow-y: auto; padding-right: 5px; margin-bottom: 15px; }
-        .chat-bubble { max-width: 80%; padding: 12px 14px; border-radius: 12px; font-size: 13px; line-height: 1.5; word-break: break-word; }
-        .chat-bubble.ouvinte { align-self: flex-start; background: #1f1f23; color: #fff; border-left: 3px solid var(--purple-light); }
-        .chat-bubble.adm { align-self: flex-end; background: rgba(29, 185, 84, 0.15); color: #e2f8eb; border-right: 3px solid var(--primary); border: 1px solid rgba(29,185,84,0.2); }
-        .chat-meta { font-size: 10px; color: var(--text-muted); margin-bottom: 6px; display: flex; justify-content: space-between; gap: 15px; }
-        
-        .chat-input-area { display: flex; gap: 10px; }
-        .chat-input-area textarea { flex: 1; background: #161619; border: 1px solid var(--border-glass); border-radius: 10px; color: #fff; padding: 10px 14px; font-size: 13px; resize: none; outline: none; transition: border-color 0.2s; }
-        .chat-input-area textarea:focus { border-color: var(--primary); }
-        .btn-send-chat { background: var(--primary); color: #000; border: none; padding: 0 18px; border-radius: 10px; font-weight: 800; font-size: 12px; cursor: pointer; transition: opacity 0.2s; }
-        .btn-send-chat:hover { opacity: 0.9; }
+        .container {
+            width: 100%;
+            max-width: 900px;
+        }
 
-        /* GRID PRINCIPAL */
-        .main-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 25px; max-width: 1400px; margin: 0 auto; }
-        @media (max-width: 1024px) { .main-grid { grid-template-columns: 1fr; } }
-        
-        .card { background: var(--card); backdrop-filter: blur(12px); border-radius: 24px; padding: 24px; border: 1px solid var(--border-glass); margin-bottom: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); }
-        h3 { color: var(--primary); font-size: 12px; text-transform: uppercase; letter-spacing: 2.5px; margin-bottom: 20px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+        .header-painel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            padding: 20px 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
 
-        /* EMISSORAS / RÁDIOS */
-        .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
-        .radio-item { aspect-ratio: 1/1; border-radius: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #000; font-weight: 800; font-size: 12px; text-align: center; padding: 10px; cursor: grab; transition: transform 0.2s, box-shadow 0.2s; position: relative; border: 2px solid transparent; }
-        .radio-item:active { cursor: grabbing; }
-        .radio-item.sortable-ghost { opacity: 0.3; border: 2px dashed var(--primary); }
-        .radio-item.active { background: #121214 !important; color: var(--primary) !important; border-color: var(--primary); box-shadow: 0 0 20px rgba(29, 185, 84, 0.35); }
-        .radio-actions { position: absolute; top: 8px; right: 8px; display: flex; gap: 5px; z-index: 10; }
-        .radio-actions i { cursor: pointer; padding: 6px; background: rgba(0,0,0,0.15); border-radius: 6px; font-size: 11px; color: inherit; transition: background 0.2s; }
-        .radio-actions i:hover { background: rgba(0,0,0,0.3); }
+        .header-painel h1 {
+            font-size: 18px;
+            margin: 0;
+            background: linear-gradient(135deg, #c084fc, #e879f9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+        }
 
-        .antena { font-size: 26px; margin-bottom: 8px; display: none; color: var(--primary); }
-        .active .antena { display: block !important; animation: antenaPisca 0.8s infinite alternate !important; }
-        @keyframes antenaPisca { from { opacity: 1; transform: scale(1.1); } to { opacity: 0.2; transform: scale(0.9); } }
+        .btn-sair {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 12px;
+            transition: 0.2s;
+        }
 
-        .speaker-icon { color: var(--blue-online); margin-right: 6px; animation: speakerPisca 0.8s infinite alternate; }
-        @keyframes speakerPisca { from { opacity: 1; transform: scale(1.2); } to { opacity: 0.3; transform: scale(0.9); } }
+        .btn-sair:hover {
+            background: rgba(239, 68, 68, 0.3);
+        }
 
-        .player-footer { margin-top: 20px; background: rgba(0,0,0,0.3); padding: 18px; border-radius: 16px; border: 1px solid var(--border-glass); text-align: center; }
-        .controls-row { display: flex; align-items: center; justify-content: center; gap: 25px; }
-        .btn-nav { background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer; transition: color 0.2s; }
-        .btn-nav:hover { color: #fff; }
-        .btn-spotify-play { width: 50px; height: 50px; background: #fff; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #000; cursor: pointer; box-shadow: 0 4px 15px rgba(255,255,255,0.2); transition: transform 0.2s; }
-        .btn-spotify-play:hover { transform: scale(1.05); }
+        .monitor-card {
+            background: var(--card);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+        }
 
-        .pub-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
-        @media (max-width: 600px) { .pub-container { grid-template-columns: 1fr; } }
-        .pub-preview { width: 100%; max-height: 120px; object-fit: contain; margin-top: 10px; border-radius: 10px; border: 1px dashed var(--border-glass); display: none; }
+        .monitor-title {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #e4e4e7;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-        /* MONITOR DE OUVINTES (MODERNO E RETRÁTIL) */
-        .monitor-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .btn-trash-all { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; padding: 6px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: background 0.2s; }
-        .btn-trash-all:hover { background: rgba(239, 68, 68, 0.25); }
+        .lista-ouvintes {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 550px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
 
-        .user-item { background: rgba(20, 20, 24, 0.6); margin-bottom: 12px; border-radius: 14px; border: 1px solid var(--border-glass); overflow: hidden; transition: all 0.3s ease; }
-        .user-item.online { border-left: 4px solid var(--blue-online); background: rgba(20, 25, 35, 0.7); }
-        .user-item.offline { border-left: 4px solid var(--purple-light); opacity: 0.8; }
-        
-        .user-header-bar { width: 100%; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; cursor: pointer; }
-        .user-header-bar:hover { background: rgba(255, 255, 255, 0.02); }
-        .user-title { color: #fff; font-weight: 700; font-size: 13px; display: flex; align-items: center; gap: 8px; }
-        
-        .status-on { color: var(--blue-online); font-weight: 900; font-size: 10px; background: rgba(56, 189, 248, 0.12); padding: 4px 10px; border-radius: 20px; letter-spacing: 0.5px; }
-        .status-off { color: var(--purple-light); font-weight: 900; font-size: 10px; background: rgba(168, 85, 247, 0.12); padding: 4px 10px; border-radius: 20px; letter-spacing: 0.5px; }
-        
-        .user-details-wrapper { max-height: 0; overflow: hidden; transition: max-height 0.35s ease, padding 0.35s ease; background: rgba(10, 10, 12, 0.5); }
-        .user-item.open .user-details-wrapper { max-height: 200px; padding: 14px 16px; border-top: 1px solid var(--border-glass); }
+        /* Estilização do Card do Ouvinte conforme solicitado */
+        .ouvinte-item {
+            background: #161619;
+            border-radius: 14px;
+            padding: 15px 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 1px solid var(--gray-border);
+        }
 
-        .user-details-bar { font-size: 12px; color: var(--text-muted); line-height: 1.9; }
-        .chevron-icon { font-size: 11px; color: var(--text-muted); transition: transform 0.3s; margin-left: 6px; }
-        .user-item.open .chevron-icon { transform: rotate(180deg); color: #fff; }
+        .ouvinte-item.online {
+            border-color: var(--primary);
+            box-shadow: 0 0 12px rgba(29, 185, 84, 0.25);
+        }
 
-        .action-icon-delete { color: #f87171; background: rgba(239, 68, 68, 0.1); padding: 8px; border-radius: 8px; cursor: pointer; font-size: 12px; transition: background 0.2s, transform 0.2s; }
-        .action-icon-delete:hover { background: rgba(239, 68, 68, 0.25); transform: scale(1.05); }
+        .ouvinte-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-        input, select { padding: 12px 14px; background: #161619; border: 1px solid var(--border-glass); color: white; border-radius: 10px; margin-bottom: 12px; width: 100%; outline: none; font-size: 13px; transition: border-color 0.2s; }
-        input:focus, select:focus { border-color: var(--primary); }
-        .btn-save { padding: 12px; background: var(--primary); color: #000; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; width: 100%; font-size: 13px; transition: opacity 0.2s, transform 0.1s; }
-        .btn-save:hover { opacity: 0.9; transform: translateY(-1px); }
+        .ouvinte-nome-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        /* Ícone de alto-falante piscando para ouvintes online */
+        @keyframes piscarSpeaker {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .speaker-icon {
+            color: var(--primary);
+            animation: piscarSpeaker 1.2s infinite ease-in-out;
+        }
+
+        .status-badge {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+
+        .status-badge.online {
+            background: rgba(29, 185, 84, 0.15);
+            color: var(--primary);
+        }
+
+        .status-badge.offline {
+            background: rgba(113, 113, 122, 0.15);
+            color: var(--gray-text);
+        }
+
+        /* Detalhes expansíveis ao clicar no ouvinte */
+        .ouvinte-detalhes {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, margin-top 0.4s ease;
+            font-size: 12px;
+            color: var(--text-muted);
+            border-top: 1px solid transparent;
+            margin-top: 0;
+        }
+
+        .ouvinte-item.expandido .ouvinte-detalhes {
+            max-height: 150px;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border-glass);
+        }
+
+        .detalhe-linha {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .radio-destaque {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .sem-ouvintes {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 30px;
+            font-size: 13px;
+        }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div class="header-brand">
-            <h2 class="header-title">PAINEL ADM</h2>
-            <p class="header-sub">Gerenciamento Supremo de Rádios e Ouvintes</p>
+    <div class="container">
+        <div class="header-painel">
+            <h1>Painel Administrativo - LMS Rádios</h1>
+            <button class="btn-sair" onclick="sairPainel()">Sair do Painel</button>
         </div>
 
-        <div class="header-right">
-            <button class="btn-msg-notif" onclick="toggleMensagens()">
-                <i class="fas fa-envelope"></i> MENSAGENS <span id="count-msg">0</span>
-            </button>
-            
-            <button class="btn-header" onclick="location.reload()" title="Reiniciar">
-                <i class="fas fa-sync-alt"></i> REINICIAR
-            </button>
-
-            <div class="info-pill">
-                <i class="far fa-clock"></i>
-                <span id="hora">00:00:00</span>
+        <div class="monitor-card">
+            <div class="monitor-title">
+                <i class="fa-solid fa-users-viewfinder"></i> Monitor de Ouvintes em Tempo Real
             </div>
-
-            <div class="info-pill" id="weather-pill">
-                <i class="fas fa-sun" id="weather-icon" style="color: #f59e0b;"></i>
-                <span id="weather-text">Carregando...</span>
-            </div>
-
-            <button class="btn-header btn-sair" onclick="logout()">
-                <i class="fas fa-sign-out-alt"></i> SAIR
-            </button>
-        </div>
-    </div>
-
-    <div id="container-mensagens-adm">
-        <div class="card">
-            <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h3>MENSAGENS DOS OUVINTES</h3>
-                <button onclick="window.print()" class="btn-header" style="font-size: 11px;"><i class="fas fa-file-pdf"></i> PDF</button>
-            </div>
-            <div id="msg-list-adm" class="msg-grid-adm"></div>
-        </div>
-    </div>
-
-    <div class="main-grid">
-        <div class="col-left">
-            <div class="card">
-                <h3><i class="fas fa-broadcast-tower"></i> GERENCIAR EMISSORA</h3>
-                <div class="input-group">
-                    <input type="hidden" id="r-key">
-                    <input type="text" id="r-name" placeholder="Nome da Rádio">
-                    <input type="text" id="r-url" placeholder="Link .mp3 / Stream">
-                    <button class="btn-save" id="btn-radio-action" onclick="addRadio()">SALVAR RÁDIO</button>
-                </div>
-                <h3 style="margin-top:25px;">GRADE DE RÁDIOS (ARRASTE PARA ORGANIZAR)</h3>
-                <div id="radio-list" class="radio-grid"></div>
-                <div class="player-footer">
-                    <div id="now-title" style="font-size:11px; color:var(--text-muted); margin-bottom:12px; font-weight:600;">SELECIONE UMA RÁDIO</div>
-                    <div class="controls-row">
-                        <button class="btn-nav" onclick="prevRadio()"><i class="fas fa-step-backward"></i></button>
-                        <button class="btn-spotify-play" onclick="togglePlay()"><i class="fas fa-play" id="play-icon"></i></button>
-                        <button class="btn-nav" onclick="nextRadio()"><i class="fas fa-step-forward"></i></button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3><i class="fas fa-bullhorn"></i> GERENCIAR PUBLICIDADE</h3>
-                <div class="pub-container">
-                    <input type="hidden" id="pub-key">
-                    <div>
-                        <input type="file" id="pub-file" accept="image/*" onchange="previewPub(this)">
-                        <img id="pub-view" class="pub-preview">
-                    </div>
-                    <div>
-                        <input type="datetime-local" id="pub-ini">
-                        <input type="datetime-local" id="pub-fim">
-                        <select id="pub-target" onchange="document.getElementById('pub-manual').style.display = (this.value=='MANUAL'?'block':'none')">
-                            <option value="TODOS">TODOS OS OUVINTES</option>
-                            <option value="MANUAL">SELECIONAR MANUAL</option>
-                        </select>
-                        <input type="text" id="pub-manual" placeholder="NOME DO OUVINTE" style="display:none;">
-                    </div>
-                </div>
-                <button class="btn-save" onclick="savePub()">LANÇAR CAMPANHA</button>
-                <div id="pub-list-admin" style="margin-top:20px;"></div>
-            </div>
-        </div>
-
-        <div class="col-right">
-            <div class="card">
-                <div class="monitor-header-flex">
-                    <h3><i class="fas fa-users"></i> MONITOR DE OUVINTES</h3>
-                    <button class="btn-trash-all" onclick="excluirTodosOuvintes()" title="Excluir todos os ouvintes e forçar novo login">
-                        <i class="fas fa-trash-alt"></i> EXCLUIR TODOS
-                    </button>
-                </div>
-                <div id="user-list"></div>
+            <div class="lista-ouvintes" id="listaOuvintesContainer">
+                <div class="sem-ouvintes">Carregando monitoramento...</div>
             </div>
         </div>
     </div>
-
-    <audio id="audio-player"></audio>
 
     <script>
         const firebaseConfig = {
@@ -256,468 +226,161 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const player = document.getElementById('audio-player');
-        let radioData = [], activeIndex = -1, imgBase64 = "", sortableInstance = null;
-        let rawContas = {}, rawPreferencias = {}, rawOnlineState = {};
-        let openCards = {}; 
-        let openChatCards = {}; 
 
-        setInterval(() => {
-            const hElement = document.getElementById('hora');
-            if(hElement) hElement.innerText = new Date().toLocaleTimeString('pt-BR');
-            updateLiveTimers();
-        }, 1000);
-
-        async function fetchWeather() {
-            try {
-                if ("geolocation" in navigator) {
-                    navigator.geolocation.getCurrentPosition(async (pos) => {
-                        const lat = pos.coords.latitude;
-                        const lon = pos.coords.longitude;
-                        const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/reverse?latitude=${lat}&longitude=${lon}`);
-                        const geoData = await geoRes.json();
-                        const city = geoData.results?.[0]?.name || "Local";
-                        const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
-                        const wData = await wRes.json();
-                        updateWeatherUI(city, Math.round(wData.current_weather.temperature), wData.current_weather.weathercode);
-                    }, () => fetchFallbackWeather());
-                } else { fetchFallbackWeather(); }
-            } catch (e) { fetchFallbackWeather(); }
+        function sairPainel() {
+            localStorage.removeItem('usuarioNome');
+            window.location.href = "index.html";
         }
 
-        async function fetchFallbackWeather() {
-            try {
-                const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=-24.9578&longitude=-53.4594&current_weather=true`);
-                const wData = await wRes.json();
-                updateWeatherUI("Cascavel", Math.round(wData.current_weather.temperature), wData.current_weather.weathercode);
-            } catch (e) { document.getElementById('weather-text').innerText = "Indisponível"; }
+        // Função auxiliar para formatar segundos em HH:MM:SS
+        function formatarTempo(totalSegundos) {
+            if (!totalSegundos || isNaN(totalSegundos)) return "00:00:00";
+            let h = Math.floor(totalSegundos / 3600);
+            let m = Math.floor((totalSegundos % 3600) / 60);
+            let s = totalSegundos % 60;
+            return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
         }
 
-        function updateWeatherUI(city, temp, code) {
-            const txt = document.getElementById('weather-text'), icon = document.getElementById('weather-icon');
-            if(!txt || !icon) return;
-            txt.innerText = `${city}: ${temp}°C`;
-            icon.className = code === 0 ? "fas fa-sun" : (code <= 3 ? "fas fa-cloud-sun" : "fas fa-cloud");
-            icon.style.color = code === 0 ? "#f59e0b" : "#cbd5e1";
-        }
-        fetchWeather();
+        // Escuta contas cadastradas e estado de sessão/presença no Realtime Database
+        db.ref('contas').on('value', snapshotContas => {
+            const contas = snapshotContas.val() || {};
+            
+            db.ref('sessoes').on('value', snapshotSessoes => {
+                const sessoes = snapshotSessoes.val() || {};
+                renderizarMonitor(contas, sessoes);
+            });
+        });
 
-        function logout() { if(confirm("Deseja sair do painel?")) { localStorage.removeItem('usuarioNome'); window.location.href = 'index.html'; } }
-        function toggleMensagens() { document.getElementById('container-mensagens-adm').classList.toggle('aberto'); }
+        function renderizarMonitor(contas, sessoes) {
+            const container = document.getElementById('listaOuvintesContainer');
+            container.innerHTML = '';
 
-        let allMensagens = {};
-        let allRespostas = {};
-
-        function toggleChatAccordion(nomeOuvinte) {
-            openChatCards[nomeOuvinte] = !openChatCards[nomeOuvinte];
-            renderChats();
-        }
-
-        function handleChatKeyDown(event, nomeOuvinte, safeNome) {
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                enviarRespostaChat(nomeOuvinte, safeNome);
-            }
-        }
-
-        function renderChats() {
-            const container = document.getElementById('msg-list-adm');
-            const countElem = document.getElementById('count-msg');
-            if(!container) return;
-            container.innerHTML = "";
-
-            const ouvintesMap = {};
-
-            for(let key in allMensagens) {
-                const m = allMensagens[key];
-                const nome = m.ouvinte || m.nome || 'Ouvinte';
-                if(!ouvintesMap[nome]) ouvintesMap[nome] = { msgs: [], keys: [] };
-                
-                let ts = m.timestamp || parseTimestamp(m.dataHora) || 0;
-                ouvintesMap[nome].msgs.push({
-                    type: 'ouvinte',
-                    id: key,
-                    nome: nome,
-                    texto: m.mensagem,
-                    dataHora: m.dataHora || 'Enviado',
-                    ts: ts
-                });
-                ouvintesMap[nome].keys.push(key);
-            }
-
-            for(let key in allRespostas) {
-                const r = allRespostas[key];
-                const nome = r.ouvinte || 'Ouvinte';
-                if(!ouvintesMap[nome]) ouvintesMap[nome] = { msgs: [], keys: [] };
-
-                let ts = r.timestamp || parseTimestamp(r.dataHora) || 0;
-                ouvintesMap[nome].msgs.push({
-                    type: 'adm',
-                    id: key,
-                    nome: 'ADM',
-                    texto: r.resposta,
-                    dataHora: r.dataHora || 'Enviado',
-                    ts: ts
-                });
-            }
-
-            const ouvintesNomes = Object.keys(ouvintesMap);
-            if(countElem) countElem.innerText = ouvintesNomes.length;
-
-            if(ouvintesNomes.length === 0) {
-                container.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:12px;">Nenhuma mensagem recebida.</div>`;
+            const chavesContas = Object.keys(contas);
+            if (chavesContas.length === 0) {
+                container.innerHTML = '<div class="sem-ouvintes">Nenhum ouvinte cadastrado no sistema.</div>';
                 return;
             }
 
-            ouvintesNomes.forEach(nome => {
-                const dados = ouvintesMap[nome];
-                dados.msgs.sort((a,b) => a.ts - b.ts);
+            // Monta lista unificando dados cadastrais com dados ativos de sessão
+            let listaOuvintes = chavesContas.map(key => {
+                const conta = contas[key];
+                const sessao = sessoes[key] || {};
+                
+                return {
+                    id: key,
+                    nome: conta.nome || 'Usuário',
+                    email: conta.email || '',
+                    criadoEm: conta.criadoEm || 0,
+                    online: sessao.online || false,
+                    loginTimestamp: sessao.loginTimestamp || 0,
+                    radioAtual: sessao.radioAtual || 'Nenhuma',
+                    tempoRadioSegundos: sessao.tempoRadioSegundos || 0,
+                    ultimaRadioSalva: sessao.ultimaRadioSalva || 'Nenhuma',
+                    tempoSessaoCompletoSalvo: sessao.tempoSessaoCompletoSalvo || 0
+                };
+            });
 
-                const isOpen = !!openChatCards[nome];
-                const safeNome = nome.replace(/[^a-zA-Z0-9]/g, '_');
+            // Regras de Ordenação:
+            // 1. Quem estiver online fica no topo, ordenados pela ordem de entrada (mais antigo online primeiro ou mais recente? "quando fizer login suba por ordem de entrada")
+            // 2. Novos cadastros sem sessão ativa ficam sempre por último na cor cinza.
+            listaOuvintes.sort((a, b) => {
+                if (a.online && !b.online) return -1;
+                if (!a.online && b.online) return 1;
+                if (a.online && b.online) {
+                    return a.loginTimestamp - b.loginTimestamp; // Ordem de entrada (primeiro a entrar fica acima)
+                }
+                // Offline / Nunca logados ordenados por data de cadastro (mais antigos primeiro, novos cadastrados por último)
+                return a.criadoEm - b.criadoEm;
+            });
 
-                const card = document.createElement('div');
-                card.className = `chat-accordion-card ${isOpen ? 'open' : ''}`;
+            listaOuvintes.forEach(ouvinte => {
+                const divItem = document.createElement('div');
+                divItem.className = `ouvinte-item ${ouvinte.online ? 'online' : ''}`;
+                divItem.id = `ouvinte-${ouvinte.id}`;
 
-                let chatHistoryHTML = '';
-                dados.msgs.forEach(msg => {
-                    chatHistoryHTML += `
-                        <div class="chat-bubble ${msg.type}">
-                            <div class="chat-meta">
-                                <strong>${msg.nome}</strong>
-                                <span>${msg.dataHora}</span>
-                            </div>
-                            <div>${msg.texto}</div>
+                // Cálculo em tempo real dos tempos para exibição fluida
+                let tempoSessaoSegundos = 0;
+                let tempoRadioAtualSegundos = ouvinte.tempoRadioSegundos;
+
+                if (ouvinte.online && ouvinte.loginTimestamp) {
+                    const agoraMS = Date.now();
+                    tempoSessaoSegundos = Math.floor((agoraMS - ouvinte.loginTimestamp) / 1000);
+                } else {
+                    tempoSessaoSegundos = ouvinte.tempoSessaoCompletoSalvo;
+                }
+
+                const displayUltimaRadio = ouvinte.online ? ouvinte.radioAtual : ouvinte.ultimaRadioSalva;
+                const displayTempoRadio = ouvinte.online ? tempoRadioAtualSegundos : ouvinte.tempoRadioSegundos;
+                const displayTempoSessao = tempoSessaoSegundos;
+
+                divItem.innerHTML = `
+                    <div class="ouvinte-header">
+                        <div class="ouvinte-nome-area">
+                            ${ouvinte.online ? '<i class="fa-solid fa-volume-high speaker-icon"></i>' : '<i class="fa-solid fa-user" style="color: var(--gray-text);"></i>'}
+                            <span>${ouvinte.nome}</span>
                         </div>
-                    `;
-                });
-
-                card.innerHTML = `
-                    <div class="chat-header" onclick="toggleChatAccordion('${nome}')">
-                        <span class="chat-user-title">
-                            <i class="fas fa-comments"></i> ${nome}
-                            <i class="fas fa-chevron-down chevron-chat"></i>
-                        </span>
-                        <i class="fas fa-trash-alt" style="color:#f87171; cursor:pointer; font-size:13px;" 
-                           title="Excluir Histórico" onclick="event.stopPropagation(); deletarConversaOuvinte('${nome}')"></i>
+                        <div>
+                            <span class="status-badge ${ouvinte.online ? 'online' : 'offline'}">
+                                ${ouvinte.online ? 'online' : 'off'}
+                            </span>
+                        </div>
                     </div>
-                    <div class="chat-body-wrapper">
-                        <div class="chat-history" id="chat-hist-${safeNome}">
-                            ${chatHistoryHTML}
+                    <div class="ouvinte-detalhes">
+                        <div class="detalhe-linha">
+                            <span>E-mail:</span> <strong>${ouvinte.email}</strong>
                         </div>
-                        <div class="chat-input-area">
-                            <textarea id="chat-input-${safeNome}" rows="2" placeholder="Escreva uma resposta... (Enter envia)" onkeydown="handleChatKeyDown(event, '${nome}', '${safeNome}')"></textarea>
-                            <button class="btn-send-chat" onclick="enviarRespostaChat('${nome}', '${safeNome}')">RESPONDER</button>
+                        <div class="detalhe-linha">
+                            <span>Rádio Atual / Última Ouvida:</span> <strong class="radio-destaque">${displayUltimaRadio}</strong>
+                        </div>
+                        <div class="detalhe-linha">
+                            <span>Tempo de Sessão Completo:</span> <strong id="sessao-${ouvinte.id}">${formatarTempo(displayTempoSessao)}</strong>
+                        </div>
+                        <div class="detalhe-linha">
+                            <span>Tempo Conectado nesta Rádio:</span> <strong id="radio-${ouvinte.id}">${formatarTempo(displayTempoRadio)}</strong>
                         </div>
                     </div>
                 `;
-                container.appendChild(card);
-                
-                if(isOpen) {
-                    setTimeout(() => {
-                        const histDiv = document.getElementById(`chat-hist-${safeNome}`);
-                        if(histDiv) histDiv.scrollTop = histDiv.scrollHeight;
-                    }, 50);
-                }
+
+                // Comportamento de clique para deslizar (expandir/recolher) os detalhes
+                divItem.addEventListener('click', (e) => {
+                    // Evita conflitos caso haja elementos internos clicáveis no futuro
+                    document.querySelectorAll('.ouvinte-item').forEach(el => {
+                        if (el !== divItem) el.classList.remove('expandido');
+                    });
+                    divItem.classList.toggle('expandido');
+                });
+
+                container.appendChild(divItem);
             });
         }
 
-        db.ref('mensagens_ouvintes').on('value', snapMsgs => {
-            allMensagens = snapMsgs.val() || {};
-            renderChats();
-        });
+        // Timer global dinâmico na tela do Admin para atualizar os contadores de tempo segundo a segundo em tempo real
+        setInterval(() => {
+            db.ref('sessoes').once('value', snapshotSessoes => {
+                const sessoes = snapshotSessoes.val() || {};
+                const agoraMS = Date.now();
 
-        db.ref('respostas_adm').on('value', snapResp => {
-            allRespostas = snapResp.val() || {};
-            renderChats();
-        });
+                Object.keys(sessoes).forEach(id => {
+                    const sessao = sessoes[id];
+                    if (sessao.online && sessao.loginTimestamp) {
+                        const tSessao = Math.floor((agoraMS - sessao.loginTimestamp) / 1000);
+                        const tRadio = (sessao.tempoRadioSegundos || 0) + 1; // Incrementa relógio da rádio ativa
 
-        function enviarRespostaChat(nomeOuvinte, safeNome) {
-            const txtInput = document.getElementById(`chat-input-${safeNome}`);
-            if(!txtInput || !txtInput.value.trim()) return alert("Digite uma resposta!");
-            
-            db.ref('respostas_adm').push({
-                ouvinte: nomeOuvinte,
-                resposta: txtInput.value.trim(),
-                dataHora: new Date().toLocaleString('pt-BR'),
-                timestamp: firebase.database.ServerValue.TIMESTAMP
-            }).then(() => {
-                txtInput.value = "";
-            });
-        }
-
-        function deletarConversaOuvinte(nomeOuvinte) {
-            if(confirm(`Deseja apagar permanentemente toda a conversa de "${nomeOuvinte}"?`)) {
-                const updates = {};
-                for(let key in allMensagens) {
-                    if((allMensagens[key].ouvinte || allMensagens[key].nome) === nomeOuvinte) {
-                        updates['mensagens_ouvintes/' + key] = null;
-                    }
-                }
-                for(let key in allRespostas) {
-                    if(allRespostas[key].ouvinte === nomeOuvinte) {
-                        updates['respostas_adm/' + key] = null;
-                    }
-                }
-                db.ref().update(updates);
-            }
-        }
-
-        db.ref('radios').on('value', snap => {
-            radioData = []; snap.forEach(c => { radioData.push({ ...c.val(), key: c.key }); });
-            radioData.sort((a,b) => (a.posicao || 0) - (b.posicao || 0));
-            renderRadioGrid();
-        });
-
-        function renderRadioGrid() {
-            const list = document.getElementById('radio-list'); if(!list) return;
-            list.innerHTML = "";
-            radioData.forEach((r, i) => {
-                const div = document.createElement('div');
-                div.className = `radio-item ${activeIndex === i ? 'active' : ''}`;
-                div.style.background = r.color || '#e4e4e7';
-                div.dataset.key = r.key;
-                div.onclick = () => playRadio(i);
-                div.innerHTML = `<div class="radio-actions"><i class="fas fa-pencil-alt" onclick="event.stopPropagation(); prepareEditRadio('${r.key}','${r.name}','${r.url}')"></i><i class="fas fa-times" onclick="event.stopPropagation(); if(confirm('Excluir?')) db.ref('radios/${r.key}').remove()"></i></div><i class="fas fa-tower-broadcast antena"></i><span>${r.name}</span>`;
-                list.appendChild(div);
-            });
-
-            if(!sortableInstance) {
-                sortableInstance = new Sortable(list, {
-                    animation: 150,
-                    ghostClass: 'sortable-ghost',
-                    onEnd: function () {
-                        const items = list.querySelectorAll('.radio-item');
-                        items.forEach((item, index) => {
-                            const key = item.dataset.key;
-                            if(key) db.ref('radios/' + key).update({ posicao: index });
-                        });
+                        // Atualiza direto no banco periodicamente ou atualiza o DOM visualmente de forma fluida
+                        const elSessao = document.getElementById(`sessao-${id}`);
+                        const elRadio = document.getElementById(`radio-${id}`);
+                        if (elSessao) elSessao.innerText = formatarTempo(tSessao);
+                        if (elRadio) {
+                            elRadio.innerText = formatarTempo(tRadio);
+                            // Sincroniza o incremento levemente no banco de dados para persistência do tempo da rádio
+                            if (Math.random() < 0.3) { // Evita escrita excessiva a cada 1 segundo exato, atualizando a cada poucos ciclos
+                                db.ref(`sessoes/${id}`).update({ tempoRadioSegundos: tRadio });
+                            }
+                        }
                     }
                 });
-            }
-        }
-
-        function playRadio(idx) {
-            activeIndex = idx; const r = radioData[idx]; player.src = r.url; player.play();
-            document.getElementById('now-title').innerText = "OUVINDO: " + r.name;
-            document.getElementById('play-icon').className = "fas fa-stop";
-            renderRadioGrid();
-        }
-        function togglePlay() { if(player.paused) { player.play(); document.getElementById('play-icon').className = "fas fa-stop"; } else { player.pause(); document.getElementById('play-icon').className = "fas fa-play"; } }
-        function nextRadio() { if(radioData.length) playRadio((activeIndex + 1) % radioData.length); }
-        function prevRadio() { if(radioData.length) playRadio((activeIndex - 1 + radioData.length) % radioData.length); }
-        function addRadio() {
-            const n = document.getElementById('r-name').value, u = document.getElementById('r-url').value, k = document.getElementById('r-key').value;
-            if(n && u) {
-                if(k) db.ref('radios/'+k).update({name:n, url:u});
-                else db.ref('radios').push({ name: n, url: u, color: '#e4e4e7', posicao: radioData.length });
-                document.getElementById('r-name').value = ""; document.getElementById('r-url').value = ""; document.getElementById('r-key').value = "";
-            }
-        }
-        function prepareEditRadio(k, n, u) { document.getElementById('r-key').value = k; document.getElementById('r-name').value = n; document.getElementById('r-url').value = u; }
-
-        function previewPub(input) {
-            const reader = new FileReader();
-            reader.onload=(e)=>{imgBase64=e.target.result;document.getElementById('pub-view').src=imgBase64;document.getElementById('pub-view').style.display="block"};
-            if(input.files[0])reader.readAsDataURL(input.files[0]);
-        }
-        function savePub() {
-            const i=document.getElementById('pub-ini').value, f=document.getElementById('pub-fim').value, k=document.getElementById('pub-key').value;
-            if(!imgBase64 || !i) return;
-            const d = { imagem: imgBase64, inicio: new Date(i).getTime(), fim: new Date(f).getTime(), destino: document.getElementById('pub-target').value, ouvinteAlvo: document.getElementById('pub-manual').value || 'TODOS' };
-            if(k) db.ref('publicidade/'+k).update(d); else db.ref('publicidade').push(d);
-            document.getElementById('pub-key').value = ""; document.getElementById('pub-view').style.display="none"; alert("Campanha salva com sucesso!");
-        }
-
-        // =======================================================
-        // MONITOR DE OUVINTES (FILTRANDO ADMIN & CORRIGINDO CHAVES)
-        // =======================================================
-        function toggleUserCard(key) {
-            openCards[key] = !openCards[key];
-            const itemElem = document.getElementById(`user-card-${CSS.escape(key)}`);
-            if (itemElem) {
-                if (openCards[key]) itemElem.classList.add('open');
-                else itemElem.classList.remove('open');
-            }
-        }
-
-        function parseTimestamp(val) {
-            if(!val) return 0;
-            if(typeof val === 'number') return val;
-            if(typeof val === 'string') {
-                const parsed = Date.parse(val);
-                if(!isNaN(parsed)) return parsed;
-                const num = parseInt(val);
-                if(!isNaN(num)) return num;
-            }
-            return 0;
-        }
-
-        function renderOuvintes() {
-            const container = document.getElementById('user-list'); 
-            if(!container) return;
-            
-            const agora = Date.now();
-            container.innerHTML = "";
-
-            const allKeys = new Set([...Object.keys(rawContas), ...Object.keys(rawPreferencias), ...Object.keys(rawOnlineState)]);
-
-            // Filtra o administrador para que ele nunca apareça no monitor de ouvintes
-            const keysFiltradas = Array.from(allKeys).filter(k => {
-                const conta = rawContas[k] || {};
-                const pref = rawPreferencias[k] || {};
-                const nome = (conta.nome || conta.usuario || pref.nome || k).trim().toLowerCase();
-                
-                // Exclui se o nome for explicitamente admin ou se a chave contiver 'admin'
-                if(nome === 'admin' || k.toLowerCase().includes('admin')) {
-                    return false;
-                }
-                return true;
             });
-
-            if(keysFiltradas.length === 0) {
-                container.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:12px;">Nenhum ouvinte registrado.</div>`;
-                return;
-            }
-
-            keysFiltradas.forEach(k => {
-                const conta = rawContas[k] || {};
-                const pref = rawPreferencias[k] || {};
-                const onState = rawOnlineState[k] || {};
-
-                const nome = conta.nome || conta.usuario || pref.nome || k;
-                const safeKey = k.replace(/[^a-zA-Z0-9]/g, '_');
-
-                const t1 = parseTimestamp(pref.lastActive);
-                const t2 = parseTimestamp(pref.timestamp);
-                const t3 = parseTimestamp(pref.ultimaAtividade);
-                const t4 = parseTimestamp(onState.lastActive);
-                const t5 = parseTimestamp(onState.timestamp);
-                
-                const lastActive = Math.max(t1, t2, t3, t4, t5);
-
-                const explicitStatus = (pref.status || onState.status || '').toLowerCase();
-                const explicitOnline = (pref.online === true || onState.online === true);
-                const isOnline = (explicitStatus === 'online' || explicitOnline || (lastActive > 0 && (agora - lastActive < 30000)));
-
-                const radioTocando = isOnline ? (pref.radioAtual || onState.radioAtual || pref.radio || 'Ouvindo Rádio') : 'Nenhuma';
-                const sessionStart = pref.sessionStart || onState.sessionStart || (isOnline ? (lastActive || agora) : agora);
-                const radioStart = pref.radioStart || onState.radioStart || (isOnline ? (lastActive || agora) : agora);
-
-                const isOpen = !!openCards[k];
-
-                const div = document.createElement('div');
-                div.id = `user-card-${safeKey}`;
-                div.className = `user-item ${isOnline ? 'online' : 'offline'} ${isOpen ? 'open' : ''}`;
-                
-                const iconSpeaker = isOnline ? `<i class="fas fa-volume-high speaker-icon"></i>` : '';
-
-                div.innerHTML = `
-                    <div class="user-header-bar" onclick="toggleUserCard('${k}')">
-                        <span class="user-title">
-                            ${iconSpeaker} ${nome}
-                            <i class="fas fa-chevron-down chevron-icon"></i>
-                        </span>
-                        <div style="display:flex; align-items:center; gap:12px;">
-                            <span class="${isOnline ? 'status-on' : 'status-off'}">${isOnline ? '● ONLINE' : 'OFF'}</span>
-                            <i class="fas fa-trash-alt action-icon-delete" 
-                               title="Excluir Ouvinte (Forçar Login)" onclick="event.stopPropagation(); deletarOuvinte('${k}')"></i>
-                        </div>
-                    </div>
-                    <div class="user-details-wrapper">
-                        <div class="user-details-bar">
-                            <div>Rádio Atual: <b style="color:var(--primary)">${radioTocando}</b></div>
-                            <div>Tempo de Sessão: <b style="color:var(--blue-online)" id="ts-${safeKey}" data-start="${sessionStart}" data-online="${isOnline}">00:00:00</b></div>
-                            <div>Tempo nesta Rádio: <b style="color:var(--purple-light)" id="tr-${safeKey}" data-start="${radioStart}" data-online="${isOnline}">00:00:00</b></div>
-                        </div>
-                    </div>`;
-                container.appendChild(div);
-            });
-
-            updateLiveTimers();
-        }
-
-        function updateLiveTimers() {
-            const agora = Date.now();
-            document.querySelectorAll('[id^="ts-"]').forEach(elem => {
-                const isOnline = elem.getAttribute('data-online') === 'true';
-                const start = parseInt(elem.getAttribute('data-start') || agora);
-                elem.innerText = isOnline ? formatMs(agora - start) : '00:00:00';
-            });
-            document.querySelectorAll('[id^="tr-"]').forEach(elem => {
-                const isOnline = elem.getAttribute('data-online') === 'true';
-                const start = parseInt(elem.getAttribute('data-start') || agora);
-                elem.innerText = isOnline ? formatMs(agora - start) : '00:00:00';
-            });
-        }
-
-        function formatMs(ms) {
-            if (!ms || ms < 0) ms = 0;
-            const totalSeg = Math.floor(ms / 1000);
-            const h = Math.floor(totalSeg / 3600);
-            const m = Math.floor((totalSeg % 3600) / 60);
-            const s = totalSeg % 60;
-            return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-        }
-
-        // Correção cirúrgica na exclusão individual usando .set(null) para garantir remoção no Firebase Realtime Database
-        function deletarOuvinte(keyConta) {
-            if(confirm(`Deseja excluir o ouvinte "${keyConta}"? Ele precisará fazer login novamente.`)) {
-                const promises = [
-                    db.ref('contas/' + keyConta).set(null),
-                    db.ref('ouvintes_preferencias/' + keyConta).set(null),
-                    db.ref('ouvintes_online/' + keyConta).set(null)
-                ];
-
-                Promise.all(promises).then(() => {
-                    // Atualização local imediata para feedback fluido
-                    delete rawContas[keyConta];
-                    delete rawPreferencias[keyConta];
-                    delete rawOnlineState[keyConta];
-                    renderOuvintes();
-                }).catch(err => {
-                    console.error("Erro ao excluir:", err);
-                    alert("Erro ao excluir ouvinte do banco de dados.");
-                });
-            }
-        }
-
-        // Correção cirúrgica na exclusão global limpando os nós corretamente com .set(null)
-        function excluirTodosOuvintes() {
-            if(confirm("ATENÇÃO: Deseja excluir TODOS os ouvintes cadastrados? Todos serão desconectados e obrigados a fazer login de volta.")) {
-                const promises = [
-                    db.ref('contas').set(null),
-                    db.ref('ouvintes_preferencias').set(null),
-                    db.ref('ouvintes_online').set(null)
-                ];
-
-                Promise.all(promises).then(() => {
-                    rawContas = {};
-                    rawPreferencias = {};
-                    rawOnlineState = {};
-                    renderOuvintes();
-                    alert("Todos os ouvintes foram removidos com sucesso!");
-                }).catch(err => {
-                    console.error("Erro ao excluir todos:", err);
-                    alert("Erro ao remover os ouvintes.");
-                });
-            }
-        }
-
-        db.ref('contas').on('value', snap => {
-            rawContas = snap.val() || {};
-            renderOuvintes();
-        });
-
-        db.ref('ouvintes_preferencias').on('value', snap => {
-            rawPreferencias = snap.val() || {};
-            renderOuvintes();
-        });
-
-        db.ref('ouvintes_online').on('value', snap => {
-            rawOnlineState = snap.val() || {};
-            renderOuvintes();
-        });
+        }, 1000);
     </script>
 </body>
 </html>
