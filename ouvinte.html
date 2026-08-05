@@ -998,7 +998,7 @@
             gap: 4px;
         }
 
-        /* CUSTOMIZAÇÃO DE CARDS (PINCEL E MODAL) */
+        /* CUSTOMIZAÇÃO DE CARDS (PINCEL COM RISCO VERMELHO E MODAL) */
         .btn-pincel-card {
             position: absolute;
             top: 8px;
@@ -1019,6 +1019,23 @@
         }
         .btn-pincel-card:hover {
             background: var(--primary);
+        }
+
+        /* ESTILO DO RISQUINHO VERMELHO NO PINCEL QUANDO BLOQUEADO */
+        .pincel-bloqueado-wrapper {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .risco-vermelho-diagonal {
+            position: absolute;
+            width: 130%;
+            height: 2px;
+            background-color: #ef4444;
+            transform: rotate(-45deg);
+            pointer-events: none;
+            box-shadow: 0 0 4px rgba(239, 68, 68, 0.8);
         }
 
         .modal-personalizacao-card {
@@ -1288,7 +1305,6 @@
                 <h2>Painel do Ouvinte</h2>
                 <div class="user-name-title">
                     <span id="nome-ouvinte-display"></span>
-                    <!-- CRONOMETRO LOGO AO LADO DO NOME DO OUVINTE -->
                     <span style="font-size: 12px; color: #a855f7; font-weight: 700;">cronometro de ludigins: <span id="cronometro-online" class="cronometro-online-box">00:00:00</span></span>
                     <span id="alerta-cronometro" class="alerta-cronometro-msg" style="display: none;" onclick="rolarParaBonusDiario()"></span>
                 </div>
@@ -1320,15 +1336,13 @@
             <i class="fas fa-headphones" style="margin-right: 6px;"></i> CURTA AQUI SUAS RADIOS PREFERIDAS
         </div>
 
-        <!-- PAINEL DE DISPUTA DE OUVINTES (MOSTRANDO LUDGINS E PREMIOS EM TODOS OS PAINEIS) -->
+        <!-- PAINEL DE DISPUTA DE OUVINTES -->
         <div class="disputa-ouvintes-card">
             <div class="disputa-titulo">
                 <span><i class="fas fa-fire" style="color: #f59e0b; margin-right: 6px;"></i> DISPUTA DE OUVINTES & PRÊMIOS DA SEMANA</span>
                 <span style="font-size: 11px; color: #9ca3af; font-weight: 600;">Quem acumular mais Ludgins lidera!</span>
             </div>
-            <div class="ranking-ouvintes-lista" id="container-ranking-ouvintes">
-                <!-- Preenchido via Firebase em tempo real -->
-            </div>
+            <div class="ranking-ouvintes-lista" id="container-ranking-ouvintes"></div>
         </div>
 
         <!-- LOJA VIRTUAL DE DESBLOQUEIO -->
@@ -1337,9 +1351,7 @@
                 <span><i class="fas fa-store" style="color: #a855f7; margin-right: 6px;"></i> SUA LOJA VIRTUAL PARA DESBLOQUEAR MAIS FUNCOES NO PAINEL</span>
                 <span style="font-size: 11px; color: #9ca3af; font-weight: 600;">Ouça a radio para farmar Ludgins!</span>
             </div>
-            <div class="loja-itens-grid" id="container-loja-itens">
-                <!-- Gerado via JS dinamicamente -->
-            </div>
+            <div class="loja-itens-grid" id="container-loja-itens"></div>
         </div>
 
         <div class="main-container">
@@ -1355,7 +1367,7 @@
                 </div>
             </div>
 
-            <!-- CARD 2: SUAS RADIOS PREFERIDAS (COM BOTÃO LUDGINS CENTRALIZADO) -->
+            <!-- CARD 2: SUAS RADIOS PREFERIDAS -->
             <div class="card-box" id="card-box-playlist">
                 <h3>GERENCIAR SUAS RADIOS PREFERIDAS</h3>
                 <div class="radios-section-container">
@@ -1363,7 +1375,7 @@
                         <h3 class="sub-titulo-secao"><i class="fas fa-sort"></i> 2. ARRASTE PARA REORDENAR</h3>
                         <div id="grid-playlist" class="playlist-grid-ouvinte"></div>
                         
-                        <!-- BOTÃO LUDGINS CENTRALIZADO ABAIXO DAS RÁDIOS PREFERIDAS -->
+                        <!-- BOTÃO LUDGINS CENTRALIZADO -->
                         <div id="secao-bonus-diario" style="display: flex; justify-content: center; width: 100%; margin-top: 16px;">
                             <button onclick="resgatarBonusLudginsCentral()" style="background: linear-gradient(135deg, #7c3aed, #db2777); color: #fff; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 800; font-size: 13.5px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(219, 39, 119, 0.4); transition: transform 0.2s;">
                                 <i class="fas fa-gem" style="font-size: 16px;"></i> Ganhar Bônus de Ludgins de Hoje
@@ -1373,17 +1385,16 @@
                 </div>
             </div>
 
-            <!-- CARD 3: COLUNA DIREITA (ESPORTES + BOTOES DE TABELAS + HOROSCOPO + CHAT) -->
+            <!-- CARD 3: COLUNA DIREITA -->
             <div class="coluna-direita" style="display: flex; flex-direction: column; gap: 14px;">
                 
-                <!-- QUADRO DE FUTEBOL E BOTOES PARA CONFERIR TABELAS -->
+                <!-- QUADRO DE FUTEBOL -->
                 <div class="card-box" id="card-box-esportes" style="padding: 16px;">
                     <h3 style="margin-bottom: 10px; font-size: 13.5px;"><i class="fas fa-futbol" style="color: #22c55e;"></i> FUTEBOL: JOGOS & TABELAS</h3>
                     <div id="lista-jogos-esportes" class="esportes-container">
                         <p style="color:#666; font-size:11.5px; text-align:center; margin:10px 0;">Carregando jogos da semana...</p>
                     </div>
 
-                    <!-- BOTOES CIRURGICOS PEDIDOS -->
                     <div class="botoes-tabelas-col">
                         <button class="btn-tabela-esporte" onclick="abrirModalTabela('brasileirao')">
                             <span><i class="fas fa-table" style="color: #a855f7; margin-right: 6px;"></i> Confira a tabela e classificacao</span>
@@ -1437,20 +1448,18 @@
 
     </div>
 
-    <!-- MODAL DE EXIBICAO DAS TABELAS COM SETAS DE VARIACAO -->
+    <!-- MODAL DE EXIBICAO DAS TABELAS -->
     <div id="modal-tabela" class="modal-overlay" onclick="fecharModalFora(event)">
         <div class="modal-conteudo-box">
             <div class="modal-header-box">
                 <h3 id="modal-titulo-tabela"><i class="fas fa-trophy" style="color: #a855f7;"></i> Classificacao</h3>
                 <button class="btn-fechar-modal" onclick="fecharModalTabela()"><i class="fas fa-times"></i></button>
             </div>
-            <div class="modal-body-tabela" id="modal-corpo-tabela">
-                <!-- Conteudo injetado via JS -->
-            </div>
+            <div class="modal-body-tabela" id="modal-corpo-tabela"></div>
         </div>
     </div>
 
-    <!-- MODAL DE PERSONALIZACAO DE CARD (CORES E 10 EMOJIS) -->
+    <!-- MODAL DE PERSONALIZACAO DE CARD -->
     <div id="modal-personalizacao" class="modal-personalizacao-card" onclick="fecharModalPersonalizacaoFora(event)">
         <div class="card-custom-content">
             <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -1531,7 +1540,6 @@
 
         document.getElementById('nome-ouvinte-display').innerText = "OLA, " + ouvinteNome.toUpperCase();
 
-        // SISTEMA DE LUDGINS, TEMPO ONLINE (COM RECOMPENSAS PROGRESSIVAS) E LOJA VIRTUAL
         let segundosConectados = 0;
         let meusLudgins = parseInt(localStorage.getItem('ludgins_ouvinte_' + ouvinteId)) || 0;
         let patenteAtual = localStorage.getItem('patente_ouvinte_' + ouvinteId) || 'Bronze';
@@ -1539,15 +1547,14 @@
         let isRadioTocando = false;
         let cardSendoEditadoKey = null;
 
-        // Som suave para comemorações de bônus/compras
         function tocarSomSuaveSucesso() {
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
-                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15); // A5
+                osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15);
                 gain.gain.setValueAtTime(0.1, ctx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
                 osc.connect(gain);
@@ -1557,7 +1564,6 @@
             } catch(e) {}
         }
 
-        // Desbloqueios salvos no localStorage (Loja Virtual: Chat=20, Cores/Cards=30, Horoscopo=50, Esportes=70)
         let desbloqueios = JSON.parse(localStorage.getItem('desbloqueios_ouvinte_' + ouvinteId)) || {
             chat: false,
             cores: false,
@@ -1565,7 +1571,6 @@
             esportes: false
         };
 
-        // Customizações salvas por card (cores e emojis)
         let customizacoesCards = JSON.parse(localStorage.getItem('customizacoes_cards_' + ouvinteId)) || {};
 
         function atualizarInterfaceLudginsEPatente() {
@@ -1573,6 +1578,7 @@
             document.getElementById('patente-ouvinte-badge').innerText = patenteAtual;
             renderizarLojaVirtual();
             aplicarTravaBloqueios();
+            renderizarPlaylistDireita(); // Atualiza os ícones de pincel (com ou sem risco vermelho)
         }
 
         function formatarTempoOnline(segundos) {
@@ -1582,18 +1588,16 @@
             return `${h}:${m}:${s}`;
         }
 
-        // FUNCAO DO CRONOMETRO COM RECOMPENSAS PROGRESSIVAS EXATAS
         function iniciarCronometroOnline() {
             if (timerOnlineInterval) return;
             timerOnlineInterval = setInterval(() => {
-                if (!isRadioTocando) return; // Só conta se estiver ouvindo rádio
+                if (!isRadioTocando) return;
 
                 segundosConectados++;
                 document.getElementById('cronometro-online').innerText = formatarTempoOnline(segundosConectados);
 
                 const alertaBox = document.getElementById('alerta-cronometro');
 
-                // 1. A cada 20 minutos (1200 segundos), ganha 5 ludgins
                 if (segundosConectados === 1200) {
                     meusLudgins += 5;
                     salvarProgressoLudgins();
@@ -1601,13 +1605,11 @@
                     if (typeof confetti === 'function') confetti({ particleCount: 100, spread: 60 });
                 }
 
-                // 2. Depois, a cada 10 minutos (600s adicionais -> 1800s), ganha 2 ludgins
                 if (segundosConectados > 1200 && (segundosConectados - 1200) % 600 === 0) {
                     meusLudgins += 2;
                     salvarProgressoLudgins();
                 }
 
-                // 3. Se passar de 50 minutos (3000 segundos) ouvindo rádio, ganha mais 5 ludgins
                 if (segundosConectados === 3000) {
                     meusLudgins += 5;
                     salvarProgressoLudgins();
@@ -1615,13 +1617,11 @@
                     if (typeof confetti === 'function') confetti({ particleCount: 120, spread: 70 });
                 }
 
-                // 4. A cada 10 minutos que ele ficar após 50 min, ganha 3 ludgins
                 if (segundosConectados > 3000 && (segundosConectados - 3000) % 600 === 0) {
                     meusLudgins += 3;
                     salvarProgressoLudgins();
                 }
 
-                // 5. Se passar de 1 hora (3600 segundos) ouvindo, ganha 10 ludgins
                 if (segundosConectados === 3600) {
                     meusLudgins += 10;
                     salvarProgressoLudgins();
@@ -1629,7 +1629,6 @@
                     if (typeof confetti === 'function') confetti({ particleCount: 150, spread: 80 });
                 }
 
-                // 6. A cada 10 minutos a mais ouvindo, ganha alternadamente: mais 5, mais 10, mais 5, mais 10, e assim por diante.
                 if (segundosConectados > 3600 && (segundosConectados - 3600) % 600 === 0) {
                     let ciclosDezMin = Math.floor((segundosConectados - 3600) / 600);
                     let ganhoExtra = (ciclosDezMin % 2 !== 0) ? 5 : 10;
@@ -1637,7 +1636,6 @@
                     salvarProgressoLudgins();
                 }
 
-                // Recompensa diária: se passar 30 minutos (1800 segundos), aparece mensagem no meio da tela
                 if (segundosConectados === 1800) {
                     alertaBox.style.display = 'inline-block';
                     alertaBox.innerText = "Você passou de 30 minutos conectado! Role a página e clique em ganhar bônus de ludgins de hoje.";
@@ -1690,7 +1688,6 @@
         }
         sincronizarFirebaseOuvinteOnline();
 
-        // RESGATE DO BÔNUS DIÁRIO DE LUDGINS (DÁ 3 LUDGINS COMO SOLICITADO)
         function resgatarBonusLudginsCentral() {
             const hoje = new Date().toDateString();
             const ultimoResgate = localStorage.getItem('ultimo_resgate_bonus_' + ouvinteId);
@@ -1705,14 +1702,12 @@
             salvarProgressoLudgins();
             tocarSomSuaveSucesso();
 
-            // Estoura na tela um monte de confetes
             if (typeof confetti === 'function') {
                 confetti({ particleCount: 250, spread: 100, origin: { y: 0.6 } });
             }
             alert("Parabéns! Você resgatou +3 Ludgins de bônus!");
         }
 
-        // ESCUTA EM TEMPO REAL DO RANKING DE DISPUTA DE OUVINTES
         db.ref('ouvintes_online').on('value', snap => {
             const containerRanking = document.getElementById('container-ranking-ouvintes');
             if (!containerRanking) return;
@@ -1760,7 +1755,6 @@
             containerRanking.innerHTML = htmlRanking;
         });
 
-        // RENDERIZACAO DA LOJA VIRTUAL COM OS VALORES EXATOS PEDIDOS (20, 30, 50, 70)
         function renderizarLojaVirtual() {
             const container = document.getElementById('container-loja-itens');
             
@@ -1794,7 +1788,7 @@
 
         function comprarItemLoja(idItem, custo) {
             if (meusLudgins < custo) {
-                alert(`Ludgins insuficientes! Você tem ${meusLudgins} Ludgins e precisa de ${custo} Ludgins para liberar essa função.`);
+                alert(`Ludgins insuficientes! Você tem ${meusLudgins} Ludgins e precisa de ${custo} Ludgins.`);
                 return;
             }
 
@@ -1806,7 +1800,6 @@
                 salvarProgressoLudgins();
                 tocarSomSuaveSucesso();
 
-                // Estoura na tela um monte de confetes
                 if (typeof confetti === 'function') {
                     confetti({ particleCount: 250, spread: 100, origin: { y: 0.5 } });
                 }
@@ -1838,7 +1831,7 @@
                     div.innerHTML = `
                         <i class="fas fa-lock"></i>
                         <p style="font-size:13.5px; color:#fff; margin-bottom:4px;">${nomeRecurso} Bloqueado</p>
-                        <p>Você não tem saldo ainda para liberar essa função! Junte <strong style="color:#c084fc;">${custoReq} Ludgins</strong> ou compre na Loja Virtual para liberar para sempre!</p>
+                        <p>Junte <strong style="color:#c084fc;">${custoReq} Ludgins</strong> ou compre na Loja Virtual para liberar para sempre!</p>
                     `;
                     elementoCard.style.position = 'relative';
                     elementoCard.appendChild(div);
@@ -1857,7 +1850,6 @@
         setInterval(atualizarRelogio, 1000);
         atualizarRelogio();
 
-        // CLIMA DAS CAPITAIS
         const cidadesClima = [
             { nome: 'Cascavel', lat: -24.9578, lon: -53.4595 },
             { nome: 'Curitiba', lat: -25.4284, lon: -49.2733 },
@@ -1902,7 +1894,6 @@
         atualizarCarrosselClima();
         setInterval(atualizarCarrosselClima, 6000);
 
-        // JOGOS DA SEMANA
         function carregarJogosBrasileiraoSemana() {
             const containerEsportes = document.getElementById('lista-jogos-esportes');
             
@@ -1996,7 +1987,6 @@
         carregarJogosBrasileiraoSemana();
         setInterval(carregarJogosBrasileiraoSemana, 30000);
 
-        // DADOS DA CLASSIFICACAO
         const tabelaBrasileiraoDados = [
             { pos: 1, var: 0, time: "Palmeiras", pts: 47, j: 21, v: 14, sg: 22 },
             { pos: 2, var: 0, time: "Flamengo", pts: 39, j: 20, v: 11, sg: 19 },
@@ -2119,7 +2109,6 @@
             }
         }
 
-        // HOROSCOPO DO DIA
         const nomesSignos = {
             aries: 'Aries', taurus: 'Touro', gemini: 'Gemeos', cancer: 'Cancer',
             leo: 'Leao', virgo: 'Virgem', libra: 'Libra', scorpio: 'Escorpiao',
@@ -2143,7 +2132,7 @@
 
         async function carregarHoroscopo(signo, el) {
             if (!desbloqueios.horoscopo) {
-                alert("Horoscopo bloqueado! Você não tem saldo ainda para liberar essa função ou precisa adquiri-la na sua Loja Virtual acima.");
+                alert("Horoscopo bloqueado! Adquira o recurso na sua Loja Virtual acima.");
                 return;
             }
 
@@ -2168,7 +2157,6 @@
             }, 300);
         }
 
-        // NOTICIAS BRASIL
         async function carregarNoticiasBrasil() {
             try {
                 const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fg1.globo.com%2Fdynamo%2Frss2.xml');
@@ -2217,7 +2205,6 @@
             }
         });
 
-        // Sincronizar customizações de cards salvas no Firebase / LocalStorage
         db.ref('ouvintes_preferencias/' + ouvinteId + '/customizacoes_cards').on('value', snap => {
             if (snap.exists()) {
                 customizacoesCards = snap.val();
@@ -2294,7 +2281,6 @@
             radiosPlaylist.forEach((r) => {
                 const isPlaying = (radioTocandoKey === r.key && isRadioTocando);
                 
-                // Pegar customização salva para este card (cor e emoji escolhido)
                 let custom = customizacoesCards[r.key] || {};
                 let cardColor = custom.cor || r.color || '#9333ea';
                 let iconeEmoji = custom.emoji || null;
@@ -2306,11 +2292,21 @@
                     htmlIcone = `<i class="fas ${isPlaying ? 'fa-tower-broadcast antena-piscando' : 'fa-radio'} icon-radio"></i>`;
                 }
 
-                // Botão de pincel só aparece se o ouvinte já liberou/comprou o painel de personalização (30 ludgins). 
-                // Se não liberou, o botão não aparece e ao tentar buscar feedback a loja avisa que ele não tem saldo ainda.
+                // LÓGICA DO PINCEL: Sempre visível em todos os cards da playlist.
+                // Se não foi liberado (desbloqueios.cores == false), mostra com o risquinho vermelho e exibe o alerta ao clicar.
+                // Se liberado, funciona normalmente para personalizar.
                 let htmlPincel = '';
                 if (desbloqueios.cores) {
                     htmlPincel = `<button class="btn-pincel-card" title="Personalizar card" onclick="event.stopPropagation(); abrirModalPersonalizacao('${r.key}')"><i class="fas fa-paint-brush"></i></button>`;
+                } else {
+                    htmlPincel = `
+                        <button class="btn-pincel-card" title="Recurso Bloqueado" onclick="event.stopPropagation(); alert('Você ainda não tem Ludgins suficientes para liberar a personalização dos cards! Ouça mais a rádio ou compre na Loja Virtual.')">
+                            <span class="pincel-bloqueado-wrapper">
+                                <i class="fas fa-paint-brush"></i>
+                                <span class="risco-vermelho-diagonal"></span>
+                            </span>
+                        </button>
+                    `;
                 }
 
                 container.innerHTML += `
@@ -2326,30 +2322,22 @@
             });
         }
 
-        // LÓGICA DE PERSONALIZAÇÃO COM CORES E 10 EMOJIS
         const listaCoresPredefinidas = ['#9333ea', '#ff007f', '#2563eb', '#16a34a', '#ca8a04', '#dc2626', '#0891b2', '#4f46e5', '#db2777', '#334155'];
         const lista10Emojis = ['📻', '🎵', '🎧', '🎸', '🎷', '🎤', '🎹', '🎶', '🌟', '🔥'];
 
         function abrirModalPersonalizacao(key) {
-            if (!desbloqueios.cores) {
-                alert("Você não tem saldo ainda para liberar essa função! Adquira o Painel de Personalização na Loja Virtual por 30 Ludgins.");
-                return;
-            }
-
             cardSendoEditadoKey = key;
             const modal = document.getElementById('modal-personalizacao');
             
-            // Renderizar paleta de cores
             const containerCores = document.getElementById('paleta-cores-container');
             containerCores.innerHTML = "";
             listaCoresPredefinidas.forEach(cor => {
                 containerCores.innerHTML += `<div class="cor-opcao-btn" style="background: ${cor};" onclick="salvarCorCard('${cor}')"></div>`;
             });
 
-            // Renderizar 10 ícones/emojis
             const containerEmojis = document.getElementById('emojis-card-container');
             containerEmojis.innerHTML = "";
-            lista10Emojis.forEach( emoji => {
+            lista10Emojis.forEach(emoji => {
                 containerEmojis.innerHTML += `<div class="emoji-opcao-btn" onclick="salvarEmojiCard('${emoji}')">${emoji}</div>`;
             });
 
@@ -2489,7 +2477,7 @@
 
         function enviarMensagem() {
             if (!desbloqueios.chat) {
-                alert("O Chat está bloqueado! Você não tem saldo ainda para liberar essa função ou precisa adquiri-la na Loja Virtual por 20 Ludgins.");
+                alert("O Chat está bloqueado! Adquira o acesso na Loja Virtual por 20 Ludgins.");
                 return;
             }
 
