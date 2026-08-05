@@ -34,7 +34,7 @@
 
         .container {
             width: 100%;
-            max-width: 900px;
+            max-width: 1100px;
         }
 
         .header-painel {
@@ -98,12 +98,11 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            max-height: 550px;
+            max-height: 600px;
             overflow-y: auto;
             padding-right: 5px;
         }
 
-        /* Estilização do Card do Ouvinte conforme solicitado */
         .ouvinte-item {
             background: #161619;
             border-radius: 14px;
@@ -133,7 +132,6 @@
             color: #fff;
         }
 
-        /* Ícone de alto-falante piscando para ouvintes online */
         @keyframes piscarSpeaker {
             0% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.3; transform: scale(0.9); }
@@ -162,7 +160,6 @@
             color: var(--gray-text);
         }
 
-        /* Detalhes expansíveis ao clicar no ouvinte */
         .ouvinte-detalhes {
             max-height: 0;
             overflow: hidden;
@@ -174,7 +171,7 @@
         }
 
         .ouvinte-item.expandido .ouvinte-detalhes {
-            max-height: 150px;
+            max-height: 180px;
             margin-top: 12px;
             padding-top: 10px;
             border-top: 1px solid var(--border-glass);
@@ -232,7 +229,6 @@
             window.location.href = "index.html";
         }
 
-        // Função auxiliar para formatar segundos em HH:MM:SS
         function formatarTempo(totalSegundos) {
             if (!totalSegundos || isNaN(totalSegundos)) return "00:00:00";
             let h = Math.floor(totalSegundos / 3600);
@@ -241,7 +237,6 @@
             return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
         }
 
-        // Escuta contas cadastradas e estado de sessão/presença no Realtime Database
         db.ref('contas').on('value', snapshotContas => {
             const contas = snapshotContas.val() || {};
             
@@ -261,7 +256,6 @@
                 return;
             }
 
-            // Monta lista unificando dados cadastrais com dados ativos de sessão
             let listaOuvintes = chavesContas.map(key => {
                 const conta = contas[key];
                 const sessao = sessoes[key] || {};
@@ -280,25 +274,20 @@
                 };
             });
 
-            // Regras de Ordenação:
-            // 1. Quem estiver online fica no topo, ordenados pela ordem de entrada (mais antigo online primeiro ou mais recente? "quando fizer login suba por ordem de entrada")
-            // 2. Novos cadastros sem sessão ativa ficam sempre por último na cor cinza.
+            // Ordenação: Online no topo por ordem de entrada; Novos cadastros offline por último por data de cadastro
             listaOuvintes.sort((a, b) => {
                 if (a.online && !b.online) return -1;
                 if (!a.online && b.online) return 1;
                 if (a.online && b.online) {
-                    return a.loginTimestamp - b.loginTimestamp; // Ordem de entrada (primeiro a entrar fica acima)
+                    return a.loginTimestamp - b.loginTimestamp;
                 }
-                // Offline / Nunca logados ordenados por data de cadastro (mais antigos primeiro, novos cadastrados por último)
                 return a.criadoEm - b.criadoEm;
             });
 
             listaOuvintes.forEach(ouvinte => {
                 const divItem = document.createElement('div');
                 divItem.className = `ouvinte-item ${ouvinte.online ? 'online' : ''}`;
-                divItem.id = `ouvinte-${ouvinte.id}`;
 
-                // Cálculo em tempo real dos tempos para exibição fluida
                 let tempoSessaoSegundos = 0;
                 let tempoRadioAtualSegundos = ouvinte.tempoRadioSegundos;
 
@@ -330,7 +319,7 @@
                             <span>E-mail:</span> <strong>${ouvinte.email}</strong>
                         </div>
                         <div class="detalhe-linha">
-                            <span>Rádio Atual / Última Ouvida:</span> <strong class="radio-destaque">${displayUltimaRadio}</strong>
+                            <span>Última Rádio / Atual:</span> <strong class="radio-destaque">${displayUltimaRadio}</strong>
                         </div>
                         <div class="detalhe-linha">
                             <span>Tempo de Sessão Completo:</span> <strong id="sessao-${ouvinte.id}">${formatarTempo(displayTempoSessao)}</strong>
@@ -341,9 +330,7 @@
                     </div>
                 `;
 
-                // Comportamento de clique para deslizar (expandir/recolher) os detalhes
-                divItem.addEventListener('click', (e) => {
-                    // Evita conflitos caso haja elementos internos clicáveis no futuro
+                divItem.addEventListener('click', () => {
                     document.querySelectorAll('.ouvinte-item').forEach(el => {
                         if (el !== divItem) el.classList.remove('expandido');
                     });
@@ -354,7 +341,6 @@
             });
         }
 
-        // Timer global dinâmico na tela do Admin para atualizar os contadores de tempo segundo a segundo em tempo real
         setInterval(() => {
             db.ref('sessoes').once('value', snapshotSessoes => {
                 const sessoes = snapshotSessoes.val() || {};
@@ -364,16 +350,14 @@
                     const sessao = sessoes[id];
                     if (sessao.online && sessao.loginTimestamp) {
                         const tSessao = Math.floor((agoraMS - sessao.loginTimestamp) / 1000);
-                        const tRadio = (sessao.tempoRadioSegundos || 0) + 1; // Incrementa relógio da rádio ativa
+                        const tRadio = (sessao.tempoRadioSegundos || 0) + 1;
 
-                        // Atualiza direto no banco periodicamente ou atualiza o DOM visualmente de forma fluida
                         const elSessao = document.getElementById(`sessao-${id}`);
                         const elRadio = document.getElementById(`radio-${id}`);
                         if (elSessao) elSessao.innerText = formatarTempo(tSessao);
                         if (elRadio) {
                             elRadio.innerText = formatarTempo(tRadio);
-                            // Sincroniza o incremento levemente no banco de dados para persistência do tempo da rádio
-                            if (Math.random() < 0.3) { // Evita escrita excessiva a cada 1 segundo exato, atualizando a cada poucos ciclos
+                            if (Math.random() < 0.3) {
                                 db.ref(`sessoes/${id}`).update({ tempoRadioSegundos: tRadio });
                             }
                         }
