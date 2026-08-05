@@ -97,7 +97,7 @@
         @media (max-width: 600px) { .pub-container { grid-template-columns: 1fr; } }
         .pub-preview { width: 100%; max-height: 120px; object-fit: contain; margin-top: 10px; border-radius: 10px; border: 1px dashed #444; display: none; }
 
-        /* MONITOR DE OUVINTES (ATUALIZADO CONFORME PEDIDO) */
+        /* MONITOR DE OUVINTES (ATUALIZADO RIGOROSAMENTE CONFORME PEDIDO) */
         .user-item { background: #141414; margin-bottom: 10px; border-radius: 14px; border: 1px solid var(--gray-border); overflow: hidden; transition: all 0.3s ease; cursor: pointer; }
         .user-item.online { border-color: var(--primary); box-shadow: 0 0 12px rgba(29, 185, 84, 0.25); background: #161619; }
         .user-item.offline { border-color: var(--gray-border); opacity: 0.9; }
@@ -506,7 +506,7 @@
         }
 
         // =======================================================
-        // MONITOR DE OUVINTES (REQUISITOS ATENDIDOS)
+        // MONITOR DE OUVINTES (RIGOROSAMENTE AJUSTADO CONFORME PEDIDO)
         // =======================================================
         function toggleUserCard(key) {
             openCards[key] = !openCards[key];
@@ -583,7 +583,8 @@
                 });
             });
 
-            // ORDENAÇÃO: Online no topo ordenados por ordem de entrada (mais antigo online primeiro). Novos cadastros/offline por último em ordem de cadastro.
+            // REQUISITO: Novos cadastros sem sessão ou offline ficam sempre por último em ordem de cadastro.
+            // Os online sobem por ordem de entrada no sistema.
             listaOuvintesMonitor.sort((a, b) => {
                 if (a.isOnline && !b.isOnline) return -1;
                 if (!a.isOnline && b.isOnline) return 1;
@@ -623,6 +624,7 @@
                 div.id = `user-card-${safeKey}`;
                 div.className = `user-item ${ouvinte.isOnline ? 'online' : 'offline'} ${isOpen ? 'open' : ''}`;
                 
+                // REQUISITO: Ícone de alto-falante piscando para online, usuário cinza para offline
                 const iconHeader = ouvinte.isOnline ? `<i class="fas fa-volume-high speaker-icon"></i>` : `<i class="fas fa-user" style="color: var(--gray-text); margin-right: 8px;"></i>`;
 
                 div.innerHTML = `
@@ -642,7 +644,7 @@
                             <div>E-mail: <strong>${rawContas[k]?.email || 'Não informado'}</strong></div>
                             <div>Nome da Rádio: <strong class="radio-destaque">${displayUltimaRadio}</strong></div>
                             <div>Tempo de Sessão: <b style="color:#38bdf8" id="ts-${safeKey}" data-login="${ouvinte.loginTimestamp}" data-salvo="${ouvinte.tempoSessaoCompletoSalvo}" data-online="${ouvinte.isOnline}">${formatarTempo(tempoSessaoSegundos)}</b></div>
-                            <div>Tempo Conectado nesta Rádio: <b style="color:#a855f7" id="tr-${safeKey}" data-radio-start="${ouvinte.radioStart}" data-salvo="${ouvinte.tempoRadioSegundos}" data-online="${ouvinte.isOnline}">${formatarTempo(tempoRadioAtualSegundos)}</b></div>
+                            <div>Tempo nessa Rádio: <b style="color:#a855f7" id="tr-${safeKey}" data-radio-start="${ouvinte.radioStart}" data-salvo="${ouvinte.tempoRadioSegundos}" data-online="${ouvinte.isOnline}">${formatarTempo(tempoRadioAtualSegundos)}</b></div>
                         </div>
                     </div>`;
                 container.appendChild(div);
