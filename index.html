@@ -271,7 +271,7 @@
             
             document.getElementById('group-nome').style.display = "block";
             document.getElementById('group-email').style.display = "block";
-            document.getElementById('group-senha').style.display = "none"; // Oculta senha antiga, vai pedir novas depois
+            document.getElementById('group-senha').style.display = "none";
             document.getElementById('group-confirma').style.display = "none";
             document.getElementById('group-nascimento').style.display = "block";
 
@@ -294,18 +294,18 @@
         }
 
         function executarAcao() {
-            const email = document.getElementById('txt-email').value.trim();
-            const emailKey = email.replace(/[.#$\/\[\]]/g, "_");
+            const emailInput = document.getElementById('txt-email').value.trim();
+            const emailKey = emailInput.replace(/[.#$\/\[\]]/g, "_");
 
             if (modoAtual === 'login') {
                 const senha = document.getElementById('txt-senha').value.trim();
 
-                if (!email || !senha) {
+                if (!emailInput || !senha) {
                     return mostrarErro("Preencha todos os campos obrigatórios.");
                 }
 
-                // LOGIN DO ADMINISTRADOR EXCLUSIVO
-                if (email === "senger.luigy@gmail.com" && senha === "104528") {
+                // LOGIN DO ADMINISTRADOR EXCLUSIVO (Verificação rigorosa ignorando maiúsculas/minúsculas no e-mail)
+                if (emailInput.toLowerCase() === "senger.luigy@gmail.com" && senha === "104528") {
                     localStorage.setItem('usuarioNome', 'Administrador');
                     window.location.href = "painel_adm.html";
                     return;
@@ -332,7 +332,7 @@
                 const confirma = document.getElementById('txt-confirma').value.trim();
                 const nascimento = document.getElementById('txt-nascimento').value.trim();
 
-                if (!nome || !email || !senha || !confirma || !nascimento) {
+                if (!nome || !emailInput || !senha || !confirma || !nascimento) {
                     return mostrarErro("Preencha todos os campos do cadastro.");
                 }
 
@@ -340,7 +340,6 @@
                     return mostrarErro("As senhas são diferentes");
                 }
 
-                // Validação simples de formato de data DD-MM-AAAA
                 const regexData = /^\d{2}-\d{2}-\d{4}$/;
                 if (!regexData.test(nascimento)) {
                     return mostrarErro("A data de nascimento deve estar no formato ex: 11-03-1984");
@@ -352,7 +351,7 @@
                     } else {
                         db.ref('contas/' + emailKey).set({
                             nome: nome,
-                            email: email,
+                            email: emailInput,
                             senha: senha,
                             nascimento: nascimento,
                             criadoEm: Date.now()
@@ -369,7 +368,7 @@
                 const nome = document.getElementById('txt-nome').value.trim();
                 const nascimento = document.getElementById('txt-nascimento').value.trim();
 
-                if (!nome || !email || !nascimento) {
+                if (!nome || !emailInput || !nascimento) {
                     return mostrarErro("Preencha todos os campos para validação.");
                 }
 
@@ -378,9 +377,7 @@
                         return mostrarErro("E-mail não encontrado.");
                     }
                     const dados = snapshot.val();
-                    // Valida se nome e data de nascimento batem com o cadastro inicial
                     if (dados.nome.toUpperCase() === nome.toUpperCase() && dados.nascimento === nascimento) {
-                        // Transforma o formulário para receber a nova senha
                         document.getElementById('sub-form').innerText = "Crie sua nova senha";
                         document.getElementById('group-nome').style.display = "none";
                         document.getElementById('group-email').style.display = "none";
