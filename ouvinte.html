@@ -33,7 +33,7 @@
             --text-muted: #9ca3af;
         }
 
-        /* CORPO DA PÁGINA */
+        /* CORPO DA PAGINA */
         html, body {
             background-color: var(--bg);
             background-image: 
@@ -89,7 +89,10 @@
             font-weight: 600;
             color: var(--text-muted);
             margin-top: 2px;
-            display: block;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
         .header-widgets {
@@ -122,9 +125,20 @@
         }
 
         .cronometro-online-box {
-            font-size: 17px;
+            font-size: 15px;
             font-weight: 700;
             color: #c084fc;
+        }
+
+        .alerta-cronometro-msg {
+            font-size: 12px;
+            font-weight: 700;
+            color: #f59e0b;
+            background: rgba(245, 158, 11, 0.12);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            padding: 2px 8px;
+            border-radius: 6px;
+            animation: piscar 1.2s infinite ease-in-out;
         }
 
         .clima-box {
@@ -511,7 +525,7 @@
             color: #fff;
         }
 
-        /* MODAL DE CLASSIFICAÇÃO */
+        /* MODAL DE CLASSIFICACAO */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -610,7 +624,7 @@
         .seta-vermelha { color: #ef4444; font-size: 11px; }
         .neutro-pos { color: #64748b; font-size: 11px; }
 
-        /* HORÓSCOPO DO DIA */
+        /* HOROSCOPO DO DIA */
         .signos-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -1100,19 +1114,18 @@
         <div class="header">
             <div>
                 <h2>Painel do Ouvinte</h2>
-                <span id="nome-ouvinte-display" class="user-name-title"></span>
-                <span id="patente-ouvinte-badge" class="patente-tag-header">🥉 Bronze</span>
+                <div class="user-name-title">
+                    <span id="nome-ouvinte-display"></span>
+                    <!-- CRONOMETRO LOGO AO LADO DO NOME DO OUVINTE -->
+                    <span style="font-size: 12px; color: #a855f7; font-weight: 700;">cronometro de ludigins: <span id="cronometro-online" class="cronometro-online-box">00:00:00</span></span>
+                    <span id="alerta-cronometro" class="alerta-cronometro-msg" style="display: none;"></span>
+                </div>
+                <span id="patente-ouvinte-badge" class="patente-tag-header">Bronze</span>
             </div>
 
             <div class="header-widgets">
                 <div class="widget-item">
                     <span class="ludgins-badge-wallet"><i class="fas fa-gem"></i> <span id="contador-ludgins">0</span> Ludgins</span>
-                </div>
-
-                <!-- CRONÔMETRO DE TEMPO ONLINE NA PARTE SUPERIOR -->
-                <div class="widget-item" title="Tempo conectado farmando Ludgins">
-                    <i class="fas fa-stopwatch" style="color: #c084fc;"></i>
-                    <span id="cronometro-online" class="cronometro-online-box">00:00:00</span>
                 </div>
 
                 <div class="widget-item">
@@ -1132,14 +1145,14 @@
         </div>
 
         <div class="frase-centro-playlist">
-            <i class="fas fa-headphones" style="margin-right: 6px;"></i> CURTA AQUI SUAS RÁDIOS PREFERIDAS
+            <i class="fas fa-headphones" style="margin-right: 6px;"></i> CURTA AQUI SUAS RADIOS PREFERIDAS
         </div>
 
         <!-- LOJA VIRTUAL DE DESBLOQUEIO -->
         <div class="loja-virtual-card">
             <div class="loja-titulo">
-                <span><i class="fas fa-store" style="color: #a855f7; margin-right: 6px;"></i> SUA LOJA VIRTUAL PARA DESBLOQUEAR MAIS FUNÇÕES NO PAINEL</span>
-                <span style="font-size: 11px; color: #9ca3af; font-weight: 600;">Ouça a rádio para farmar Ludgins!</span>
+                <span><i class="fas fa-store" style="color: #a855f7; margin-right: 6px;"></i> SUA LOJA VIRTUAL PARA DESBLOQUEAR MAIS FUNCOES NO PAINEL</span>
+                <span style="font-size: 11px; color: #9ca3af; font-weight: 600;">Ouça a radio para farmar Ludgins!</span>
             </div>
             <div class="loja-itens-grid" id="container-loja-itens">
                 <!-- Gerado via JS dinamicamente -->
@@ -1148,20 +1161,20 @@
 
         <div class="main-container">
 
-            <!-- CARD 1: ADICIONAR RÁDIOS -->
+            <!-- CARD 1: ADICIONAR RADIOS -->
             <div class="card-box">
-                <h3>GERENCIAR SUAS RÁDIOS PREFERIDAS</h3>
+                <h3>GERENCIAR SUAS RADIOS PREFERIDAS</h3>
                 <div class="radios-section-container">
                     <div>
-                        <h3 class="sub-titulo-secao"><i class="fas fa-plus-circle"></i> 1. ADICIONE SUAS RÁDIOS</h3>
+                        <h3 class="sub-titulo-secao"><i class="fas fa-plus-circle"></i> 1. ADICIONE SUAS RADIOS</h3>
                         <div id="catalogo-radios" class="catalogo-list"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- CARD 2: SUAS RÁDIOS PREFERIDAS -->
+            <!-- CARD 2: SUAS RADIOS PREFERIDAS -->
             <div class="card-box" id="card-box-playlist">
-                <h3>GERENCIAR SUAS RÁDIOS PREFERIDAS</h3>
+                <h3>GERENCIAR SUAS RADIOS PREFERIDAS</h3>
                 <div class="radios-section-container">
                     <div>
                         <h3 class="sub-titulo-secao"><i class="fas fa-sort"></i> 2. ARRASTE PARA REORDENAR</h3>
@@ -1170,58 +1183,58 @@
                 </div>
             </div>
 
-            <!-- CARD 3: COLUNA DIREITA (ESPORTES + BOTÕES DE TABELAS + HORÓSCOPO + CHAT) -->
+            <!-- CARD 3: COLUNA DIREITA (ESPORTES + BOTOES DE TABELAS + HOROSCOPO + CHAT) -->
             <div class="coluna-direita" style="display: flex; flex-direction: column; gap: 14px;">
                 
-                <!-- QUADRO DE FUTEBOL E BOTÕES PARA CONFERIR TABELAS -->
+                <!-- QUADRO DE FUTEBOL E BOTOES PARA CONFERIR TABELAS -->
                 <div class="card-box" id="card-box-esportes" style="padding: 16px;">
                     <h3 style="margin-bottom: 10px; font-size: 13.5px;"><i class="fas fa-futbol" style="color: #22c55e;"></i> FUTEBOL: JOGOS & TABELAS</h3>
                     <div id="lista-jogos-esportes" class="esportes-container">
                         <p style="color:#666; font-size:11.5px; text-align:center; margin:10px 0;">Carregando jogos da semana...</p>
                     </div>
 
-                    <!-- BOTÕES CIRÚRGICOS PEDIDOS -->
+                    <!-- BOTOES CIRURGICOS PEDIDOS -->
                     <div class="botoes-tabelas-col">
                         <button class="btn-tabela-esporte" onclick="abrirModalTabela('brasileirao')">
-                            <span><i class="fas fa-table" style="color: #a855f7; margin-right: 6px;"></i> Confira a tabela e classificação</span>
+                            <span><i class="fas fa-table" style="color: #a855f7; margin-right: 6px;"></i> Confira a tabela e classificacao</span>
                             <i class="fas fa-chevron-right" style="font-size: 10px;"></i>
                         </button>
                         <button class="btn-tabela-esporte" onclick="abrirModalTabela('copadobrasil')">
-                            <span><i class="fas fa-trophy" style="color: #eab308; margin-right: 6px;"></i> Confira aqui a tabela e classificação da Copa do Brasil</span>
+                            <span><i class="fas fa-trophy" style="color: #eab308; margin-right: 6px;"></i> Confira aqui a tabela e classificacao da Copa do Brasil</span>
                             <i class="fas fa-chevron-right" style="font-size: 10px;"></i>
                         </button>
                     </div>
                 </div>
 
-                <!-- HORÓSCOPO DO DIA -->
+                <!-- HOROSCOPO DO DIA -->
                 <div class="card-box" id="card-box-horoscopo" style="padding: 16px;">
-                    <h3 style="margin-bottom: 10px; font-size: 13.5px;"><i class="fas fa-star-of-david" style="color: #c084fc;"></i> HORÓSCOPO DO DIA</h3>
+                    <h3 style="margin-bottom: 10px; font-size: 13.5px;"><i class="fas fa-star-of-david" style="color: #c084fc;"></i> HOROSCOPO DO DIA</h3>
                     <div class="signos-grid">
-                        <div class="signo-btn" onclick="carregarHoroscopo('aries', this)"><i class="fas fa-aries"></i><span>ÁRIES</span></div>
+                        <div class="signo-btn" onclick="carregarHoroscopo('aries', this)"><i class="fas fa-aries"></i><span>ARIES</span></div>
                         <div class="signo-btn" onclick="carregarHoroscopo('taurus', this)"><i class="fas fa-taurus"></i><span>TOURO</span></div>
-                        <div class="signo-btn" onclick="carregarHoroscopo('gemini', this)"><i class="fas fa-gemini"></i><span>GÊMEOS</span></div>
-                        <div class="signo-btn" onclick="carregarHoroscopo('cancer', this)"><i class="fas fa-cancer"></i><span>CÂNCER</span></div>
-                        <div class="signo-btn" onclick="carregarHoroscopo('leo', this)"><i class="fas fa-leo"></i><span>LEÃO</span></div>
+                        <div class="signo-btn" onclick="carregarHoroscopo('gemini', this)"><i class="fas fa-gemini"></i><span>GEMEOS</span></div>
+                        <div class="signo-btn" onclick="carregarHoroscopo('cancer', this)"><i class="fas fa-cancer"></i><span>CANCER</span></div>
+                        <div class="signo-btn" onclick="carregarHoroscopo('leo', this)"><i class="fas fa-leo"></i><span>LEAO</span></div>
                         <div class="signo-btn" onclick="carregarHoroscopo('virgo', this)"><i class="fas fa-virgo"></i><span>VIRGEM</span></div>
                         <div class="signo-btn" onclick="carregarHoroscopo('libra', this)"><i class="fas fa-libra"></i><span>LIBRA</span></div>
-                        <div class="signo-btn" onclick="carregarHoroscopo('scorpio', this)"><i class="fas fa-scorpio"></i><span>ESCORPIÃO</span></div>
-                        <div class="signo-btn" onclick="carregarHoroscopo('sagittarius', this)"><i class="fas fa-sagittarius"></i><span>SAGITÁRIO</span></div>
-                        <div class="signo-btn" onclick="carregarHoroscopo('capricorn', this)"><i class="fas fa-capricorn"></i><span>CAPRICÓRNIO</span></div>
-                        <div class="signo-btn" onclick="carregarHoroscopo('aquarius', this)"><i class="fas fa-aquarius"></i><span>AQUÁRIO</span></div>
+                        <div class="signo-btn" onclick="carregarHoroscopo('scorpio', this)"><i class="fas fa-scorpio"></i><span>ESCORPIAO</span></div>
+                        <div class="signo-btn" onclick="carregarHoroscopo('sagittarius', this)"><i class="fas fa-sagittarius"></i><span>SAGITARIO</span></div>
+                        <div class="signo-btn" onclick="carregarHoroscopo('capricorn', this)"><i class="fas fa-capricorn"></i><span>CAPRICORNIO</span></div>
+                        <div class="signo-btn" onclick="carregarHoroscopo('aquarius', this)"><i class="fas fa-aquarius"></i><span>AQUARIO</span></div>
                         <div class="signo-btn" onclick="carregarHoroscopo('pisces', this)"><i class="fas fa-pisces"></i><span>PEIXES</span></div>
                     </div>
                     <div class="horoscopo-display" id="horoscopo-texto">
-                        Clique em um signo acima para ver a previsão astral! ✨
+                        Clique em um signo acima para ver a previsao astral! ✨
                     </div>
                 </div>
 
                 <!-- CARD DE MENSAGENS -->
                 <div class="card-box" id="card-box-chat" style="padding: 16px;">
                     <div class="banner-destaque-adm">
-                        <i class="fas fa-paper-plane" style="margin-right: 4px;"></i> MANDE MENSAGEM PARA O ADM PARA PEDIR PARA ADICIONAR UMA RÁDIO QUE VOCÊ GOSTE
+                        <i class="fas fa-paper-plane" style="margin-right: 4px;"></i> MANDE MENSAGEM PARA O ADM PARA PEDIR PARA ADICIONAR UMA RADIO QUE VOCE GOSTE
                     </div>
 
-                    <textarea id="texto-mensagem" class="input-msg" rows="3" placeholder="Escreva seu recado ou pedido de rádio aqui... (Enter envia)" onkeydown="handleKeyDown(event)"></textarea>
+                    <textarea id="texto-mensagem" class="input-msg" rows="3" placeholder="Escreva seu recado ou pedido de radio aqui... (Enter envia)" onkeydown="handleKeyDown(event)"></textarea>
                     <button class="btn-enviar" onclick="enviarMensagem()"><i class="fas fa-paper-plane"></i> Enviar Mensagem</button>
 
                     <h3 style="margin-top: 12px; margin-bottom: 8px; text-align: left; font-size: 13px;"><i class="fas fa-comments"></i> SUAS MENSAGENS E RESPOSTAS</h3>
@@ -1234,27 +1247,27 @@
 
     </div>
 
-    <!-- MODAL DE EXIBIÇÃO DAS TABELAS COM SETAS DE VARIAÇÃO -->
+    <!-- MODAL DE EXIBICAO DAS TABELAS COM SETAS DE VARIACAO -->
     <div id="modal-tabela" class="modal-overlay" onclick="fecharModalFora(event)">
         <div class="modal-conteudo-box">
             <div class="modal-header-box">
-                <h3 id="modal-titulo-tabela"><i class="fas fa-trophy" style="color: #a855f7;"></i> Classificação</h3>
+                <h3 id="modal-titulo-tabela"><i class="fas fa-trophy" style="color: #a855f7;"></i> Classificacao</h3>
                 <button class="btn-fechar-modal" onclick="fecharModalTabela()"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body-tabela" id="modal-corpo-tabela">
-                <!-- Conteúdo injetado via JS -->
+                <!-- Conteudo injetado via JS -->
             </div>
         </div>
     </div>
 
-    <!-- PLAYER RODAPÉ -->
+    <!-- PLAYER RODAPE -->
     <div class="player-footer">
         <div class="player-info">
-            <div id="player-title">Nenhuma rádio selecionada</div>
+            <div id="player-title">Nenhuma radio selecionada</div>
         </div>
         
         <div class="player-controls">
-            <button class="btn-control-step" title="Rádio Anterior" onclick="mudarRadio(-1)">
+            <button class="btn-control-step" title="Radio Anterior" onclick="mudarRadio(-1)">
                 <i class="fas fa-step-backward"></i>
             </button>
             
@@ -1262,21 +1275,21 @@
                 <i class="fas fa-play"></i>
             </button>
             
-            <button class="btn-control-step" title="Próxima Rádio" onclick="mudarRadio(1)">
+            <button class="btn-control-step" title="Proxima Radio" onclick="mudarRadio(1)">
                 <i class="fas fa-step-forward"></i>
             </button>
         </div>
     </div>
 
-    <!-- LETREIRO DE NOTÍCIAS BRASIL -->
+    <!-- LETREIRO DE NOTICIAS BRASIL -->
     <div class="news-ticker-bar">
         <div class="news-ticker-badge">
-            <i class="fas fa-circle"></i> NOTÍCIAS DO BRASIL
+            <i class="fas fa-circle"></i> NOTICIAS DO BRASIL
         </div>
         <div class="news-ticker-wrapper">
             <div class="news-ticker-content" id="ticker-noticias-container">
                 <div class="news-block-repeat">
-                    <span class="news-item-link">Carregando últimas manchetes do Brasil...</span>
+                    <span class="news-item-link">Carregando ultimas manchetes do Brasil...</span>
                 </div>
             </div>
         </div>
@@ -1300,18 +1313,20 @@
             localStorage.setItem('userId', ouvinteId);
         }
         
-        let ouvinteNomeBruto = localStorage.getItem('usuarioNome') || localStorage.getItem('usuarioEmail') || 'Ouvinte Anônimo';
+        let ouvinteNomeBruto = localStorage.getItem('usuarioNome') || localStorage.getItem('usuarioEmail') || 'Ouvinte Anonimo';
         if (ouvinteNomeBruto.includes('@')) {
             ouvinteNomeBruto = ouvinteNomeBruto.split('@')[0];
         }
         let ouvinteNome = ouvinteNomeBruto.trim().split(' ')[0];
 
-        document.getElementById('nome-ouvinte-display').innerText = "OLÁ, " + ouvinteNome.toUpperCase();
+        document.getElementById('nome-ouvinte-display').innerText = "OLA, " + ouvinteNome.toUpperCase();
 
-        // SISTEMA DE LUDGINS, TEMPO ONLINE E LOJA VIRTUAL
+        // SISTEMA DE LUDGINS, TEMPO ONLINE (COM PLAY/PAUSE) E LOJA VIRTUAL
         let segundosConectados = 0;
         let meusLudgins = parseInt(localStorage.getItem('ludgins_ouvinte_' + ouvinteId)) || 0;
-        let patenteAtual = localStorage.getItem('patente_ouvinte_' + ouvinteId) || '🥉 Bronze';
+        let patenteAtual = localStorage.getItem('patente_ouvinte_' + ouvinteId) || 'Bronze';
+        let timerOnlineInterval = null;
+        let isRadioTocando = false;
 
         // Desbloqueios salvos no localStorage
         let desbloqueios = JSON.parse(localStorage.getItem('desbloqueios_ouvinte_' + ouvinteId)) || {
@@ -1328,7 +1343,6 @@
             aplicarTravaBloqueios();
         }
 
-        // Formata os segundos em HH:MM:SS para o cronômetro do topo
         function formatarTempoOnline(segundos) {
             const h = Math.floor(segundos / 3600).toString().padStart(2, '0');
             const m = Math.floor((segundos % 3600) / 60).toString().padStart(2, '0');
@@ -1336,37 +1350,60 @@
             return `${h}:${m}:${s}`;
         }
 
-        // Cronômetro principal de ganho de Ludgins por tempo online e atualização visual
-        setInterval(() => {
-            segundosConectados++;
-            document.getElementById('cronometro-online').innerText = formatarTempoOnline(segundosConectados);
+        // FUNCAO DO CRONOMETRO QUE SÓ CONTAGILIZA COM PLAY ATIVO
+        function iniciarCronometroOnline() {
+            if (timerOnlineInterval) return;
+            timerOnlineInterval = setInterval(() => {
+                if (!isRadioTocando) return; // Se pausado, trava o cronometro
 
-            // A cada 10 minutos (600 segundos), ganha +1 Ludgin
-            if (segundosConectados % 600 === 0) {
-                meusLudgins += 1;
-                salvarProgressoLudgins();
-            }
+                segundosConectados++;
+                document.getElementById('cronometro-online').innerText = formatarTempoOnline(segundosConectados);
 
-            // A cada 30 minutos (1800 segundos), ganha +3 Ludgins extras e confete
-            if (segundosConectados % 1800 === 0) {
-                meusLudgins += 3;
-                salvarProgressoLudgins();
-                if (typeof confetti === 'function') {
-                    confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+                const alertaBox = document.getElementById('alerta-cronometro');
+
+                // Mensagem de 5 minutos para o primeiro ludgin (300 segundos)
+                if (segundosConectados === 300) {
+                    alertaBox.style.display = 'inline-block';
+                    alertaBox.innerText = "Ei ligadao, mais 5 minutos ouvindo voce fatura seu primeiro ludgins";
+                } 
+                // Mensagem para dobrar (Exemplo aos 570 segundos / 9 min e 30s ou marco desejado)
+                else if (segundosConectados === 570) {
+                    alertaBox.style.display = 'inline-block';
+                    alertaBox.innerText = "Ei ligadao, mais 3 minutos vc pode dobrar seus ludigins";
+                } 
+                // Ocultar apos alguns segundos para nao poluir
+                else if (segundosConectados === 360 || segundosConectados === 630) {
+                    alertaBox.style.display = 'none';
                 }
-            }
 
-            verificarPatentePorTempo();
-        }, 1000);
+                // A cada 10 minutos (600 segundos), ganha +1 Ludgin
+                if (segundosConectados % 600 === 0) {
+                    meusLudgins += 1;
+                    salvarProgressoLudgins();
+                }
+
+                // A cada 30 minutos (1800 segundos), ganha +3 Ludgins extras e confete
+                if (segundosConectados % 1800 === 0) {
+                    meusLudgins += 3;
+                    salvarProgressoLudgins();
+                    if (typeof confetti === 'function') {
+                        confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+                    }
+                }
+
+                verificarPatentePorTempo();
+            }, 1000);
+        }
+        iniciarCronometroOnline();
 
         function verificarPatentePorTempo() {
             let novaPatente = patenteAtual;
-            if (meusLudgins >= 100) novaPatente = '👑 Carretel de Joias';
-            else if (meusLudgins >= 75) novaPatente = '🔴 Rubi';
-            else if (meusLudgins >= 50) novaPatente = '💎 Diamante';
-            else if (meusLudgins >= 30) novaPatente = '🥇 Ouro';
-            else if (meusLudgins >= 15) novaPatente = '🥈 Prata';
-            else novaPatente = '🥉 Bronze';
+            if (meusLudgins >= 100) novaPatente = 'Carretel de Joias';
+            else if (meusLudgins >= 75) novaPatente = 'Rubi';
+            else if (meusLudgins >= 50) novaPatente = 'Diamante';
+            else if (meusLudgins >= 30) novaPatente = 'Ouro';
+            else if (meusLudgins >= 15) novaPatente = 'Prata';
+            else novaPatente = 'Bronze';
 
             if (novaPatente !== patenteAtual) {
                 patenteAtual = novaPatente;
@@ -1394,15 +1431,15 @@
         }
         sincronizarFirebaseOuvinteOnline();
 
-        // RENDERIZAÇÃO DA LOJA VIRTUAL
+        // RENDERIZACAO DA LOJA VIRTUAL
         function renderizarLojaVirtual() {
             const container = document.getElementById('container-loja-itens');
             
             const itensLoja = [
-                { id: 'chat', nome: '💬 Desbloquear Chat de Pedidos de Rádios', custo: 10, adquirido: desbloqueios.chat },
-                { id: 'cores', nome: '🎨 Desbloquear Cores Personalizadas nos Cards', custo: 20, adquirido: desbloqueios.cores },
-                { id: 'horoscopo', nome: '✨ Desbloquear Horóscopo do Dia', custo: 30, adquirido: desbloqueios.horoscopo },
-                { id: 'esportes', nome: '⚽ Desbloquear Seção de Esportes e Jogos', custo: 50, adquirido: desbloqueios.esportes }
+                { id: 'chat', nome: 'Desbloquear Chat de Pedidos de Radios', custo: 10, adquirido: desbloqueios.chat },
+                { id: 'cores', nome: 'Desbloquear Cores Personalizadas nos Cards', custo: 20, adquirido: desbloqueios.cores },
+                { id: 'horoscopo', nome: 'Desbloquear Horoscopo do Dia', custo: 30, adquirido: desbloqueios.horoscopo },
+                { id: 'esportes', nome: 'Desbloquear Secao de Esportes e Jogos', custo: 50, adquirido: desbloqueios.esportes }
             ];
 
             let html = "";
@@ -1428,7 +1465,7 @@
 
         function comprarItemLoja(idItem, custo) {
             if (meusLudgins < custo) {
-                alert(`💎 Ludgins insuficientes! Você tem ${meusLudgins} Ludgins e precisa de ${custo} Ludgins para desbloquear.`);
+                alert(`Ludgins insuficientes! Voce tem ${meusLudgins} Ludgins e precisa de ${custo} Ludgins para desbloquear.`);
                 return;
             }
 
@@ -1442,22 +1479,19 @@
                 if (typeof confetti === 'function') {
                     confetti({ particleCount: 120, spread: 70 });
                 }
-                alert("🎉 Recurso desbloqueado com sucesso!");
+                alert("Recurso desbloqueado com sucesso!");
             }
         }
 
         function aplicarTravaBloqueios() {
-            // Trava Chat (10 Ludgins)
             const cardChat = document.getElementById('card-box-chat');
-            gerenciarOverlay(cardChat, desbloqueios.chat, '💬 Chat de Pedidos', 10);
+            gerenciarOverlay(cardChat, desbloqueios.chat, 'Chat de Pedidos', 10);
 
-            // Trava Horóscopo (30 Ludgins)
             const cardHoroscopo = document.getElementById('card-box-horoscopo');
-            gerenciarOverlay(cardHoroscopo, desbloqueios.horoscopo, '✨ Horóscopo do Dia', 30);
+            gerenciarOverlay(cardHoroscopo, desbloqueios.horoscopo, 'Horoscopo do Dia', 30);
 
-            // Trava Esportes (50 Ludgins)
             const cardEsportes = document.getElementById('card-box-esportes');
-            gerenciarOverlay(cardEsportes, desbloqueios.esportes, '⚽ Futebol & Esportes', 50);
+            gerenciarOverlay(cardEsportes, desbloqueios.esportes, 'Futebol & Esportes', 50);
         }
 
         function gerenciarOverlay(elementoCard, statusDesbloqueado, nomeRecurso, custoReq) {
@@ -1496,9 +1530,9 @@
         const cidadesClima = [
             { nome: 'Cascavel', lat: -24.9578, lon: -53.4595 },
             { nome: 'Curitiba', lat: -25.4284, lon: -49.2733 },
-            { nome: 'São Paulo', lat: -23.5505, lon: -46.6333 },
+            { nome: 'Sao Paulo', lat: -23.5505, lon: -46.6333 },
             { nome: 'Rio de Janeiro', lat: -22.9068, lon: -43.1729 },
-            { nome: 'Florianópolis', lat: -27.5954, lon: -48.5480 },
+            { nome: 'Florianopolis', lat: -27.5954, lon: -48.5480 },
             { nome: 'Salvador', lat: -12.9777, lon: -38.5016 }
         ];
         let indiceClima = 0;
@@ -1529,7 +1563,7 @@
                     document.getElementById('clima-cidade').innerText = `${cidade.nome}: ${temp}°C`;
                 }
             } catch (e) {
-                document.getElementById('clima-cidade').innerText = "Indisponível";
+                document.getElementById('clima-cidade').innerText = "Indisponivel";
             }
             indiceClima = (indiceClima + 1) % cidadesClima.length;
         }
@@ -1537,39 +1571,39 @@
         atualizarCarrosselClima();
         setInterval(atualizarCarrosselClima, 6000);
 
-        // JOGOS DA SEMANA COM CAMPEONATO CENTRALIZADO ACIMA DOS TIMES
+        // JOGOS DA SEMANA
         function carregarJogosBrasileiraoSemana() {
             const containerEsportes = document.getElementById('lista-jogos-esportes');
             
             const jogosBrasileirao = [
                 { 
-                    campeonato: "Brasileirão Série A",
-                    timeA: "Grêmio", timeB: "São Paulo", data: "Sáb, 08/08", hora: "16:00", 
+                    campeonato: "Brasileirao Serie A",
+                    timeA: "Gremio", timeB: "Sao Paulo", data: "Sab, 08/08", hora: "16:00", 
                     timestamp: new Date(2026, 7, 8, 16, 0).getTime(),
                     golsA: 1, golsB: 1,
                     artilheiros: [
-                        { min: "24'", autor: "Luis Suárez (Grêmio)" },
-                        { min: "68'", autor: "Calleri (São Paulo)" }
+                        { min: "24'", autor: "Luis Suarez (Gremio)" },
+                        { min: "68'", autor: "Calleri (Sao Paulo)" }
                     ]
                 },
                 { 
                     campeonato: "Copa do Brasil",
-                    timeA: "Remo", timeB: "Atlético-MG", data: "Sáb, 08/08", hora: "18:30", 
+                    timeA: "Remo", timeB: "Atletico-MG", data: "Sab, 08/08", hora: "18:30", 
                     timestamp: new Date(2026, 7, 8, 18, 30).getTime(),
                     golsA: 0, golsB: 2,
                     artilheiros: [
-                        { min: "12'", autor: "Hulk (Atlético-MG)" },
-                        { min: "81'", autor: "Paulinho (Atlético-MG)" }
+                        { min: "12'", autor: "Hulk (Atletico-MG)" },
+                        { min: "81'", autor: "Paulinho (Atletico-MG)" }
                     ]
                 },
-                { campeonato: "Brasileirão Série A", timeA: "Coritiba", timeB: "Chapecoense", data: "Sáb, 08/08", hora: "20:30", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 8, 20, 30).getTime() },
-                { campeonato: "Brasileirão Série A", timeA: "Botafogo", timeB: "Fluminense", data: "Sáb, 08/08", hora: "21:00", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 8, 21, 0).getTime() },
-                { campeonato: "Brasileirão Série A", timeA: "Cruzeiro", timeB: "Mirassol", data: "Dom, 09/08", hora: "11:00", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 11, 0).getTime() },
-                { campeonato: "Brasileirão Série A", timeA: "Bahia", timeB: "Vasco", data: "Dom, 09/08", hora: "16:00", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 16, 0).getTime() },
+                { campeonato: "Brasileirao Serie A", timeA: "Coritiba", timeB: "Chapecoense", data: "Sab, 08/08", hora: "20:30", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 8, 20, 30).getTime() },
+                { campeonato: "Brasileirao Serie A", timeA: "Botafogo", timeB: "Fluminense", data: "Sab, 08/08", hora: "21:00", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 8, 21, 0).getTime() },
+                { campeonato: "Brasileirao Serie A", timeA: "Cruzeiro", timeB: "Mirassol", data: "Dom, 09/08", hora: "11:00", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 11, 0).getTime() },
+                { campeonato: "Brasileirao Serie A", timeA: "Bahia", timeB: "Vasco", data: "Dom, 09/08", hora: "16:00", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 16, 0).getTime() },
                 { campeonato: "Copa do Brasil", timeA: "Palmeiras", timeB: "Internacional", data: "Dom, 09/08", hora: "16:00", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 16, 0).getTime() },
-                { campeonato: "Brasileirão Série A", timeA: "Santos", timeB: "Athletico-PR", data: "Dom, 09/08", hora: "18:30", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 18, 30).getTime() },
-                { campeonato: "Brasileirão Série A", timeA: "Red Bull Bragantino", timeB: "Corinthians", data: "Dom, 09/08", hora: "18:30", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 18, 30).getTime() },
-                { campeonato: "Brasileirão Série A", timeA: "Flamengo", timeB: "Vitória", data: "Dom, 09/08", hora: "19:30", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 19, 30).getTime() }
+                { campeonato: "Brasileirao Serie A", timeA: "Santos", timeB: "Athletico-PR", data: "Dom, 09/08", hora: "18:30", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 18, 30).getTime() },
+                { campeonato: "Brasileirao Serie A", timeA: "Red Bull Bragantino", timeB: "Corinthians", data: "Dom, 09/08", hora: "18:30", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 18, 30).getTime() },
+                { campeonato: "Brasileirao Serie A", timeA: "Flamengo", timeB: "Vitoria", data: "Dom, 09/08", hora: "19:30", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 19, 30).getTime() }
             ];
 
             const agoraTime = new Date().getTime();
@@ -1613,7 +1647,7 @@
                         </div>
                         <div class="jogo-header-info">
                             <span><i class="far fa-calendar-alt"></i> ${j.data}</span>
-                            ${aoVivo ? '<span class="live-tag-badge"><i class="fas fa-circle"></i> AO VIVO ' + tempoExibicao + '</span>' : '<span>' + (status === 'AGENDADO' ? 'Às ' + j.hora : 'Encerrado') + '</span>'}
+                            ${aoVivo ? '<span class="live-tag-badge"><i class="fas fa-circle"></i> AO VIVO ' + tempoExibicao + '</span>' : '<span>' + (status === 'AGENDADO' ? 'As ' + j.hora : 'Encerrado') + '</span>'}
                         </div>
                         <div class="jogo-placares-row">
                             <span class="time-nome-box home" title="${j.timeA}">${j.timeA}</span>
@@ -1631,7 +1665,7 @@
         carregarJogosBrasileiraoSemana();
         setInterval(carregarJogosBrasileiraoSemana, 30000);
 
-        // DADOS REAIS DA CLASSIFICAÇÃO COM VARIAÇÃO DE POSIÇÕES (SETAS)
+        // DADOS DA CLASSIFICACAO
         const tabelaBrasileiraoDados = [
             { pos: 1, var: 0, time: "Palmeiras", pts: 47, j: 21, v: 14, sg: 22 },
             { pos: 2, var: 0, time: "Flamengo", pts: 39, j: 20, v: 11, sg: 19 },
@@ -1642,14 +1676,14 @@
             { pos: 7, var: 2, time: "Cruzeiro", pts: 30, j: 21, v: 8, sg: -3 },
             { pos: 8, var: -1, time: "Botafogo", pts: 29, j: 20, v: 8, sg: 2 },
             { pos: 9, var: 0, time: "Corinthians", pts: 29, j: 21, v: 7, sg: 2 },
-            { pos: 10, var: 2, time: "Atlético-MG", pts: 28, j: 20, v: 8, sg: 0 },
+            { pos: 10, var: 2, time: "Atletico-MG", pts: 28, j: 20, v: 8, sg: 0 },
             { pos: 11, var: -1, time: "Coritiba", pts: 27, j: 21, v: 7, sg: -3 },
-            { pos: 12, var: 0, time: "São Paulo", pts: 26, j: 20, v: 7, sg: 2 },
-            { pos: 13, var: 0, time: "Vitória", pts: 26, j: 21, v: 7, sg: -9 },
+            { pos: 12, var: 0, time: "Sao Paulo", pts: 26, j: 20, v: 7, sg: 2 },
+            { pos: 13, var: 0, time: "Vitoria", pts: 26, j: 21, v: 7, sg: -9 },
             { pos: 14, var: 2, time: "Mirassol", pts: 23, j: 20, v: 6, sg: -4 },
             { pos: 15, var: 0, time: "Santos", pts: 22, j: 20, v: 5, sg: -4 },
             { pos: 16, var: 0, time: "Internacional", pts: 22, j: 21, v: 5, sg: -4 },
-            { pos: 17, var: -1, time: "Grêmio", pts: 22, j: 20, v: 5, sg: -4 },
+            { pos: 17, var: -1, time: "Gremio", pts: 22, j: 20, v: 5, sg: -4 },
             { pos: 18, var: 1, time: "Vasco da Gama", pts: 21, j: 20, v: 5, sg: -8 },
             { pos: 19, var: -1, time: "Remo", pts: 21, j: 21, v: 5, sg: -10 },
             { pos: 20, var: 0, time: "Chapecoense", pts: 10, j: 20, v: 1, sg: -22 }
@@ -1658,10 +1692,10 @@
         const tabelaCopaDoBrasilDados = [
             { pos: "Quartas", var: 0, time: "Palmeiras", fase: "Classificado" },
             { pos: "Quartas", var: 0, time: "Flamengo", fase: "Classificado" },
-            { pos: "Quartas", var: 0, time: "São Paulo", fase: "Classificado" },
+            { pos: "Quartas", var: 0, time: "Sao Paulo", fase: "Classificado" },
             { pos: "Quartas", var: 0, time: "Corinthians", fase: "Classificado" },
-            { pos: "Quartas", var: 0, time: "Grêmio", fase: "Classificado" },
-            { pos: "Quartas", var: 0, time: "Atlético-MG", fase: "Classificado" },
+            { pos: "Quartas", var: 0, time: "Gremio", fase: "Classificado" },
+            { pos: "Quartas", var: 0, time: "Atletico-MG", fase: "Classificado" },
             { pos: "Quartas", var: 0, time: "Cruzeiro", fase: "Classificado" },
             { pos: "Quartas", var: 0, time: "Athletico-PR", fase: "Classificado" }
         ];
@@ -1672,7 +1706,7 @@
             const corpo = document.getElementById('modal-corpo-tabela');
 
             if (tipo === 'brasileirao') {
-                titulo.innerHTML = `<i class="fas fa-trophy" style="color: #a855f7;"></i> Tabela e Classificação - Brasileirão Série A`;
+                titulo.innerHTML = `<i class="fas fa-trophy" style="color: #a855f7;"></i> Tabela e Classificacao - Brasileirao Serie A`;
                 
                 let html = `
                     <table class="tabela-classificacao-full">
@@ -1713,7 +1747,7 @@
                 corpo.innerHTML = html;
 
             } else {
-                titulo.innerHTML = `<i class="fas fa-award" style="color: #eab308;"></i> Classificação - Copa do Brasil (Quartas de Final)`;
+                titulo.innerHTML = `<i class="fas fa-award" style="color: #eab308;"></i> Classificacao - Copa do Brasil (Quartas de Final)`;
                 
                 let html = `
                     <table class="tabela-classificacao-full">
@@ -1754,67 +1788,31 @@
             }
         }
 
-        // HORÓSCOPO DO DIA DINÂMICO
+        // HOROSCOPO DO DIA
         const nomesSignos = {
-            aries: 'Áries', taurus: 'Touro', gemini: 'Gêmeos', cancer: 'Câncer',
-            leo: 'Leão', virgo: 'Virgem', libra: 'Libra', scorpio: 'Escorpião',
-            sagittarius: 'Sagitário', capricorn: 'Capricórnio', aquarius: 'Aquário', pisces: 'Peixes'
+            aries: 'Aries', taurus: 'Touro', gemini: 'Gemeos', cancer: 'Cancer',
+            leo: 'Leao', virgo: 'Virgem', libra: 'Libra', scorpio: 'Escorpiao',
+            sagittarius: 'Sagitario', capricorn: 'Capricornio', aquarius: 'Aquario', pisces: 'Peixes'
         };
 
         const baseHoroscopoDinamico = {
-            aries: [
-                "Dia de energia renovada. Bom momento para tomar iniciativas e focar nos seus objetivos pessoais.",
-                "Sua ousadia trará novas oportunidades profissionais hoje. Não hesite em dar o primeiro passo."
-            ],
-            taurus: [
-                "Estabilidade em alta. Mantenha os pés no chão e aproveite momentos de tranquilidade e conforto.",
-                "Foco total nas finanças e investimentos. O dia favorece a organização material."
-            ],
-            gemini: [
-                "Comunicação afiada hoje! Ótima oportunidade para trocar ideias e fazer novos contatos.",
-                "Sua curiosidade natural está em alta. Aproveite para estudar algo novo."
-            ],
-            cancer: [
-                "Intuição aguçada. Volte a atenção para a família e para o que traz segurança emocional.",
-                "Momento propício para curar velhas feridas e fortalecer laços afetivos."
-            ],
-            leo: [
-                "Seu brilho pessoal está destacado. Confie no seu potencial para liderar e inspirar os outros.",
-                "O reconhecimento que você tanto esperava no trabalho pode chegar hoje."
-            ],
-            virgo: [
-                "Organização e foco nos detalhes trarão excelentes resultados nas suas tarefas diárias.",
-                "Sua saúde pede um pouco mais de atenção; priorize o bem-estar."
-            ],
-            libra: [
-                "Busque o equilíbrio em suas relações. Um dia favorável para harmonia e acordos amigáveis.",
-                "Sua diplomacia abrirá portas importantes em parcerias."
-            ],
-            scorpio: [
-                "Momento de transformação e foco profundo. Sua determinação vai te ajudar a superar desafios.",
-                "Segredos podem vir à tona, revelando verdades importantes."
-            ],
-            sagittarius: [
-                "Espírito otimista e busca por novidades. Excelente dia para aprender algo novo.",
-                "Sua alegria contagiante atrai pessoas benéficas para o seu círculo."
-            ],
-            capricorn: [
-                "Foco no trabalho e nas metas de longo prazo. Sua disciplina trará bons frutos.",
-                "Recompensa financeira ou profissional à vista."
-            ],
-            aquarius: [
-                "Ideias inovadoras em alta. Esteja aberto para colaborar com amigos e pensar no futuro.",
-                "Sua originalidade se destaca em reuniões e debates."
-            ],
-            pisces: [
-                "Sensibilidade e criatividade elevadas. Confie nos seus sentimentos para tomar decisões.",
-                "Momento mágico para a arte, a música e a conexão espiritual."
-            ]
+            aries: ["Dia de energia renovada. Bom momento para tomar iniciativas e focar nos seus objetivos pessoais."],
+            taurus: ["Estabilidade em alta. Mantenha os pes no chão e aproveite momentos de tranquilidade e conforto."],
+            gemini: ["Comunicacao afiada hoje! Otima oportunidade para trocar ideias e fazer novos contatos."],
+            cancer: ["Intuicao aguçada. Volte a atencao para a familia e para o que traz seguranca emocional."],
+            leo: ["Seu brilho pessoal esta destacado. Confie no seu potencial para liderar e inspirar os outros."],
+            virgo: ["Organizacao e foco nos detalhes trarao excelentes resultados nas suas tarefas diarias."],
+            libra: ["Busque o equilibrio em suas relacoes. Um dia favoravel para harmonia e acordos amigaveis."],
+            scorpio: ["Momento de transformacao e foco profundo. Sua determinacao vai te ajudar a superar desafios."],
+            sagittarius: ["Espirito otimista e busca por novidades. Excelente dia para aprender algo novo."],
+            capricorn: ["Foco no trabalho e nas metas de longo prazo. Sua disciplina trara bons frutos."],
+            aquarius: ["Ideias inovadoras em alta. Esteja aberto para colaborar com amigos e pensar no futuro."],
+            pisces: ["Sensibilidade e criatividade elevadas. Confie nos seus sentimentos para tomar decisoes."]
         };
 
         async function carregarHoroscopo(signo, el) {
             if (!desbloqueios.horoscopo) {
-                alert("🔒 Horóscopo bloqueado! Adquira o recurso na sua Loja Virtual acima.");
+                alert("Horoscopo bloqueado! Adquira o recurso na sua Loja Virtual acima.");
                 return;
             }
 
@@ -1839,7 +1837,7 @@
             }, 300);
         }
 
-        // NOTÍCIAS BRASIL
+        // NOTICIAS BRASIL
         async function carregarNoticiasBrasil() {
             try {
                 const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fg1.globo.com%2Fdynamo%2Frss2.xml');
@@ -1866,7 +1864,7 @@
             } catch (err) {
                 const htmlFallback = `
                     <div class="news-block-repeat">
-                        <span class="news-item-link"><span class="news-item-divider"><i class="fas fa-diamond"></i></span> Notícias do Brasil atualizadas diariamente no portal G1.</span>
+                        <span class="news-item-link"><span class="news-item-divider"><i class="fas fa-diamond"></i></span> Noticias do Brasil atualizadas diariamente no portal G1.</span>
                     </div>
                 `;
                 document.getElementById('ticker-noticias-container').innerHTML = htmlFallback + htmlFallback;
@@ -1924,7 +1922,7 @@
             container.innerHTML = "";
 
             if (todasRadios.length === 0) {
-                container.innerHTML = "<p style='color:#666; font-size:12px;'>Nenhuma rádio cadastrada.</p>";
+                container.innerHTML = "<p style='color:#666; font-size:12px;'>Nenhuma radio cadastrada.</p>";
                 return;
             }
 
@@ -1949,12 +1947,12 @@
                 .filter(Boolean);
 
             if (radiosPlaylist.length === 0) {
-                container.innerHTML = "<p style='color:#666; font-size:12px; grid-column: 1/-1; text-align:center; padding: 20px;'>Clique em '+' para adicionar rádios!</p>";
+                container.innerHTML = "<p style='color:#666; font-size:12px; grid-column: 1/-1; text-align:center; padding: 20px;'>Clique em '+' para adicionar radios!</p>";
                 return;
             }
 
             radiosPlaylist.forEach((r) => {
-                const isPlaying = (radioTocandoKey === r.key);
+                const isPlaying = (radioTocandoKey === r.key && isRadioTocando);
                 const cardColor = r.color || '#9333ea';
 
                 let clickAcao = `tocarRadioPorKey('${r.key}')`;
@@ -1980,10 +1978,10 @@
 
         function abrirSeletorCorCard(key) {
             if (!desbloqueios.cores) return;
-            let novaCor = prompt("Digite o código da cor desejada (ex: #ff007f, #00ffff, #3b82f6) ou nome em inglês:", "#9333ea");
+            let novaCor = prompt("Digite o codigo da cor desejada (ex: #ff007f, #00ffff, #3b82f6) ou nome em ingles:", "#9333ea");
             if (novaCor) {
                 db.ref('ouvintes_preferencias/' + ouvinteId + '/cores_cards/' + key).set(novaCor);
-                alert("🎨 Cor do card atualizada!");
+                alert("Cor do card atualizada!");
                 renderizarPlaylistDireita();
             }
         }
@@ -2019,15 +2017,17 @@
             const radio = todasRadios.find(r => r.key === key);
             if (!radio) return;
 
-            if (radioTocandoKey === key) {
+            if (radioTocandoKey === key && isRadioTocando) {
                 togglePlay();
             } else {
                 radioTocandoKey = key;
                 player.src = radio.url;
-                player.play().catch(() => {});
+                player.play().then(() => {
+                    isRadioTocando = true;
+                    document.getElementById('btn-play').innerHTML = '<i class="fas fa-pause"></i>';
+                    renderizarPlaylistDireita();
+                }).catch(() => {});
                 document.getElementById('player-title').innerText = radio.name;
-                document.getElementById('btn-play').innerHTML = '<i class="fas fa-pause"></i>';
-                renderizarPlaylistDireita();
             }
         }
 
@@ -2050,13 +2050,31 @@
         function togglePlay() {
             if (!player.src) return;
             if (player.paused) {
-                player.play();
-                document.getElementById('btn-play').innerHTML = '<i class="fas fa-pause"></i>';
+                player.play().then(() => {
+                    isRadioTocando = true;
+                    document.getElementById('btn-play').innerHTML = '<i class="fas fa-pause"></i>';
+                    renderizarPlaylistDireita();
+                }).catch(() => {});
             } else {
                 player.pause();
+                isRadioTocando = false;
                 document.getElementById('btn-play').innerHTML = '<i class="fas fa-play"></i>';
+                renderizarPlaylistDireita();
             }
         }
+
+        // Eventos nativos do player para capturar play/pause com precisao
+        player.addEventListener('play', () => {
+            isRadioTocando = true;
+            document.getElementById('btn-play').innerHTML = '<i class="fas fa-pause"></i>';
+            renderizarPlaylistDireita();
+        });
+
+        player.addEventListener('pause', () => {
+            isRadioTocando = false;
+            document.getElementById('btn-play').innerHTML = '<i class="fas fa-play"></i>';
+            renderizarPlaylistDireita();
+        });
 
         function handleKeyDown(event) {
             if (event.key === 'Enter' && !event.shiftKey) {
@@ -2067,7 +2085,7 @@
 
         function enviarMensagem() {
             if (!desbloqueios.chat) {
-                alert("🔒 O Chat de Pedidos está bloqueado! Adquira o acesso na Loja Virtual por 10 Ludgins.");
+                alert("O Chat de Pedidos esta bloqueado! Adquira o acesso na Loja Virtual por 10 Ludgins.");
                 return;
             }
 
@@ -2142,7 +2160,7 @@
                             container.innerHTML += `
                                 <div class="chat-bubble-ouvinte">
                                     <div class="chat-sender-header">
-                                        <span class="chat-sender-name ouvinte">Você (${patenteAtual})</span>
+                                        <span class="chat-sender-name ouvinte">Voce (${patenteAtual})</span>
                                         <button class="btn-delete-chat" title="Apagar" onclick="deletarMensagem('${item.id}')">
                                             <i class="fas fa-trash-alt"></i>
                                         </button>
