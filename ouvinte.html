@@ -1541,32 +1541,11 @@
         document.getElementById('nome-ouvinte-display').innerText = "OLA, " + ouvinteNome.toUpperCase();
 
         let segundosConectados = 0;
-        let meusLudgins = 0;
-        let patenteAtual = 'Bronze';
+        let meusLudgins = parseInt(localStorage.getItem('ludgins_ouvinte_' + ouvinteId)) || 0;
+        let patenteAtual = localStorage.getItem('patente_ouvinte_' + ouvinteId) || 'Bronze';
         let timerOnlineInterval = null;
         let isRadioTocando = false;
         let cardSendoEditadoKey = null;
-
-        let desbloqueios = {
-            chat: false,
-            cores: false,
-            horoscopo: false,
-            esportes: false
-        };
-
-        let customizacoesCards = {};
-
-        // Sincronização e carregamento inicial do Firebase para o Ouvinte
-        db.ref('ouvintes_preferencias/' + ouvinteId).on('value', snap => {
-            if (snap.exists()) {
-                const dados = snap.val();
-                if (dados.ludgins !== undefined) meusLudgins = parseInt(dados.ludgins) || 0;
-                if (dados.patente !== undefined) patenteAtual = dados.patente;
-                if (dados.desbloqueios) desbloqueios = dados.desbloqueios;
-                if (dados.customizacoes_cards) customizacoesCards = dados.customizacoes_cards;
-            }
-            atualizarInterfaceLudginsEPatente();
-        });
 
         function tocarSomSuaveSucesso() {
             try {
@@ -1585,12 +1564,21 @@
             } catch(e) {}
         }
 
+        let desbloqueios = JSON.parse(localStorage.getItem('desbloqueios_ouvinte_' + ouvinteId)) || {
+            chat: false,
+            cores: false,
+            horoscopo: false,
+            esportes: false
+        };
+
+        let customizacoesCards = JSON.parse(localStorage.getItem('customizacoes_cards_' + ouvinteId)) || {};
+
         function atualizarInterfaceLudginsEPatente() {
             document.getElementById('contador-ludgins').innerText = meusLudgins;
             document.getElementById('patente-ouvinte-badge').innerText = patenteAtual;
             renderizarLojaVirtual();
             aplicarTravaBloqueios();
-            renderizarPlaylistDireita();
+            renderizarPlaylistDireita(); // Atualiza os ícones de pincel (com ou sem risco vermelho)
         }
 
         function formatarTempoOnline(segundos) {
@@ -1684,20 +1672,13 @@
         }
 
         function salvarProgressoLudgins() {
+            localStorage.setItem('ludgins_ouvinte_' + ouvinteId, meusLudgins);
+            localStorage.setItem('patente_ouvinte_' + ouvinteId, patenteAtual);
             atualizarInterfaceLudginsEPatente();
             sincronizarFirebaseOuvinteOnline();
         }
 
         function sincronizarFirebaseOuvinteOnline() {
-            db.ref('ouvintes_preferencias/' + ouvinteId).update({
-                ouvinte: ouvinteNome,
-                ludgins: meusLudgins,
-                patente: patenteAtual,
-                desbloqueios: desbloqueios,
-                customizacoes_cards: customizacoesCards,
-                ultimaAtualizacao: firebase.database.ServerValue.TIMESTAMP
-            });
-
             db.ref('ouvintes_online/' + ouvinteId).update({
                 nome: ouvinteNome,
                 ludgins: meusLudgins,
@@ -1709,25 +1690,22 @@
 
         function resgatarBonusLudginsCentral() {
             const hoje = new Date().toDateString();
-            
-            db.ref('ouvintes_preferencias/' + ouvinteId + '/ultimo_resgate_bonus').once('value', snap => {
-                const ultimoResgate = snap.val();
+            const ultimoResgate = localStorage.getItem('ultimo_resgate_bonus_' + ouvinteId);
 
-                if (ultimoResgate === hoje) {
-                    alert("Você já resgatou seu bônus de ludgins de hoje! Volte amanhã.");
-                    return;
-                }
+            if (ultimoResgate === hoje) {
+                alert("Você já resgatou seu bônus de ludgins de hoje! Volte amanhã.");
+                return;
+            }
 
-                meusLudgins += 3;
-                db.ref('ouvintes_preferencias/' + ouvinteId + '/ultimo_resgate_bonus').set(hoje);
-                salvarProgressoLudgins();
-                tocarSomSuaveSucesso();
+            meusLudgins += 3;
+            localStorage.setItem('ultimo_resgate_bonus_' + ouvinteId, hoje);
+            salvarProgressoLudgins();
+            tocarSomSuaveSucesso();
 
-                if (typeof confetti === 'function') {
-                    confetti({ particleCount: 250, spread: 100, origin: { y: 0.6 } });
-                }
-                alert("Parabéns! Você resgatou +3 Ludgins de bônus!");
-            });
+            if (typeof confetti === 'function') {
+                confetti({ particleCount: 250, spread: 100, origin: { y: 0.6 } });
+            }
+            alert("Parabéns! Você resgatou +3 Ludgins de bônus!");
         }
 
         db.ref('ouvintes_online').on('value', snap => {
@@ -1818,6 +1796,7 @@
                 meusLudgins -= custo;
                 desbloqueios[idItem] = true;
                 
+                localStorage.setItem('desbloqueios_ouvinte_' + ouvinteId, JSON.stringify(desbloqueios));
                 salvarProgressoLudgins();
                 tocarSomSuaveSucesso();
 
@@ -2214,21 +2193,28 @@
         setInterval(carregarNoticiasBrasil, 180000);
 
         let todasRadios = [];
-        let playlistKeys = [];
+        let playlistKeys = JSON.parse(localStorage.getItem('playlist_keys_ouvinte') || '[]');
         let radioTocandoKey = null;
 
         db.ref('ouvintes_preferencias/' + ouvinteId + '/playlist').on('value', snap => {
             if (snap.exists()) {
                 playlistKeys = snap.val();
-                renderizarPainelRadios();
-            } else if (todasRadios.length > 0) {
-                playlistKeys = todasRadios.map(r => r.key);
-                salvarPreferenciasOuvinte();
+                localStorage.setItem('playlist_keys_ouvinte', JSON.stringify(playlistKeys));
+                localStorage.setItem('playlist_iniciada', 'true');
                 renderizarPainelRadios();
             }
         });
 
+        db.ref('ouvintes_preferencias/' + ouvinteId + '/customizacoes_cards').on('value', snap => {
+            if (snap.exists()) {
+                customizacoesCards = snap.val();
+                localStorage.setItem('customizacoes_cards_' + ouvinteId, JSON.stringify(customizacoesCards));
+                renderizarPlaylistDireita();
+            }
+        });
+
         function salvarPreferenciasOuvinte() {
+            localStorage.setItem('playlist_keys_ouvinte', JSON.stringify(playlistKeys));
             db.ref('ouvintes_preferencias/' + ouvinteId).update({
                 ouvinte: ouvinteNome,
                 playlist: playlistKeys,
@@ -2244,13 +2230,13 @@
 
             todasRadios.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
 
-            db.ref('ouvintes_preferencias/' + ouvinteId + '/playlist').once('value', snapPlaylist => {
-                if (!snapPlaylist.exists() && playlistKeys.length === 0) {
-                    playlistKeys = todasRadios.map(r => r.key);
-                    salvarPreferenciasOuvinte();
-                }
-                renderizarPainelRadios();
-            });
+            if (!localStorage.getItem('playlist_iniciada') && playlistKeys.length === 0) {
+                playlistKeys = todasRadios.map(r => r.key);
+                salvarPreferenciasOuvinte();
+                localStorage.setItem('playlist_iniciada', 'true');
+            }
+
+            renderizarPainelRadios();
         });
 
         function renderizarPainelRadios() {
@@ -2306,6 +2292,9 @@
                     htmlIcone = `<i class="fas ${isPlaying ? 'fa-tower-broadcast antena-piscando' : 'fa-radio'} icon-radio"></i>`;
                 }
 
+                // LÓGICA DO PINCEL: Sempre visível em todos os cards da playlist.
+                // Se não foi liberado (desbloqueios.cores == false), mostra com o risquinho vermelho e exibe o alerta ao clicar.
+                // Se liberado, funciona normalmente para personalizar.
                 let htmlPincel = '';
                 if (desbloqueios.cores) {
                     htmlPincel = `<button class="btn-pincel-card" title="Personalizar card" onclick="event.stopPropagation(); abrirModalPersonalizacao('${r.key}')"><i class="fas fa-paint-brush"></i></button>`;
@@ -2371,7 +2360,7 @@
             if (!customizacoesCards[cardSendoEditadoKey]) customizacoesCards[cardSendoEditadoKey] = {};
             customizacoesCards[cardSendoEditadoKey].cor = corHex;
             
-            sincronizarFirebaseOuvinteOnline();
+            persistirCustomizacoesCards();
             fecharModalPersonalizacao();
         }
 
@@ -2380,8 +2369,14 @@
             if (!customizacoesCards[cardSendoEditadoKey]) customizacoesCards[cardSendoEditadoKey] = {};
             customizacoesCards[cardSendoEditadoKey].emoji = emoji;
             
-            sincronizarFirebaseOuvinteOnline();
+            persistirCustomizacoesCards();
             fecharModalPersonalizacao();
+        }
+
+        function persistirCustomizacoesCards() {
+            localStorage.setItem('customizacoes_cards_' + ouvinteId, JSON.stringify(customizacoesCards));
+            db.ref('ouvintes_preferencias/' + ouvinteId + '/customizacoes_cards').set(customizacoesCards);
+            renderizarPlaylistDireita();
         }
 
         function togglePlaylistRadio(key) {
@@ -2585,6 +2580,7 @@
         }
 
         carregarChatCompleto();
+        atualizarInterfaceLudginsEPatente();
 
         function logout() {
             localStorage.clear();
