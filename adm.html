@@ -101,22 +101,27 @@
         .user-item.offline { border-color: var(--gray-border); opacity: 0.9; }
         
         .user-header-bar { width: 100%; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
-        .user-title { color: white; font-weight: bold; font-size: 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .user-title { color: white; font-weight: bold; font-size: 14px; display: flex; align-items: center; gap: 8px; }
         
-        /* Estilo para a badge de nível ao lado do nome */
-        .badge-nivel { font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid currentColor; background: rgba(0,0,0,0.3); }
-
         .status-badge { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
         .status-badge.online { background: rgba(29, 185, 84, 0.15); color: var(--primary); }
         .status-badge.offline { background: rgba(113, 113, 122, 0.15); color: var(--gray-text); }
         
         .user-details-wrapper { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, margin-top 0.4s ease; background: #0d0d0d; font-size: 12px; color: var(--text-muted); border-top: 1px solid transparent; }
-        .user-item.open .user-details-wrapper { max-height: 200px; padding: 12px 15px; border-top: 1px solid #282828; }
+        .user-item.open .user-details-wrapper { max-height: 250px; padding: 12px 15px; border-top: 1px solid #282828; }
 
         .user-details-bar { font-size: 12px; color: var(--text-muted); line-height: 1.8; }
         .chevron-icon { font-size: 11px; color: #666; transition: transform 0.3s; margin-left: 8px; }
         .user-item.open .chevron-icon { transform: rotate(180deg); color: #fff; }
         .radio-destaque { color: var(--primary); font-weight: 700; }
+        
+        .badge-categoria { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; margin-left: 5px; }
+        .cat-bronze { background: #cd7f32; color: #fff; }
+        .cat-prata { background: #c0c0c0; color: #000; }
+        .cat-ouro { background: #ffd700; color: #000; }
+        .cat-diamante { background: #b9f2ff; color: #000; }
+        .cat-rubi { background: #e0115f; color: #fff; }
+        .cat-carretel { background: #a855f7; color: #fff; }
 
         input, select { padding: 12px; background: #2a2a2a; border: none; color: white; border-radius: 8px; margin-bottom: 10px; width: -webkit-fill-available; outline: none; font-size: 14px; }
         .btn-save { padding: 12px; background: var(--primary); border: none; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; }
@@ -505,21 +510,24 @@
             document.getElementById('pub-key').value = ""; document.getElementById('pub-view').style.display="none"; alert("OK");
         }
 
-        // =======================================================
-        // FUNÇÃO DE PATENTES E NÍVEIS
-        // =======================================================
-        function obterNivelPatente(ludgins) {
-            const pts = Number(ludgins) || 0;
-            if (pts >= 100) return { nome: 'Carretel de Joias', cor: '#38bdf8' }; // Azul brilhante
-            if (pts >= 75)  return { nome: 'Rubi', cor: '#ef4444' };              // Vermelho Rubi
-            if (pts >= 50)  return { nome: 'Diamante', cor: '#a855f7' };          // Roxo / Diamante
-            if (pts >= 30)  return { nome: 'Ouro', cor: '#f59e0b' };              // Dourado
-            if (pts >= 15)  return { nome: 'Prata', cor: '#94a3b8' };             // Prateado
-            return { nome: 'Bronze', cor: '#b45309' };                            // Bronze / Marrom
-        }
+        db.ref('publicidade').on('value', snap => {
+            const listDiv = document.getElementById('pub-list-admin');
+            if(!listDiv) return;
+            listDiv.innerHTML = "";
+            const pubs = snap.val() || {};
+            let html = "";
+            for(let key in pubs) {
+                const p = pubs[key];
+                html += `<div style="background:#181818; padding:10px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; font-size:12px;">
+                    <div>Alvo: <b>${p.destino}</b> (${p.ouvinteAlvo})</div>
+                    <i class="fas fa-trash" style="color:#ff4444; cursor:pointer;" onclick="db.ref('publicidade/${key}').remove()"></i>
+                </div>`;
+            }
+            listDiv.innerHTML = html;
+        });
 
         // =======================================================
-        // MONITOR DE OUVINTES (BASEADO NAS CONTAS E PREFERÊNCIAS)
+        // MONITOR DE OUVINTES (COM CÁLCULO E ATUALIZAÇÃO AUTOMÁTICA DE CATEGORIA)
         // =======================================================
         function toggleUserCard(key) {
             openCards[key] = !openCards[key];
@@ -542,6 +550,16 @@
             return 0;
         }
 
+        function calcularCategoria(ludgins) {
+            const l = Number(ludgins) || 0;
+            if (l >= 1000) return { nome: 'Carretel de Joias', classe: 'cat-carretel' };
+            if (l >= 500) return { nome: 'Rubi', classe: 'cat-rubi' };
+            if (l >= 250) return { nome: 'Diamante', classe: 'cat-diamante' };
+            if (l >= 100) return { nome: 'Ouro', classe: 'cat-ouro' };
+            if (l >= 50) return { nome: 'Prata', classe: 'cat-prata' };
+            return { nome: 'Bronze', classe: 'cat-bronze' };
+        }
+
         function renderOuvintes() {
             const container = document.getElementById('user-list'); 
             if(!container) return;
@@ -562,9 +580,6 @@
                 const email = conta.email || pref.email || 'Não informado';
                 const criadoEm = parseTimestamp(conta.criadoEm || 0);
 
-                // Captura os ludgins armazenados na conta ou preferências
-                const ludgins = Number(conta.ludgins || pref.ludgins || 0);
-
                 const t1 = parseTimestamp(pref.lastActive);
                 const t2 = parseTimestamp(pref.timestamp);
                 const t3 = parseTimestamp(pref.ultimaAtividade);
@@ -581,19 +596,24 @@
                 const tempoRadioSegundos = pref.tempoRadioSegundos || 0;
                 const radioStart = parseTimestamp(pref.radioStart || (isOnline ? loginTimestamp : 0));
 
+                // Busca os ludgins tanto em contas quanto em preferencias para refletir em tempo real
+                const ludgins = conta.ludgins !== undefined ? conta.ludgins : (pref.ludgins !== undefined ? pref.ludgins : 0);
+                const categoriaInfo = calcularCategoria(ludgins);
+
                 listaOuvintesMonitor.push({
                     key: k,
                     nome: nome,
                     email: email,
                     criadoEm: criadoEm,
-                    ludgins: ludgins,
                     isOnline: isOnline,
                     loginTimestamp: loginTimestamp,
                     radioAtual: radioAtual,
                     ultimaRadioSalva: ultimaRadioSalva,
                     tempoSessaoCompletoSalvo: tempoSessaoCompletoSalvo,
                     tempoRadioSegundos: tempoRadioSegundos,
-                    radioStart: radioStart
+                    radioStart: radioStart,
+                    ludgins: ludgins,
+                    categoriaInfo: categoriaInfo
                 });
             });
 
@@ -612,8 +632,6 @@
                 const k = ouvinte.key;
                 const safeKey = k.replace(/[^a-zA-Z0-9]/g, '_');
                 const isOpen = !!openCards[k];
-
-                const patente = obterNivelPatente(ouvinte.ludgins);
 
                 let tempoSessaoSegundos = 0;
                 if (ouvinte.isOnline && ouvinte.loginTimestamp) {
@@ -640,7 +658,7 @@
                     <div class="user-header-bar" onclick="toggleUserCard('${k}')">
                         <span class="user-title">
                             ${iconHeader} ${ouvinte.nome}
-                            <span class="badge-nivel" style="color: ${patente.cor}; border-color: ${patente.cor};">${patente.nome}</span>
+                            <span class="badge-categoria ${ouvinte.categoriaInfo.classe}">${ouvinte.categoriaInfo.nome}</span>
                             <i class="fas fa-chevron-down chevron-icon"></i>
                         </span>
                         <div style="display:flex; align-items:center; gap:10px;">
@@ -652,7 +670,7 @@
                     <div class="user-details-wrapper">
                         <div class="user-details-bar">
                             <div>E-mail: <strong>${ouvinte.email}</strong></div>
-                            <div>Ludgins: <strong style="color: #f59e0b;">${ouvinte.ludgins}</strong></div>
+                            <div>Ludgins / Pontos: <strong style="color: var(--purple-light);">${ouvinte.ludgins}</strong></div>
                             <div>Nome da Rádio: <strong class="radio-destaque">${displayUltimaRadio}</strong></div>
                             <div>Tempo de Sessão: <b style="color:#38bdf8" id="ts-${safeKey}" data-login="${ouvinte.loginTimestamp}" data-salvo="${ouvinte.tempoSessaoCompletoSalvo}" data-online="${ouvinte.isOnline}">${formatarTempo(tempoSessaoSegundos)}</b></div>
                             <div>Tempo nessa Rádio: <b style="color:#a855f7" id="tr-${safeKey}" data-radio-start="${ouvinte.radioStart}" data-salvo="${ouvinte.tempoRadioSegundos}" data-online="${ouvinte.isOnline}">${formatarTempo(tempoRadioAtualSegundos)}</b></div>
