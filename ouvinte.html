@@ -1578,7 +1578,7 @@
             document.getElementById('patente-ouvinte-badge').innerText = patenteAtual;
             renderizarLojaVirtual();
             aplicarTravaBloqueios();
-            renderizarPlaylistDireita(); // Atualiza os ícones de pincel (com ou sem risco vermelho)
+            renderizarPlaylistDireita();
         }
 
         function formatarTempoOnline(segundos) {
@@ -2193,15 +2193,22 @@
         setInterval(carregarNoticiasBrasil, 180000);
 
         let todasRadios = [];
-        let playlistKeys = JSON.parse(localStorage.getItem('playlist_keys_ouvinte') || '[]');
+        // BLINDAÇÃO APLICADA: Carrega primeiramente do localStorage utilizando o ID único do ouvinte
+        let playlistKeys = JSON.parse(localStorage.getItem('playlist_keys_ouvinte_' + ouvinteId) || '[]');
         let radioTocandoKey = null;
 
+        // Ouvinte seguro do Firebase com validação estrita para não zerar dados locais vazios
         db.ref('ouvintes_preferencias/' + ouvinteId + '/playlist').on('value', snap => {
             if (snap.exists()) {
-                playlistKeys = snap.val();
-                localStorage.setItem('playlist_keys_ouvinte', JSON.stringify(playlistKeys));
-                localStorage.setItem('playlist_iniciada', 'true');
-                renderizarPainelRadios();
+                const playlistFirebase = snap.val();
+                if (Array.isArray(playlistFirebase) && playlistFirebase.length > 0) {
+                    playlistKeys = playlistFirebase;
+                    localStorage.setItem('playlist_keys_ouvinte_' + ouvinteId, JSON.stringify(playlistKeys));
+                    localStorage.setItem('playlist_iniciada', 'true');
+                    renderizarPainelRadios();
+                }
+            } else if (playlistKeys.length > 0) {
+                salvarPreferenciasOuvinte();
             }
         });
 
@@ -2214,7 +2221,7 @@
         });
 
         function salvarPreferenciasOuvinte() {
-            localStorage.setItem('playlist_keys_ouvinte', JSON.stringify(playlistKeys));
+            localStorage.setItem('playlist_keys_ouvinte_' + ouvinteId, JSON.stringify(playlistKeys));
             db.ref('ouvintes_preferencias/' + ouvinteId).update({
                 ouvinte: ouvinteNome,
                 playlist: playlistKeys,
@@ -2292,9 +2299,6 @@
                     htmlIcone = `<i class="fas ${isPlaying ? 'fa-tower-broadcast antena-piscando' : 'fa-radio'} icon-radio"></i>`;
                 }
 
-                // LÓGICA DO PINCEL: Sempre visível em todos os cards da playlist.
-                // Se não foi liberado (desbloqueios.cores == false), mostra com o risquinho vermelho e exibe o alerta ao clicar.
-                // Se liberado, funciona normalmente para personalizar.
                 let htmlPincel = '';
                 if (desbloqueios.cores) {
                     htmlPincel = `<button class="btn-pincel-card" title="Personalizar card" onclick="event.stopPropagation(); abrirModalPersonalizacao('${r.key}')"><i class="fas fa-paint-brush"></i></button>`;
