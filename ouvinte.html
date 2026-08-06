@@ -190,7 +190,7 @@
             grid-template-columns: 1fr 1.6fr 1.1fr; 
             gap: 14px; 
             width: 100%; 
-            margin-bottom: 120px; 
+            margin-bottom: 140px; 
             align-items: start;
         }
 
@@ -1021,6 +1021,7 @@
             background: var(--primary);
         }
 
+        /* ESTILO DO RISQUINHO VERMELHO NO PINCEL QUANDO BLOQUEADO */
         .pincel-bloqueado-wrapper {
             position: relative;
             display: inline-flex;
@@ -1515,91 +1516,38 @@
 
     <audio id="audio-ouvinte"></audio>
 
-  <script>
+    <script>
         const firebaseConfig = {
             apiKey: "ef1aa464f6bacacd0ff6d26c8179aee0",
             authDomain: "meu-painel-f2efe.firebaseapp.com",
             databaseURL: "https://meu-painel-f2efe-default-rtdb.firebaseio.com/",
             projectId: "meu-painel-f2efe"
         };
-        firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
         const db = firebase.database();
         const player = document.getElementById('audio-ouvinte');
 
-        // Identificação do ouvinte
         const ouvinteId = localStorage.getItem('userId') || ('ouvinte_' + Date.now());
-        if (!localStorage.getItem('userId')) localStorage.setItem('userId', ouvinteId);
+        if (!localStorage.getItem('userId')) {
+            localStorage.setItem('userId', ouvinteId);
+        }
         
         let ouvinteNomeBruto = localStorage.getItem('usuarioNome') || localStorage.getItem('usuarioEmail') || 'Ouvinte Anonimo';
         if (ouvinteNomeBruto.includes('@')) {
             ouvinteNomeBruto = ouvinteNomeBruto.split('@')[0];
         }
         let ouvinteNome = ouvinteNomeBruto.trim().split(' ')[0];
+
         document.getElementById('nome-ouvinte-display').innerText = "OLA, " + ouvinteNome.toUpperCase();
 
         let segundosConectados = 0;
-        let meusLudgins = 0;
-        let patenteAtual = 'Bronze';
+        let meusLudgins = parseInt(localStorage.getItem('ludgins_ouvinte_' + ouvinteId)) || 0;
+        let patenteAtual = localStorage.getItem('patente_ouvinte_' + ouvinteId) || 'Bronze';
         let timerOnlineInterval = null;
         let isRadioTocando = false;
-        let cardsSendoEditadoKey = null;
-
-        let desbloqueios = {
-            chat: false,
-            cores: false,
-            horoscopo: false,
-            esportes: false
-        };
-
-        let customizacoesCards = {};
-        let playlistKeys = []; // Certifique-se de ter essa variável declarada para a playlist
-
-        // FUNÇÃO DE PERSISTÊNCIA GLOBAL NO FIREBASE
-        function salvarPreferenciasNoFirebase() {
-            db.ref('ouvintes_preferencias/' + ouvinteId).set({
-                meusLudgins: meusLudgins,
-                patenteAtual: patenteAtual,
-                desbloqueios: desbloqueios,
-                customizacoes: customizacoesCards,
-                playlist: playlistKeys,
-                ultimaAtualizacao: firebase.database.ServerValue.TIMESTAMP
-            });
-        }
-
-        // CARREGAMENTO INICIAL SINCRONIZADO DO FIREBASE
-        db.ref('ouvintes_preferencias/' + ouvinteId).once('value', (snap) => {
-            const data = snap.val();
-            if (data) {
-                if (data.meusLudgins !== undefined) meusLudgins = data.meusLudgins;
-                if (data.patenteAtual) patenteAtual = data.patenteAtual;
-                if (data.desbloqueios) desbloqueios = data.desbloqueios;
-                if (data.customizacoes) customizacoesCards = data.customizacoes;
-                if (data.playlist) playlistKeys = data.playlist;
-            } else {
-                // Se for a primeira vez, salva o estado inicial padrão no Firebase
-                salvarPreferenciasNoFirebase();
-            }
-
-            // Atualiza o visual com os dados carregados da nuvem
-            if(typeof atualizarInterfaceLudgins === 'function') atualizarInterfaceLudgins();
-            if(typeof renderizarPainelRadios === 'function') renderizarPainelRadios();
-            if(typeof aplicarTravaBloqueios === 'function') aplicarTravaBloqueios();
-        });
-        // Sincronização inicial e em tempo real dos bloqueios/desbloqueios direto no Firebase para persistir e aparecer no painel do ADM
-        db.ref('ouvintes_preferencias/' + ouvinteId + '/desbloqueios').on('value', snap => {
-            if (snap.exists()) {
-                desbloqueios = snap.val();
-                localStorage.setItem('desbloqueios_ouvinte_' + ouvinteId, JSON.stringify(desbloqueios));
-            } else {
-                db.ref('ouvintes_preferencias/' + ouvinteId + '/desbloqueios').set(desbloqueios);
-            }
-            atualizarInterfaceLudginsEPatente();
-        });
-
-        function persistirDesbloqueiosFirebase() {
-            localStorage.setItem('desbloqueios_ouvinte_' + ouvinteId, JSON.stringify(desbloqueios));
-            db.ref('ouvintes_preferencias/' + ouvinteId + '/desbloqueios').set(desbloqueios);
-        }
+        let cardSendoEditadoKey = null;
 
         function tocarSomSuaveSucesso() {
             try {
@@ -1617,6 +1565,15 @@
                 osc.stop(ctx.currentTime + 0.4);
             } catch(e) {}
         }
+
+        let desbloqueios = JSON.parse(localStorage.getItem('desbloqueios_ouvinte_' + ouvinteId)) || {
+            chat: false,
+            cores: false,
+            horoscopo: false,
+            esportes: false
+        };
+
+        let customizacoesCards = JSON.parse(localStorage.getItem('customizacoes_cards_' + ouvinteId)) || {};
 
         function atualizarInterfaceLudginsEPatente() {
             document.getElementById('contador-ludgins').innerText = meusLudgins;
@@ -1841,7 +1798,7 @@
                 meusLudgins -= custo;
                 desbloqueios[idItem] = true;
                 
-                persistirDesbloqueiosFirebase();
+                localStorage.setItem('desbloqueios_ouvinte_' + ouvinteId, JSON.stringify(desbloqueios));
                 salvarProgressoLudgins();
                 tocarSomSuaveSucesso();
 
