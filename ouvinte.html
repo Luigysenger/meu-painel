@@ -1547,6 +1547,39 @@
         let isRadioTocando = false;
         let cardSendoEditadoKey = null;
 
+        let desbloqueios = JSON.parse(localStorage.getItem('desbloqueios_ouvinte_' + ouvinteId)) || {
+            chat: false,
+            cores: false,
+            horoscopo: false,
+            esportes: false
+        };
+
+        let customizacoesCards = JSON.parse(localStorage.getItem('customizacoes_cards_' + ouvinteId)) || {};
+
+        // Sincronização Inicial via Firebase para puxar os dados salvos do usuário ao entrar
+        db.ref('ouvintes_preferencias/' + ouvinteId).once('value', snap => {
+            if (snap.exists()) {
+                const dados = snap.val();
+                if (dados.ludgins !== undefined) {
+                    meusLudgins = dados.ludgins;
+                    localStorage.setItem('ludgins_ouvinte_' + ouvinteId, meusLudgins);
+                }
+                if (dados.patente) {
+                    patenteAtual = dados.patente;
+                    localStorage.setItem('patente_ouvinte_' + ouvinteId, patenteAtual);
+                }
+                if (dados.desbloqueios) {
+                    desbloqueios = dados.desbloqueios;
+                    localStorage.setItem('desbloqueios_ouvinte_' + ouvinteId, JSON.stringify(desbloqueios));
+                }
+                if (dados.customizacoes_cards) {
+                    customizacoesCards = dados.customizacoes_cards;
+                    localStorage.setItem('customizacoes_cards_' + ouvinteId, JSON.stringify(customizacoesCards));
+                }
+            }
+            atualizarInterfaceLudginsEPatente();
+        });
+
         function tocarSomSuaveSucesso() {
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1564,21 +1597,12 @@
             } catch(e) {}
         }
 
-        let desbloqueios = JSON.parse(localStorage.getItem('desbloqueios_ouvinte_' + ouvinteId)) || {
-            chat: false,
-            cores: false,
-            horoscopo: false,
-            esportes: false
-        };
-
-        let customizacoesCards = JSON.parse(localStorage.getItem('customizacoes_cards_' + ouvinteId)) || {};
-
         function atualizarInterfaceLudginsEPatente() {
             document.getElementById('contador-ludgins').innerText = meusLudgins;
             document.getElementById('patente-ouvinte-badge').innerText = patenteAtual;
             renderizarLojaVirtual();
             aplicarTravaBloqueios();
-            renderizarPlaylistDireita(); // Atualiza os ícones de pincel (com ou sem risco vermelho)
+            renderizarPlaylistDireita();
         }
 
         function formatarTempoOnline(segundos) {
@@ -1684,6 +1708,15 @@
                 ludgins: meusLudgins,
                 patente: patenteAtual,
                 ultimaAtividade: firebase.database.ServerValue.TIMESTAMP
+            });
+
+            db.ref('ouvintes_preferencias/' + ouvinteId).update({
+                ouvinte: ouvinteNome,
+                ludgins: meusLudgins,
+                patente: patenteAtual,
+                desbloqueios: desbloqueios,
+                customizacoes_cards: customizacoesCards,
+                ultimaAtualizacao: firebase.database.ServerValue.TIMESTAMP
             });
         }
         sincronizarFirebaseOuvinteOnline();
@@ -2292,9 +2325,6 @@
                     htmlIcone = `<i class="fas ${isPlaying ? 'fa-tower-broadcast antena-piscando' : 'fa-radio'} icon-radio"></i>`;
                 }
 
-                // LÓGICA DO PINCEL: Sempre visível em todos os cards da playlist.
-                // Se não foi liberado (desbloqueios.cores == false), mostra com o risquinho vermelho e exibe o alerta ao clicar.
-                // Se liberado, funciona normalmente para personalizar.
                 let htmlPincel = '';
                 if (desbloqueios.cores) {
                     htmlPincel = `<button class="btn-pincel-card" title="Personalizar card" onclick="event.stopPropagation(); abrirModalPersonalizacao('${r.key}')"><i class="fas fa-paint-brush"></i></button>`;
