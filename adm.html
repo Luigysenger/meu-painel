@@ -10,24 +10,21 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --primary: #1DB954; --bg: #000; --card: #121212; --text-muted: #b3b3b3; --purple-light: #a855f7; --blue-online: #38bdf8; --gray-border: #52525b; --gray-text: #71717a; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 15px; user-select: none; box-sizing: border-box; }
-        *, *:before, *:after { box-sizing: inherit; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 10px; user-select: none; }
         
-        .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 20px 25px; border-radius: 20px; border: 1px solid #282828; margin-bottom: 25px; gap: 15px; flex-wrap: wrap; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
-        .header-brand { display: flex; flex-direction: column; gap: 4px; }
-        .header-title { font-size: 22px; font-weight: 900; color: #a855f7; letter-spacing: 1px; margin: 0; text-transform: uppercase; }
+        .header { display: flex; justify-content: space-between; align-items: center; background: #121212; padding: 15px 20px; border-radius: 15px; border: 1px solid #282828; margin-bottom: 20px; gap: 15px; flex-wrap: wrap; }
+        .header-brand { display: flex; flex-direction: column; gap: 2px; }
+        .header-title { font-size: 20px; font-weight: 900; color: #a855f7; letter-spacing: 1px; margin: 0; text-transform: uppercase; }
         .header-sub { font-size: 13px; color: #e5e7eb; font-weight: 600; margin: 0; }
         
-        .header-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
         
-        .info-pill { background: #1e1e1e; border: 1px solid #333; padding: 8px 16px; border-radius: 10px; font-size: 13px; font-weight: bold; color: #fff; display: flex; align-items: center; gap: 8px; }
+        .info-pill { background: #1e1e1e; border: 1px solid #333; padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: bold; color: #fff; display: flex; align-items: center; gap: 8px; }
         .info-pill i { color: #a855f7; }
         
-        .btn-msg-notif { background: #ff4444; color: white; border: none; padding: 10px 16px; border-radius: 10px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; font-size: 13px; transition: 0.2s; }
-        .btn-msg-notif:hover { background: #fa2828; }
-        .btn-msg-notif span { background: white; color: #ff4444; padding: 2px 7px; border-radius: 50%; font-size: 12px; }
-        
-        .btn-header { background: #1e1e1e; border: 1px solid #333; color: white; padding: 10px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
+        .btn-msg-notif { background: #ff4444; color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; font-size: 13px; }
+        .btn-msg-notif span { background: white; color: #ff4444; padding: 2px 6px; border-radius: 50%; font-size: 12px; }
+        .btn-header { background: #1e1e1e; border: 1px solid #333; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
         .btn-header:hover { background: #2a2a2a; }
         .btn-sair { color: #ff4444; border-color: #ef4444; background: rgba(239, 68, 68, 0.1); }
         .btn-sair:hover { background: rgba(239, 68, 68, 0.2); }
@@ -41,47 +38,45 @@
         #container-mensagens-adm { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out; }
         #container-mensagens-adm.aberto { max-height: 2000px; margin-bottom: 25px; }
         
-        .msg-grid-adm { display: flex; flex-direction: column; gap: 12px; padding: 15px; background: #080808; border-radius: 15px; border: 1px solid #222; }
+        .msg-grid-adm { display: flex; flex-direction: column; gap: 10px; padding: 10px; background: #080808; border-radius: 15px; border: 1px solid #222; }
         
-        .chat-accordion-card { background: #141414; border: 1px solid #282828; border-radius: 12px; overflow: hidden; }
-        .chat-header { padding: 14px 18px; background: #181818; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
+        .chat-accordion-card { background: #141414; border: 1px solid #282828; border-radius: 10px; overflow: hidden; }
+        .chat-header { padding: 12px 15px; background: #181818; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
         .chat-header:hover { background: #202020; }
         .chat-user-title { font-weight: bold; font-size: 14px; color: var(--purple-light); display: flex; align-items: center; gap: 8px; }
         
         .chat-body-wrapper { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-in-out, padding 0.3s ease; background: #0d0d0d; }
-        .chat-accordion-card.open .chat-body-wrapper { max-height: 1000px; padding: 18px; border-top: 1px solid #222; }
+        .chat-accordion-card.open .chat-body-wrapper { max-height: 1000px; padding: 15px; border-top: 1px solid #222; }
         .chat-accordion-card.open .chevron-chat { transform: rotate(180deg); color: #fff; }
         .chevron-chat { font-size: 12px; color: #666; transition: transform 0.3s; }
         
         .chat-history { display: flex; flex-direction: column; gap: 10px; max-height: 350px; overflow-y: auto; padding-right: 5px; margin-bottom: 12px; }
         
-        .chat-bubble { max-width: 80%; padding: 12px 14px; border-radius: 10px; font-size: 13px; line-height: 1.4; word-break: break-word; }
+        .chat-bubble { max-width: 80%; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.4; word-break: break-word; }
         .chat-bubble.ouvinte { align-self: flex-start; background: #222; color: #fff; border-left: 3px solid var(--purple-light); }
         .chat-bubble.adm { align-self: flex-end; background: #1e3a29; color: #e2f8eb; border-right: 3px solid var(--primary); }
         
         .chat-meta { font-size: 10px; color: #aaa; margin-bottom: 4px; display: flex; justify-content: space-between; gap: 10px; }
-        .chat-input-area { display: flex; gap: 10px; margin-top: 10px; }
-        .chat-input-area textarea { flex: 1; background: #111; border: 1px solid #333; border-radius: 8px; color: #fff; padding: 10px; font-size: 13px; resize: none; outline: none; }
-        .btn-send-chat { background: var(--primary); color: #000; border: none; padding: 0 20px; border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer; transition: 0.2s; }
-        .btn-send-chat:hover { opacity: 0.9; }
+        .chat-input-area { display: flex; gap: 8px; margin-top: 10px; }
+        .chat-input-area textarea { flex: 1; background: #111; border: 1px solid #333; border-radius: 6px; color: #fff; padding: 8px; font-size: 12px; resize: none; outline: none; }
+        .btn-send-chat { background: var(--primary); color: #000; border: none; padding: 0 15px; border-radius: 6px; font-weight: bold; font-size: 12px; cursor: pointer; }
 
-        .main-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 25px; max-width: 1400px; margin: 0 auto; }
+        .main-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; max-width: 1400px; margin: 0 auto; }
         @media (max-width: 1024px) { .main-grid { grid-template-columns: 1fr; } }
-        
-        .card { background: var(--card); border-radius: 20px; padding: 25px; border: 1px solid #282828; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
-        h3 { color: var(--primary); font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; margin-top: 0; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+        .card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid #282828; margin-bottom: 20px; }
+        h3 { color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; }
 
-        .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
+        .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
         @media (max-width: 480px) { .radio-grid { grid-template-columns: repeat(2, 1fr); } }
 
-        .radio-item { aspect-ratio: 1/1; border-radius: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #000; font-weight: bold; font-size: 13px; text-align: center; padding: 12px; cursor: grab; transition: transform 0.2s, box-shadow 0.2s; position: relative; border: 2px solid transparent; -webkit-tap-highlight-color: transparent; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .radio-item { aspect-ratio: 1/1; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #000; font-weight: bold; font-size: 12px; text-align: center; padding: 10px; cursor: grab; transition: transform 0.2s, box-shadow 0.2s; position: relative; border: 2px solid transparent; -webkit-tap-highlight-color: transparent; }
         .radio-item:active { cursor: grabbing; }
         .radio-item.sortable-ghost { opacity: 0.4; border: 2px dashed #1DB954; }
-        .radio-item.active { background: #000 !important; color: var(--primary) !important; border-color: var(--primary); box-shadow: 0 0 20px rgba(29, 185, 84, 0.4); }
-        .radio-actions { position: absolute; top: 8px; right: 8px; display: flex; gap: 6px; z-index: 10; }
-        .radio-actions i { cursor: pointer; padding: 5px; background: rgba(0,0,0,0.15); border-radius: 6px; font-size: 11px; }
+        .radio-item.active { background: #000 !important; color: var(--primary) !important; border-color: var(--primary); box-shadow: 0 0 15px rgba(29, 185, 84, 0.3); }
+        .radio-actions { position: absolute; top: 5px; right: 5px; display: flex; gap: 5px; z-index: 10; }
+        .radio-actions i { cursor: pointer; padding: 4px; background: rgba(0,0,0,0.1); border-radius: 4px; font-size: 11px; }
 
-        .antena { font-size: 26px; margin-bottom: 10px; display: none; color: var(--primary); }
+        .antena { font-size: 24px; margin-bottom: 8px; display: none; color: var(--primary); }
         .active .antena { display: block !important; animation: antenaPisca 0.8s infinite alternate !important; }
         @keyframes antenaPisca { from { opacity: 1; transform: scale(1.1); } to { opacity: 0.1; transform: scale(0.9); } }
 
@@ -92,52 +87,36 @@
         }
         .speaker-icon { color: var(--primary); margin-right: 8px; animation: speakerPisca 1.2s infinite ease-in-out; }
 
-        .player-footer { margin-top: 25px; background: #111; padding: 22px; border-radius: 16px; border: 1px solid #222; text-align: center; }
-        .controls-row { display: flex; align-items: center; justify-content: center; gap: 30px; }
-        .btn-nav { background: none; border: none; color: #b3b3b3; font-size: 24px; cursor: pointer; transition: color 0.2s; }
-        .btn-nav:hover { color: white; }
-        .btn-spotify-play { width: 60px; height: 60px; background: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: black; cursor: pointer; transition: transform 0.2s; box-shadow: 0 4px 15px rgba(255,255,255,0.2); }
-        .btn-spotify-play:hover { transform: scale(1.05); }
+        .player-footer { margin-top: 20px; background: #111; padding: 20px; border-radius: 20px; border: 1px solid #222; text-align: center; }
+        .controls-row { display: flex; align-items: center; justify-content: center; gap: 25px; }
+        .btn-nav { background: none; border: none; color: #b3b3b3; font-size: 24px; cursor: pointer; }
+        .btn-spotify-play { width: 55px; height: 55px; background: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: black; cursor: pointer; }
 
-        .pub-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px; }
-        @media (max-width: 768px) { .pub-container { grid-template-columns: 1fr; } }
-        .pub-preview { width: 100%; max-height: 140px; object-fit: contain; margin-top: 10px; border-radius: 10px; border: 1px dashed #444; display: none; background: #000; padding: 5px; }
-        
-        .pub-box-fields { display: flex; flex-direction: column; gap: 12px; }
-        .pub-box-fields label { font-size: 11px; color: var(--text-muted); font-weight: bold; margin-bottom: -6px; text-transform: uppercase; }
+        .pub-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        @media (max-width: 600px) { .pub-container { grid-template-columns: 1fr; } }
+        .pub-preview { width: 100%; max-height: 120px; object-fit: contain; margin-top: 10px; border-radius: 10px; border: 1px dashed #444; display: none; }
 
-        .user-item { background: #141414; margin-bottom: 12px; border-radius: 16px; border: 1px solid var(--gray-border); overflow: hidden; transition: all 0.3s ease; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-        .user-item.online { border-color: var(--primary); box-shadow: 0 0 15px rgba(29, 185, 84, 0.25); background: #161619; }
+        .user-item { background: #141414; margin-bottom: 10px; border-radius: 14px; border: 1px solid var(--gray-border); overflow: hidden; transition: all 0.3s ease; cursor: pointer; }
+        .user-item.online { border-color: var(--primary); box-shadow: 0 0 12px rgba(29, 185, 84, 0.25); background: #161619; }
         .user-item.offline { border-color: var(--gray-border); opacity: 0.9; }
         
-        .user-header-bar { width: 100%; padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
-        .user-title { color: white; font-weight: bold; font-size: 14px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .user-header-bar { width: 100%; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
+        .user-title { color: white; font-weight: bold; font-size: 14px; display: flex; align-items: center; gap: 8px; }
         
-        .status-badge { font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .status-badge.online { background: rgba(29, 185, 84, 0.15); color: var(--primary); border: 1px solid rgba(29, 185, 84, 0.3); }
-        .status-badge.offline { background: rgba(113, 113, 122, 0.15); color: var(--gray-text); border: 1px solid rgba(113, 113, 122, 0.3); }
+        .status-badge { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+        .status-badge.online { background: rgba(29, 185, 84, 0.15); color: var(--primary); }
+        .status-badge.offline { background: rgba(113, 113, 122, 0.15); color: var(--gray-text); }
         
-        .user-details-wrapper { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.3s ease; background: #0d0d0d; font-size: 13px; color: var(--text-muted); border-top: 1px solid transparent; }
-        .user-item.open .user-details-wrapper { max-height: 300px; padding: 16px 20px; border-top: 1px solid #282828; }
+        .user-details-wrapper { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, margin-top 0.4s ease; background: #0d0d0d; font-size: 12px; color: var(--text-muted); border-top: 1px solid transparent; }
+        .user-item.open .user-details-wrapper { max-height: 200px; padding: 12px 15px; border-top: 1px solid #282828; }
 
-        .user-details-bar { font-size: 13px; color: var(--text-muted); line-height: 1.8; display: flex; flex-direction: column; gap: 4px; }
+        .user-details-bar { font-size: 12px; color: var(--text-muted); line-height: 1.8; }
         .chevron-icon { font-size: 11px; color: #666; transition: transform 0.3s; margin-left: 8px; }
         .user-item.open .chevron-icon { transform: rotate(180deg); color: #fff; }
         .radio-destaque { color: var(--primary); font-weight: 700; }
-        
-        .badge-categoria { font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
-        .cat-bronze { background: #cd7f32; color: #fff; box-shadow: 0 0 8px rgba(205,127,50,0.4); }
-        .cat-prata { background: #c0c0c0; color: #000; box-shadow: 0 0 8px rgba(192,192,192,0.4); }
-        .cat-ouro { background: #ffd700; color: #000; box-shadow: 0 0 8px rgba(255,215,0,0.4); }
-        .cat-diamante { background: #b9f2ff; color: #000; box-shadow: 0 0 10px rgba(185,242,255,0.6); }
-        .cat-rubi { background: #e0115f; color: #fff; box-shadow: 0 0 10px rgba(224,17,95,0.6); }
-        .cat-carretel { background: #a855f7; color: #fff; box-shadow: 0 0 10px rgba(168,85,247,0.6); }
 
-        input, select { padding: 12px 14px; background: #1e1e1e; border: 1px solid #333; color: white; border-radius: 10px; margin-bottom: 12px; width: 100%; outline: none; font-size: 13px; transition: border-color 0.2s; }
-        input:focus, select:focus { border-color: var(--primary); }
-        
-        .btn-save { padding: 14px; background: var(--primary); border: none; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: #000; transition: opacity 0.2s; box-shadow: 0 4px 12px rgba(29, 185, 84, 0.3); }
-        .btn-save:hover { opacity: 0.9; }
+        input, select { padding: 12px; background: #2a2a2a; border: none; color: white; border-radius: 8px; margin-bottom: 10px; width: -webkit-fill-available; outline: none; font-size: 14px; }
+        .btn-save { padding: 12px; background: var(--primary); border: none; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; }
     </style>
 </head>
 <body>
@@ -186,17 +165,17 @@
     <div class="main-grid">
         <div class="col-left">
             <div class="card">
-                <h3><i class="fas fa-broadcast-tower"></i> GERENCIAR EMISSORA</h3>
+                <h3>GERENCIAR EMISSORA</h3>
                 <div class="input-group">
                     <input type="hidden" id="r-key">
                     <input type="text" id="r-name" placeholder="Nome da Rádio">
                     <input type="text" id="r-url" placeholder="Link .mp3">
-                    <button class="btn-save" id="btn-radio-action" onclick="addRadio()">SALVAR RÁDIO</button>
+                    <button class="btn-save" id="btn-radio-action" onclick="addRadio()">SALVAR</button>
                 </div>
-                <h3 style="margin-top: 25px;"><i class="fas fa-th"></i> GRADE DE RÁDIOS (ARRASTE PARA ORGANIZAR)</h3>
+                <h3>GRADE DE RÁDIOS (ARRASTE PARA ORGANIZAR)</h3>
                 <div id="radio-list" class="radio-grid"></div>
                 <div class="player-footer">
-                    <div id="now-title" style="font-size:11px; color:#888; margin-bottom:15px; font-weight: bold;">SELECIONE UMA RÁDIO</div>
+                    <div id="now-title" style="font-size:10px; color:#888; margin-bottom:15px;">SELECIONE UMA RÁDIO</div>
                     <div class="controls-row">
                         <button class="btn-nav" onclick="prevRadio()"><i class="fas fa-step-backward"></i></button>
                         <button class="btn-spotify-play" onclick="togglePlay()"><i class="fas fa-play" id="play-icon"></i></button>
@@ -206,22 +185,18 @@
             </div>
 
             <div class="card">
-                <h3><i class="fas fa-bullhorn"></i> GERENCIAR PUBLICIDADE</h3>
+                <h3>GERENCIAR PUBLICIDADE</h3>
                 <div class="pub-container">
+                    <input type="hidden" id="pub-key">
                     <div>
-                        <label>Banner da Campanha</label>
                         <input type="file" id="pub-file" accept="image/*" onchange="previewPub(this)">
                         <img id="pub-view" class="pub-preview">
                     </div>
-                    <div class="pub-box-fields">
-                        <input type="hidden" id="pub-key">
-                        <label>Data e Hora de Início[cite: 6]</label>
+                    <div>
                         <input type="datetime-local" id="pub-ini">
-                        <label>Data e Hora de Término[cite: 6]</label>
                         <input type="datetime-local" id="pub-fim">
-                        <label>Público Alvo</label>
                         <select id="pub-target" onchange="document.getElementById('pub-manual').style.display = (this.value=='MANUAL'?'block':'none')">
-                            <option value="TODOS">TODOS OS OUVINTES[cite: 6]</option>
+                            <option value="TODOS">TODOS OS OUVINTES</option>
                             <option value="MANUAL">SELECIONAR MANUAL</option>
                         </select>
                         <input type="text" id="pub-manual" placeholder="NOME DO OUVINTE" style="display:none;">
@@ -360,7 +335,7 @@
             if(countElem) countElem.innerText = ouvintesNomes.length;
 
             if(ouvintesNomes.length === 0) {
-                container.innerHTML = `<div style="text-align:center; padding:20px; color:#666; font-size:13px;">Nenhuma mensagem recebida.</div>`;
+                container.innerHTML = `<div style="text-align:center; padding:20px; color:#666; font-size:12px;">Nenhuma mensagem recebida.</div>`;
                 return;
             }
 
@@ -521,31 +496,23 @@
         }
         function savePub() {
             const i=document.getElementById('pub-ini').value, f=document.getElementById('pub-fim').value, k=document.getElementById('pub-key').value;
-            if(!imgBase64 || !i) return alert("Selecione a imagem e a data de início!");
-            const d = { imagem: imgBase64, inicio: new Date(i).getTime(), fim: f ? new Date(f).getTime() : 0, destino: document.getElementById('pub-target').value, ouvinteAlvo: document.getElementById('pub-manual').value || 'TODOS' };
+            if(!imgBase64 || !i) return;
+            const d = { imagem: imgBase64, inicio: new Date(i).getTime(), fim: new Date(f).getTime(), destino: document.getElementById('pub-target').value, ouvinteAlvo: document.getElementById('pub-manual').value || 'TODOS' };
             if(k) db.ref('publicidade/'+k).update(d); else db.ref('publicidade').push(d);
-            document.getElementById('pub-key').value = ""; document.getElementById('pub-view').style.display="none"; alert("Campanha salva com sucesso!");
+            document.getElementById('pub-key').value = ""; document.getElementById('pub-view').style.display="none"; alert("OK");
         }
 
-        db.ref('publicidade').on('value', snap => {
-            const listDiv = document.getElementById('pub-list-admin');
-            if(!listDiv) return;
-            listDiv.innerHTML = "";
-            const pubs = snap.val() || {};
-            let html = "";
-            for(let key in pubs) {
-                const p = pubs[key];
-                html += `<div style="background:#181818; padding:12px; border-radius:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; font-size:12px; border: 1px solid #282828;">
-                    <div>Alvo: <b>${p.destino}</b> (${p.ouvinteAlvo})</div>
-                    <i class="fas fa-trash" style="color:#ff4444; cursor:pointer; font-size: 14px;" onclick="db.ref('publicidade/${key}').remove()"></i>
-                </div>`;
-            }
-            listDiv.innerHTML = html;
-        });
+        // =======================================================
+        // MONITOR DE OUVINTES (COM PATENTES EM TEMPO REAL)
+        // =======================================================
+        function calcularPatente(ludgins) {
+            const p = Number(ludgins) || 0;
+            if (p >= 10000) return { nome: 'DIAMANTE', cor: '#38bdf8' };
+            if (p >= 5000)  return { nome: 'OURO', cor: '#f59e0b' };
+            if (p >= 2000)  return { nome: 'PRATA', cor: '#cbd5e1' };
+            return { nome: 'BRONZE', cor: '#d97706' };
+        }
 
-        // =======================================================
-        // MONITOR DE OUVINTES (ATUALIZAÇÃO EM TEMPO REAL DE PATENTES)
-        // =======================================================
         function toggleUserCard(key) {
             openCards[key] = !openCards[key];
             const itemElem = document.getElementById(`user-card-${key.replace(/[^a-zA-Z0-9]/g, '_')}`);
@@ -565,16 +532,6 @@
                 if(!isNaN(num)) return num;
             }
             return 0;
-        }
-
-        function calcularCategoria(ludgins) {
-            const l = Number(ludgins) || 0;
-            if (l >= 1000) return { nome: 'Carretel de Joias', classe: 'cat-carretel' };
-            if (l >= 500) return { nome: 'Rubi', classe: 'cat-rubi' };
-            if (l >= 250) return { nome: 'Diamante', classe: 'cat-diamante' };
-            if (l >= 100) return { nome: 'Ouro', classe: 'cat-ouro' };
-            if (l >= 50) return { nome: 'Prata', classe: 'cat-prata' };
-            return { nome: 'Bronze', classe: 'cat-bronze' };
         }
 
         function renderOuvintes() {
@@ -597,6 +554,9 @@
                 const email = conta.email || pref.email || 'Não informado';
                 const criadoEm = parseTimestamp(conta.criadoEm || 0);
 
+                const ludgins = Number(conta.ludgins || pref.ludgins || 0);
+                const patenteInfo = calcularPatente(ludgins);
+
                 const t1 = parseTimestamp(pref.lastActive);
                 const t2 = parseTimestamp(pref.timestamp);
                 const t3 = parseTimestamp(pref.ultimaAtividade);
@@ -604,6 +564,7 @@
 
                 const explicitStatus = (pref.status || '').toLowerCase();
                 const explicitOnline = (pref.online === true);
+                
                 const isOnline = (explicitStatus === 'online' || explicitOnline || (lastActive > 0 && (agora - lastActive < 90000)));
 
                 const loginTimestamp = parseTimestamp(pref.loginTimestamp || (isOnline ? (lastActive || criadoEm || agora) : 0));
@@ -612,10 +573,6 @@
                 const tempoSessaoCompletoSalvo = pref.tempoSessaoCompletoSalvo || 0;
                 const tempoRadioSegundos = pref.tempoRadioSegundos || 0;
                 const radioStart = parseTimestamp(pref.radioStart || (isOnline ? loginTimestamp : 0));
-
-                // Monitoramento em tempo real dos Ludgins nas duas fontes (contas ou preferências)
-                const ludgins = conta.ludgins !== undefined ? conta.ludgins : (pref.ludgins !== undefined ? pref.ludgins : 0);
-                const categoriaInfo = calcularCategoria(ludgins);
 
                 listaOuvintesMonitor.push({
                     key: k,
@@ -630,7 +587,7 @@
                     tempoRadioSegundos: tempoRadioSegundos,
                     radioStart: radioStart,
                     ludgins: ludgins,
-                    categoriaInfo: categoriaInfo
+                    patente: patenteInfo
                 });
             });
 
@@ -673,21 +630,23 @@
 
                 div.innerHTML = `
                     <div class="user-header-bar" onclick="toggleUserCard('${k}')">
-                        <span class="user-title">
-                            ${iconHeader} ${ouvinte.nome}
-                            <span class="badge-categoria ${ouvinte.categoriaInfo.classe}">${ouvinte.categoriaInfo.nome}</span>
+                        <span class="user-title" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                            ${iconHeader} ${ouvinte.nome} 
+                            <span style="font-size: 10px; padding: 2px 8px; border-radius: 6px; background: rgba(255,255,255,0.08); color: ${ouvinte.patente.cor}; border: 1px solid ${ouvinte.patente.cor}44; font-weight: bold;">
+                                ${ouvinte.patente.nome}
+                            </span>
                             <i class="fas fa-chevron-down chevron-icon"></i>
                         </span>
-                        <div style="display:flex; align-items:center; gap:12px;">
+                        <div style="display:flex; align-items: center; gap:10px;">
                             <span class="status-badge ${ouvinte.isOnline ? 'online' : 'offline'}">${ouvinte.isOnline ? 'online' : 'off'}</span>
-                            <i class="fas fa-trash-alt" style="color: #ff4444; cursor: pointer; font-size: 13px;" 
+                            <i class="fas fa-trash-alt" style="color: #ff4444; cursor: pointer; font-size: 12px;" 
                                title="Excluir Ouvinte" onclick="event.stopPropagation(); deletarOuvinte('${k}')"></i>
                         </div>
                     </div>
                     <div class="user-details-wrapper">
                         <div class="user-details-bar">
                             <div>E-mail: <strong>${ouvinte.email}</strong></div>
-                            <div>Ludgins / Pontos: <strong style="color: var(--purple-light);">${ouvinte.ludgins}</strong></div>
+                            <div>Ludgins (Pontos): <strong style="color: #f59e0b;">${ouvinte.ludgins}</strong></div>
                             <div>Nome da Rádio: <strong class="radio-destaque">${displayUltimaRadio}</strong></div>
                             <div>Tempo de Sessão: <b style="color:#38bdf8" id="ts-${safeKey}" data-login="${ouvinte.loginTimestamp}" data-salvo="${ouvinte.tempoSessaoCompletoSalvo}" data-online="${ouvinte.isOnline}">${formatarTempo(tempoSessaoSegundos)}</b></div>
                             <div>Tempo nessa Rádio: <b style="color:#a855f7" id="tr-${safeKey}" data-radio-start="${ouvinte.radioStart}" data-salvo="${ouvinte.tempoRadioSegundos}" data-online="${ouvinte.isOnline}">${formatarTempo(tempoRadioAtualSegundos)}</b></div>
