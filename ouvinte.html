@@ -1556,18 +1556,16 @@
 
         let customizacoesCards = {};
 
-        // Sincronizar dados iniciais do ouvinte diretamente do Firebase
+        // Sincronização e carregamento inicial do Firebase para o Ouvinte
         db.ref('ouvintes_preferencias/' + ouvinteId).on('value', snap => {
             if (snap.exists()) {
                 const dados = snap.val();
-                meusLudgins = dados.ludgins !== undefined ? dados.ludgins : 0;
-                patenteAtual = dados.patente || 'Bronze';
+                if (dados.ludgins !== undefined) meusLudgins = parseInt(dados.ludgins) || 0;
+                if (dados.patente !== undefined) patenteAtual = dados.patente;
                 if (dados.desbloqueios) desbloqueios = dados.desbloqueios;
                 if (dados.customizacoes_cards) customizacoesCards = dados.customizacoes_cards;
-                if (dados.playlist) playlistKeys = dados.playlist;
             }
             atualizarInterfaceLudginsEPatente();
-            renderizarPlaylistDireita();
         });
 
         function tocarSomSuaveSucesso() {
@@ -1712,7 +1710,7 @@
         function resgatarBonusLudginsCentral() {
             const hoje = new Date().toDateString();
             
-            db.ref('ouvintes_preferencias/' + ouvinteId + '/ultimo_resgate_bonus').once('value').then(snap => {
+            db.ref('ouvintes_preferencias/' + ouvinteId + '/ultimo_resgate_bonus').once('value', snap => {
                 const ultimoResgate = snap.val();
 
                 if (ultimoResgate === hoje) {
@@ -1721,10 +1719,7 @@
                 }
 
                 meusLudgins += 3;
-                db.ref('ouvintes_preferencias/' + ouvinteId).update({
-                    ultimo_resgate_bonus: hoje
-                });
-                
+                db.ref('ouvintes_preferencias/' + ouvinteId + '/ultimo_resgate_bonus').set(hoje);
                 salvarProgressoLudgins();
                 tocarSomSuaveSucesso();
 
@@ -2226,13 +2221,10 @@
             if (snap.exists()) {
                 playlistKeys = snap.val();
                 renderizarPainelRadios();
-            }
-        });
-
-        db.ref('ouvintes_preferencias/' + ouvinteId + '/customizacoes_cards').on('value', snap => {
-            if (snap.exists()) {
-                customizacoesCards = snap.val();
-                renderizarPlaylistDireita();
+            } else if (todasRadios.length > 0) {
+                playlistKeys = todasRadios.map(r => r.key);
+                salvarPreferenciasOuvinte();
+                renderizarPainelRadios();
             }
         });
 
@@ -2252,7 +2244,7 @@
 
             todasRadios.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
 
-            db.ref('ouvintes_preferencias/' + ouvinteId + '/playlist').once('value').then(snapPlaylist => {
+            db.ref('ouvintes_preferencias/' + ouvinteId + '/playlist').once('value', snapPlaylist => {
                 if (!snapPlaylist.exists() && playlistKeys.length === 0) {
                     playlistKeys = todasRadios.map(r => r.key);
                     salvarPreferenciasOuvinte();
@@ -2379,7 +2371,7 @@
             if (!customizacoesCards[cardSendoEditadoKey]) customizacoesCards[cardSendoEditadoKey] = {};
             customizacoesCards[cardSendoEditadoKey].cor = corHex;
             
-            persistirCustomizacoesCards();
+            sincronizarFirebaseOuvinteOnline();
             fecharModalPersonalizacao();
         }
 
@@ -2388,13 +2380,8 @@
             if (!customizacoesCards[cardSendoEditadoKey]) customizacoesCards[cardSendoEditadoKey] = {};
             customizacoesCards[cardSendoEditadoKey].emoji = emoji;
             
-            persistirCustomizacoesCards();
+            sincronizarFirebaseOuvinteOnline();
             fecharModalPersonalizacao();
-        }
-
-        function persistirCustomizacoesCards() {
-            db.ref('ouvintes_preferencias/' + ouvinteId + '/customizacoes_cards').set(customizacoesCards);
-            renderizarPlaylistDireita();
         }
 
         function togglePlaylistRadio(key) {
