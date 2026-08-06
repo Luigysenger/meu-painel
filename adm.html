@@ -554,7 +554,18 @@
                 const email = conta.email || pref.email || 'Não informado';
                 const criadoEm = parseTimestamp(conta.criadoEm || 0);
 
-                const ludgins = Number(conta.ludgins || pref.ludgins || 0);
+                // Varredura abrangente para encontrar os pontos em qualquer propriedade provável
+                const ludgins = Number(
+                    conta.ludgins ?? 
+                    pref.ludgins ?? 
+                    conta.pontos ?? 
+                    pref.pontos ?? 
+                    conta.score ?? 
+                    pref.score ?? 
+                    conta.xp ?? 
+                    pref.xp ?? 0
+                );
+                
                 const patenteInfo = calcularPatente(ludgins);
 
                 const t1 = parseTimestamp(pref.lastActive);
