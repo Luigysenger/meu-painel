@@ -1,2006 +1,992 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PAINEL OUVINTE - LUIGY</title>
-    
-    <!-- Fonts & Icons -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>Painel do Ouvinte - Web Rádio</title>
+    <!-- FontAwesome para Ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Scripts Firebase, Sortable & Confetti -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Sortable.js para Arrastar e Soltar (Playlist) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <!-- Firebase SDK v8 (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     
     <style>
-        :root { 
-            --primary: #9333ea; 
-            --primary-hover: #a855f7;
-            --primary-glow: rgba(147, 51, 234, 0.35);
-            --pink-accent: #ff007f;
-            --bg: #0b0b0e; 
-            --card: #141419; 
-            --card-border: #23232b;
-            --text-main: #f3f4f6;
-            --text-muted: #9ca3af;
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-color: #3b82f6;
+            --accent-hover: #2563eb;
+            --danger-color: #ef4444;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
         }
 
-        /* CORPO DA PAGINA */
-        html, body {
-            background-color: var(--bg);
-            background-image: 
-                radial-gradient(at 10% 10%, rgba(147, 51, 234, 0.08) 0px, transparent 50%),
-                radial-gradient(at 90% 90%, rgba(255, 0, 127, 0.05) 0px, transparent 50%);
-            color: var(--text-main);
-            font-family: 'Plus Jakarta Sans', sans-serif;
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            width: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
             overflow-x: hidden;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.1) 0px, transparent 50%);
         }
 
-        .wrapper-notebook {
-            width: 100%;
-            max-width: 98vw;
-            margin: 0 auto;
-            padding: 12px clamp(12px, 1.2vw, 22px);
+        header {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--card-border);
+            padding: 15px 30px;
             display: flex;
-            flex-direction: column;
-            box-sizing: border-box;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
-        .header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            background: rgba(20, 20, 25, 0.85); 
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            padding: 14px 24px; 
-            border-radius: 16px; 
-            border: 1px solid var(--card-border); 
-            margin-bottom: 12px; 
-            width: 100%; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            box-sizing: border-box;
-        }
-
-        .header h2 { 
-            margin: 0; 
-            background: linear-gradient(135deg, #a855f7, #ec4899);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-size: 21px; 
-            font-weight: 800;
-            letter-spacing: -0.5px;
-        }
-
-        .user-name-title {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-muted);
-            margin-top: 2px;
+        .logo-area {
             display: flex;
             align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .header-widgets {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #ccc;
-            flex-wrap: wrap;
-            justify-content: flex-end;
-        }
-
-        .widget-item {
-            background: #1a1a22;
-            padding: 9px 14px;
-            border-radius: 10px;
-            border: 1px solid #2d2d38;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .widget-item i {
-            font-size: 16px !important;
-        }
-
-        .relogio-box {
-            font-size: 17px;
-            font-weight: 700;
-            color: #fff;
-        }
-
-        .clima-box {
-            font-size: 16.5px;
-            font-weight: 600;
-            color: #fff;
-        }
-
-        .btn-sair { 
-            background: rgba(239, 68, 68, 0.1); 
-            border: 1px solid rgba(239, 68, 68, 0.3); 
-            color: #ef4444; 
-            padding: 10px 16px; 
-            border-radius: 10px; 
-            cursor: pointer; 
-            font-size: 14px; 
-            font-weight: 700; 
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 7px;
-        }
-
-        .btn-sair:hover {
-            background: #ef4444;
-            color: #fff;
-            box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
-        }
-
-        .frase-centro-playlist {
-            text-align: center;
-            font-size: 14px;
-            font-weight: 700;
-            color: #d8b4fe;
-            letter-spacing: 1px;
-            margin: 0 0 12px 0;
-            width: 100%;
-            background: linear-gradient(90deg, rgba(147, 51, 234, 0), rgba(147, 51, 234, 0.12), rgba(147, 51, 234, 0));
-            padding: 10px;
-            border-radius: 10px;
-            border-top: 1px solid rgba(147, 51, 234, 0.2);
-            border-bottom: 1px solid rgba(147, 51, 234, 0.2);
-            box-sizing: border-box;
-        }
-
-        .main-container { 
-            display: grid; 
-            grid-template-columns: 1fr 1.6fr 1.1fr; 
-            gap: 14px; 
-            width: 100%; 
-            margin-bottom: 120px; 
-            align-items: start;
-        }
-
-        .card-box { 
-            background: var(--card); 
-            border-radius: 18px; 
-            padding: clamp(14px, 1.4vw, 20px); 
-            border: 1px solid var(--card-border); 
-            width: 100%; 
-            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
-            box-sizing: border-box;
-            position: relative;
-        }
-
-        h3 { 
-            color: var(--text-main); 
-            font-size: 13.5px; 
-            font-weight: 800;
-            letter-spacing: 0.4px; 
-            margin-top: 0;
-            margin-bottom: 12px; 
-            text-align: center; 
-        }
-
-        .sub-titulo-secao {
-            font-size: 12.5px;
-            font-weight: 700;
-            text-align: left;
-            color: #c084fc;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .banner-destaque-adm {
-            background: linear-gradient(135deg, rgba(147, 51, 234, 0.15), rgba(255, 0, 127, 0.15));
-            color: #f3e8ff;
-            border: 1px solid rgba(168, 85, 247, 0.4);
-            border-radius: 10px;
-            padding: 9px;
-            font-size: 11px;
-            font-weight: 700;
-            text-align: center;
-            line-height: 1.4;
-            margin-bottom: 8px;
-        }
-
-        .radios-section-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .catalogo-list {
-            display: flex;
-            flex-direction: column;
-            gap: 9px;
-            max-height: clamp(480px, 66vh, 720px);
-            overflow-y: auto;
-            padding-right: 4px;
-        }
-
-        .bar-radio-catalogo {
-            background: #1a1a22;
-            border: 1px solid #2a2a36;
-            border-radius: 12px;
-            padding: 12px 14px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            color: var(--text-main);
-            font-weight: 600;
-            font-size: 13px;
-        }
-
-        .bar-radio-catalogo:hover {
-            border-color: var(--primary);
-            transform: translateX(2px);
-            background: #22222d;
-        }
-
-        .bar-radio-catalogo.adicionada {
-            background: rgba(168, 85, 247, 0.15) !important;
-            color: #e9d5ff !important;
-            border-color: rgba(168, 85, 247, 0.4) !important;
-        }
-
-        .bar-radio-catalogo .btn-add-icon {
-            font-size: 11px;
-            width: 21px;
-            height: 21px;
-            border-radius: 6px;
-            background: #272734;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .bar-radio-catalogo.adicionada .btn-add-icon {
-            background: var(--primary);
-            color: #fff;
-        }
-
-        .playlist-grid-ouvinte {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 12px;
-            width: 100%;
-            max-height: clamp(480px, 66vh, 720px);
-            overflow-y: auto;
-            padding-right: 4px;
         }
 
-        .radio-card-quadrado {
-            aspect-ratio: 1 / 1;
-            border-radius: 14px;
+        .logo-area i {
+            font-size: 24px;
+            color: var(--accent-color);
+        }
+
+        .logo-area h1 {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .user-status-bar {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-badge {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid var(--accent-color);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-badge i {
+            color: var(--warning-color);
+        }
+
+        /* Letreiro de Notícias (Ticker) */
+        .news-ticker {
+            background: rgba(30, 41, 59, 0.9);
+            border-bottom: 1px solid var(--card-border);
+            padding: 8px 0;
+            overflow: hidden;
+            white-space: nowrap;
+            position: relative;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .news-ticker marquee {
+            width: 100%;
+        }
+
+        .news-ticker span {
+            margin-right: 40px;
+            color: var(--text-primary);
+        }
+
+        /* Container Principal */
+        .main-container {
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 25px;
+            display: grid;
+            grid-template-columns: 320px 1fr 350px;
+            gap: 25px;
+            flex: 1;
+        }
+
+        @media (max-width: 1100px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 20px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            position: relative;
+        }
+
+        .panel-card h3 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 10px;
+        }
+
+        /* Overlay de Bloqueio (Loja) */
+        .bloqueado-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(5px);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            border-radius: 16px;
+            z-index: 10;
             text-align: center;
-            padding: 10px;
-            cursor: grab;
-            color: #fff;
-            font-weight: 700;
-            transition: all 0.2s ease;
-            position: relative;
-            border: 1px solid rgba(255,255,255,0.12);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-            overflow: hidden;
+            padding: 20px;
         }
 
-        .radio-card-quadrado::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.5) 100%);
-            z-index: 1;
-        }
-
-        .radio-card-quadrado > * {
-            position: relative;
-            z-index: 2;
-        }
-
-        .radio-card-quadrado:hover {
-            transform: translateY(-2px) scale(1.02);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.6);
-        }
-
-        .radio-card-quadrado:active {
-            cursor: grabbing;
-        }
-
-        .radio-card-quadrado.playing {
-            border: 2px solid #22c55e !important;
-            box-shadow: 0 0 16px rgba(34, 197, 94, 0.5) !important;
-        }
-
-        .radio-card-quadrado i.icon-radio {
-            font-size: clamp(36px, 4.2vw, 54px);
-            margin-bottom: 8px;
-        }
-
-        .antena-piscando {
-            color: #22c55e;
-            font-size: clamp(36px, 4.2vw, 54px) !important;
-            animation: piscar 1.2s infinite ease-in-out;
-        }
-
-        @keyframes piscar {
-            0%, 100% { opacity: 0.4; transform: scale(0.95); }
-            50% { opacity: 1; transform: scale(1.1); }
-        }
-
-        .radio-card-quadrado .radio-name {
-            font-size: clamp(15px, 1.7vw, 19px);
-            font-weight: 800;
-            line-height: 1.3;
-            word-break: break-word;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-        }
-
-        /* ESPORTES E TABELAS */
-        .esportes-container {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            max-height: 220px;
-            overflow-y: auto;
-            padding-right: 2px;
+        .bloqueado-overlay i {
+            font-size: 32px;
+            color: var(--warning-color);
             margin-bottom: 10px;
         }
 
-        .jogo-card-item {
-            background: #181822;
-            border: 1px solid #2a2a3a;
-            border-radius: 10px;
-            padding: 10px 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .campeonato-badge-jogo {
-            font-size: 10px;
-            font-weight: 800;
-            color: #c084fc;
-            background: rgba(168, 85, 247, 0.1);
-            padding: 2px 8px;
-            border-radius: 4px;
-            display: block;
-            width: fit-content;
-            margin: 0 auto;
-            border: 1px solid rgba(168, 85, 247, 0.25);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            text-align: center;
-        }
-
-        .jogo-header-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 10.5px;
-            color: var(--text-muted);
-            font-weight: 700;
-        }
-
-        .live-tag-badge {
-            background: rgba(34, 197, 94, 0.15);
-            color: #22c55e;
-            border: 1px solid rgba(34, 197, 94, 0.4);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 9.5px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            font-weight: 800;
-        }
-
-        .live-tag-badge i {
-            font-size: 7px;
-            animation: piscar 1s infinite ease-in-out;
-        }
-
-        .jogo-placares-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 12.5px;
-            font-weight: 700;
-            color: #fff;
-        }
-
-        .time-nome-box {
-            flex: 1;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .time-nome-box.home { text-align: right; }
-        .time-nome-box.away { text-align: left; }
-
-        .placar-central-num {
-            background: #0f0f14;
-            border: 1px solid #2b2b3b;
-            padding: 4px 10px;
-            border-radius: 6px;
+        .bloqueado-overlay p {
             font-size: 13px;
-            font-weight: 800;
-            color: #4ade80;
-            margin: 0 10px;
-            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
         }
 
-        .gols-artilheiros-box {
-            background: #111117;
-            border-top: 1px dashed #272736;
-            padding-top: 5px;
-            margin-top: 2px;
-            font-size: 10.5px;
-            color: #cbd5e1;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .gol-item-linha {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-weight: 600;
-        }
-
-        .gol-item-linha i {
-            color: #f59e0b;
-            font-size: 10px;
-        }
-
-        .botoes-tabelas-col {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .btn-tabela-esporte {
-            background: linear-gradient(135deg, #1e1e2d, #252538);
-            border: 1px solid #3b3b52;
-            color: #d8b4fe;
-            padding: 9px 12px;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: all 0.2s ease;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .btn-tabela-esporte:hover {
-            border-color: var(--primary);
-            background: linear-gradient(135deg, rgba(147, 51, 234, 0.2), #252538);
-            color: #fff;
-        }
-
-        /* MODAL DE CLASSIFICACAO */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(8px);
-            z-index: 2000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 15px;
-            box-sizing: border-box;
-        }
-
-        .modal-conteudo-box {
-            background: #14141c;
-            border: 1px solid #3a3a52;
-            border-radius: 16px;
-            width: 100%;
-            max-width: 650px;
-            max-height: 85vh;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
-            overflow: hidden;
-        }
-
-        .modal-header-box {
-            padding: 16px 20px;
-            background: #1a1a26;
-            border-bottom: 1px solid #2b2b3d;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-header-box h3 {
-            margin: 0;
-            font-size: 15px;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-fechar-modal {
-            background: none;
+        .btn-comprar {
+            background: var(--accent-color);
+            color: white;
             border: none;
-            color: #9ca3af;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .btn-comprar:hover {
+            background: var(--accent-hover);
+        }
+
+        /* Coluna Esquerda: Player & Playlist */
+        .player-box {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .player-info h4 {
             font-size: 18px;
-            cursor: pointer;
-            transition: color 0.2s;
+            margin-bottom: 5px;
         }
 
-        .btn-fechar-modal:hover { color: #ef4444; }
-
-        .modal-body-tabela {
-            padding: 15px 20px;
-            overflow-y: auto;
-            flex: 1;
-        }
-
-        .tabela-classificacao-full {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 12.5px;
-        }
-
-        .tabela-classificacao-full th {
-            background: #1e1e2e;
-            color: #a855f7;
-            padding: 8px 6px;
-            text-align: left;
-            font-weight: 800;
-            border-bottom: 2px solid #2e2e42;
-        }
-
-        .tabela-classificacao-full td {
-            padding: 8px 6px;
-            border-bottom: 1px solid #222230;
-            color: #e2e8f0;
-            font-weight: 600;
-        }
-
-        .tabela-classificacao-full tr:hover td {
-            background: rgba(147, 51, 234, 0.08);
-        }
-
-        .pos-badge {
-            font-weight: 800;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .seta-verde { color: #22c55e; font-size: 11px; }
-        .seta-vermelha { color: #ef4444; font-size: 11px; }
-        .neutro-pos { color: #64748b; font-size: 11px; }
-
-        /* HOROSCOPO DO DIA */
-        .signos-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            margin-bottom: 14px;
-        }
-
-        .signo-btn {
-            background: #181822;
-            border: 1px solid #2b2b3b;
-            border-radius: 10px;
-            padding: clamp(10px, 1.4vh, 14px) 4px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            color: #cbd5e1;
-        }
-
-        .signo-btn:hover, .signo-btn.ativo {
-            background: linear-gradient(135deg, rgba(147, 51, 234, 0.35), rgba(255, 0, 127, 0.35));
-            border-color: #a855f7;
-            color: #fff;
-            transform: translateY(-1px);
-        }
-
-        .signo-btn.ativo {
-            box-shadow: 0 0 12px rgba(168, 85, 247, 0.4);
-        }
-
-        .signo-btn i {
-            font-size: 19px;
-            margin-bottom: 4px;
-            color: #c084fc;
-        }
-
-        .signo-btn span {
-            font-size: 11px;
-            font-weight: 800;
-            letter-spacing: 0.3px;
-        }
-
-        .horoscopo-display {
-            background: #0d0d12;
-            border: 1px solid #2b2b3b;
-            border-radius: 12px;
-            padding: 14px;
-            font-size: 13.5px;
-            line-height: 1.5;
-            color: #f1f5f9;
-            min-height: 120px;
-            max-height: 170px;
-            overflow-y: auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-        }
-
-        .horoscopo-display span.signo-titulo {
-            font-weight: 800;
-            color: #d8b4fe;
-            display: block;
-            margin-bottom: 4px;
-            font-size: 14.5px;
-        }
-
-        /* CHAT */
-        .input-msg { 
-            width: 100%; 
-            background: #0f0f14; 
-            border: 1px solid #272734; 
-            border-radius: 10px; 
-            color: #fff; 
-            padding: 11px 13px; 
-            margin-bottom: 8px; 
-            outline: none; 
-            resize: none;
+        .player-info p {
+            color: var(--text-secondary);
             font-size: 13px;
-            font-family: inherit;
-            box-sizing: border-box;
-        }
-
-        .input-msg:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 12px var(--primary-glow);
-        }
-
-        .btn-enviar { 
-            background: linear-gradient(135deg, var(--primary), #7e22ce); 
-            color: #fff; 
-            border: none; 
-            padding: 10px; 
-            border-radius: 10px; 
-            font-weight: 700; 
-            font-size: 13px;
-            width: 100%; 
-            cursor: pointer; 
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 12px var(--primary-glow);
-            margin-bottom: 8px;
-        }
-
-        .btn-enviar:hover {
-            transform: translateY(-1px);
-            background: linear-gradient(135deg, var(--primary-hover), #9333ea);
-        }
-
-        .chat-container {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            max-height: 180px;
-            overflow-y: auto;
-            padding: 10px;
-            background: #0d0d12;
-            border-radius: 10px;
-            border: 1px solid #22222e;
-        }
-
-        .chat-bubble-ouvinte {
-            align-self: flex-start;
-            background: linear-gradient(135deg, #2e1045, #1e0b2e);
-            border: 1px solid rgba(168, 85, 247, 0.3);
-            color: #fff;
-            padding: 8px 12px;
-            border-radius: 10px 10px 10px 3px;
-            max-width: 85%;
-        }
-
-        .chat-bubble-adm {
-            align-self: flex-end;
-            background: linear-gradient(135deg, #063726, #032217);
-            border: 1px solid rgba(34, 197, 94, 0.4);
-            color: #fff;
-            padding: 8px 12px;
-            border-radius: 10px 10px 3px 10px;
-            max-width: 85%;
-        }
-
-        .chat-sender-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 3px;
-        }
-
-        .chat-sender-name {
-            font-size: 10.5px;
-            font-weight: 800;
-        }
-
-        .chat-sender-name.adm { color: #4ade80; }
-        .chat-sender-name.ouvinte { color: #e9d5ff; }
-
-        .chat-text {
-            font-size: 12.5px;
-            line-height: 1.4;
-            word-break: break-word;
-        }
-
-        .chat-time {
-            font-size: 9.5px;
-            color: #94a3b8;
-            text-align: right;
-            margin-top: 2px;
-        }
-
-        .btn-delete-chat {
-            background: none;
-            border: none;
-            color: #f87171;
-            cursor: pointer;
-            font-size: 10px;
-            opacity: 0.7;
-            padding: 0;
-        }
-
-        /* CUSTOMIZAÇÃO DE CARDS (PINCEL) */
-        .btn-pincel-card {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #fff;
-            width: 28px;
-            height: 28px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            cursor: pointer;
-            z-index: 3;
-            transition: background 0.2s;
-        }
-        .btn-pincel-card:hover {
-            background: var(--primary);
-        }
-
-        .modal-personalizacao-card {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(8px);
-            z-index: 2500;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 15px;
-            box-sizing: border-box;
-        }
-
-        .card-custom-content {
-            background: #14141c;
-            border: 1px solid #3a3a52;
-            border-radius: 16px;
-            width: 100%;
-            max-width: 450px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
-        }
-
-        .cores-paleta-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
-        }
-
-        .cor-opcao-btn {
-            width: 100%;
-            aspect-ratio: 1/1;
-            border-radius: 8px;
-            border: 2px solid transparent;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .cor-opcao-btn:hover {
-            transform: scale(1.1);
-            border-color: #fff;
-        }
-
-        .emojis-card-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
-        }
-
-        .emoji-opcao-btn {
-            background: #1e1e2d;
-            border: 1px solid #3b3b52;
-            border-radius: 8px;
-            font-size: 20px;
-            aspect-ratio: 1/1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .emoji-opcao-btn:hover {
-            background: var(--primary);
-        }
-
-        .player-footer { 
-            position: fixed; 
-            bottom: 54px; 
-            left: 50%;
-            transform: translateX(-50%);
-            width: min(840px, 92vw);
-            background: rgba(18, 18, 24, 0.92); 
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            padding: 11px 22px; 
-            border-radius: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.12); 
-            z-index: 1000; 
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between;
-            gap: 14px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.7);
-            box-sizing: border-box;
-        }
-
-        .player-info { 
-            text-align: left;
-            flex: 1;
-            overflow: hidden;
-        }
-
-        #player-title {
-            font-size: 13.5px;
-            font-weight: 700;
-            color: #fff;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            margin-bottom: 15px;
         }
 
         .player-controls {
             display: flex;
-            align-items: center;
-            gap: 9px;
-        }
-
-        .btn-control-step {
-            background: #252532;
-            color: #fff;
-            border: 1px solid #3b3b4f;
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
             justify-content: center;
-            font-size: 11.5px;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            align-items: center;
+            gap: 15px;
         }
 
-        .btn-control-step:hover {
-            border-color: var(--primary);
-            color: var(--primary-hover);
-        }
-
-        .btn-play {
-            background: linear-gradient(135deg, var(--primary), #a855f7);
-            color: #fff;
+        .btn-player {
+            background: var(--accent-color);
+            color: white;
             border: none;
-            width: 42px;
-            height: 42px;
-            border-radius: 12px;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 13.5px;
-            cursor: pointer;
-            box-shadow: 0 0 15px var(--primary-glow);
+            transition: transform 0.2s, background 0.2s;
         }
 
-        .news-ticker-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100vw;
-            height: 44px;
-            background: #09090c;
-            border-top: 1px solid #2a2a3d;
-            z-index: 1001;
+        .btn-player:hover {
+            transform: scale(1.05);
+            background: var(--accent-hover);
+        }
+
+        .playlist-list {
+            list-style: none;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .playlist-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--card-border);
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
             display: flex;
             align-items: center;
-            overflow: hidden;
+            justify-content: space-between;
+            cursor: grab;
+            transition: background 0.2s;
         }
 
-        .news-ticker-badge {
-            background: #dc2626;
-            color: #fff;
-            font-size: 13px;
-            font-weight: 800;
-            padding: 0 16px;
-            height: 100%;
+        .playlist-item:active {
+            cursor: grabbing;
+        }
+
+        .playlist-item:hover {
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        /* Coluna Central: Chat, Esportes, Horóscopo */
+        .central-content {
             display: flex;
-            align-items: center;
-            gap: 7px;
-            white-space: nowrap;
-            z-index: 10;
-            box-shadow: 12px 0 25px rgba(0,0,0,0.9);
-            flex-shrink: 0;
+            flex-direction: column;
+            gap: 25px;
         }
 
-        .news-ticker-badge i {
-            animation: piscar 1.2s infinite ease-in-out;
-            font-size: 9px;
+        .chat-box {
+            display: flex;
+            flex-direction: column;
+            height: 300px;
         }
 
-        .news-ticker-wrapper {
+        .chat-messages {
             flex: 1;
-            overflow: hidden;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            font-size: 13px;
             display: flex;
-            align-items: center;
-            position: relative;
+            flex-direction: column;
+            gap: 8px;
         }
 
-        .news-ticker-content {
+        .chat-msg {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 6px 10px;
+            border-radius: 6px;
+        }
+
+        .chat-msg strong {
+            color: var(--accent-color);
+            margin-right: 5px;
+        }
+
+        .chat-input-area {
             display: flex;
-            align-items: center;
-            white-space: nowrap;
-            animation: ticker-slide 75s linear infinite;
+            gap: 8px;
         }
 
-        .news-ticker-bar:hover .news-ticker-content {
-            animation-play-state: paused;
+        .chat-input-area input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            padding: 8px 12px;
+            border-radius: 6px;
+            color: white;
+            outline: none;
         }
 
-        .news-block-repeat {
-            display: flex;
-            align-items: center;
-            gap: 40px;
-            padding-right: 40px;
-            flex-shrink: 0;
+        .chat-input-area button {
+            background: var(--accent-color);
+            border: none;
+            color: white;
+            padding: 0 15px;
+            border-radius: 6px;
+            cursor: pointer;
         }
 
-        .news-item-link {
-            color: #ffffff;
-            font-size: 17px;
-            font-weight: 700;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 9px;
-            transition: color 0.2s ease;
-            white-space: nowrap;
+        .grid-modules {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
         }
 
-        .news-item-link:hover {
-            color: #c084fc;
-        }
-
-        .news-item-divider {
-            color: #a855f7;
-            font-size: 12px;
-        }
-
-        @keyframes ticker-slide {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-
-        @media (max-width: 1024px) {
-            .wrapper-notebook {
-                max-width: 100%;
-                padding: 14px 16px;
-            }
-            .main-container {
+        @media (max-width: 768px) {
+            .grid-modules {
                 grid-template-columns: 1fr;
             }
-            .playlist-grid-ouvinte {
-                grid-template-columns: repeat(3, minmax(0, 1fr));
-            }
         }
 
-        @media (max-width: 600px) {
-            .playlist-grid-ouvinte {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-            .signos-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
+        /* Coluna Direita: Loja, Clima e Ranking */
+        .right-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
         }
 
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-thumb { background: #272736; border-radius: 8px; }
+        .store-items {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .store-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--card-border);
+            padding: 10px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .store-item-info h5 {
+            font-size: 13px;
+            margin-bottom: 2px;
+        }
+
+        .store-item-info span {
+            font-size: 11px;
+            color: var(--warning-color);
+        }
+
+        .clima-widget {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .clima-widget strong {
+            color: var(--text-primary);
+        }
+
+        .ranking-list {
+            list-style: none;
+            font-size: 13px;
+        }
+
+        .ranking-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .ranking-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Modal de Identificação Inicial */
+        .modal-login {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(15px);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 30px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 15px;
+            font-size: 22px;
+        }
+
+        .modal-content p {
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .modal-content input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            padding: 12px;
+            border-radius: 8px;
+            color: white;
+            font-size: 15px;
+            margin-bottom: 15px;
+            outline: none;
+            text-align: center;
+        }
+
+        .modal-content button {
+            width: 100%;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .modal-content button:hover {
+            background: var(--accent-hover);
+        }
     </style>
 </head>
 <body>
 
-    <div class="wrapper-notebook">
-
-        <div class="header">
-            <div>
-                <h2>Painel do Ouvinte</h2>
-                <div class="user-name-title">
-                    <span id="nome-ouvinte-display"></span>
-                </div>
-            </div>
-
-            <div class="header-widgets">
-                <div class="widget-item">
-                    <i class="far fa-clock" style="color: var(--primary);"></i>
-                    <span id="relogio-digital" class="relogio-box">00:00:00</span>
-                </div>
-                
-                <div class="widget-item">
-                    <span id="icone-clima-dinamico"><i class="fas fa-sun" style="color: #eab308;"></i></span>
-                    <span id="clima-cidade" class="clima-box">Carregando...</span>
-                </div>
-                
-                <button class="btn-sair" onclick="logout()">
-                    <i class="fas fa-sign-out-alt"></i> SAIR
-                </button>
-            </div>
-        </div>
-
-        <div class="frase-centro-playlist">
-            <i class="fas fa-headphones" style="margin-right: 6px;"></i> CURTA AQUI SUAS RADIOS PREFERIDAS
-        </div>
-
-        <div class="main-container">
-
-            <!-- CARD 1: ADICIONAR RADIOS -->
-            <div class="card-box">
-                <h3>GERENCIAR SUAS RADIOS PREFERIDAS</h3>
-                <div class="radios-section-container">
-                    <div>
-                        <h3 class="sub-titulo-secao"><i class="fas fa-plus-circle"></i> 1. ADICIONE SUAS RADIOS</h3>
-                        <div id="catalogo-radios" class="catalogo-list"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- CARD 2: SUAS RADIOS PREFERIDAS -->
-            <div class="card-box" id="card-box-playlist">
-                <h3>GERENCIAR SUAS RADIOS PREFERIDAS</h3>
-                <div class="radios-section-container">
-                    <div>
-                        <h3 class="sub-titulo-secao"><i class="fas fa-sort"></i> 2. ARRASTE PARA REORDENAR</h3>
-                        <div id="grid-playlist" class="playlist-grid-ouvinte"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- CARD 3: COLUNA DIREITA -->
-            <div class="coluna-direita" style="display: flex; flex-direction: column; gap: 14px;">
-                
-                <!-- QUADRO DE FUTEBOL -->
-                <div class="card-box" id="card-box-esportes" style="padding: 16px;">
-                    <h3 style="margin-bottom: 10px; font-size: 13.5px;"><i class="fas fa-futbol" style="color: #22c55e;"></i> FUTEBOL: JOGOS & TABELAS</h3>
-                    <div id="lista-jogos-esportes" class="esportes-container">
-                        <p style="color:#666; font-size:11.5px; text-align:center; margin:10px 0;">Carregando jogos da semana...</p>
-                    </div>
-
-                    <div class="botoes-tabelas-col">
-                        <button class="btn-tabela-esporte" onclick="abrirModalTabela('brasileirao')">
-                            <span><i class="fas fa-table" style="color: #a855f7; margin-right: 6px;"></i> Confira a tabela e classificacao</span>
-                            <i class="fas fa-chevron-right" style="font-size: 10px;"></i>
-                        </button>
-                        <button class="btn-tabela-esporte" onclick="abrirModalTabela('copadobrasil')">
-                            <span><i class="fas fa-trophy" style="color: #eab308; margin-right: 6px;"></i> Confira aqui a tabela e classificacao da Copa do Brasil</span>
-                            <i class="fas fa-chevron-right" style="font-size: 10px;"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- HOROSCOPO DO DIA -->
-                <div class="card-box" id="card-box-horoscopo" style="padding: 16px;">
-                    <h3 style="margin-bottom: 10px; font-size: 13.5px;"><i class="fas fa-star-of-david" style="color: #c084fc;"></i> HOROSCOPO DO DIA</h3>
-                    <div class="signos-grid">
-                        <div class="signo-btn" onclick="carregarHoroscopo('aries', this)"><i class="fas fa-aries"></i><span>ARIES</span></div>
-                        <div class="signo-btn" onclick="carregarHoroscopo('taurus', this)"><i class="fas fa-taurus"></i><span>TOURO</span></div>
-                        <div class="signo-btn" onclick="carregarHoroscopo('gemini', this)"><i class="fas fa-gemini"></i><span>GEMEOS</span></div>
-                        <div class="signo-btn" onclick="carregarHoroscopo('cancer', this)"><i class="fas fa-cancer"></i><span>CANCER</span></div>
-                        <div class="signo-btn" onclick="carregarHoroscopo('leo', this)"><i class="fas fa-leo"></i><span>LEAO</span></div>
-                        <div class="signo-btn" onclick="carregarHoroscopo('virgo', this)"><i class="fas fa-virgo"></i><span>VIRGEM</span></div>
-                        <div class="signo-btn" onclick="carregarHoroscopo('libra', this)"><i class="fas fa-libra"></i><span>LIBRA</span></div>
-                        <div class="signo-btn" onclick="carregarHoroscopo('scorpio', this)"><i class="fas fa-scorpio"></i><span>ESCORPIAO</span></div>
-                        <div class="signo-btn" onclick="carregarHoroscopo('sagittarius', this)"><i class="fas fa-sagittarius"></i><span>SAGITARIO</span></div>
-                        <div class="signo-btn" onclick="carregarHoroscopo('capricorn', this)"><i class="fas fa-capricorn"></i><span>CAPRICORNIO</span></div>
-                        <div class="signo-btn" onclick="carregarHoroscopo('aquarius', this)"><i class="fas fa-aquarius"></i><span>AQUARIO</span></div>
-                        <div class="signo-btn" onclick="carregarHoroscopo('pisces', this)"><i class="fas fa-pisces"></i><span>PEIXES</span></div>
-                    </div>
-                    <div class="horoscopo-display" id="horoscopo-texto">
-                        Clique em um signo acima para ver a previsao astral! ✨
-                    </div>
-                </div>
-
-                <!-- CARD DE MENSAGENS -->
-                <div class="card-box" id="card-box-chat" style="padding: 16px;">
-                    <div class="banner-destaque-adm">
-                        <i class="fas fa-paper-plane" style="margin-right: 4px;"></i> MANDE MENSAGEM PARA O ADM PARA PEDIR PARA ADICIONAR UMA RADIO QUE VOCE GOSTE
-                    </div>
-
-                    <textarea id="texto-mensagem" class="input-msg" rows="3" placeholder="Escreva seu recado ou pedido de radio aqui... (Enter envia)" onkeydown="handleKeyDown(event)"></textarea>
-                    <button class="btn-enviar" onclick="enviarMensagem()"><i class="fas fa-paper-plane"></i> Enviar Mensagem</button>
-
-                    <h3 style="margin-top: 12px; margin-bottom: 8px; text-align: left; font-size: 13px;"><i class="fas fa-comments"></i> SUAS MENSAGENS E RESPOSTAS</h3>
-                    <div id="lista-respostas-adm" class="chat-container"></div>
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <!-- MODAL DE EXIBICAO DAS TABELAS -->
-    <div id="modal-tabela" class="modal-overlay" onclick="fecharModalFora(event)">
-        <div class="modal-conteudo-box">
-            <div class="modal-header-box">
-                <h3 id="modal-titulo-tabela"><i class="fas fa-trophy" style="color: #a855f7;"></i> Classificacao</h3>
-                <button class="btn-fechar-modal" onclick="fecharModalTabela()"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="modal-body-tabela" id="modal-corpo-tabela"></div>
+    <!-- Modal de Identificação Inicial (Garante Sincronização Firebase) -->
+    <div id="modalLogin" class="modal-login">
+        <div class="modal-content">
+            <h2>Bem-vindo ao Painel</h2>
+            <p>Digite seu Apelido (Nickname) para carregar seu progresso e sincronizar na nuvem:</p>
+            <input type="text" id="inputNickname" placeholder="Seu apelido..." autocomplete="off">
+            <button onclick="entrarNoPainel()">Entrar no Painel</button>
         </div>
     </div>
 
-    <!-- MODAL DE PERSONALIZACAO DE CARD -->
-    <div id="modal-personalizacao" class="modal-personalizacao-card" onclick="fecharModalPersonalizacaoFora(event)">
-        <div class="card-custom-content">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h3 style="margin: 0; color: #fff;"><i class="fas fa-paint-brush" style="color: #a855f7;"></i> Personalizar Card</h3>
-                <button class="btn-fechar-modal" onclick="fecharModalPersonalizacao()"><i class="fas fa-times"></i></button>
+    <!-- Header -->
+    <header>
+        <div class="logo-area">
+            <i class="fa-solid fa-radio"></i>
+            <h1>Painel do Ouvinte</h1>
+        </div>
+        <div class="user-status-bar">
+            <div class="user-badge">
+                <i class="fa-solid fa-coins"></i>
+                <span id="txtLudgins">0</span> Ludgins
             </div>
-            
-            <div>
-                <label style="font-size: 12px; font-weight: 700; color: #c084fc; display: block; margin-bottom: 6px;">Escolha a Cor do Card:</label>
-                <div class="cores-paleta-grid" id="paleta-cores-container"></div>
-            </div>
-
-            <div>
-                <label style="font-size: 12px; font-weight: 700; color: #c084fc; display: block; margin-bottom: 6px;">Escolha o Ícone (Emoji):</label>
-                <div class="emojis-card-grid" id="emojis-card-container"></div>
+            <div class="user-badge" style="border-color: var(--warning-color); background: rgba(245, 158, 11, 0.1);">
+                <i class="fa-solid fa-award" style="color: var(--warning-color);"></i>
+                <span id="txtPatente">Bronze</span>
             </div>
         </div>
+    </header>
+
+    <!-- Letreiro de Notícias (Ticker G1 via RSS) -->
+    <div class="news-ticker">
+        <marquee scrollamount="5" scrolldelay="0" onmouseover="this.stop();" onmouseout="this.start();">
+            <span id="tickerContent"><i class="fa-solid fa-spinner fa-spin"></i> Carregando notícias em tempo real...</span>
+        </marquee>
     </div>
 
-    <!-- PLAYER RODAPE -->
-    <div class="player-footer">
-        <div class="player-info">
-            <div id="player-title">Nenhuma radio selecionada</div>
-        </div>
+    <!-- Conteúdo Principal -->
+    <div class="main-container">
         
-        <div class="player-controls">
-            <button class="btn-control-step" title="Radio Anterior" onclick="mudarRadio(-1)">
-                <i class="fas fa-step-backward"></i>
-            </button>
-            
-            <button id="btn-play" class="btn-play" onclick="togglePlay()">
-                <i class="fas fa-play"></i>
-            </button>
-            
-            <button class="btn-control-step" title="Proxima Radio" onclick="mudarRadio(1)">
-                <i class="fas fa-step-forward"></i>
-            </button>
+        <!-- COLUNA 1: Player & Playlist Dinâmica -->
+        <div class="panel-card">
+            <h3><i class="fa-solid fa-headphones"></i> Player & Playlist</h3>
+            <div class="player-box">
+                <div class="player-info">
+                    <h4 id="currentRadioName">Selecione uma rádio</h4>
+                    <p id="currentRadioGenre">Web Rádio Ao Vivo</p>
+                </div>
+                <div class="player-controls">
+                    <button class="btn-player" onclick="togglePlay()"><i id="playIcon" class="fa-solid fa-play"></i></button>
+                </div>
+                <audio id="audioStream"></audio>
+            </div>
+            <h4 style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">Arraste para organizar sua playlist:</h4>
+            <ul id="playlist" class="playlist-list">
+                <!-- Preenchido via JS -->
+            </ul>
         </div>
-    </div>
 
-    <!-- LETREIRO DE NOTICIAS BRASIL -->
-    <div class="news-ticker-bar">
-        <div class="news-ticker-badge">
-            <i class="fas fa-circle"></i> NOTICIAS DO BRASIL
-        </div>
-        <div class="news-ticker-wrapper">
-            <div class="news-ticker-content" id="ticker-noticias-container">
-                <div class="news-block-repeat">
-                    <span class="news-item-link">Carregando ultimas manchetes do Brasil...</span>
+        <!-- COLUNA 2: Módulos Centrais (Chat, Esportes, Horóscopo) -->
+        <div class="central-content">
+            
+            <!-- Módulo de Chat Interativo -->
+            <div class="panel-card" style="position: relative;">
+                <h3><i class="fa-solid fa-comments"></i> Chat da Comunidade</h3>
+                <div id="overlayChat" class="bloqueado-overlay">
+                    <i class="fa-solid fa-lock"></i>
+                    <p>Módulo de Chat bloqueado. Desbloqueie na Loja!</p>
+                    <button class="btn-comprar" onclick="comprarItem('chat')">Desbloquear (20 Ludgins)</button>
+                </div>
+                <div class="chat-box">
+                    <div id="chatMessages" class="chat-messages">
+                        <!-- Mensagens do Chat -->
+                    </div>
+                    <div class="chat-input-area">
+                        <input type="text" id="inputChat" placeholder="Digite sua mensagem..." autocomplete="off">
+                        <button onclick="enviarMensagemChat()"><i class="fa-solid fa-paper-plane"></i></button>
+                    </div>
                 </div>
             </div>
+
+            <div class="grid-modules">
+                <!-- Módulo de Esportes -->
+                <div class="panel-card" style="position: relative;">
+                    <h3><i class="fa-solid fa-futbol"></i> Placar Esportivo</h3>
+                    <div id="overlayEsportes" class="bloqueado-overlay">
+                        <i class="fa-solid fa-lock"></i>
+                        <p>Bloqueado. Adquira na Loja!</p>
+                        <button class="btn-comprar" onclick="comprarItem('esportes')">Desbloquear (70 Ludgins)</button>
+                    </div>
+                    <div style="font-size: 13px; color: var(--text-secondary);">
+                        <p style="margin-bottom: 6px;"><strong>Brasileirão (Ao Vivo):</strong></p>
+                        <p>Flamengo <span style="color: var(--success-color);">2</span> x <span style="color: var(--danger-color);">1</span> Palmeiras</p>
+                        <p style="margin-top: 10px; margin-bottom: 6px;"><strong>Copa do Brasil:</strong></p>
+                        <p>Corinthians <span style="color: var(--text-primary);">0</span> x <span style="color: var(--text-primary);">0</span> São Paulo</p>
+                    </div>
+                </div>
+
+                <!-- Módulo de Horóscopo -->
+                <div class="panel-card" style="position: relative;">
+                    <h3><i class="fa-solid fa-star"></i> Horóscopo do Dia</h3>
+                    <div id="overlayHoroscopo" class="bloqueado-overlay">
+                        <i class="fa-solid fa-lock"></i>
+                        <p>Bloqueado. Adquira na Loja!</p>
+                        <button class="btn-comprar" onclick="comprarItem('horoscopo')">Desbloquear (50 Ludgins)</button>
+                    </div>
+                    <div style="font-size: 13px; color: var(--text-secondary);">
+                        <select id="selectSigno" onchange="atualizarHoroscopo()" style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--card-border); color: white; padding: 6px; border-radius: 6px; margin-bottom: 8px; outline: none;">
+                            <option value="aries">Áries</option>
+                            <option value="touro">Touro</option>
+                            <option value="gemeos">Gêmeos</option>
+                            <option value="cancer">Câncer</option>
+                            <option value="leao">Leão</option>
+                            <option value="virgem">Virgem</option>
+                            <option value="libra">Libra</option>
+                            <option value="escorpiao">Escorpião</option>
+                            <option value="sagitario">Sagitário</option>
+                            <option value="capricornio">Capricórnio</option>
+                            <option value="aquario">Aquário</option>
+                            <option value="peixes">Peixes</option>
+                        </select>
+                        <p id="textoHoroscopo" style="font-style: italic; color: var(--text-primary);">Selecione seu signo para ver a previsão astrológica de hoje.</p>
+                    </div>
+                </div>
+            </div>
+
         </div>
+
+        <!-- COLUNA 3: Loja, Clima Dinâmico e Ranking -->
+        <div class="right-sidebar">
+            
+            <!-- Loja Virtual de Desbloqueios -->
+            <div class="panel-card">
+                <h3><i class="fa-solid fa-store"></i> Loja de Recursos</h3>
+                <div class="store-items">
+                    <div class="store-item">
+                        <div class="store-item-info">
+                            <h5>Chat ao Vivo</h5>
+                            <span>20 Ludgins</span>
+                        </div>
+                        <button id="btnStoreChat" class="btn-comprar" onclick="comprarItem('chat')">Adquirir</button>
+                    </div>
+                    <div class="store-item">
+                        <div class="store-item-info">
+                            <h5>Horóscopo</h5>
+                            <span>50 Ludgins</span>
+                        </div>
+                        <button id="btnStoreHoroscopo" class="btn-comprar" onclick="comprarItem('horoscopo')">Adquirir</button>
+                    </div>
+                    <div class="store-item">
+                        <div class="store-item-info">
+                            <h5>Painel Esportivo</h5>
+                            <span>70 Ludgins</span>
+                        </div>
+                        <button id="btnStoreEsportes" class="btn-comprar" onclick="comprarItem('esportes')">Adquirir</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Clima Dinâmico via Open-Meteo -->
+            <div class="panel-card">
+                <h3><i class="fa-solid fa-cloud-sun"></i> Clima Atual</h3>
+                <div id="climaInfo" class="clima-widget">
+                    <p><i class="fa-solid fa-spinner fa-spin"></i> Buscando previsão meteorológica...</p>
+                </div>
+            </div>
+
+            <!-- Ranking Global de Ouvintes -->
+            <div class="panel-card">
+                <h3><i class="fa-solid fa-trophy"></i> Ranking da Semana</h3>
+                <ul id="rankingList" class="ranking-list">
+                    <!-- Preenchido via Firebase -->
+                </ul>
+            </div>
+
+        </div>
+
     </div>
 
-    <audio id="audio-ouvinte"></audio>
-
+    <!-- Script de Inicialização, Conexão Firebase e Lógica Geral -->
     <script>
+        // Configuração do Firebase Realtime Database
         const firebaseConfig = {
-            apiKey: "ef1aa464f6bacacd0ff6d26c8179aee0",
-            authDomain: "meu-painel-f2efe.firebaseapp.com",
-            databaseURL: "https://meu-painel-f2efe-default-rtdb.firebaseio.com/",
-            projectId: "meu-painel-f2efe"
+            databaseURL: "https://SEU_PROJETO_FIREBASE-default-rtdb.firebaseio.com/"
         };
-        firebase.initializeApp(firebaseConfig);
+
+        // Inicializa Firebase (Caso já esteja inicializado globalmente, previne erros)
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
         const db = firebase.database();
-        const player = document.getElementById('audio-ouvinte');
 
-        const ouvinteId = localStorage.getItem('userId') || ('ouvinte_' + Date.now());
-        if (!localStorage.getItem('userId')) {
-            localStorage.setItem('userId', ouvinteId);
-        }
-        
-        let ouvinteNomeBruto = localStorage.getItem('usuarioNome') || localStorage.getItem('usuarioEmail') || 'Ouvinte Anonimo';
-        if (ouvinteNomeBruto.includes('@')) {
-            ouvinteNomeBruto = ouvinteNomeBruto.split('@')[0];
-        }
-        let ouvinteNome = ouvinteNomeBruto.trim().split(' ')[0];
+        // Variáveis de Estado do Ouvinte
+        let usuarioId = null;
+        let nickname = null;
+        let ludgins = 0;
+        let tempoEscuta = 0;
+        let itensDesbloqueados = {
+            chat: false,
+            horoscopo: false,
+            esportes: false
+        };
+        let ordemRadios = ["radio1", "radio2", "radio3"];
 
-        document.getElementById('nome-ouvinte-display').innerText = "OLA, " + ouvinteNome.toUpperCase();
-
-        let isRadioTocando = false;
-        let cardSendoEditadoKey = null;
-        let customizacoesCards = JSON.parse(localStorage.getItem('customizacoes_cards_' + ouvinteId)) || {};
-
-        function atualizarRelogio() {
-            const agora = new Date();
-            document.getElementById('relogio-digital').innerText = agora.toLocaleTimeString('pt-BR');
-        }
-        setInterval(atualizarRelogio, 1000);
-        atualizarRelogio();
-
-        const cidadesClima = [
-            { nome: 'Cascavel', lat: -24.9578, lon: -53.4595 },
-            { nome: 'Curitiba', lat: -25.4284, lon: -49.2733 },
-            { nome: 'Sao Paulo', lat: -23.5505, lon: -46.6333 },
-            { nome: 'Rio de Janeiro', lat: -22.9068, lon: -43.1729 },
-            { nome: 'Florianopolis', lat: -27.5954, lon: -48.5480 },
-            { nome: 'Salvador', lat: -12.9777, lon: -38.5016 }
-        ];
-        let indiceClima = 0;
-
-        async function atualizarCarrosselClima() {
-            try {
-                const cidade = cidadesClima[indiceClima];
-                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${cidade.lat}&longitude=${cidade.lon}&current_weather=true`);
-                const climaData = await res.json();
-                
-                if (climaData.current_weather) {
-                    const temp = Math.round(climaData.current_weather.temperature);
-                    const code = climaData.current_weather.weathercode;
-
-                    let iconeHTML = '<i class="fas fa-sun" style="color: #eab308; font-size: 18px;"></i>';
-
-                    if (code === 0 || code === 1) {
-                        iconeHTML = '<i class="fas fa-sun" style="color: #eab308; font-size: 18px;"></i>';
-                    } else if (code === 2 || code === 3) {
-                        iconeHTML = '<i class="fas fa-cloud-sun" style="color: #f59e0b; font-size: 18px;"></i>';
-                    } else if (code >= 51 && code <= 99) {
-                        iconeHTML = '<i class="fas fa-cloud-showers-heavy" style="color: #38bdf8; font-size: 18px;"></i>';
-                    } else if (code === 45 || code === 48) {
-                        iconeHTML = '<i class="fas fa-cloud" style="color: #94a3b8; font-size: 18px;"></i>';
-                    }
-
-                    document.getElementById('icone-clima-dinamico').innerHTML = iconeHTML;
-                    document.getElementById('clima-cidade').innerText = `${cidade.nome}: ${temp}°C`;
-                }
-            } catch (e) {
-                document.getElementById('clima-cidade').innerText = "Indisponivel";
-            }
-            indiceClima = (indiceClima + 1) % cidadesClima.length;
-        }
-
-        atualizarCarrosselClima();
-        setInterval(atualizarCarrosselClima, 6000);
-
-        function carregarJogosBrasileiraoSemana() {
-            const containerEsportes = document.getElementById('lista-jogos-esportes');
-            
-            const jogosBrasileirao = [
-                { 
-                    campeonato: "Brasileirao Serie A",
-                    timeA: "Gremio", timeB: "Sao Paulo", data: "Sab, 08/08", hora: "16:00", 
-                    timestamp: new Date(2026, 7, 8, 16, 0).getTime(),
-                    golsA: 1, golsB: 1,
-                    artilheiros: [
-                        { min: "24'", autor: "Luis Suarez (Gremio)" },
-                        { min: "68'", autor: "Calleri (Sao Paulo)" }
-                    ]
-                },
-                { 
-                    campeonato: "Copa do Brasil",
-                    timeA: "Remo", timeB: "Atletico-MG", data: "Sab, 08/08", hora: "18:30", 
-                    timestamp: new Date(2026, 7, 8, 18, 30).getTime(),
-                    golsA: 0, golsB: 2,
-                    artilheiros: [
-                        { min: "12'", autor: "Hulk (Atletico-MG)" },
-                        { min: "81'", autor: "Paulinho (Atletico-MG)" }
-                    ]
-                },
-                { campeonato: "Brasileirao Serie A", timeA: "Coritiba", timeB: "Chapecoense", data: "Sab, 08/08", hora: "20:30", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 8, 20, 30).getTime() },
-                { campeonato: "Brasileirao Serie A", timeA: "Botafogo", timeB: "Fluminense", data: "Sab, 08/08", hora: "21:00", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 8, 21, 0).getTime() },
-                { campeonato: "Brasileirao Serie A", timeA: "Cruzeiro", timeB: "Mirassol", data: "Dom, 09/08", hora: "11:00", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 11, 0).getTime() },
-                { campeonato: "Brasileirao Serie A", timeA: "Bahia", timeB: "Vasco", data: "Dom, 09/08", hora: "16:00", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 16, 0).getTime() },
-                { campeonato: "Copa do Brasil", timeA: "Palmeiras", timeB: "Internacional", data: "Dom, 09/08", hora: "16:00", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 16, 0).getTime() },
-                { campeonato: "Brasileirao Serie A", timeA: "Santos", timeB: "Athletico-PR", data: "Dom, 09/08", hora: "18:30", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 18, 30).getTime() },
-                { campeonato: "Brasileirao Serie A", timeA: "Red Bull Bragantino", timeB: "Corinthians", data: "Dom, 09/08", hora: "18:30", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 18, 30).getTime() },
-                { campeonato: "Brasileirao Serie A", timeA: "Flamengo", timeB: "Vitoria", data: "Dom, 09/08", hora: "19:30", golsA: 0, golsB: 0, artilheiros: [], timestamp: new Date(2026, 7, 9, 19, 30).getTime() }
-            ];
-
-            const agoraTime = new Date().getTime();
-            let htmlJogos = "";
-
-            jogosBrasileirao.forEach(j => {
-                let status = "AGENDADO";
-                let tempoExibicao = j.hora;
-                const duracaoPartidaMs = 110 * 60 * 1000;
-
-                if (agoraTime >= j.timestamp && agoraTime <= (j.timestamp + duracaoPartidaMs)) {
-                    status = "AO VIVO";
-                    const minutosRolando = Math.floor((agoraTime - j.timestamp) / 60000);
-                    tempoExibicao = minutosRolando + "'";
-                } else if (agoraTime > (j.timestamp + duracaoPartidaMs)) {
-                    status = "ENCERRADO";
-                    tempoExibicao = "Fim";
-                }
-
-                const aoVivo = status === "AO VIVO";
-                const mostrarPlacar = aoVivo || status === 'ENCERRADO';
-
-                let htmlArtilheiros = "";
-                if (mostrarPlacar && j.artilheiros && j.artilheiros.length > 0) {
-                    htmlArtilheiros += `<div class="gols-artilheiros-box">`;
-                    j.artilheiros.forEach(g => {
-                        htmlArtilheiros += `
-                            <div class="gol-item-linha">
-                                <i class="fas fa-futbol"></i>
-                                <span><strong>${g.min}</strong> - ${g.autor}</span>
-                            </div>
-                        `;
-                    });
-                    htmlArtilheiros += `</div>`;
-                }
-
-                htmlJogos += `
-                    <div class="jogo-card-item">
-                        <div>
-                            <span class="campeonato-badge-jogo"><i class="fas fa-trophy" style="font-size: 8.5px; margin-right: 3px;"></i> ${j.campeonato}</span>
-                        </div>
-                        <div class="jogo-header-info">
-                            <span><i class="far fa-calendar-alt"></i> ${j.data}</span>
-                            ${aoVivo ? '<span class="live-tag-badge"><i class="fas fa-circle"></i> AO VIVO ' + tempoExibicao + '</span>' : '<span>' + (status === 'AGENDADO' ? 'As ' + j.hora : 'Encerrado') + '</span>'}
-                        </div>
-                        <div class="jogo-placares-row">
-                            <span class="time-nome-box home" title="${j.timeA}">${j.timeA}</span>
-                            <span class="placar-central-num">${mostrarPlacar ? j.golsA + ' x ' + j.golsB : 'VS'}</span>
-                            <span class="time-nome-box away" title="${j.timeB}">${j.timeB}</span>
-                        </div>
-                        ${htmlArtilheiros}
-                    </div>
-                `;
-            });
-
-            containerEsportes.innerHTML = htmlJogos;
-        }
-
-        carregarJogosBrasileiraoSemana();
-        setInterval(carregarJogosBrasileiraoSemana, 30000);
-
-        const tabelaBrasileiraoDados = [
-            { pos: 1, var: 0, time: "Palmeiras", pts: 47, j: 21, v: 14, sg: 22 },
-            { pos: 2, var: 0, time: "Flamengo", pts: 39, j: 20, v: 11, sg: 19 },
-            { pos: 3, var: 0, time: "Athletico-PR", pts: 37, j: 21, v: 11, sg: 9 },
-            { pos: 4, var: 0, time: "Fluminense", pts: 34, j: 21, v: 9, sg: 5 },
-            { pos: 5, var: 1, time: "Bahia", pts: 32, j: 21, v: 8, sg: 4 },
-            { pos: 6, var: -1, time: "Red Bull Bragantino", pts: 31, j: 20, v: 9, sg: 6 },
-            { pos: 7, var: 2, time: "Cruzeiro", pts: 30, j: 21, v: 8, sg: -3 },
-            { pos: 8, var: -1, time: "Botafogo", pts: 29, j: 20, v: 8, sg: 2 },
-            { pos: 9, var: 0, time: "Corinthians", pts: 29, j: 21, v: 7, sg: 2 },
-            { pos: 10, var: 2, time: "Atletico-MG", pts: 28, j: 20, v: 8, sg: 0 },
-            { pos: 11, var: -1, time: "Coritiba", pts: 27, j: 21, v: 7, sg: -3 },
-            { pos: 12, var: 0, time: "Sao Paulo", pts: 26, j: 20, v: 7, sg: 2 },
-            { pos: 13, var: 0, time: "Vitoria", pts: 26, j: 21, v: 7, sg: -9 },
-            { pos: 14, var: 2, time: "Mirassol", pts: 23, j: 20, v: 6, sg: -4 },
-            { pos: 15, var: 0, time: "Santos", pts: 22, j: 20, v: 5, sg: -4 },
-            { pos: 16, var: 0, time: "Internacional", pts: 22, j: 21, v: 5, sg: -4 },
-            { pos: 17, var: -1, time: "Gremio", pts: 22, j: 20, v: 5, sg: -4 },
-            { pos: 18, var: 1, time: "Vasco da Gama", pts: 21, j: 20, v: 5, sg: -8 },
-            { pos: 19, var: -1, time: "Remo", pts: 21, j: 21, v: 5, sg: -10 },
-            { pos: 20, var: 0, time: "Chapecoense", pts: 10, j: 20, v: 1, sg: -22 }
-        ];
-
-        const tabelaCopaDoBrasilDados = [
-            { pos: "Quartas", var: 0, time: "Palmeiras", fase: "Classificado" },
-            { pos: "Quartas", var: 0, time: "Flamengo", fase: "Classificado" },
-            { pos: "Quartas", var: 0, time: "Sao Paulo", fase: "Classificado" },
-            { pos: "Quartas", var: 0, time: "Corinthians", fase: "Classificado" },
-            { pos: "Quartas", var: 0, time: "Gremio", fase: "Classificado" },
-            { pos: "Quartas", var: 0, time: "Atletico-MG", fase: "Classificado" },
-            { pos: "Quartas", var: 0, time: "Cruzeiro", fase: "Classificado" },
-            { pos: "Quartas", var: 0, time: "Athletico-PR", fase: "Classificado" }
-        ];
-
-        function abrirModalTabela(tipo) {
-            const modal = document.getElementById('modal-tabela');
-            const titulo = document.getElementById('modal-titulo-tabela');
-            const corpo = document.getElementById('modal-corpo-tabela');
-
-            if (tipo === 'brasileirao') {
-                titulo.innerHTML = `<i class="fas fa-trophy" style="color: #a855f7;"></i> Tabela e Classificacao - Brasileirao Serie A`;
-                
-                let html = `
-                    <table class="tabela-classificacao-full">
-                        <thead>
-                            <tr>
-                                <th>Pos</th>
-                                <th>Time</th>
-                                <th>Pts</th>
-                                <th>J</th>
-                                <th>V</th>
-                                <th>SG</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                `;
-
-                tabelaBrasileiraoDados.forEach(item => {
-                    let setaHtml = `<span class="neutro-pos">-</span>`;
-                    if (item.var > 0) {
-                        setaHtml = `<span class="pos-badge"><i class="fas fa-arrow-up seta-verde"></i>${item.var}</span>`;
-                    } else if (item.var < 0) {
-                        setaHtml = `<span class="pos-badge"><i class="fas fa-arrow-down seta-vermelha"></i>${Math.abs(item.var)}</span>`;
-                    }
-
-                    html += `
-                        <tr>
-                            <td>${item.pos}º ${setaHtml}</td>
-                            <td style="font-weight: 700; color: #fff;">${item.time}</td>
-                            <td style="color: #4ade80; font-weight: 800;">${item.pts}</td>
-                            <td>${item.j}</td>
-                            <td>${item.v}</td>
-                            <td>${item.sg > 0 ? '+' + item.sg : item.sg}</td>
-                        </tr>
-                    `;
-                });
-
-                html += `</tbody></table>`;
-                corpo.innerHTML = html;
-
-            } else {
-                titulo.innerHTML = `<i class="fas fa-award" style="color: #eab308;"></i> Classificacao - Copa do Brasil (Quartas de Final)`;
-                
-                let html = `
-                    <table class="tabela-classificacao-full">
-                        <thead>
-                            <tr>
-                                <th>Fase</th>
-                                <th>Equipe Classificada</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                `;
-
-                tabelaCopaDoBrasilDados.forEach(item => {
-                    html += `
-                        <tr>
-                            <td><span class="pos-badge"><i class="fas fa-arrow-up seta-verde"></i> ${item.pos}</span></td>
-                            <td style="font-weight: 700; color: #fff;">${item.time}</td>
-                            <td style="color: #38bdf8; font-weight: 700;">${item.fase}</td>
-                        </tr>
-                    `;
-                });
-
-                html += `</tbody></table>`;
-                corpo.innerHTML = html;
-            }
-
-            modal.style.display = 'flex';
-        }
-
-        function fecharModalTabela() {
-            document.getElementById('modal-tabela').style.display = 'none';
-        }
-
-        function fecharModalFora(event) {
-            if (event.target.id === 'modal-tabela') {
-                fecharModalTabela();
-            }
-        }
-
-        const nomesSignos = {
-            aries: 'Aries', taurus: 'Touro', gemini: 'Gemeos', cancer: 'Cancer',
-            leo: 'Leao', virgo: 'Virgem', libra: 'Libra', scorpio: 'Escorpiao',
-            sagittarius: 'Sagitario', capricorn: 'Capricornio', aquarius: 'Aquarius', pisces: 'Peixes'
+        // Catálogo de Rádios Padrão
+        const radiosCatalogo = {
+            radio1: { nome: "Rádio Hits Brasil", genero: "Pop / Variedades", url: "https://stream.zeno.fm/f3wvbbqmdg8uv" },
+            radio2: { nome: "Rádio Rock Classic", genero: "Rock 80s & 90s", url: "https://stream.zeno.fm/0wr32b1w5aouv" },
+            radio3: { nome: "Electronic Club", genero: "EDM / House", url: "https://stream.zeno.fm/7039912z5vduv" }
         };
 
-        const baseHoroscopoDinamico = {
-            aries: ["Dia de energia renovada. Bom momento para tomar iniciativas e focar nos seus objetivos pessoais."],
-            taurus: ["Estabilidade em alta. Mantenha os pes no chão e aproveite momentos de tranquilidade e conforto."],
-            gemini: ["Comunicacao afiada hoje! Otima oportunidade para trocar ideias e fazer novos contatos."],
-            cancer: ["Intuicao aguçada. Volte a atencao para a familia e para o que traz seguranca emocional."],
-            leo: ["Seu brilho pessoal esta destacado. Confie no seu potencial para liderar e inspirar os outros."],
-            virgo: ["Organizacao e foco nos detalhes trarao excelentes resultados nas suas tarefas diarias."],
-            libra: ["Busque o equilibrio em suas relacoes. Um dia favoravel para harmonia e acordos amigaveis."],
-            scorpio: ["Momento de transformacao e foco profundo. Sua determinacao vai te ajudar a superar desafios."],
-            sagittarius: ["Espirito otimista e busca por novidades. Excelente dia para aprender algo novo."],
-            capricorn: ["Foco no trabalho e nas metas de longo prazo. Sua disciplina trara bons frutos."],
-            aquarius: ["Ideias inovadoras em alta. Esteja aberto para colaborar com amigos e pensar no futuro."],
-            pisces: ["Sensibilidade e criatividade elevadas. Confie nos seus sentimentos para tomar decisoes."]
-        };
-
-        async function carregarHoroscopo(signo, el) {
-            document.querySelectorAll('.signo-btn').forEach(b => b.classList.remove('ativo'));
-            if(el) el.classList.add('ativo');
-
-            const container = document.getElementById('horoscopo-texto');
-            container.innerHTML = `<i class="fas fa-spinner fa-spin" style="color:#c084fc;"></i> Consultando astros...`;
-
-            const hojeStr = new Date().toISOString().slice(0, 10);
-            let hashData = 0;
-            for (let i = 0; i < hojeStr.length; i++) {
-                hashData += hojeStr.charCodeAt(i);
-            }
-
-            const listaFrases = baseHoroscopoDinamico[signo] || baseHoroscopoDinamico['aries'];
-            const indiceDoDia = hashData % listaFrases.length;
-            const textoDoDia = listaFrases[indiceDoDia];
-
-            setTimeout(() => {
-                container.innerHTML = `<div><span class="signo-titulo">✨ ${nomesSignos[signo]}</span>${textoDoDia}</div>`;
-            }, 300);
-        }
-
-        async function carregarNoticiasBrasil() {
-            try {
-                const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fg1.globo.com%2Fdynamo%2Frss2.xml');
-                const data = await res.json();
-                
-                if (data.status === 'ok' && data.items && data.items.length > 0) {
-                    let htmlItens = '';
-                    const manchetes = data.items.slice(0, 15);
-                    
-                    manchetes.forEach(item => {
-                        let tituloLimpo = item.title.replace(/<[^>]*>?/gm, '').trim();
-                        if (tituloLimpo.length > 5) {
-                            htmlItens += `
-                                <a href="${item.link}" target="_blank" class="news-item-link">
-                                    <span class="news-item-divider"><i class="fas fa-diamond"></i></span> ${tituloLimpo}
-                                </a>
-                            `;
-                        }
-                    });
-
-                    const blocoOriginal = `<div class="news-block-repeat">${htmlItens}</div>`;
-                    document.getElementById('ticker-noticias-container').innerHTML = blocoOriginal + blocoOriginal;
-                }
-            } catch (err) {
-                const htmlFallback = `
-                    <div class="news-block-repeat">
-                        <span class="news-item-link"><span class="news-item-divider"><i class="fas fa-diamond"></i></span> Noticias do Brasil atualizadas diariamente no portal G1.</span>
-                    </div>
-                `;
-                document.getElementById('ticker-noticias-container').innerHTML = htmlFallback + htmlFallback;
-            }
-        }
-        carregarNoticiasBrasil();
-        setInterval(carregarNoticiasBrasil, 180000);
-
-        let todasRadios = [];
-        let playlistKeys = JSON.parse(localStorage.getItem('playlist_keys_ouvinte') || '[]');
-        let radioTocandoKey = null;
-
-        db.ref('ouvintes_preferencias/' + ouvinteId + '/playlist').on('value', snap => {
-            if (snap.exists()) {
-                playlistKeys = snap.val();
-                localStorage.setItem('playlist_keys_ouvinte', JSON.stringify(playlistKeys));
-                localStorage.setItem('playlist_iniciada', 'true');
-                renderizarPainelRadios();
-            }
-        });
-
-        db.ref('ouvintes_preferencias/' + ouvinteId + '/customizacoes_cards').on('value', snap => {
-            if (snap.exists()) {
-                customizacoesCards = snap.val();
-                localStorage.setItem('customizacoes_cards_' + ouvinteId, JSON.stringify(customizacoesCards));
-                renderizarPlaylistDireita();
-            }
-        });
-
-        function salvarPreferenciasOuvinte() {
-            localStorage.setItem('playlist_keys_ouvinte', JSON.stringify(playlistKeys));
-            db.ref('ouvintes_preferencias/' + ouvinteId).update({
-                ouvinte: ouvinteNome,
-                playlist: playlistKeys,
-                ultimaAtualizacao: firebase.database.ServerValue.TIMESTAMP
-            });
-        }
-
-        db.ref('radios').on('value', snap => {
-            todasRadios = [];
-            snap.forEach(child => {
-                todasRadios.push({ key: child.key, ...child.val() });
-            });
-
-            todasRadios.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
-
-            if (!localStorage.getItem('playlist_iniciada') && playlistKeys.length === 0) {
-                playlistKeys = todasRadios.map(r => r.key);
-                salvarPreferenciasOuvinte();
-                localStorage.setItem('playlist_iniciada', 'true');
-            }
-
-            renderizarPainelRadios();
-        });
-
-        function renderizarPainelRadios() {
-            renderizarCatologoEsquerda();
-            renderizarPlaylistDireita();
-        }
-
-        function renderizarCatologoEsquerda() {
-            const container = document.getElementById('catalogo-radios');
-            container.innerHTML = "";
-
-            if (todasRadios.length === 0) {
-                container.innerHTML = "<p style='color:#666; font-size:12px;'>Nenhuma radio cadastrada.</p>";
+        // Identificação do Usuário por Modal
+        function entrarNoPainel() {
+            const input = document.getElementById('inputNickname').value.trim();
+            if (!input) {
+                alert("Por favor, digite um apelido válido!");
                 return;
             }
+            nickname = input;
+            usuarioId = nickname.toLowerCase().replace(/[^a-z0-9]/g, '_');
+            localStorage.setItem('ouvinte_nickname', nickname);
+            localStorage.setItem('ouvinte_id', usuarioId);
 
-            todasRadios.forEach(r => {
-                const estaNaPlaylist = playlistKeys.includes(r.key);
-
-                container.innerHTML += `
-                    <div class="bar-radio-catalogo ${estaNaPlaylist ? 'adicionada' : ''}" onclick="togglePlaylistRadio('${r.key}')">
-                        <span class="btn-add-icon"><i class="fas ${estaNaPlaylist ? 'fa-check' : 'fa-plus'}"></i></span>
-                        <span>${r.name}</span>
-                    </div>
-                `;
-            });
+            document.getElementById('modalLogin').style.display = 'none';
+            inicializarSistemaFirebase();
         }
 
-        function renderizarPlaylistDireita() {
-            const container = document.getElementById('grid-playlist');
-            container.innerHTML = "";
-
-            const radiosPlaylist = playlistKeys
-                .map(key => todasRadios.find(r => r.key === key))
-                .filter(Boolean);
-
-            if (radiosPlaylist.length === 0) {
-                container.innerHTML = "<p style='color:#666; font-size:12px; grid-column: 1/-1; text-align:center; padding: 20px;'>Clique em '+' para adicionar radios!</p>";
-                return;
+        // Verifica se já estava logado no navegador anterior
+        window.addEventListener('DOMContentLoaded', () => {
+            const salvoNick = localStorage.getItem('ouvinte_nickname');
+            const salvoId = localStorage.getItem('ouvinte_id');
+            if (salvoNick && salvoId) {
+                nickname = salvoNick;
+                usuarioId = salvoId;
+                document.getElementById('modalLogin').style.display = 'none';
+                inicializarSistemaFirebase();
             }
+        });
 
-            radiosPlaylist.forEach((r) => {
-                const isPlaying = (radioTocandoKey === r.key && isRadioTocando);
-                
-                let custom = customizacoesCards[r.key] || {};
-                let cardColor = custom.cor || r.color || '#9333ea';
-                let iconeEmoji = custom.emoji || null;
+        function inicializarSistemaFirebase() {
+            carregarDadosDoFirebase();
+            iniciarContadorLudgins();
+            iniciarClimaRotativo();
+            carregarNoticiasG1();
+            escutarChatFirebase();
+            escutarRankingGlobal();
+            renderizarPlaylist();
+        }
 
-                let htmlIcone = '';
-                if (iconeEmoji) {
-                    htmlIcone = `<span style="font-size: clamp(32px, 4vw, 48px); margin-bottom: 8px;">${iconeEmoji}</span>`;
+        // Carrega dados da nuvem do Firebase
+        function carregarDadosDoFirebase() {
+            db.ref('usuarios/' + usuarioId).once('value').then((snapshot) => {
+                const dados = snapshot.val();
+                if (dados) {
+                    ludgins = dados.gamificacao?.ludgins || 0;
+                    tempoEscuta = dados.gamificacao?.tempoTotalEscuta || 0;
+                    if (dados.loja) itensDesbloqueados = dados.loja;
+                    if (dados.playlist && dados.playlist.ordem) ordemRadios = dados.playlist.ordem;
                 } else {
-                    htmlIcone = `<i class="fas ${isPlaying ? 'fa-tower-broadcast antena-piscando' : 'fa-radio'} icon-radio"></i>`;
+                    // Primeiro acesso, grava estado inicial na nuvem
+                    salvarProgressoNoFirebase();
                 }
+                atualizarInterfaceGlobal();
+            });
+        }
 
-                // Pincel totalmente liberado para personalização
-                let htmlPincel = `<button class="btn-pincel-card" title="Personalizar card" onclick="event.stopPropagation(); abrirModalPersonalizacao('${r.key}')"><i class="fas fa-paint-brush"></i></button>`;
+        function salvarProgressoNoFirebase() {
+            if (!usuarioId) return;
+            db.ref('usuarios/' + usuarioId).set({
+                perfil: { nickname: nickname },
+                gamificacao: { ludgins: ludgins, tempoTotalEscuta: tempoEscuta, patente: calcularPatente(ludgins) },
+                loja: itensDesbloqueados,
+                playlist: { ordem: ordemRadios }
+            });
+            // Atualiza também no ranking global semanal
+            db.ref('ranking/' + usuarioId).set({
+                nickname: nickname,
+                ludgins: ludgins
+            });
+        }
 
-                container.innerHTML += `
-                    <div class="radio-card-quadrado ${isPlaying ? 'playing' : ''}" 
-                         style="background: ${cardColor}; cursor: grab;" 
-                         data-key="${r.key}"
-                         onclick="tocarRadioPorKey('${r.key}')">
-                        ${htmlPincel}
-                        ${htmlIcone}
-                        <span class="radio-name">${r.name}</span>
+        function calcularPatente(pontos) {
+            if (pontos >= 500) return "Rubi";
+            if (pontos >= 300) return "Diamante";
+            if (pontos >= 150) return "Ouro";
+            if (pontos >= 50) return "Prata";
+            return "Bronze";
+        }
+
+        function atualizarInterfaceGlobal() {
+            document.getElementById('txtLudgins').innerText = ludgins;
+            const patenteAtual = calcularPatente(ludgins);
+            document.getElementById('txtPatente').innerText = patenteAtual;
+
+            // Gerencia Overlays da Loja
+            if (itensDesbloqueados.chat) document.getElementById('overlayChat').style.display = 'none';
+            if (itensDesbloqueados.horoscopo) document.getElementById('overlayHoroscopo').style.display = 'none';
+            if (itensDesbloqueados.esportes) document.getElementById('overlayEsportes').style.display = 'none';
+
+            // Atualiza botões da loja
+            if (itensDesbloqueados.chat) { document.getElementById('btnStoreChat').innerText = "Adquirido"; document.getElementById('btnStoreChat').disabled = true; }
+            if (itensDesbloqueados.horoscopo) { document.getElementById('btnStoreHoroscopo').innerText = "Adquirido"; document.getElementById('btnStoreHoroscopo').disabled = true; }
+            if (itensDesbloqueados.esportes) { document.getElementById('btnStoreEsportes').innerText = "Adquirido"; document.getElementById('btnStoreEsportes').disabled = true; }
+        }
+
+        // Sistema de Gamificação (Ludgins por Tempo de Escuta)
+        function iniciarContadorLudgins() {
+            setInterval(() => {
+                const audio = document.getElementById('audioStream');
+                if (!audio.paused) {
+                    tempoEscuta += 10;
+                    if (tempoEscuta % 60 === 0) { // A cada 1 minuto ouvindo, ganha 5 ludgins
+                        ludgins += 5;
+                        salvarProgressoNoFirebase();
+                        atualizarInterfaceGlobal();
+                    }
+                }
+            }, 10000);
+        }
+
+        // Sistema da Loja
+        function comprarItem(tipo) {
+            let custo = 0;
+            if (tipo === 'chat') custo = 20;
+            if (tipo === 'horoscopo') custo = 50;
+            if (tipo === 'esportes') custo = 70;
+
+            if (ludgins >= custo) {
+                ludgins -= custo;
+                itensDesbloqueados[tipo] = true;
+                salvarProgressoNoFirebase();
+                atualizarInterfaceGlobal();
+                alert("Parabéns! Recurso desbloqueado com sucesso.");
+            } else {
+                alert("Ludgins insuficientes! Continue ouvindo a rádio para acumular mais moedas.");
+            }
+        }
+
+        // Renderização e Ordenação da Playlist
+        function renderizarPlaylist() {
+            const playlistEl = document.getElementById('playlist');
+            playlistEl.innerHTML = '';
+            ordemRadios.forEach((id) => {
+                const r = radiosCatalogo[id];
+                if (!r) return;
+                const li = document.createElement('li');
+                li.className = 'playlist-item';
+                li.setAttribute('data-id', id);
+                li.innerHTML = `
+                    <div>
+                        <strong>${r.nome}</strong><br>
+                        <small style="color: var(--text-secondary);">${r.genero}</small>
                     </div>
+                    <button class="btn-comprar" style="padding: 4px 10px; font-size: 12px;" onclick="tocarRadio('${id}')"><i class="fa-solid fa-play"></i></button>
                 `;
+                playlistEl.appendChild(li);
+            });
+
+            // Ativa SortableJS para persistir arrastar e soltar
+            new Sortable(playlistEl, {
+                animation: 150,
+                onEnd: function () {
+                    const novaOrdem = [];
+                    playlistEl.querySelectorAll('li').forEach((el) => {
+                        novaOrdem.push(el.getAttribute('data-id'));
+                    });
+                    ordemRadios = novaOrdem;
+                    salvarProgressoNoFirebase();
+                }
             });
         }
 
-        const listaCoresPredefinidas = ['#9333ea', '#ff007f', '#2563eb', '#16a34a', '#ca8a04', '#dc2626', '#0891b2', '#4f46e5', '#db2777', '#334155'];
-        const lista10Emojis = ['📻', '🎵', '🎧', '🎸', '🎷', '🎤', '🎹', '🎶', '🌟', '🔥'];
-
-        function abrirModalPersonalizacao(key) {
-            cardSendoEditadoKey = key;
-            const modal = document.getElementById('modal-personalizacao');
-            
-            const containerCores = document.getElementById('paleta-cores-container');
-            containerCores.innerHTML = "";
-            listaCoresPredefinidas.forEach(cor => {
-                containerCores.innerHTML += `<div class="cor-opcao-btn" style="background: ${cor};" onclick="salvarCorCard('${cor}')"></div>`;
-            });
-
-            const containerEmojis = document.getElementById('emojis-card-container');
-            containerEmojis.innerHTML = "";
-            lista10Emojis.forEach(emoji => {
-                containerEmojis.innerHTML += `<div class="emoji-opcao-btn" onclick="salvarEmojiCard('${emoji}')">${emoji}</div>`;
-            });
-
-            modal.style.display = 'flex';
-        }
-
-        function fecharModalPersonalizacao() {
-            document.getElementById('modal-personalizacao').style.display = 'none';
-            cardSendoEditadoKey = null;
-        }
-
-        function fecharModalPersonalizacaoFora(event) {
-            if (event.target.id === 'modal-personalizacao') {
-                fecharModalPersonalizacao();
-            }
-        }
-
-        function salvarCorCard(corHex) {
-            if (!cardSendoEditadoKey) return;
-            if (!customizacoesCards[cardSendoEditadoKey]) customizacoesCards[cardSendoEditadoKey] = {};
-            customizacoesCards[cardSendoEditadoKey].cor = corHex;
-            
-            persistirCustomizacoesCards();
-            fecharModalPersonalizacao();
-        }
-
-        function salvarEmojiCard(emoji) {
-            if (!cardSendoEditadoKey) return;
-            if (!customizacoesCards[cardSendoEditadoKey]) customizacoesCards[cardSendoEditadoKey] = {};
-            customizacoesCards[cardSendoEditadoKey].emoji = emoji;
-            
-            persistirCustomizacoesCards();
-            fecharModalPersonalizacao();
-        }
-
-        function persistirCustomizacoesCards() {
-            localStorage.setItem('customizacoes_cards_' + ouvinteId, JSON.stringify(customizacoesCards));
-            db.ref('ouvintes_preferencias/' + ouvinteId + '/customizacoes_cards').set(customizacoesCards);
-            renderizarPlaylistDireita();
-        }
-
-        function togglePlaylistRadio(key) {
-            const index = playlistKeys.indexOf(key);
-            if (index > -1) {
-                playlistKeys.splice(index, 1);
-            } else {
-                playlistKeys.push(key);
-            }
-
-            salvarPreferenciasOuvinte();
-            renderizarPainelRadios();
-        }
-
-        new Sortable(document.getElementById('grid-playlist'), {
-            animation: 150,
-            delay: 100,
-            delayOnTouchOnly: true,
-            onEnd: function() {
-                const novaOrdem = [];
-                document.querySelectorAll('#grid-playlist .radio-card-quadrado').forEach(el => {
-                    novaOrdem.push(el.getAttribute('data-key'));
-                });
-
-                playlistKeys = novaOrdem;
-                salvarPreferenciasOuvinte();
-            }
-        });
-
-        function tocarRadioPorKey(key) {
-            const radio = todasRadios.find(r => r.key === key);
-            if (!radio) return;
-
-            if (radioTocandoKey === key && isRadioTocando) {
-                togglePlay();
-            } else {
-                radioTocandoKey = key;
-                player.src = radio.url;
-                player.play().then(() => {
-                    isRadioTocando = true;
-                    document.getElementById('btn-play').innerHTML = '<i class="fas fa-pause"></i>';
-                    renderizarPlaylistDireita();
-                }).catch(() => {});
-                document.getElementById('player-title').innerText = radio.name;
-            }
-        }
-
-        function mudarRadio(direcao) {
-            const radiosPlaylist = playlistKeys
-                .map(key => todasRadios.find(r => r.key === key))
-                .filter(Boolean);
-
-            if (radiosPlaylist.length === 0) return;
-
-            let currentIndex = radiosPlaylist.findIndex(r => r.key === radioTocandoKey);
-            let nextIndex = currentIndex + direcao;
-
-            if (nextIndex >= radiosPlaylist.length) nextIndex = 0;
-            if (nextIndex < 0) nextIndex = radiosPlaylist.length - 1;
-
-            tocarRadioPorKey(radiosPlaylist[nextIndex].key);
+        // Player de Áudio
+        let radioAtualId = null;
+        function tocarRadio(id) {
+            const r = radiosCatalogo[id];
+            if (!r) return;
+            radioAtualId = id;
+            const audio = document.getElementById('audioStream');
+            audio.src = r.url;
+            audio.play().catch(e => console.log("Erro ao reproduzir stream:", e));
+            document.getElementById('currentRadioName').innerText = r.nome;
+            document.getElementById('currentRadioGenre').innerText = r.genero;
+            document.getElementById('playIcon').className = "fa-solid fa-pause";
         }
 
         function togglePlay() {
-            if (!player.src) return;
-            if (player.paused) {
-                player.play().then(() => {
-                    isRadioTocando = true;
-                    document.getElementById('btn-play').innerHTML = '<i class="fas fa-pause"></i>';
-                    renderizarPlaylistDireita();
-                }).catch(() => {});
+            const audio = document.getElementById('audioStream');
+            if (!audio.src) {
+                tocarRadio(ordemRadios[0]);
+                return;
+            }
+            if (audio.paused) {
+                audio.play();
+                document.getElementById('playIcon').className = "fa-solid fa-pause";
             } else {
-                player.pause();
-                isRadioTocando = false;
-                document.getElementById('btn-play').innerHTML = '<i class="fas fa-play"></i>';
-                renderizarPlaylistDireita();
+                audio.pause();
+                document.getElementById('playIcon').className = "fa-solid fa-play";
             }
         }
 
-        player.addEventListener('play', () => {
-            isRadioTocando = true;
-            document.getElementById('btn-play').innerHTML = '<i class="fas fa-pause"></i>';
-            renderizarPlaylistDireita();
-        });
+        // Chat Firebase em Tempo Real
+        function enviarMensagemChat() {
+            if (!itensDesbloqueados.chat) return;
+            const input = document.getElementById('inputChat');
+            const mensagem = input.value.trim();
+            if (!mensagem) return;
 
-        player.addEventListener('pause', () => {
-            isRadioTocando = false;
-            document.getElementById('btn-play').innerHTML = '<i class="fas fa-play"></i>';
-            renderizarPlaylistDireita();
-        });
-
-        function handleKeyDown(event) {
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                enviarMensagem();
-            }
+            db.ref('chatPublico').push({
+                nickname: nickname,
+                mensagem: mensagem,
+                timestamp: Date.now()
+            });
+            input.value = '';
         }
 
-        function enviarMensagem() {
-            const texto = document.getElementById('texto-mensagem').value.trim();
-            if (!texto) return alert("Digite sua mensagem!");
-
-            db.ref('mensagens_ouvintes').push({
-                ouvinteId: ouvinteId,
-                ouvinte: ouvinteNome,
-                mensagem: texto,
-                dataHora: new Date().toLocaleString('pt-BR'),
-                timestamp: firebase.database.ServerValue.TIMESTAMP
-            }).then(() => {
-                document.getElementById('texto-mensagem').value = "";
+        function escutarChatFirebase() {
+            const chatMsgs = document.getElementById('chatMessages');
+            db.ref('chatPublico').limitToLast(20).on('child_added', (snapshot) => {
+                const dados = snapshot.val();
+                if (!dados) return;
+                const div = document.createElement('div');
+                div.className = 'chat-msg';
+                div.innerHTML = `<strong>${dados.nickname}:</strong> ${dados.mensagem}`;
+                chatMsgs.appendChild(div);
+                chatMsgs.scrollTop = chatMsgs.scrollHeight;
             });
         }
 
-        function deletarMensagem(msgKey) {
-            if (confirm("Deseja apagar esta mensagem?")) {
-                db.ref('mensagens_ouvintes/' + msgKey).remove();
-            }
-        }
-
-        function carregarChatCompleto() {
-            db.ref('mensagens_ouvintes').on('value', snapMsgs => {
-                db.ref('respostas_adm').on('value', snapResps => {
-                    const container = document.getElementById('lista-respostas-adm');
-                    container.innerHTML = "";
-                    
-                    const msgs = snapMsgs.val() || {};
-                    const resps = snapResps.val() || {};
-
-                    let listaHistorico = [];
-
-                    for (let id in msgs) {
-                        const m = msgs[id];
-                        if (m.ouvinteId === ouvinteId || m.ouvinte === ouvinteNome) {
-                            listaHistorico.push({
-                                tipo: 'ouvinte',
-                                id: id,
-                                texto: m.mensagem,
-                                dataHora: m.dataHora || '',
-                                timestamp: m.timestamp || 0
-                            });
-                        }
-                    }
-
-                    for (let id in resps) {
-                        const r = resps[id];
-                        if (r.ouvinteId === ouvinteId || r.ouvinte === ouvinteNome) {
-                            listaHistorico.push({
-                                tipo: 'adm',
-                                id: id,
-                                texto: r.resposta,
-                                dataHora: r.dataHora || '',
-                                timestamp: r.timestamp || 0
-                            });
-                        }
-                    }
-
-                    listaHistorico.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
-
-                    if (listaHistorico.length === 0) {
-                        container.innerHTML = "<p style='color:#666; text-align:center; font-size:12px; padding:10px;'>Nenhuma mensagem enviada.</p>";
-                        return;
-                    }
-
-                    listaHistorico.forEach(item => {
-                        if (item.tipo === 'ouvinte') {
-                            container.innerHTML += `
-                                <div class="chat-bubble-ouvinte">
-                                    <div class="chat-sender-header">
-                                        <span class="chat-sender-name ouvinte">Voce</span>
-                                        <button class="btn-delete-chat" title="Apagar" onclick="deletarMensagem('${item.id}')">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </div>
-                                    <div class="chat-text">${item.texto}</div>
-                                    <div class="chat-time">${item.dataHora}</div>
-                                </div>
-                            `;
-                        } else {
-                            container.innerHTML += `
-                                <div class="chat-bubble-adm">
-                                    <div class="chat-sender-header">
-                                        <span class="chat-sender-name adm"><i class="fas fa-user-shield"></i> ADM</span>
-                                    </div>
-                                    <div class="chat-text">${item.texto}</div>
-                                    <div class="chat-time">${item.dataHora}</div>
-                                </div>
-                            `;
-                        }
-                    });
-
-                    container.scrollTop = container.scrollHeight;
+        // Ranking Global Firebase
+        function escutarRankingGlobal() {
+            const rankingEl = document.getElementById('rankingList');
+            db.ref('ranking').orderByChild('ludgins').limitToLast(5).on('value', (snapshot) => {
+                rankingEl.innerHTML = '';
+                const lista = [];
+                snapshot.forEach((child) => {
+                    lista.push(child.val());
+                });
+                lista.reverse().forEach((usuario, index) => {
+                    const li = document.createElement('li');
+                    li.className = 'ranking-item';
+                    li.innerHTML = `<span>${index + 1}. ${usuario.nickname}</span> <strong>${usuario.ludgins} Ludgins</strong>`;
+                    rankingEl.appendChild(li);
                 });
             });
         }
 
-        carregarChatCompleto();
+        // Clima Dinâmico via Open-Meteo
+        const capitais = [
+            { nome: "São Paulo", lat: -23.55, lon: -46.63 },
+            { nome: "Rio de Janeiro", lat: -22.90, lon: -43.17 },
+            { nome: "Brasília", lat: -15.78, lon: -47.92 },
+            { nome: "Curitiba", lat: -25.42, lon: -49.27 },
+            { nome: "Salvador", lat: -12.97, lon: -38.51 }
+        ];
+        let indiceCapital = 0;
 
-        function logout() {
-            localStorage.clear();
-            window.location.href = 'index.html';
+        function buscarClima() {
+            const cap = capitais[indiceCapital];
+            indiceCapital = (indiceCapital + 1) % capitais.length;
+            
+            fetch(`https://api.open-meteo.com/v1/forecast?latitude=${cap.lat}&longitude=${cap.lon}&current_weather=true`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.current_weather) {
+                        document.getElementById('climaInfo').innerHTML = `
+                            <p>Capital: <strong>${cap.nome}</strong></p>
+                            <p>Temperatura: <strong>${data.current_weather.temperature}°C</strong></p>
+                            <p>Vento: <strong>${data.current_weather.windspeed} km/h</strong></p>
+                        `;
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('climaInfo').innerHTML = `<p>Informações de clima indisponíveis.</p>`;
+                });
+        }
+
+        function iniciarClimaRotativo() {
+            buscarClima();
+            setInterval(buscarClima, 8000);
+        }
+
+        // Notícias G1 via RSS to JSON
+        function carregarNoticiasG1() {
+            fetch('https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fg1.globo.com%2Frss%2Fg1%2F')
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.items) {
+                        let textoHtml = "";
+                        data.items.forEach(item => {
+                            textoHtml += `<span><i class="fa-solid fa-circle" style="font-size: 6px; color: var(--accent-color); margin-right: 6px;"></i> ${item.title}</span>`;
+                        });
+                        document.getElementById('tickerContent').innerHTML = textoHtml;
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('tickerContent').innerHTML = `<span>Bem-vindo ao Painel do Ouvinte da Web Rádio! Aproveite a programação ao vivo.</span>`;
+                });
+        }
+
+        // Horóscopo Dinâmico Diário
+        function atualizarHoroscopo() {
+            const signo = document.getElementById('selectSigno').value;
+            const previsoes = {
+                aries: "Sua energia estará em alta hoje. Ótimo momento para iniciar novos projetos na rádio e na vida pessoal.",
+                touro: "A paciência será sua maior aliada. Aproveite o som relaxante para colocar as ideias em ordem.",
+                gemeos: "Sua comunicação flui com facilidade. Interaja mais no chat e conheça novos ouvintes.",
+                cancer: "Momento voltado para a intuição e sensibilidade. Deixe a música embalar seus sentimentos.",
+                leao: "Seu brilho pessoal se destaca por onde passar. Aproveite para subir no ranking de ouvintes!",
+                virgem: "Organização em foco. Sua playlist personalizada está perfeita para o seu dia produtivo.",
+                libra: "Busque o equilíbrio em suas decisões. Um dia harmonioso e cheio de boa música.",
+                escorpiao: "Intensidade nas escolhas. O momento pede foco nos seus objetivos na comunidade.",
+                sagitario: "O otimismo guiará seus passos. Descubra novos estilos musicais no painel.",
+                capricornio: "Foco e dedicação trouxeram você até aqui. Continue acumulando seus Ludgins!",
+                aquario: "Ideias inovadoras surgem com facilidade. Explore todos os recursos liberados na loja.",
+                peixes: "A criatividade e a imaginação estão ativadas. Deixe o som te levar a novos horizontes."
+            };
+            document.getElementById('textoHoroscopo').innerText = previsoes[signo] || "Confie nas estrelas e aproveite a programação.";
         }
     </script>
 </body>
