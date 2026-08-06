@@ -1541,11 +1541,34 @@
         document.getElementById('nome-ouvinte-display').innerText = "OLA, " + ouvinteNome.toUpperCase();
 
         let segundosConectados = 0;
-        let meusLudgins = parseInt(localStorage.getItem('ludgins_ouvinte_' + ouvinteId)) || 0;
-        let patenteAtual = localStorage.getItem('patente_ouvinte_' + ouvinteId) || 'Bronze';
+        let meusLudgins = 0;
+        let patenteAtual = 'Bronze';
         let timerOnlineInterval = null;
         let isRadioTocando = false;
         let cardSendoEditadoKey = null;
+
+        let desbloqueios = {
+            chat: false,
+            cores: false,
+            horoscopo: false,
+            esportes: false
+        };
+
+        let customizacoesCards = {};
+
+        // Sincronizar dados iniciais do ouvinte diretamente do Firebase
+        db.ref('ouvintes_preferencias/' + ouvinteId).on('value', snap => {
+            if (snap.exists()) {
+                const dados = snap.val();
+                meusLudgins = dados.ludgins !== undefined ? dados.ludgins : 0;
+                patenteAtual = dados.patente || 'Bronze';
+                if (dados.desbloqueios) desbloqueios = dados.desbloqueios;
+                if (dados.customizacoes_cards) customizacoesCards = dados.customizacoes_cards;
+                if (dados.playlist) playlistKeys = dados.playlist;
+            }
+            atualizarInterfaceLudginsEPatente();
+            renderizarPlaylistDireita();
+        });
 
         function tocarSomSuaveSucesso() {
             try {
@@ -1563,15 +1586,6 @@
                 osc.stop(ctx.currentTime + 0.4);
             } catch(e) {}
         }
-
-        let desbloqueios = JSON.parse(localStorage.getItem('desbloqueios_ouvinte_' + ouvinteId)) || {
-            chat: false,
-            cores: false,
-            horoscopo: false,
-            esportes: false
-        };
-
-        let customizacoesCards = JSON.parse(localStorage.getItem('customizacoes_cards_' + ouvinteId)) || {};
 
         function atualizarInterfaceLudginsEPatente() {
             document.getElementById('contador-ludgins').innerText = meusLudgins;
@@ -1672,13 +1686,20 @@
         }
 
         function salvarProgressoLudgins() {
-            localStorage.setItem('ludgins_ouvinte_' + ouvinteId, meusLudgins);
-            localStorage.setItem('patente_ouvinte_' + ouvinteId, patenteAtual);
             atualizarInterfaceLudginsEPatente();
             sincronizarFirebaseOuvinteOnline();
         }
 
         function sincronizarFirebaseOuvinteOnline() {
+            db.ref('ouvintes_preferencias/' + ouvinteId).update({
+                ouvinte: ouvinteNome,
+                ludgins: meusLudgins,
+                patente: patenteAtual,
+                desbloqueios: desbloqueios,
+                customizacoes_cards: customizacoesCards,
+                ultimaAtualizacao: firebase.database.ServerValue.TIMESTAMP
+            });
+
             db.ref('ouvintes_online/' + ouvinteId).update({
                 nome: ouvinteNome,
                 ludgins: meusLudgins,
@@ -1690,22 +1711,28 @@
 
         function resgatarBonusLudginsCentral() {
             const hoje = new Date().toDateString();
-            const ultimoResgate = localStorage.getItem('ultimo_resgate_bonus_' + ouvinteId);
+            
+            db.ref('ouvintes_preferencias/' + ouvinteId + '/ultimo_resgate_bonus').once('value').then(snap => {
+                const ultimoResgate = snap.val();
 
-            if (ultimoResgate === hoje) {
-                alert("Você já resgatou seu bônus de ludgins de hoje! Volte amanhã.");
-                return;
-            }
+                if (ultimoResgate === hoje) {
+                    alert("Você já resgatou seu bônus de ludgins de hoje! Volte amanhã.");
+                    return;
+                }
 
-            meusLudgins += 3;
-            localStorage.setItem('ultimo_resgate_bonus_' + ouvinteId, hoje);
-            salvarProgressoLudgins();
-            tocarSomSuaveSucesso();
+                meusLudgins += 3;
+                db.ref('ouvintes_preferencias/' + ouvinteId).update({
+                    ultimo_resgate_bonus: hoje
+                });
+                
+                salvarProgressoLudgins();
+                tocarSomSuaveSucesso();
 
-            if (typeof confetti === 'function') {
-                confetti({ particleCount: 250, spread: 100, origin: { y: 0.6 } });
-            }
-            alert("Parabéns! Você resgatou +3 Ludgins de bônus!");
+                if (typeof confetti === 'function') {
+                    confetti({ particleCount: 250, spread: 100, origin: { y: 0.6 } });
+                }
+                alert("Parabéns! Você resgatou +3 Ludgins de bônus!");
+            });
         }
 
         db.ref('ouvintes_online').on('value', snap => {
@@ -1796,7 +1823,6 @@
                 meusLudgins -= custo;
                 desbloqueios[idItem] = true;
                 
-                localStorage.setItem('desbloqueios_ouvinte_' + ouvinteId, JSON.stringify(desbloqueios));
                 salvarProgressoLudgins();
                 tocarSomSuaveSucesso();
 
@@ -2193,14 +2219,12 @@
         setInterval(carregarNoticiasBrasil, 180000);
 
         let todasRadios = [];
-        let playlistKeys = JSON.parse(localStorage.getItem('playlist_keys_ouvinte') || '[]');
+        let playlistKeys = [];
         let radioTocandoKey = null;
 
         db.ref('ouvintes_preferencias/' + ouvinteId + '/playlist').on('value', snap => {
             if (snap.exists()) {
                 playlistKeys = snap.val();
-                localStorage.setItem('playlist_keys_ouvinte', JSON.stringify(playlistKeys));
-                localStorage.setItem('playlist_iniciada', 'true');
                 renderizarPainelRadios();
             }
         });
@@ -2208,13 +2232,11 @@
         db.ref('ouvintes_preferencias/' + ouvinteId + '/customizacoes_cards').on('value', snap => {
             if (snap.exists()) {
                 customizacoesCards = snap.val();
-                localStorage.setItem('customizacoes_cards_' + ouvinteId, JSON.stringify(customizacoesCards));
                 renderizarPlaylistDireita();
             }
         });
 
         function salvarPreferenciasOuvinte() {
-            localStorage.setItem('playlist_keys_ouvinte', JSON.stringify(playlistKeys));
             db.ref('ouvintes_preferencias/' + ouvinteId).update({
                 ouvinte: ouvinteNome,
                 playlist: playlistKeys,
@@ -2230,13 +2252,13 @@
 
             todasRadios.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
 
-            if (!localStorage.getItem('playlist_iniciada') && playlistKeys.length === 0) {
-                playlistKeys = todasRadios.map(r => r.key);
-                salvarPreferenciasOuvinte();
-                localStorage.setItem('playlist_iniciada', 'true');
-            }
-
-            renderizarPainelRadios();
+            db.ref('ouvintes_preferencias/' + ouvinteId + '/playlist').once('value').then(snapPlaylist => {
+                if (!snapPlaylist.exists() && playlistKeys.length === 0) {
+                    playlistKeys = todasRadios.map(r => r.key);
+                    salvarPreferenciasOuvinte();
+                }
+                renderizarPainelRadios();
+            });
         });
 
         function renderizarPainelRadios() {
@@ -2371,7 +2393,6 @@
         }
 
         function persistirCustomizacoesCards() {
-            localStorage.setItem('customizacoes_cards_' + ouvinteId, JSON.stringify(customizacoesCards));
             db.ref('ouvintes_preferencias/' + ouvinteId + '/customizacoes_cards').set(customizacoesCards);
             renderizarPlaylistDireita();
         }
@@ -2577,7 +2598,6 @@
         }
 
         carregarChatCompleto();
-        atualizarInterfaceLudginsEPatente();
 
         function logout() {
             localStorage.clear();
