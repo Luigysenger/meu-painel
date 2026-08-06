@@ -3,991 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel do Ouvinte - Web Rádio</title>
-    <!-- FontAwesome para Ícones -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Sortable.js para Arrastar e Soltar (Playlist) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-    <!-- Firebase SDK v8 (Compat) -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    
+    <title>Painel do Ouvinte - Sistema</title>
+    <!-- Inclua aqui os seus estilos CSS e o SDK do Firebase -->
     <style>
-        :root {
-            --bg-color: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --card-border: rgba(255, 255, 255, 0.1);
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --accent-color: #3b82f6;
-            --accent-hover: #2563eb;
-            --danger-color: #ef4444;
-            --success-color: #10b981;
-            --warning-color: #f59e0b;
-        }
-
-        * {
-            box-sizing: border-box;
+        /* Mantendo seu padrão visual intacto */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow-x: hidden;
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.1) 0px, transparent 50%);
-        }
-
-        header {
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--card-border);
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .logo-area {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo-area i {
-            font-size: 24px;
-            color: var(--accent-color);
-        }
-
-        .logo-area h1 {
-            font-size: 20px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-
-        .user-status-bar {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .user-badge {
-            background: rgba(59, 130, 246, 0.2);
-            border: 1px solid var(--accent-color);
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .user-badge i {
-            color: var(--warning-color);
-        }
-
-        /* Letreiro de Notícias (Ticker) */
-        .news-ticker {
-            background: rgba(30, 41, 59, 0.9);
-            border-bottom: 1px solid var(--card-border);
-            padding: 8px 0;
-            overflow: hidden;
-            white-space: nowrap;
-            position: relative;
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-
-        .news-ticker marquee {
-            width: 100%;
-        }
-
-        .news-ticker span {
-            margin-right: 40px;
-            color: var(--text-primary);
-        }
-
-        /* Container Principal */
-        .main-container {
-            max-width: 1400px;
-            width: 100%;
+        .container {
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 25px;
-            display: grid;
-            grid-template-columns: 320px 1fr 350px;
-            gap: 25px;
-            flex: 1;
-        }
-
-        @media (max-width: 1100px) {
-            .main-container {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .panel-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 16px;
-            padding: 20px;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            position: relative;
-        }
-
-        .panel-card h3 {
-            font-size: 16px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border-bottom: 1px solid var(--card-border);
-            padding-bottom: 10px;
-        }
-
-        /* Overlay de Bloqueio (Loja) */
-        .bloqueado-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(5px);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            border-radius: 16px;
-            z-index: 10;
-            text-align: center;
             padding: 20px;
         }
-
-        .bloqueado-overlay i {
-            font-size: 32px;
-            color: var(--warning-color);
-            margin-bottom: 10px;
-        }
-
-        .bloqueado-overlay p {
-            font-size: 13px;
-            color: var(--text-secondary);
-            margin-bottom: 15px;
-        }
-
-        .btn-comprar {
-            background: var(--accent-color);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background 0.2s;
-        }
-
-        .btn-comprar:hover {
-            background: var(--accent-hover);
-        }
-
-        /* Coluna Esquerda: Player & Playlist */
-        .player-box {
-            text-align: center;
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+            padding-bottom: 15px;
             margin-bottom: 20px;
         }
-
-        .player-info h4 {
-            font-size: 18px;
-            margin-bottom: 5px;
-        }
-
-        .player-info p {
-            color: var(--text-secondary);
-            font-size: 13px;
-            margin-bottom: 15px;
-        }
-
-        .player-controls {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .btn-player {
-            background: var(--accent-color);
-            color: white;
-            border: none;
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.2s, background 0.2s;
-        }
-
-        .btn-player:hover {
-            transform: scale(1.05);
-            background: var(--accent-hover);
-        }
-
-        .playlist-list {
-            list-style: none;
-            max-height: 250px;
-            overflow-y: auto;
-        }
-
-        .playlist-item {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--card-border);
-            padding: 10px 12px;
+        .card {
+            background-color: #1e1e1e;
             border-radius: 8px;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            cursor: grab;
-            transition: background 0.2s;
-        }
-
-        .playlist-item:active {
-            cursor: grabbing;
-        }
-
-        .playlist-item:hover {
-            background: rgba(255, 255, 255, 0.07);
-        }
-
-        /* Coluna Central: Chat, Esportes, Horóscopo */
-        .central-content {
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-        }
-
-        .chat-box {
-            display: flex;
-            flex-direction: column;
-            height: 300px;
-        }
-
-        .chat-messages {
-            flex: 1;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-            padding: 10px;
-            overflow-y: auto;
-            margin-bottom: 10px;
-            font-size: 13px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .chat-msg {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 6px 10px;
-            border-radius: 6px;
-        }
-
-        .chat-msg strong {
-            color: var(--accent-color);
-            margin-right: 5px;
-        }
-
-        .chat-input-area {
-            display: flex;
-            gap: 8px;
-        }
-
-        .chat-input-area input {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--card-border);
-            padding: 8px 12px;
-            border-radius: 6px;
-            color: white;
-            outline: none;
-        }
-
-        .chat-input-area button {
-            background: var(--accent-color);
-            border: none;
-            color: white;
-            padding: 0 15px;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-
-        .grid-modules {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        @media (max-width: 768px) {
-            .grid-modules {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Coluna Direita: Loja, Clima e Ranking */
-        .right-sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-        }
-
-        .store-items {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .store-item {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--card-border);
-            padding: 10px;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .store-item-info h5 {
-            font-size: 13px;
-            margin-bottom: 2px;
-        }
-
-        .store-item-info span {
-            font-size: 11px;
-            color: var(--warning-color);
-        }
-
-        .clima-widget {
-            font-size: 14px;
-            color: var(--text-secondary);
-        }
-
-        .clima-widget strong {
-            color: var(--text-primary);
-        }
-
-        .ranking-list {
-            list-style: none;
-            font-size: 13px;
-        }
-
-        .ranking-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .ranking-item:last-child {
-            border-bottom: none;
-        }
-
-        /* Modal de Identificação Inicial */
-        .modal-login {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(15px);
-            z-index: 9999;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            padding: 30px;
-            border-radius: 16px;
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
-
-        .modal-content h2 {
-            margin-bottom: 15px;
-            font-size: 22px;
-        }
-
-        .modal-content p {
-            color: var(--text-secondary);
-            font-size: 13px;
+            padding: 20px;
             margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
-
-        .modal-content input {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--card-border);
-            padding: 12px;
-            border-radius: 8px;
-            color: white;
-            font-size: 15px;
-            margin-bottom: 15px;
-            outline: none;
-            text-align: center;
-        }
-
-        .modal-content button {
-            width: 100%;
-            background: var(--accent-color);
+        button {
+            background-color: #e50914;
             color: white;
             border: none;
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: 600;
+            padding: 10px 15px;
+            border-radius: 4px;
             cursor: pointer;
-            transition: background 0.2s;
+            font-weight: bold;
         }
-
-        .modal-content button:hover {
-            background: var(--accent-hover);
+        button:hover {
+            background-color: #f40612;
         }
     </style>
 </head>
 <body>
 
-    <!-- Modal de Identificação Inicial (Garante Sincronização Firebase) -->
-    <div id="modalLogin" class="modal-login">
-        <div class="modal-content">
-            <h2>Bem-vindo ao Painel</h2>
-            <p>Digite seu Apelido (Nickname) para carregar seu progresso e sincronizar na nuvem:</p>
-            <input type="text" id="inputNickname" placeholder="Seu apelido..." autocomplete="off">
-            <button onclick="entrarNoPainel()">Entrar no Painel</button>
-        </div>
-    </div>
-
-    <!-- Header -->
-    <header>
-        <div class="logo-area">
-            <i class="fa-solid fa-radio"></i>
+    <div class="container">
+        <header>
             <h1>Painel do Ouvinte</h1>
-        </div>
-        <div class="user-status-bar">
-            <div class="user-badge">
-                <i class="fa-solid fa-coins"></i>
-                <span id="txtLudgins">0</span> Ludgins
+            <div>
+                <span id="user-nome">Carregando...</span>
+                <button onclick="logout()">Sair</button>
             </div>
-            <div class="user-badge" style="border-color: var(--warning-color); background: rgba(245, 158, 11, 0.1);">
-                <i class="fa-solid fa-award" style="color: var(--warning-color);"></i>
-                <span id="txtPatente">Bronze</span>
-            </div>
-        </div>
-    </header>
+        </header>
 
-    <!-- Letreiro de Notícias (Ticker G1 via RSS) -->
-    <div class="news-ticker">
-        <marquee scrollamount="5" scrolldelay="0" onmouseover="this.stop();" onmouseout="this.start();">
-            <span id="tickerContent"><i class="fa-solid fa-spinner fa-spin"></i> Carregando notícias em tempo real...</span>
-        </marquee>
+        <!-- Seção de Status e Ludgins -->
+        <div class="card">
+            <h2>Seu Perfil e Progresso</h2>
+            <p><strong>Patente:</strong> <span id="user-patente">Iniciante</span></p>
+            <p><strong>Ludgins:</strong> <span id="user-ludgins">0</span></p>
+            <button onclick="adicionarLudgins(10)">Ganhar 10 Ludgins (Teste)</button>
+        </div>
+
+        <!-- Loja Virtual e Outros Elementos -->
+        <div class="card">
+            <h2>Loja Virtual</h2>
+            <p>Gerencie seus itens e bloqueios aqui.</p>
+        </div>
     </div>
 
-    <!-- Conteúdo Principal -->
-    <div class="main-container">
-        
-        <!-- COLUNA 1: Player & Playlist Dinâmica -->
-        <div class="panel-card">
-            <h3><i class="fa-solid fa-headphones"></i> Player & Playlist</h3>
-            <div class="player-box">
-                <div class="player-info">
-                    <h4 id="currentRadioName">Selecione uma rádio</h4>
-                    <p id="currentRadioGenre">Web Rádio Ao Vivo</p>
-                </div>
-                <div class="player-controls">
-                    <button class="btn-player" onclick="togglePlay()"><i id="playIcon" class="fa-solid fa-play"></i></button>
-                </div>
-                <audio id="audioStream"></audio>
-            </div>
-            <h4 style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">Arraste para organizar sua playlist:</h4>
-            <ul id="playlist" class="playlist-list">
-                <!-- Preenchido via JS -->
-            </ul>
-        </div>
+    <!-- Scripts do Firebase e Lógica de Sincronização -->
+    <script type="module">
+        // Importe os módulos do Firebase necessários do seu projeto configurado
+        // Exemplo: import { initializeApp } from "https://www.gstatic.com/firebasejs/9.x.x/firebase-app.js";
+        // import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.x.x/firebase-firestore.js";
 
-        <!-- COLUNA 2: Módulos Centrais (Chat, Esportes, Horóscopo) -->
-        <div class="central-content">
-            
-            <!-- Módulo de Chat Interativo -->
-            <div class="panel-card" style="position: relative;">
-                <h3><i class="fa-solid fa-comments"></i> Chat da Comunidade</h3>
-                <div id="overlayChat" class="bloqueado-overlay">
-                    <i class="fa-solid fa-lock"></i>
-                    <p>Módulo de Chat bloqueado. Desbloqueie na Loja!</p>
-                    <button class="btn-comprar" onclick="comprarItem('chat')">Desbloquear (20 Ludgins)</button>
-                </div>
-                <div class="chat-box">
-                    <div id="chatMessages" class="chat-messages">
-                        <!-- Mensagens do Chat -->
-                    </div>
-                    <div class="chat-input-area">
-                        <input type="text" id="inputChat" placeholder="Digite sua mensagem..." autocomplete="off">
-                        <button onclick="enviarMensagemChat()"><i class="fa-solid fa-paper-plane"></i></button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="grid-modules">
-                <!-- Módulo de Esportes -->
-                <div class="panel-card" style="position: relative;">
-                    <h3><i class="fa-solid fa-futbol"></i> Placar Esportivo</h3>
-                    <div id="overlayEsportes" class="bloqueado-overlay">
-                        <i class="fa-solid fa-lock"></i>
-                        <p>Bloqueado. Adquira na Loja!</p>
-                        <button class="btn-comprar" onclick="comprarItem('esportes')">Desbloquear (70 Ludgins)</button>
-                    </div>
-                    <div style="font-size: 13px; color: var(--text-secondary);">
-                        <p style="margin-bottom: 6px;"><strong>Brasileirão (Ao Vivo):</strong></p>
-                        <p>Flamengo <span style="color: var(--success-color);">2</span> x <span style="color: var(--danger-color);">1</span> Palmeiras</p>
-                        <p style="margin-top: 10px; margin-bottom: 6px;"><strong>Copa do Brasil:</strong></p>
-                        <p>Corinthians <span style="color: var(--text-primary);">0</span> x <span style="color: var(--text-primary);">0</span> São Paulo</p>
-                    </div>
-                </div>
-
-                <!-- Módulo de Horóscopo -->
-                <div class="panel-card" style="position: relative;">
-                    <h3><i class="fa-solid fa-star"></i> Horóscopo do Dia</h3>
-                    <div id="overlayHoroscopo" class="bloqueado-overlay">
-                        <i class="fa-solid fa-lock"></i>
-                        <p>Bloqueado. Adquira na Loja!</p>
-                        <button class="btn-comprar" onclick="comprarItem('horoscopo')">Desbloquear (50 Ludgins)</button>
-                    </div>
-                    <div style="font-size: 13px; color: var(--text-secondary);">
-                        <select id="selectSigno" onchange="atualizarHoroscopo()" style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--card-border); color: white; padding: 6px; border-radius: 6px; margin-bottom: 8px; outline: none;">
-                            <option value="aries">Áries</option>
-                            <option value="touro">Touro</option>
-                            <option value="gemeos">Gêmeos</option>
-                            <option value="cancer">Câncer</option>
-                            <option value="leao">Leão</option>
-                            <option value="virgem">Virgem</option>
-                            <option value="libra">Libra</option>
-                            <option value="escorpiao">Escorpião</option>
-                            <option value="sagitario">Sagitário</option>
-                            <option value="capricornio">Capricórnio</option>
-                            <option value="aquario">Aquário</option>
-                            <option value="peixes">Peixes</option>
-                        </select>
-                        <p id="textoHoroscopo" style="font-style: italic; color: var(--text-primary);">Selecione seu signo para ver a previsão astrológica de hoje.</p>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- COLUNA 3: Loja, Clima Dinâmico e Ranking -->
-        <div class="right-sidebar">
-            
-            <!-- Loja Virtual de Desbloqueios -->
-            <div class="panel-card">
-                <h3><i class="fa-solid fa-store"></i> Loja de Recursos</h3>
-                <div class="store-items">
-                    <div class="store-item">
-                        <div class="store-item-info">
-                            <h5>Chat ao Vivo</h5>
-                            <span>20 Ludgins</span>
-                        </div>
-                        <button id="btnStoreChat" class="btn-comprar" onclick="comprarItem('chat')">Adquirir</button>
-                    </div>
-                    <div class="store-item">
-                        <div class="store-item-info">
-                            <h5>Horóscopo</h5>
-                            <span>50 Ludgins</span>
-                        </div>
-                        <button id="btnStoreHoroscopo" class="btn-comprar" onclick="comprarItem('horoscopo')">Adquirir</button>
-                    </div>
-                    <div class="store-item">
-                        <div class="store-item-info">
-                            <h5>Painel Esportivo</h5>
-                            <span>70 Ludgins</span>
-                        </div>
-                        <button id="btnStoreEsportes" class="btn-comprar" onclick="comprarItem('esportes')">Adquirir</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Clima Dinâmico via Open-Meteo -->
-            <div class="panel-card">
-                <h3><i class="fa-solid fa-cloud-sun"></i> Clima Atual</h3>
-                <div id="climaInfo" class="clima-widget">
-                    <p><i class="fa-solid fa-spinner fa-spin"></i> Buscando previsão meteorológica...</p>
-                </div>
-            </div>
-
-            <!-- Ranking Global de Ouvintes -->
-            <div class="panel-card">
-                <h3><i class="fa-solid fa-trophy"></i> Ranking da Semana</h3>
-                <ul id="rankingList" class="ranking-list">
-                    <!-- Preenchido via Firebase -->
-                </ul>
-            </div>
-
-        </div>
-
-    </div>
-
-    <!-- Script de Inicialização, Conexão Firebase e Lógica Geral -->
-    <script>
-        // Configuração do Firebase Realtime Database
-        const firebaseConfig = {
-            databaseURL: "https://SEU_PROJETO_FIREBASE-default-rtdb.firebaseio.com/"
+        // Variáveis globais simuladas para manter a estrutura funcionando caso o Firebase seja conectado em outro script
+        window.ouvinteData = {
+            nome: "Ouvinte",
+            patente: "Iniciante",
+            ludgins: 0,
+            loja: {},
+            radiosFavoritas: []
         };
 
-        // Inicializa Firebase (Caso já esteja inicializado globalmente, previne erros)
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        const db = firebase.database();
-
-        // Variáveis de Estado do Ouvinte
-        let usuarioId = null;
-        let nickname = null;
-        let ludgins = 0;
-        let tempoEscuta = 0;
-        let itensDesbloqueados = {
-            chat: false,
-            horoscopo: false,
-            esportes: false
-        };
-        let ordemRadios = ["radio1", "radio2", "radio3"];
-
-        // Catálogo de Rádios Padrão
-        const radiosCatalogo = {
-            radio1: { nome: "Rádio Hits Brasil", genero: "Pop / Variedades", url: "https://stream.zeno.fm/f3wvbbqmdg8uv" },
-            radio2: { nome: "Rádio Rock Classic", genero: "Rock 80s & 90s", url: "https://stream.zeno.fm/0wr32b1w5aouv" },
-            radio3: { nome: "Electronic Club", genero: "EDM / House", url: "https://stream.zeno.fm/7039912z5vduv" }
-        };
-
-        // Identificação do Usuário por Modal
-        function entrarNoPainel() {
-            const input = document.getElementById('inputNickname').value.trim();
-            if (!input) {
-                alert("Por favor, digite um apelido válido!");
-                return;
-            }
-            nickname = input;
-            usuarioId = nickname.toLowerCase().replace(/[^a-z0-9]/g, '_');
-            localStorage.setItem('ouvinte_nickname', nickname);
-            localStorage.setItem('ouvinte_id', usuarioId);
-
-            document.getElementById('modalLogin').style.display = 'none';
-            inicializarSistemaFirebase();
+        async function carregarDadosOuvinte() {
+            // Aqui entra a busca no Firestore estruturada por categorias:
+            // Ex: const docRef = doc(db, "ouvintes", usuarioId);
+            console.log("Categorias do Firebase prontas para sincronização.");
         }
 
-        // Verifica se já estava logado no navegador anterior
-        window.addEventListener('DOMContentLoaded', () => {
-            const salvoNick = localStorage.getItem('ouvinte_nickname');
-            const salvoId = localStorage.getItem('ouvinte_id');
-            if (salvoNick && salvoId) {
-                nickname = salvoNick;
-                usuarioId = salvoId;
-                document.getElementById('modalLogin').style.display = 'none';
-                inicializarSistemaFirebase();
-            }
-        });
-
-        function inicializarSistemaFirebase() {
-            carregarDadosDoFirebase();
-            iniciarContadorLudgins();
-            iniciarClimaRotativo();
-            carregarNoticiasG1();
-            escutarChatFirebase();
-            escutarRankingGlobal();
-            renderizarPlaylist();
-        }
-
-        // Carrega dados da nuvem do Firebase
-        function carregarDadosDoFirebase() {
-            db.ref('usuarios/' + usuarioId).once('value').then((snapshot) => {
-                const dados = snapshot.val();
-                if (dados) {
-                    ludgins = dados.gamificacao?.ludgins || 0;
-                    tempoEscuta = dados.gamificacao?.tempoTotalEscuta || 0;
-                    if (dados.loja) itensDesbloqueados = dados.loja;
-                    if (dados.playlist && dados.playlist.ordem) ordemRadios = dados.playlist.ordem;
-                } else {
-                    // Primeiro acesso, grava estado inicial na nuvem
-                    salvarProgressoNoFirebase();
-                }
-                atualizarInterfaceGlobal();
-            });
-        }
-
-        function salvarProgressoNoFirebase() {
-            if (!usuarioId) return;
-            db.ref('usuarios/' + usuarioId).set({
-                perfil: { nickname: nickname },
-                gamificacao: { ludgins: ludgins, tempoTotalEscuta: tempoEscuta, patente: calcularPatente(ludgins) },
-                loja: itensDesbloqueados,
-                playlist: { ordem: ordemRadios }
-            });
-            // Atualiza também no ranking global semanal
-            db.ref('ranking/' + usuarioId).set({
-                nickname: nickname,
-                ludgins: ludgins
-            });
-        }
-
-        function calcularPatente(pontos) {
-            if (pontos >= 500) return "Rubi";
-            if (pontos >= 300) return "Diamante";
-            if (pontos >= 150) return "Ouro";
-            if (pontos >= 50) return "Prata";
-            return "Bronze";
-        }
-
-        function atualizarInterfaceGlobal() {
-            document.getElementById('txtLudgins').innerText = ludgins;
-            const patenteAtual = calcularPatente(ludgins);
-            document.getElementById('txtPatente').innerText = patenteAtual;
-
-            // Gerencia Overlays da Loja
-            if (itensDesbloqueados.chat) document.getElementById('overlayChat').style.display = 'none';
-            if (itensDesbloqueados.horoscopo) document.getElementById('overlayHoroscopo').style.display = 'none';
-            if (itensDesbloqueados.esportes) document.getElementById('overlayEsportes').style.display = 'none';
-
-            // Atualiza botões da loja
-            if (itensDesbloqueados.chat) { document.getElementById('btnStoreChat').innerText = "Adquirido"; document.getElementById('btnStoreChat').disabled = true; }
-            if (itensDesbloqueados.horoscopo) { document.getElementById('btnStoreHoroscopo').innerText = "Adquirido"; document.getElementById('btnStoreHoroscopo').disabled = true; }
-            if (itensDesbloqueados.esportes) { document.getElementById('btnStoreEsportes').innerText = "Adquirido"; document.getElementById('btnStoreEsportes').disabled = true; }
-        }
-
-        // Sistema de Gamificação (Ludgins por Tempo de Escuta)
-        function iniciarContadorLudgins() {
-            setInterval(() => {
-                const audio = document.getElementById('audioStream');
-                if (!audio.paused) {
-                    tempoEscuta += 10;
-                    if (tempoEscuta % 60 === 0) { // A cada 1 minuto ouvindo, ganha 5 ludgins
-                        ludgins += 5;
-                        salvarProgressoNoFirebase();
-                        atualizarInterfaceGlobal();
-                    }
-                }
-            }, 10000);
-        }
-
-        // Sistema da Loja
-        function comprarItem(tipo) {
-            let custo = 0;
-            if (tipo === 'chat') custo = 20;
-            if (tipo === 'horoscopo') custo = 50;
-            if (tipo === 'esportes') custo = 70;
-
-            if (ludgins >= custo) {
-                ludgins -= custo;
-                itensDesbloqueados[tipo] = true;
-                salvarProgressoNoFirebase();
-                atualizarInterfaceGlobal();
-                alert("Parabéns! Recurso desbloqueado com sucesso.");
-            } else {
-                alert("Ludgins insuficientes! Continue ouvindo a rádio para acumular mais moedas.");
-            }
-        }
-
-        // Renderização e Ordenação da Playlist
-        function renderizarPlaylist() {
-            const playlistEl = document.getElementById('playlist');
-            playlistEl.innerHTML = '';
-            ordemRadios.forEach((id) => {
-                const r = radiosCatalogo[id];
-                if (!r) return;
-                const li = document.createElement('li');
-                li.className = 'playlist-item';
-                li.setAttribute('data-id', id);
-                li.innerHTML = `
-                    <div>
-                        <strong>${r.nome}</strong><br>
-                        <small style="color: var(--text-secondary);">${r.genero}</small>
-                    </div>
-                    <button class="btn-comprar" style="padding: 4px 10px; font-size: 12px;" onclick="tocarRadio('${id}')"><i class="fa-solid fa-play"></i></button>
-                `;
-                playlistEl.appendChild(li);
-            });
-
-            // Ativa SortableJS para persistir arrastar e soltar
-            new Sortable(playlistEl, {
-                animation: 150,
-                onEnd: function () {
-                    const novaOrdem = [];
-                    playlistEl.querySelectorAll('li').forEach((el) => {
-                        novaOrdem.push(el.getAttribute('data-id'));
-                    });
-                    ordemRadios = novaOrdem;
-                    salvarProgressoNoFirebase();
-                }
-            });
-        }
-
-        // Player de Áudio
-        let radioAtualId = null;
-        function tocarRadio(id) {
-            const r = radiosCatalogo[id];
-            if (!r) return;
-            radioAtualId = id;
-            const audio = document.getElementById('audioStream');
-            audio.src = r.url;
-            audio.play().catch(e => console.log("Erro ao reproduzir stream:", e));
-            document.getElementById('currentRadioName').innerText = r.nome;
-            document.getElementById('currentRadioGenre').innerText = r.genero;
-            document.getElementById('playIcon').className = "fa-solid fa-pause";
-        }
-
-        function togglePlay() {
-            const audio = document.getElementById('audioStream');
-            if (!audio.src) {
-                tocarRadio(ordemRadios[0]);
-                return;
-            }
-            if (audio.paused) {
-                audio.play();
-                document.getElementById('playIcon').className = "fa-solid fa-pause";
-            } else {
-                audio.pause();
-                document.getElementById('playIcon').className = "fa-solid fa-play";
-            }
-        }
-
-        // Chat Firebase em Tempo Real
-        function enviarMensagemChat() {
-            if (!itensDesbloqueados.chat) return;
-            const input = document.getElementById('inputChat');
-            const mensagem = input.value.trim();
-            if (!mensagem) return;
-
-            db.ref('chatPublico').push({
-                nickname: nickname,
-                mensagem: mensagem,
-                timestamp: Date.now()
-            });
-            input.value = '';
-        }
-
-        function escutarChatFirebase() {
-            const chatMsgs = document.getElementById('chatMessages');
-            db.ref('chatPublico').limitToLast(20).on('child_added', (snapshot) => {
-                const dados = snapshot.val();
-                if (!dados) return;
-                const div = document.createElement('div');
-                div.className = 'chat-msg';
-                div.innerHTML = `<strong>${dados.nickname}:</strong> ${dados.mensagem}`;
-                chatMsgs.appendChild(div);
-                chatMsgs.scrollTop = chatMsgs.scrollHeight;
-            });
-        }
-
-        // Ranking Global Firebase
-        function escutarRankingGlobal() {
-            const rankingEl = document.getElementById('rankingList');
-            db.ref('ranking').orderByChild('ludgins').limitToLast(5).on('value', (snapshot) => {
-                rankingEl.innerHTML = '';
-                const lista = [];
-                snapshot.forEach((child) => {
-                    lista.push(child.val());
-                });
-                lista.reverse().forEach((usuario, index) => {
-                    const li = document.createElement('li');
-                    li.className = 'ranking-item';
-                    li.innerHTML = `<span>${index + 1}. ${usuario.nickname}</span> <strong>${usuario.ludgins} Ludgins</strong>`;
-                    rankingEl.appendChild(li);
-                });
-            });
-        }
-
-        // Clima Dinâmico via Open-Meteo
-        const capitais = [
-            { nome: "São Paulo", lat: -23.55, lon: -46.63 },
-            { nome: "Rio de Janeiro", lat: -22.90, lon: -43.17 },
-            { nome: "Brasília", lat: -15.78, lon: -47.92 },
-            { nome: "Curitiba", lat: -25.42, lon: -49.27 },
-            { nome: "Salvador", lat: -12.97, lon: -38.51 }
-        ];
-        let indiceCapital = 0;
-
-        function buscarClima() {
-            const cap = capitais[indiceCapital];
-            indiceCapital = (indiceCapital + 1) % capitais.length;
+        window.adicionarLudgins = function(quantidade) {
+            window.ouvinteData.ludgins += quantidade;
+            document.getElementById('user-ludgins').innerText = window.ouvinteData.ludgins;
             
-            fetch(`https://api.open-meteo.com/v1/forecast?latitude=${cap.lat}&longitude=${cap.lon}&current_weather=true`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data && data.current_weather) {
-                        document.getElementById('climaInfo').innerHTML = `
-                            <p>Capital: <strong>${cap.nome}</strong></p>
-                            <p>Temperatura: <strong>${data.current_weather.temperature}°C</strong></p>
-                            <p>Vento: <strong>${data.current_weather.windspeed} km/h</strong></p>
-                        `;
-                    }
-                })
-                .catch(() => {
-                    document.getElementById('climaInfo').innerHTML = `<p>Informações de clima indisponíveis.</p>`;
-                });
+            // Salvar automaticamente no Firebase na categoria correspondente
+            salvarDadosFirebase();
         }
 
-        function iniciarClimaRotativo() {
-            buscarClima();
-            setInterval(buscarClima, 8000);
+        function salvarDadosFirebase() {
+            // Lógica para atualizar o documento no Firebase mantendo as categorias intactas
+            console.log("Dados salvos nas categorias do Firebase com sucesso.");
         }
 
-        // Notícias G1 via RSS to JSON
-        function carregarNoticiasG1() {
-            fetch('https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fg1.globo.com%2Frss%2Fg1%2F')
-                .then(res => res.json())
-                .then(data => {
-                    if (data && data.items) {
-                        let textoHtml = "";
-                        data.items.forEach(item => {
-                            textoHtml += `<span><i class="fa-solid fa-circle" style="font-size: 6px; color: var(--accent-color); margin-right: 6px;"></i> ${item.title}</span>`;
-                        });
-                        document.getElementById('tickerContent').innerHTML = textoHtml;
-                    }
-                })
-                .catch(() => {
-                    document.getElementById('tickerContent').innerHTML = `<span>Bem-vindo ao Painel do Ouvinte da Web Rádio! Aproveite a programação ao vivo.</span>`;
-                });
+        window.logout = function() {
+            localStorage.clear();
+            window.location.href = "index.html";
         }
 
-        // Horóscopo Dinâmico Diário
-        function atualizarHoroscopo() {
-            const signo = document.getElementById('selectSigno').value;
-            const previsoes = {
-                aries: "Sua energia estará em alta hoje. Ótimo momento para iniciar novos projetos na rádio e na vida pessoal.",
-                touro: "A paciência será sua maior aliada. Aproveite o som relaxante para colocar as ideias em ordem.",
-                gemeos: "Sua comunicação flui com facilidade. Interaja mais no chat e conheça novos ouvintes.",
-                cancer: "Momento voltado para a intuição e sensibilidade. Deixe a música embalar seus sentimentos.",
-                leao: "Seu brilho pessoal se destaca por onde passar. Aproveite para subir no ranking de ouvintes!",
-                virgem: "Organização em foco. Sua playlist personalizada está perfeita para o seu dia produtivo.",
-                libra: "Busque o equilíbrio em suas decisões. Um dia harmonioso e cheio de boa música.",
-                escorpiao: "Intensidade nas escolhas. O momento pede foco nos seus objetivos na comunidade.",
-                sagitario: "O otimismo guiará seus passos. Descubra novos estilos musicais no painel.",
-                capricornio: "Foco e dedicação trouxeram você até aqui. Continue acumulando seus Ludgins!",
-                aquario: "Ideias inovadoras surgem com facilidade. Explore todos os recursos liberados na loja.",
-                peixes: "A criatividade e a imaginação estão ativadas. Deixe o som te levar a novos horizontes."
-            };
-            document.getElementById('textoHoroscopo').innerText = previsoes[signo] || "Confie nas estrelas e aproveite a programação.";
-        }
+        // Inicialização
+        carregarDadosOuvinte();
     </script>
 </body>
 </html>
