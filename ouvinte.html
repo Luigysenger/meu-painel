@@ -1541,60 +1541,11 @@
         document.getElementById('nome-ouvinte-display').innerText = "OLA, " + ouvinteNome.toUpperCase();
 
         let segundosConectados = 0;
-        let meusLudgins = 0;
-        let patenteAtual = 'Bronze';
+        let meusLudgins = parseInt(localStorage.getItem('ludgins_ouvinte_' + ouvinteId)) || 0;
+        let patenteAtual = localStorage.getItem('patente_ouvinte_' + ouvinteId) || 'Bronze';
         let timerOnlineInterval = null;
         let isRadioTocando = false;
         let cardSendoEditadoKey = null;
-
-        let desbloqueios = {
-            chat: false,
-            cores: false,
-            horoscopo: false,
-            esportes: false
-        };
-
-        let customizacoesCards = {};
-
-        // SINCRONIZAÇÃO EM TEMPO REAL COM O FIREBASE (GARANTE QUE O PAINEL SEJA RESTAURADO DE QUALQUER LUGAR)
-        db.ref('ludgins/' + ouvinteId).on('value', snap => {
-            if (snap.exists()) {
-                const dados = snap.val();
-                meusLudgins = dados.ludgins !== undefined ? dados.ludgins : 0;
-                patenteAtual = dados.patente || 'Bronze';
-            } else {
-                meusLudgins = parseInt(localStorage.getItem('ludgins_ouvinte_' + ouvinteId)) || 0;
-                patenteAtual = localStorage.getItem('patente_ouvinte_' + ouvinteId) || 'Bronze';
-                salvarProgressoLudgins();
-            }
-            atualizarInterfaceLudginsEPatente();
-        });
-
-        db.ref('desbloqueios_ouvinte/' + ouvinteId).on('value', snap => {
-            if (snap.exists()) {
-                desbloqueios = snap.val();
-            } else {
-                const salvoLocal = localStorage.getItem('desbloqueios_ouvinte_' + ouvinteId);
-                if (salvoLocal) {
-                    desbloqueios = JSON.parse(salvoLocal);
-                }
-                db.ref('desbloqueios_ouvinte/' + ouvinteId).set(desbloqueios);
-            }
-            aplicarTravaBloqueios();
-            renderizarLojaVirtual();
-        });
-
-        db.ref('customizacoes_cards/' + ouvinteId).on('value', snap => {
-            if (snap.exists()) {
-                customizacoesCards = snap.val();
-            } else {
-                const salvoLocal = localStorage.getItem('customizacoes_cards_' + ouvinteId);
-                if (salvoLocal) {
-                    customizacoesCards = JSON.parse(salvoLocal);
-                }
-            }
-            renderizarPlaylistDireita();
-        });
 
         function tocarSomSuaveSucesso() {
             try {
@@ -1612,6 +1563,15 @@
                 osc.stop(ctx.currentTime + 0.4);
             } catch(e) {}
         }
+
+        let desbloqueios = JSON.parse(localStorage.getItem('desbloqueios_ouvinte_' + ouvinteId)) || {
+            chat: false,
+            cores: false,
+            horoscopo: false,
+            esportes: false
+        };
+
+        let customizacoesCards = JSON.parse(localStorage.getItem('customizacoes_cards_' + ouvinteId)) || {};
 
         function atualizarInterfaceLudginsEPatente() {
             document.getElementById('contador-ludgins').innerText = meusLudgins;
@@ -1714,14 +1674,6 @@
         function salvarProgressoLudgins() {
             localStorage.setItem('ludgins_ouvinte_' + ouvinteId, meusLudgins);
             localStorage.setItem('patente_ouvinte_' + ouvinteId, patenteAtual);
-            
-            db.ref('ludgins/' + ouvinteId).set({
-                nome: ouvinteNome,
-                ludgins: meusLudgins,
-                patente: patenteAtual,
-                ultimaAtualizacao: firebase.database.ServerValue.TIMESTAMP
-            });
-
             atualizarInterfaceLudginsEPatente();
             sincronizarFirebaseOuvinteOnline();
         }
@@ -1845,8 +1797,6 @@
                 desbloqueios[idItem] = true;
                 
                 localStorage.setItem('desbloqueios_ouvinte_' + ouvinteId, JSON.stringify(desbloqueios));
-                db.ref('desbloqueios_ouvinte/' + ouvinteId).set(desbloqueios);
-
                 salvarProgressoLudgins();
                 tocarSomSuaveSucesso();
 
@@ -2243,18 +2193,23 @@
         setInterval(carregarNoticiasBrasil, 180000);
 
         let todasRadios = [];
-        let playlistKeys = [];
+        let playlistKeys = JSON.parse(localStorage.getItem('playlist_keys_ouvinte') || '[]');
         let radioTocandoKey = null;
 
         db.ref('ouvintes_preferencias/' + ouvinteId + '/playlist').on('value', snap => {
             if (snap.exists()) {
                 playlistKeys = snap.val();
                 localStorage.setItem('playlist_keys_ouvinte', JSON.stringify(playlistKeys));
+                localStorage.setItem('playlist_iniciada', 'true');
                 renderizarPainelRadios();
-            } else if (todasRadios.length > 0) {
-                playlistKeys = todasRadios.map(r => r.key);
-                salvarPreferenciasOuvinte();
-                renderizarPainelRadios();
+            }
+        });
+
+        db.ref('ouvintes_preferencias/' + ouvinteId + '/customizacoes_cards').on('value', snap => {
+            if (snap.exists()) {
+                customizacoesCards = snap.val();
+                localStorage.setItem('customizacoes_cards_' + ouvinteId, JSON.stringify(customizacoesCards));
+                renderizarPlaylistDireita();
             }
         });
 
@@ -2275,14 +2230,10 @@
 
             todasRadios.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
 
-            if (playlistKeys.length === 0) {
-                const salvoLocal = localStorage.getItem('playlist_keys_ouvinte');
-                if (salvoLocal) {
-                    playlistKeys = JSON.parse(salvoLocal);
-                } else {
-                    playlistKeys = todasRadios.map(r => r.key);
-                    salvarPreferenciasOuvinte();
-                }
+            if (!localStorage.getItem('playlist_iniciada') && playlistKeys.length === 0) {
+                playlistKeys = todasRadios.map(r => r.key);
+                salvarPreferenciasOuvinte();
+                localStorage.setItem('playlist_iniciada', 'true');
             }
 
             renderizarPainelRadios();
@@ -2421,7 +2372,7 @@
 
         function persistirCustomizacoesCards() {
             localStorage.setItem('customizacoes_cards_' + ouvinteId, JSON.stringify(customizacoesCards));
-            db.ref('customizacoes_cards/' + ouvinteId).set(customizacoesCards);
+            db.ref('ouvintes_preferencias/' + ouvinteId + '/customizacoes_cards').set(customizacoesCards);
             renderizarPlaylistDireita();
         }
 
