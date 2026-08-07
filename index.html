@@ -3,439 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SEJA BEM VINDO AO SISTEMA LMS DE RADIOS ONLINE</title>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <title>Painel do Ouvinte Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root {
-            --primary: #1DB954;
-            --bg: #09090b;
-            --card: rgba(18, 18, 20, 0.85);
-            --text-muted: #a1a1aa;
-            --purple-light: #c084fc;
-            --border-glass: rgba(255, 255, 255, 0.08);
-        }
+        :root { --primary: #6366f1; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; }
+        
+        /* Layout */
+        .sidebar { width: 250px; background: var(--card); padding: 20px; border-right: 1px solid #334155; }
+        .main-content { flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+        
+        /* Player Style */
+        .player-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); }
+        .controls { display: flex; align-items: center; gap: 20px; }
+        .btn { background: var(--primary); border: none; color: white; padding: 15px 20px; border-radius: 50%; cursor: pointer; }
 
-        * { box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: var(--bg);
-            color: #f4f4f5;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .login-card {
-            background: var(--card);
-            backdrop-filter: blur(16px);
-            border: 1px solid var(--border-glass);
-            border-radius: 24px;
-            padding: 35px;
-            width: 100%;
-            max-width: 420px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-            text-align: center;
-        }
-
-        .login-title {
-            font-size: 20px;
-            font-weight: 900;
-            background: linear-gradient(135deg, #c084fc, #e879f9);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            line-height: 1.3;
-        }
-
-        .login-sub {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-bottom: 25px;
-        }
-
-        .input-group {
-            margin-bottom: 16px;
-            text-align: left;
-        }
-
-        .input-group label {
-            display: block;
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-bottom: 6px;
-            font-weight: 600;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px 16px;
-            background: #161619;
-            border: 1px solid var(--border-glass);
-            color: white;
-            border-radius: 12px;
-            outline: none;
-            font-size: 14px;
-            transition: border-color 0.2s;
-        }
-
-        input:focus {
-            border-color: var(--primary);
-        }
-
-        .btn-action {
-            width: 100%;
-            padding: 14px;
-            background: var(--primary);
-            color: #000;
-            border: none;
-            border-radius: 12px;
-            font-weight: 800;
-            font-size: 14px;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: opacity 0.2s, transform 0.1s;
-            box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
-        }
-
-        .btn-action:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
-        }
-
-        .btn-link {
-            background: none;
-            border: none;
-            color: var(--purple-light);
-            font-size: 13px;
-            cursor: pointer;
-            margin-top: 12px;
-            font-weight: 600;
-            display: inline-block;
-        }
-
-        .btn-link:hover {
-            text-decoration: underline;
-        }
-
-        .toggle-mode {
-            margin-top: 20px;
-            font-size: 13px;
-            color: var(--text-muted);
-        }
-
-        .toggle-mode span {
-            color: var(--purple-light);
-            cursor: pointer;
-            font-weight: 700;
-            text-decoration: underline;
-        }
-
-        .error-msg {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #f87171;
-            padding: 10px;
-            border-radius: 10px;
-            font-size: 12px;
-            margin-bottom: 15px;
-            display: none;
-        }
+        /* Chat */
+        .chat-box { flex: 1; background: var(--card); border-radius: 10px; padding: 15px; overflow-y: auto; }
+        .chat-bubble-ouvinte { margin-bottom: 10px; background: #334155; padding: 10px; border-radius: 8px; }
     </style>
 </head>
 <body>
 
-    <div class="login-card">
-        <div id="card-header">
-            <h1 class="login-title" id="titulo-form">SEJA BEM VINDO AO SISTEMA LMS DE RADIOS ONLINE</h1>
-            <p class="login-sub" id="sub-form">Entre com suas credenciais para continuar</p>
+    <div class="sidebar">
+        <h2>Menu</h2>
+        <button onclick="alert('Funcionalidade de Loja em breve!')">Loja Virtual</button>
+    </div>
+
+    <div class="main-content">
+        <div class="player-card">
+            <h2 id="player-title">Nenhuma rádio selecionada</h2>
+            <div class="controls">
+                <button class="btn" onclick="togglePlay()" id="btn-play"><i class="fas fa-play"></i></button>
+                <input type="range" id="volume" min="0" max="1" step="0.1" value="0.5">
+            </div>
         </div>
 
-        <div id="error-alert" class="error-msg"></div>
-
-        <!-- FORMULÁRIO -->
-        <div id="form-container">
-            <!-- Campos específicos de Cadastro / Recuperação -->
-            <div class="input-group" id="group-nome" style="display: none;">
-                <label>Primeiro Nome</label>
-                <input type="text" id="txt-nome" placeholder="DIGITE SEU PRIMEIRO NOME" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" onkeydown="handleEnter(event)">
-            </div>
-
-            <div class="input-group" id="group-email">
-                <label>E-mail</label>
-                <input type="email" id="txt-email" autocapitalize="none" autocomplete="email" placeholder="seu@email.com" onkeydown="handleEnter(event)">
-            </div>
-
-            <div class="input-group" id="group-senha">
-                <label>Senha</label>
-                <input type="password" id="txt-senha" placeholder="********" onkeydown="handleEnter(event)">
-            </div>
-
-            <!-- Confirmação de Senha (Cadastro e Recuperação) -->
-            <div class="input-group" id="group-confirma" style="display: none;">
-                <label id="lbl-confirma">Confirmar Senha</label>
-                <input type="password" id="txt-confirma" placeholder="********" onkeydown="handleEnter(event)">
-            </div>
-
-            <!-- Data de Nascimento (Cadastro e Recuperação) -->
-            <div class="input-group" id="group-nascimento" style="display: none;">
-                <label>Data de Nascimento (Ex: 11-03-1984)</label>
-                <input type="text" id="txt-nascimento" placeholder="DD-MM-AAAA" maxlength="10" oninput="mascaraData(this)" onkeydown="handleEnter(event)">
-            </div>
-
-            <button class="btn-action" id="btn-submit" onclick="executarAcao()">ENTRAR</button>
-        </div>
-
-        <!-- Botão Esqueci a Senha (Apenas no Login) -->
-        <div id="div-esqueci">
-            <button class="btn-link" onclick="mudarParaEsqueci()">Esqueci minha senha</button>
-        </div>
-
-        <!-- Alternador de Telas -->
-        <div class="toggle-mode" id="div-toggle">
-            Não tenho cadastro? <span onclick="mudarParaCadastro()">Cadastre-se</span>
+        <div class="chat-box" id="lista-respostas-adm"></div>
+        <div class="input-area">
+            <input type="text" id="texto-mensagem" placeholder="Digite algo...">
+            <button onclick="enviarMensagem()">Enviar</button>
         </div>
     </div>
 
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    
     <script>
+        // CONFIGURAÇÃO DO FIREBASE (Substitua pelos seus dados)
         const firebaseConfig = {
-            apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
-            authDomain: "meu-painel-f2efe.firebaseapp.com",
-            databaseURL: "https://meu-painel-f2efe-default-rtdb.firebaseio.com/",
-            projectId: "meu-painel-f2efe"
+            apiKey: "SUA_API_KEY",
+            databaseURL: "SUA_DATABASE_URL",
+            projectId: "SEU_PROJECT_ID"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let modoAtual = 'login'; // 'login', 'cadastro', 'esqueci'
+        // Variáveis de Estado
+        let player = new Audio();
+        let isRadioTocando = false;
+        let ouvinteNome = "Ouvinte_" + Math.floor(Math.random() * 1000);
 
-        function resetarCampos() {
-            document.getElementById('txt-nome').value = '';
-            document.getElementById('txt-email').value = '';
-            document.getElementById('txt-senha').value = '';
-            document.getElementById('txt-confirma').value = '';
-            document.getElementById('txt-nascimento').value = '';
-            document.getElementById('error-alert').style.display = 'none';
-        }
-
-        // Função de máscara automática para o campo de data (DD-MM-AAAA)
-        function mascaraData(input) {
-            let v = input.value.replace(/\D/g, ""); // Remove tudo que não for dígito
-            if (v.length > 8) v = v.slice(0, 8); // Limita a 8 dígitos
-
-            // Aplica a formatação com hífens automaticamente conforme digita
-            if (v.length > 4) {
-                v = v.replace(/^(\d{2})(\d{2})(\d{0,4})/, "$1-$2-$3");
-            } else if (v.length > 2) {
-                v = v.replace(/^(\d{2})(\d{0,2})/, "$1-$2");
+        function togglePlay() {
+            if (isRadioTocando) {
+                player.pause();
+                document.getElementById('btn-play').innerHTML = '<i class="fas fa-play"></i>';
+            } else {
+                // Exemplo de stream de teste
+                player.src = "https://c1.popcast.com.br:9000/live"; 
+                player.play();
+                document.getElementById('btn-play').innerHTML = '<i class="fas fa-pause"></i>';
             }
-            input.value = v;
+            isRadioTocando = !isRadioTocando;
         }
 
-        function mudarParaLogin() {
-            modoAtual = 'login';
-            resetarCampos();
-            document.getElementById('titulo-form').innerText = "SEJA BEM VINDO AO SISTEMA LMS DE RADIOS ONLINE";
-            document.getElementById('sub-form').innerText = "Entre com suas credenciais para continuar";
+        function enviarMensagem() {
+            const input = document.getElementById('texto-mensagem');
+            if (!input.value.trim()) return;
             
-            document.getElementById('group-nome').style.display = "none";
-            document.getElementById('group-email').style.display = "block";
-            document.getElementById('group-senha').style.display = "block";
-            document.getElementById('group-confirma').style.display = "none";
-            document.getElementById('group-nascimento').style.display = "none";
-
-            document.getElementById('btn-submit').innerText = "ENTRAR";
-            document.getElementById('div-esqueci').style.display = "block";
-            document.getElementById('div-toggle').style.display = "block";
-            document.getElementById('div-toggle').innerHTML = 'Não tenho cadastro? <span onclick="mudarParaCadastro()">Cadastre-se</span>';
+            db.ref('mensagens_ouvintes').push({
+                ouvinte: ouvinteNome,
+                texto: input.value,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            });
+            input.value = "";
         }
 
-        function mudarParaCadastro() {
-            modoAtual = 'cadastro';
-            resetarCampos();
-            document.getElementById('titulo-form').innerText = "SEJA BEM VINDO AO SISTEMA LMS DE RADIOS ONLINE";
-            document.getElementById('sub-form').innerText = "Preencha os campos para se registrar";
-            
-            document.getElementById('group-nome').style.display = "block";
-            document.getElementById('group-email').style.display = "block";
-            document.getElementById('group-senha').style.display = "block";
-            document.getElementById('group-confirma').style.display = "block";
-            document.getElementById('group-nascimento').style.display = "block";
-            
-            document.getElementById('lbl-confirma').innerText = "Confirmar Senha";
-            document.getElementById('txt-senha').placeholder = "********";
-
-            document.getElementById('btn-submit').innerText = "CADASTRAR";
-            document.getElementById('div-esqueci').style.display = "none";
-            document.getElementById('div-toggle').style.display = "block";
-            document.getElementById('div-toggle').innerHTML = 'Já tenho cadastro? <span onclick="mudarParaLogin()">Entrar</span>';
-        }
-
-        function mudarParaEsqueci() {
-            modoAtual = 'esqueci';
-            resetarCampos();
-            document.getElementById('titulo-form').innerText = "SEJA BEM VINDO AO SISTEMA LMS DE RADIOS ONLINE";
-            document.getElementById('sub-form').innerText = "Recuperação de Acesso";
-            
-            document.getElementById('group-nome').style.display = "block";
-            document.getElementById('group-email').style.display = "block";
-            document.getElementById('group-senha').style.display = "none";
-            document.getElementById('group-confirma').style.display = "none";
-            document.getElementById('group-nascimento').style.display = "block";
-
-            document.getElementById('btn-submit').innerText = "AVANÇAR";
-            document.getElementById('div-esqueci').style.display = "none";
-            document.getElementById('div-toggle').style.display = "block";
-            document.getElementById('div-toggle').innerHTML = 'Lembrou a senha? <span onclick="mudarParaLogin()">Entrar</span>';
-        }
-
-        function mostrarErro(msg) {
-            const err = document.getElementById('error-alert');
-            err.innerText = msg;
-            err.style.display = 'block';
-        }
-
-        function handleEnter(event) {
-            if (event.key === 'Enter') {
-                executarAcao();
-            }
-        }
-
-        function executarAcao() {
-            const emailRaw = document.getElementById('txt-email').value;
-            const emailInput = emailRaw ? emailRaw.trim() : '';
-            const emailLimpo = emailInput.toLowerCase().replace(/[\u200B-\u200D\uFEFF]/g, '').trim();
-            const emailKey = emailInput.replace(/[.#$\/\[\]]/g, "_");
-
-            if (modoAtual === 'login') {
-                const senhaRaw = document.getElementById('txt-senha').value;
-                const senha = senhaRaw ? senhaRaw.trim() : '';
-
-                if (!emailInput || !senha) {
-                    return mostrarErro("Preencha todos os campos obrigatórios.");
-                }
-
-                // LOGIN DO ADMINISTRADOR
-                if (emailLimpo === "senger.luigy@gmail.com" && senha === "104528") {
-                    localStorage.setItem('usuarioNome', 'Administrador');
-                    window.location.href = "adm.html";
-                    return;
-                }
-
-                // FLUXO DE LOGIN DE OUVINTE
-                db.ref('contas/' + emailKey).once('value', snapshot => {
-                    if (snapshot.exists()) {
-                        const dados = snapshot.val();
-                        if (dados.senha === senha) {
-                            localStorage.setItem('usuarioNome', dados.nome);
-                            window.location.href = "ouvinte.html";
-                        } else {
-                            mostrarErro("Senha incorreta.");
-                        }
-                    } else {
-                        mostrarErro("E-mail não encontrado ou não cadastrado.");
-                    }
-                });
-
-            } else if (modoAtual === 'cadastro') {
-                const nome = document.getElementById('txt-nome').value.trim();
-                const senha = document.getElementById('txt-senha').value.trim();
-                const confirma = document.getElementById('txt-confirma').value.trim();
-                const nascimento = document.getElementById('txt-nascimento').value.trim();
-
-                if (!nome || !emailInput || !senha || !confirma || !nascimento) {
-                    return mostrarErro("Preencha todos os campos do cadastro.");
-                }
-
-                if (senha !== confirma) {
-                    return mostrarErro("As senhas são diferentes");
-                }
-
-                const regexData = /^\d{2}-\d{2}-\d{4}$/;
-                if (!regexData.test(nascimento)) {
-                    return mostrarErro("A data de nascimento deve estar no formato ex: 11-03-1984");
-                }
-
-                db.ref('contas/' + emailKey).once('value', snapshot => {
-                    if (snapshot.exists()) {
-                        mostrarErro("Este e-mail já está cadastrado.");
-                    } else {
-                        db.ref('contas/' + emailKey).set({
-                            nome: nome,
-                            email: emailInput,
-                            senha: senha,
-                            nascimento: nascimento,
-                            criadoEm: Date.now()
-                        }).then(() => {
-                            alert("Cadastro realizado com sucesso!");
-                            mudarParaLogin();
-                        }).catch(() => {
-                            mostrarErro("Erro ao cadastrar. Tente novamente.");
-                        });
-                    }
-                });
-
-            } else if (modoAtual === 'esqueci') {
-                const nome = document.getElementById('txt-nome').value.trim();
-                const nascimento = document.getElementById('txt-nascimento').value.trim();
-
-                if (!nome || !emailInput || !nascimento) {
-                    return mostrarErro("Preencha todos os campos para validação.");
-                }
-
-                db.ref('contas/' + emailKey).once('value', snapshot => {
-                    if (!snapshot.exists()) {
-                        return mostrarErro("E-mail não encontrado.");
-                    }
-                    const dados = snapshot.val();
-                    if (dados.nome.toUpperCase() === nome.toUpperCase() && dados.nascimento === nascimento) {
-                        document.getElementById('sub-form').innerText = "Crie sua nova senha";
-                        document.getElementById('group-nome').style.display = "none";
-                        document.getElementById('group-email').style.display = "none";
-                        document.getElementById('group-nascimento').style.display = "none";
-                        
-                        document.getElementById('group-senha').style.display = "block";
-                        document.getElementById('group-confirma').style.display = "block";
-                        document.getElementById('lbl-confirma').innerText = "Confirmar Senha";
-                        document.getElementById('txt-senha').placeholder = "Crie sua nova senha";
-                        document.getElementById('txt-senha').value = "";
-                        document.getElementById('txt-confirma').value = "";
-                        
-                        document.getElementById('btn-submit').innerText = "FINALIZAR";
-                        modoAtual = 'redefinindo';
-                        document.getElementById('error-alert').style.display = 'none';
-                    } else {
-                        mostrarErro("Os dados informados não conferem com o cadastro.");
-                    }
-                });
-
-            } else if (modoAtual === 'redefinindo') {
-                const senha = document.getElementById('txt-senha').value.trim();
-                const confirma = document.getElementById('txt-confirma').value.trim();
-
-                if (!senha || !confirma) {
-                    return mostrarErro("Preencha e confirme a nova senha.");
-                }
-                if (senha !== confirma) {
-                    return mostrarErro("As senhas são diferentes");
-                }
-
-                db.ref('contas/' + emailKey).update({
-                    senha: senha
-                }).then(() => {
-                    alert("Senha alterada com sucesso!");
-                    mudarParaLogin();
-                }).catch(() => {
-                    mostrarErro("Erro ao atualizar a senha.");
-                });
-            }
-        }
+        // Listener de mensagens em tempo real
+        db.ref('mensagens_ouvintes').limitToLast(5).on('value', snap => {
+            const container = document.getElementById('lista-respostas-adm');
+            container.innerHTML = "";
+            snap.forEach(child => {
+                const msg = child.val();
+                container.innerHTML += `<div class="chat-bubble-ouvinte"><b>${msg.ouvinte}:</b> ${msg.texto}</div>`;
+            });
+        });
     </script>
 </body>
 </html>
