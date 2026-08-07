@@ -165,6 +165,18 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        // AUTO-LOGIN: Se já estiver logado, redireciona automaticamente sem zerar nada
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedUser = localStorage.getItem('userId');
+            if (savedUser) {
+                if (savedUser === 'admin') {
+                    window.location.href = 'adm.html';
+                } else {
+                    window.location.href = 'ouvinte.html';
+                }
+            }
+        });
+
         let modoAtual = 'login';
 
         function mudarModo(modo) {
@@ -218,7 +230,6 @@
             const nomeInput = document.getElementById('nome-cadastro').value.trim();
             const userLower = usuarioInput.toLowerCase();
 
-            // ROTA DE ENTRADA DO ADMINISTRADOR
             if (modoAtual === 'login' && (userLower === 'admin' || userLower === 'senger.luigy@gmail.com')) {
                 localStorage.setItem('userId', 'admin');
                 localStorage.setItem('usuarioNome', 'ADMINISTRADOR');
@@ -226,7 +237,6 @@
                 return;
             }
 
-            // MODO DE RECUPERAÇÃO DE SENHA
             if (modoAtual === 'recuperar') {
                 if (!usuarioInput) return alert("Digite seu usuário ou e-mail!");
                 
@@ -245,7 +255,6 @@
                 return;
             }
 
-            // MODO DE CADASTRO DE OUVINTE
             if (modoAtual === 'cadastro') {
                 if (!nomeInput) return alert("Por favor, digite seu nome!");
 
@@ -262,7 +271,6 @@
                     window.location.href = 'ouvinte.html';
                 });
             } else {
-                // MODO DE LOGIN DE OUVINTE
                 const idUser = userLower.replace(/[^a-z0-9]/g, '_');
                 localStorage.setItem('userId', idUser);
                 localStorage.setItem('usuarioNome', usuarioInput);
