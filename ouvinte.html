@@ -917,7 +917,7 @@
             margin-top: 4px;
         }
 
-        /* PAINEL DE DISPUTA DE OUVINTES */
+        /* PAINEL DE DISPUTA DE OUVINTES / VOCE E UM OUVINTE */
         .disputa-ouvintes-card {
             background: linear-gradient(135deg, #181427, #121217);
             border: 1px solid #7c3aed;
@@ -996,6 +996,15 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
+        }
+
+        /* ANIMAÇÃO DE PISCAR PARA AS 5 ESTRELAS */
+        @keyframes piscar-estrelas {
+            0%, 100% { opacity: 0.3; transform: scale(0.9); }
+            50% { opacity: 1; transform: scale(1.2); text-shadow: 0 0 10px #facc15; }
+        }
+        .estrelas-piscando {
+            animation: piscar-estrelas 1s infinite ease-in-out;
         }
 
         /* CUSTOMIZAÇÃO DE CARDS (PINCEL COM RISCO VERMELHO E MODAL) */
@@ -1308,7 +1317,10 @@
                     <span style="font-size: 12px; color: #a855f7; font-weight: 700;">cronometro de ludigins: <span id="cronometro-online" class="cronometro-online-box">00:00:00</span></span>
                     <span id="alerta-cronometro" class="alerta-cronometro-msg" style="display: none;" onclick="rolarParaBonusDiario()"></span>
                 </div>
-                <span id="patente-ouvinte-badge" class="patente-tag-header">Bronze</span>
+                <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+                    <span id="patente-ouvinte-badge" class="patente-tag-header">Bronze</span>
+                    <span id="icone-coroa-status" style="font-size: 16px; display: none;" title="Coroa de Ouro Conquistada!">👑</span>
+                </div>
             </div>
 
             <div class="header-widgets">
@@ -1336,13 +1348,17 @@
             <i class="fas fa-headphones" style="margin-right: 6px;"></i> CURTA AQUI SUAS RADIOS PREFERIDAS
         </div>
 
-        <!-- PAINEL DE DISPUTA DE OUVINTES -->
+        <!-- PAINEL VOCE E UM OUVINTE & ESTRELAS DE TEMPO -->
         <div class="disputa-ouvintes-card">
             <div class="disputa-titulo">
-                <span><i class="fas fa-fire" style="color: #f59e0b; margin-right: 6px;"></i> DISPUTA DE OUVINTES & PRÊMIOS DA SEMANA</span>
-                <span style="font-size: 11px; color: #9ca3af; font-weight: 600;">Quem acumular mais Ludgins lidera!</span>
+                <span><i class="fas fa-star" style="color: #f59e0b; margin-right: 6px;"></i> VOCE E UM OUVINTE:</span>
+                <span id="container-estrelas-ouvinte" style="display: flex; align-items: center; gap: 6px; font-size: 16px;">
+                    <!-- Estrelas inseridas via JS a cada 20 minutos (total 5) -->
+                </span>
             </div>
-            <div class="ranking-ouvintes-lista" id="container-ranking-ouvintes"></div>
+            <div style="font-size: 11px; color: #9ca3af; font-weight: 600; text-align: right;">
+                Ganhe 1 estrela a cada 20 minutos ouvindo (Total de 5 estrelas)
+            </div>
         </div>
 
         <!-- LOJA VIRTUAL DE DESBLOQUEIO -->
@@ -1540,7 +1556,7 @@
 
         document.getElementById('nome-ouvinte-display').innerText = "OLA, " + ouvinteNome.toUpperCase();
 
-        let segundosConectados = 0;
+        let segundosConectados = parseInt(localStorage.getItem('segundos_conectados_' + ouvinteId)) || 0;
         let meusLudgins = parseInt(localStorage.getItem('ludgins_ouvinte_' + ouvinteId)) || 0;
         let patenteAtual = localStorage.getItem('patente_ouvinte_' + ouvinteId) || 'Bronze';
         let timerOnlineInterval = null;
@@ -1576,9 +1592,43 @@
         function atualizarInterfaceLudginsEPatente() {
             document.getElementById('contador-ludgins').innerText = meusLudgins;
             document.getElementById('patente-ouvinte-badge').innerText = patenteAtual;
+            
+            // Verifica se liberou todos os painéis para exibir a coroa de ouro
+            const todosPaineisLiberados = desbloqueios.chat && desbloqueios.cores && desbloqueios.horoscopo && desbloqueios.esportes;
+            const iconeCoroa = document.getElementById('icone-coroa-status');
+            if (todosPaineisLiberados) {
+                iconeCoroa.style.display = 'inline-block';
+            } else {
+                iconeCoroa.style.display = 'none';
+            }
+
             renderizarLojaVirtual();
             aplicarTravaBloqueios();
             renderizarPlaylistDireita();
+            atualizarEstrelasOuvinte();
+        }
+
+        function atualizarEstrelasOuvinte() {
+            const containerEstrelas = document.getElementById('container-estrelas-ouvinte');
+            if (!containerEstrelas) return;
+
+            // Cada 20 minutos (1200 segundos) = 1 estrela, até o máximo de 5 estrelas
+            let minutosOuvindo = Math.floor(segundosConectados / 60);
+            let qtdEstrelas = Math.min(Math.floor(minutosOuvindo / 20), 5);
+
+            let htmlEstrelas = '';
+            for (let i = 1; i <= 5; i++) {
+                if (i <= qtdEstrelas) {
+                    if (qtdEstrelas === 5) {
+                        htmlEstrelas += `<i class="fas fa-star estrelas-piscando" style="color: #facc15;" title="5 Estrelas Conquistadas!"></i>`;
+                    } else {
+                        htmlEstrelas += `<i class="fas fa-star" style="color: #facc15;" title="Estrela ${i}"></i>`;
+                    }
+                } else {
+                    htmlEstrelas += `<i class="far fa-star" style="color: #4b5563;" title="Bloqueada (${i * 20} min)"></i>`;
+                }
+            }
+            containerEstrelas.innerHTML = htmlEstrelas;
         }
 
         function formatarTempoOnline(segundos) {
@@ -1594,46 +1644,17 @@
                 if (!isRadioTocando) return;
 
                 segundosConectados++;
+                localStorage.setItem('segundos_conectados_' + ouvinteId, segundosConectados);
                 document.getElementById('cronometro-online').innerText = formatarTempoOnline(segundosConectados);
 
                 const alertaBox = document.getElementById('alerta-cronometro');
 
-                if (segundosConectados === 1200) {
+                // A cada 10 minutos (600 segundos) ouvindo ganha 5 ludgins
+                if (segundosConectados > 0 && segundosConectados % 600 === 0) {
                     meusLudgins += 5;
                     salvarProgressoLudgins();
                     tocarSomSuaveSucesso();
                     if (typeof confetti === 'function') confetti({ particleCount: 100, spread: 60 });
-                }
-
-                if (segundosConectados > 1200 && (segundosConectados - 1200) % 600 === 0) {
-                    meusLudgins += 2;
-                    salvarProgressoLudgins();
-                }
-
-                if (segundosConectados === 3000) {
-                    meusLudgins += 5;
-                    salvarProgressoLudgins();
-                    tocarSomSuaveSucesso();
-                    if (typeof confetti === 'function') confetti({ particleCount: 120, spread: 70 });
-                }
-
-                if (segundosConectados > 3000 && (segundosConectados - 3000) % 600 === 0) {
-                    meusLudgins += 3;
-                    salvarProgressoLudgins();
-                }
-
-                if (segundosConectados === 3600) {
-                    meusLudgins += 10;
-                    salvarProgressoLudgins();
-                    tocarSomSuaveSucesso();
-                    if (typeof confetti === 'function') confetti({ particleCount: 150, spread: 80 });
-                }
-
-                if (segundosConectados > 3600 && (segundosConectados - 3600) % 600 === 0) {
-                    let ciclosDezMin = Math.floor((segundosConectados - 3600) / 600);
-                    let ganhoExtra = (ciclosDezMin % 2 !== 0) ? 5 : 10;
-                    meusLudgins += ganhoExtra;
-                    salvarProgressoLudgins();
                 }
 
                 if (segundosConectados === 1800) {
@@ -1644,6 +1665,7 @@
                 }
 
                 verificarPatentePorTempo();
+                atualizarEstrelasOuvinte();
             }, 1000);
         }
         iniciarCronometroOnline();
@@ -1654,13 +1676,19 @@
         }
 
         function verificarPatentePorTempo() {
+            // Começa com Bronze, depois Prata, Rubi e desbloqueando o último item coroa de ouro
             let novaPatente = patenteAtual;
-            if (meusLudgins >= 100) novaPatente = 'Carretel de Joias';
-            else if (meusLudgins >= 75) novaPatente = 'Rubi';
-            else if (meusLudgins >= 50) novaPatente = 'Diamante';
-            else if (meusLudgins >= 30) novaPatente = 'Ouro';
-            else if (meusLudgins >= 15) novaPatente = 'Prata';
-            else novaPatente = 'Bronze';
+            const todosPaineisLiberados = desbloqueios.chat && desbloqueios.cores && desbloqueios.horoscopo && desbloqueios.esportes;
+
+            if (todosPaineisLiberados) {
+                novaPatente = 'Coroa de Ouro';
+            } else if (meusLudgins >= 70) {
+                novaPatente = 'Rubi';
+            } else if (meusLudgins >= 30) {
+                novaPatente = 'Prata';
+            } else {
+                novaPatente = 'Bronze';
+            }
 
             if (novaPatente !== patenteAtual) {
                 patenteAtual = novaPatente;
@@ -1708,53 +1736,6 @@
             alert("Parabéns! Você resgatou +3 Ludgins de bônus!");
         }
 
-        db.ref('ouvintes_online').on('value', snap => {
-            const containerRanking = document.getElementById('container-ranking-ouvintes');
-            if (!containerRanking) return;
-
-            if (!snap.exists()) {
-                containerRanking.innerHTML = "<p style='color:#666; text-align:center; font-size:12px; padding:10px;'>Nenhum ouvinte online no momento.</p>";
-                return;
-            }
-
-            let ouvintesArray = [];
-            snap.forEach(child => {
-                ouvintesArray.push({ id: child.key, ...child.val() });
-            });
-
-            ouvintesArray.sort((a, b) => (b.ludgins || 0) - (a.ludgins || 0));
-
-            let htmlRanking = "";
-            ouvintesArray.forEach((o, index) => {
-                let posicao = index + 1;
-                let ehVoce = o.id === ouvinteId;
-                let premioTexto = "";
-
-                if (posicao === 1) {
-                    premioTexto = `<span class="premio-ouvinte-tag"><i class="fas fa-crown"></i> 1º Lugar (Prêmio: VIP + 50 Ludgins)</span>`;
-                } else if (posicao === 2) {
-                    premioTexto = `<span class="premio-ouvinte-tag"><i class="fas fa-medal"></i> 2º Lugar (Prêmio: 25 Ludgins)</span>`;
-                } else if (posicao === 3) {
-                    premioTexto = `<span class="premio-ouvinte-tag"><i class="fas fa-award"></i> 3º Lugar (Prêmio: 10 Ludgins)</span>`;
-                }
-
-                htmlRanking += `
-                    <div class="ranking-ouvinte-item ${ehVoce ? 'destaque-usuario' : ''}">
-                        <div class="ranking-info-esq">
-                            <span class="ranking-posicao">${posicao}º</span>
-                            <span>${o.nome || 'Ouvinte'} ${ehVoce ? '(Você)' : ''}</span>
-                        </div>
-                        <div class="ranking-badges-dir">
-                            ${premioTexto}
-                            <span class="ludgins-badge-wallet" style="font-size: 10.5px; padding: 2px 8px;"><i class="fas fa-gem"></i> ${o.ludgins || 0} Ludgins</span>
-                        </div>
-                    </div>
-                `;
-            });
-
-            containerRanking.innerHTML = htmlRanking;
-        });
-
         function renderizarLojaVirtual() {
             const container = document.getElementById('container-loja-itens');
             
@@ -1797,6 +1778,7 @@
                 desbloqueios[idItem] = true;
                 
                 localStorage.setItem('desbloqueios_ouvinte_' + ouvinteId, JSON.stringify(desbloqueios));
+                verificarPatentePorTempo();
                 salvarProgressoLudgins();
                 tocarSomSuaveSucesso();
 
@@ -2193,18 +2175,14 @@
         setInterval(carregarNoticiasBrasil, 180000);
 
         let todasRadios = [];
-        let playlistKeys = [];
+        let playlistKeys = JSON.parse(localStorage.getItem('playlist_keys_ouvinte') || '[]');
         let radioTocandoKey = null;
 
-        // CARREGA A PLAYLIST DIRETAMENTE DO FIREBASE USANDO O ouvinteId
         db.ref('ouvintes_preferencias/' + ouvinteId + '/playlist').on('value', snap => {
             if (snap.exists()) {
                 playlistKeys = snap.val();
                 localStorage.setItem('playlist_keys_ouvinte', JSON.stringify(playlistKeys));
-                renderizarPainelRadios();
-            } else {
-                // Se não existir no Firebase, tenta pegar do localStorage ou inicia vazio
-                playlistKeys = JSON.parse(localStorage.getItem('playlist_keys_ouvinte') || '[]');
+                localStorage.setItem('playlist_iniciada', 'true');
                 renderizarPainelRadios();
             }
         });
@@ -2234,11 +2212,10 @@
 
             todasRadios.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
 
-            // Se for o primeiro acesso e o Firebase não tiver playlist salva, preenche com todas
-            if (playlistKeys.length === 0 && !localStorage.getItem('playlist_iniciada_db_' + ouvinteId)) {
+            if (!localStorage.getItem('playlist_iniciada') && playlistKeys.length === 0) {
                 playlistKeys = todasRadios.map(r => r.key);
                 salvarPreferenciasOuvinte();
-                localStorage.setItem('playlist_iniciada_db_' + ouvinteId, 'true');
+                localStorage.setItem('playlist_iniciada', 'true');
             }
 
             renderizarPainelRadios();
@@ -2453,7 +2430,7 @@
             } else {
                 player.pause();
                 isRadioTocando = false;
-                    document.getElementById('btn-play').innerHTML = '<i class="fas fa-play"></i>';
+                document.getElementById('btn-play').innerHTML = '<i class="fas fa-play"></i>';
                 renderizarPlaylistDireita();
             }
         }
