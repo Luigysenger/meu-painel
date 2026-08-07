@@ -503,16 +503,8 @@
         }
 
         // =======================================================
-        // MONITOR DE OUVINTES (COM PATENTES EM TEMPO REAL)
+        // MONITOR DE OUVINTES (BASEADO NAS CONTAS E PREFERÊNCIAS)
         // =======================================================
-        function calcularPatente(ludgins) {
-            const p = Number(ludgins) || 0;
-            if (p >= 10000) return { nome: 'DIAMANTE', cor: '#38bdf8' };
-            if (p >= 5000)  return { nome: 'OURO', cor: '#f59e0b' };
-            if (p >= 2000)  return { nome: 'PRATA', cor: '#cbd5e1' };
-            return { nome: 'BRONZE', cor: '#d97706' };
-        }
-
         function toggleUserCard(key) {
             openCards[key] = !openCards[key];
             const itemElem = document.getElementById(`user-card-${key.replace(/[^a-zA-Z0-9]/g, '_')}`);
@@ -545,6 +537,7 @@
             let listaOuvintesMonitor = [];
 
             allKeys.forEach(k => {
+                // Ignora o usuario admin principal se desejar mostrar apenas ouvintes
                 if(k === 'admin') return;
 
                 const conta = rawContas[k] || {};
@@ -554,20 +547,6 @@
                 const email = conta.email || pref.email || 'Não informado';
                 const criadoEm = parseTimestamp(conta.criadoEm || 0);
 
-                // Varredura abrangente para encontrar os pontos em qualquer propriedade provável
-                const ludgins = Number(
-                    conta.ludgins ?? 
-                    pref.ludgins ?? 
-                    conta.pontos ?? 
-                    pref.pontos ?? 
-                    conta.score ?? 
-                    pref.score ?? 
-                    conta.xp ?? 
-                    pref.xp ?? 0
-                );
-                
-                const patenteInfo = calcularPatente(ludgins);
-
                 const t1 = parseTimestamp(pref.lastActive);
                 const t2 = parseTimestamp(pref.timestamp);
                 const t3 = parseTimestamp(pref.ultimaAtividade);
@@ -576,6 +555,7 @@
                 const explicitStatus = (pref.status || '').toLowerCase();
                 const explicitOnline = (pref.online === true);
                 
+                // Considera online se o status for explícito ou se houve atividade nos últimos 90 segundos
                 const isOnline = (explicitStatus === 'online' || explicitOnline || (lastActive > 0 && (agora - lastActive < 90000)));
 
                 const loginTimestamp = parseTimestamp(pref.loginTimestamp || (isOnline ? (lastActive || criadoEm || agora) : 0));
@@ -596,9 +576,7 @@
                     ultimaRadioSalva: ultimaRadioSalva,
                     tempoSessaoCompletoSalvo: tempoSessaoCompletoSalvo,
                     tempoRadioSegundos: tempoRadioSegundos,
-                    radioStart: radioStart,
-                    ludgins: ludgins,
-                    patente: patenteInfo
+                    radioStart: radioStart
                 });
             });
 
@@ -641,14 +619,11 @@
 
                 div.innerHTML = `
                     <div class="user-header-bar" onclick="toggleUserCard('${k}')">
-                        <span class="user-title" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                            ${iconHeader} ${ouvinte.nome} 
-                            <span style="font-size: 10px; padding: 2px 8px; border-radius: 6px; background: rgba(255,255,255,0.08); color: ${ouvinte.patente.cor}; border: 1px solid ${ouvinte.patente.cor}44; font-weight: bold;">
-                                ${ouvinte.patente.nome}
-                            </span>
+                        <span class="user-title">
+                            ${iconHeader} ${ouvinte.nome}
                             <i class="fas fa-chevron-down chevron-icon"></i>
                         </span>
-                        <div style="display:flex; align-items: center; gap:10px;">
+                        <div style="display:flex; align-items:center; gap:10px;">
                             <span class="status-badge ${ouvinte.isOnline ? 'online' : 'offline'}">${ouvinte.isOnline ? 'online' : 'off'}</span>
                             <i class="fas fa-trash-alt" style="color: #ff4444; cursor: pointer; font-size: 12px;" 
                                title="Excluir Ouvinte" onclick="event.stopPropagation(); deletarOuvinte('${k}')"></i>
@@ -657,7 +632,6 @@
                     <div class="user-details-wrapper">
                         <div class="user-details-bar">
                             <div>E-mail: <strong>${ouvinte.email}</strong></div>
-                            <div>Ludgins (Pontos): <strong style="color: #f59e0b;">${ouvinte.ludgins}</strong></div>
                             <div>Nome da Rádio: <strong class="radio-destaque">${displayUltimaRadio}</strong></div>
                             <div>Tempo de Sessão: <b style="color:#38bdf8" id="ts-${safeKey}" data-login="${ouvinte.loginTimestamp}" data-salvo="${ouvinte.tempoSessaoCompletoSalvo}" data-online="${ouvinte.isOnline}">${formatarTempo(tempoSessaoSegundos)}</b></div>
                             <div>Tempo nessa Rádio: <b style="color:#a855f7" id="tr-${safeKey}" data-radio-start="${ouvinte.radioStart}" data-salvo="${ouvinte.tempoRadioSegundos}" data-online="${ouvinte.isOnline}">${formatarTempo(tempoRadioAtualSegundos)}</b></div>
