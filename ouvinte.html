@@ -1578,7 +1578,7 @@
             document.getElementById('patente-ouvinte-badge').innerText = patenteAtual;
             renderizarLojaVirtual();
             aplicarTravaBloqueios();
-            renderizarPlaylistDireita(); // Atualiza os ícones de pincel (com ou sem risco vermelho)
+            renderizarPlaylistDireita();
         }
 
         function formatarTempoOnline(segundos) {
@@ -2193,14 +2193,18 @@
         setInterval(carregarNoticiasBrasil, 180000);
 
         let todasRadios = [];
-        let playlistKeys = JSON.parse(localStorage.getItem('playlist_keys_ouvinte') || '[]');
+        let playlistKeys = [];
         let radioTocandoKey = null;
 
+        // CARREGA A PLAYLIST DIRETAMENTE DO FIREBASE USANDO O ouvinteId
         db.ref('ouvintes_preferencias/' + ouvinteId + '/playlist').on('value', snap => {
             if (snap.exists()) {
                 playlistKeys = snap.val();
                 localStorage.setItem('playlist_keys_ouvinte', JSON.stringify(playlistKeys));
-                localStorage.setItem('playlist_iniciada', 'true');
+                renderizarPainelRadios();
+            } else {
+                // Se não existir no Firebase, tenta pegar do localStorage ou inicia vazio
+                playlistKeys = JSON.parse(localStorage.getItem('playlist_keys_ouvinte') || '[]');
                 renderizarPainelRadios();
             }
         });
@@ -2230,10 +2234,11 @@
 
             todasRadios.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
 
-            if (!localStorage.getItem('playlist_iniciada') && playlistKeys.length === 0) {
+            // Se for o primeiro acesso e o Firebase não tiver playlist salva, preenche com todas
+            if (playlistKeys.length === 0 && !localStorage.getItem('playlist_iniciada_db_' + ouvinteId)) {
                 playlistKeys = todasRadios.map(r => r.key);
                 salvarPreferenciasOuvinte();
-                localStorage.setItem('playlist_iniciada', 'true');
+                localStorage.setItem('playlist_iniciada_db_' + ouvinteId, 'true');
             }
 
             renderizarPainelRadios();
@@ -2292,9 +2297,6 @@
                     htmlIcone = `<i class="fas ${isPlaying ? 'fa-tower-broadcast antena-piscando' : 'fa-radio'} icon-radio"></i>`;
                 }
 
-                // LÓGICA DO PINCEL: Sempre visível em todos os cards da playlist.
-                // Se não foi liberado (desbloqueios.cores == false), mostra com o risquinho vermelho e exibe o alerta ao clicar.
-                // Se liberado, funciona normalmente para personalizar.
                 let htmlPincel = '';
                 if (desbloqueios.cores) {
                     htmlPincel = `<button class="btn-pincel-card" title="Personalizar card" onclick="event.stopPropagation(); abrirModalPersonalizacao('${r.key}')"><i class="fas fa-paint-brush"></i></button>`;
@@ -2451,7 +2453,7 @@
             } else {
                 player.pause();
                 isRadioTocando = false;
-                document.getElementById('btn-play').innerHTML = '<i class="fas fa-play"></i>';
+                    document.getElementById('btn-play').innerHTML = '<i class="fas fa-play"></i>';
                 renderizarPlaylistDireita();
             }
         }
