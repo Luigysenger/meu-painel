@@ -2,103 +2,273 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel do Ouvinte Pro</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LOGIN - LUIGY</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
-        :root { --primary: #6366f1; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; }
-        
-        /* Layout */
-        .sidebar { width: 250px; background: var(--card); padding: 20px; border-right: 1px solid #334155; }
-        .main-content { flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
-        
-        /* Player Style */
-        .player-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); }
-        .controls { display: flex; align-items: center; gap: 20px; }
-        .btn { background: var(--primary); border: none; color: white; padding: 15px 20px; border-radius: 50%; cursor: pointer; }
+        *, *::before, *::after { box-sizing: border-box !important; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #000;
+            color: white;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
 
-        /* Chat */
-        .chat-box { flex: 1; background: var(--card); border-radius: 10px; padding: 15px; overflow-y: auto; }
-        .chat-bubble-ouvinte { margin-bottom: 10px; background: #334155; padding: 10px; border-radius: 8px; }
+        .login-card {
+            background: #121212;
+            border: 1px solid #282828;
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+
+        h2 {
+            color: #A020F0;
+            margin-top: 0;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        p.sub {
+            color: #777;
+            font-size: 12px;
+            margin-bottom: 25px;
+        }
+
+        .field-group {
+            text-align: left;
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-size: 10px;
+            color: #aaa;
+            text-transform: uppercase;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .input-login {
+            width: 100%;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 10px;
+            color: #fff;
+            padding: 12px 15px;
+            font-size: 14px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .input-login:focus {
+            border-color: #A020F0;
+            box-shadow: 0 0 10px rgba(160, 32, 240, 0.3);
+        }
+
+        .btn-entrar {
+            width: 100%;
+            background: #A020F0;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-weight: 900;
+            font-size: 13px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+            transition: 0.3s;
+        }
+
+        .btn-entrar:hover {
+            background: #b23bf2;
+            box-shadow: 0 0 15px rgba(160, 32, 240, 0.5);
+        }
+
+        .links-container {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #aaa;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .links-container span {
+            color: #FFB6C1;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        
+        .links-container span:hover {
+            color: #A020F0;
+        }
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
-        <h2>Menu</h2>
-        <button onclick="alert('Funcionalidade de Loja em breve!')">Loja Virtual</button>
-    </div>
+    <div class="login-card">
+        <h2 id="titulo-form">BEM-VINDO</h2>
+        <p class="sub" id="sub-form">Informe seus dados para acessar o painel</p>
 
-    <div class="main-content">
-        <div class="player-card">
-            <h2 id="player-title">Nenhuma rádio selecionada</h2>
-            <div class="controls">
-                <button class="btn" onclick="togglePlay()" id="btn-play"><i class="fas fa-play"></i></button>
-                <input type="range" id="volume" min="0" max="1" step="0.1" value="0.5">
+        <form id="form-login" onsubmit="processarAcao(event)">
+            <div class="field-group" id="group-nome" style="display: none;">
+                <label>SEU NOME COMPLETO</label>
+                <input type="text" id="nome-cadastro" class="input-login" placeholder="Ex: João Silva">
             </div>
-        </div>
 
-        <div class="chat-box" id="lista-respostas-adm"></div>
-        <div class="input-area">
-            <input type="text" id="texto-mensagem" placeholder="Digite algo...">
-            <button onclick="enviarMensagem()">Enviar</button>
+            <div class="field-group" id="group-usuario">
+                <label>NOME DE USUÁRIO / E-MAIL</label>
+                <input type="text" id="usuario" class="input-login" placeholder="Digite seu usuário ou e-mail" required>
+            </div>
+
+            <div class="field-group" id="group-senha">
+                <label>SENHA</label>
+                <input type="password" id="senha" class="input-login" placeholder="••••••" required>
+            </div>
+
+            <button type="submit" id="btn-submit" class="btn-entrar">ENTRAR NO PAINEL</button>
+        </form>
+
+        <div class="links-container" id="box-links">
+            <div>Não tem uma conta? <span onclick="mudarModo('cadastro')">Criar nova conta</span></div>
+            <div><span onclick="mudarModo('recuperar')">Esqueci minha senha</span></div>
         </div>
     </div>
 
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-    
     <script>
-        // CONFIGURAÇÃO DO FIREBASE (Substitua pelos seus dados)
         const firebaseConfig = {
-            apiKey: "SUA_API_KEY",
-            databaseURL: "SUA_DATABASE_URL",
-            projectId: "SEU_PROJECT_ID"
+            apiKey: "AIzaSyBGGdz8gJSrXWqq3hSQIoe3pop5MGYt20Q",
+            authDomain: "meu-painel-f2efe.firebaseapp.com",
+            databaseURL: "https://meu-painel-f2efe-default-rtdb.firebaseio.com/",
+            projectId: "meu-painel-f2efe"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Variáveis de Estado
-        let player = new Audio();
-        let isRadioTocando = false;
-        let ouvinteNome = "Ouvinte_" + Math.floor(Math.random() * 1000);
+        let modoAtual = 'login';
 
-        function togglePlay() {
-            if (isRadioTocando) {
-                player.pause();
-                document.getElementById('btn-play').innerHTML = '<i class="fas fa-play"></i>';
+        function mudarModo(modo) {
+            modoAtual = modo;
+            const titulo = document.getElementById('titulo-form');
+            const sub = document.getElementById('sub-form');
+            const groupNome = document.getElementById('group-nome');
+            const groupUsuario = document.getElementById('group-usuario');
+            const groupSenha = document.getElementById('group-senha');
+            const btnSubmit = document.getElementById('btn-submit');
+            const boxLinks = document.getElementById('box-links');
+
+            if (modo === 'cadastro') {
+                titulo.innerText = "CRIAR CONTA";
+                sub.innerText = "Preencha os dados abaixo para se cadastrar";
+                groupNome.style.display = "block";
+                groupUsuario.style.display = "block";
+                groupSenha.style.display = "block";
+                document.getElementById('senha').required = true;
+                btnSubmit.innerText = "CRIAR MINHA CONTA";
+                boxLinks.innerHTML = '<div>Já possui uma conta? <span onclick="mudarModo(\'login\')">Fazer Login</span></div>';
+            } else if (modo === 'recuperar') {
+                titulo.innerText = "RECUPERAR SENHA";
+                sub.innerText = "Digite seu usuário ou e-mail cadastrado";
+                groupNome.style.display = "none";
+                groupUsuario.style.display = "block";
+                groupSenha.style.display = "none";
+                document.getElementById('senha').required = false;
+                btnSubmit.innerText = "BUSCAR / RECUPERAR SENHA";
+                boxLinks.innerHTML = '<div>Lembrou a senha? <span onclick="mudarModo(\'login\')">Fazer Login</span></div>';
             } else {
-                // Exemplo de stream de teste
-                player.src = "https://c1.popcast.com.br:9000/live"; 
-                player.play();
-                document.getElementById('btn-play').innerHTML = '<i class="fas fa-pause"></i>';
+                titulo.innerText = "BEM-VINDO";
+                sub.innerText = "Informe seus dados para acessar o painel";
+                groupNome.style.display = "none";
+                groupUsuario.style.display = "block";
+                groupSenha.style.display = "block";
+                document.getElementById('senha').required = true;
+                btnSubmit.innerText = "ENTRAR NO PAINEL";
+                boxLinks.innerHTML = `
+                    <div>Não tem uma conta? <span onclick="mudarModo('cadastro')">Criar nova conta</span></div>
+                    <div><span onclick="mudarModo('recuperar')">Esqueci minha senha</span></div>
+                `;
             }
-            isRadioTocando = !isRadioTocando;
         }
 
-        function enviarMensagem() {
-            const input = document.getElementById('texto-mensagem');
-            if (!input.value.trim()) return;
-            
-            db.ref('mensagens_ouvintes').push({
-                ouvinte: ouvinteNome,
-                texto: input.value,
-                timestamp: firebase.database.ServerValue.TIMESTAMP
-            });
-            input.value = "";
-        }
+        function processarAcao(event) {
+            event.preventDefault();
 
-        // Listener de mensagens em tempo real
-        db.ref('mensagens_ouvintes').limitToLast(5).on('value', snap => {
-            const container = document.getElementById('lista-respostas-adm');
-            container.innerHTML = "";
-            snap.forEach(child => {
-                const msg = child.val();
-                container.innerHTML += `<div class="chat-bubble-ouvinte"><b>${msg.ouvinte}:</b> ${msg.texto}</div>`;
-            });
-        });
+            const usuarioInput = document.getElementById('usuario').value.trim();
+            const senhaInput = document.getElementById('senha').value.trim();
+            const nomeInput = document.getElementById('nome-cadastro').value.trim();
+            const userLower = usuarioInput.toLowerCase();
+
+            // ROTA DE ENTRADA DO ADMINISTRADOR
+            if (modoAtual === 'login' && (userLower === 'admin' || userLower === 'senger.luigy@gmail.com')) {
+                localStorage.setItem('userId', 'admin');
+                localStorage.setItem('usuarioNome', 'ADMINISTRADOR');
+                window.location.href = 'adm.html';
+                return;
+            }
+
+            // MODO DE RECUPERAÇÃO DE SENHA
+            if (modoAtual === 'recuperar') {
+                if (!usuarioInput) return alert("Digite seu usuário ou e-mail!");
+                
+                db.ref('contas').orderByChild('usuario').equalTo(usuarioInput).once('value', snapshot => {
+                    if (snapshot.exists()) {
+                        let dadosUsuario = null;
+                        snapshot.forEach(childSnap => {
+                            dadosUsuario = childSnap.val();
+                        });
+                        alert("Conta encontrada!\nSeu usuário: " + dadosUsuario.usuario + "\nSua senha: " + dadosUsuario.senha);
+                        mudarModo('login');
+                    } else {
+                        alert("Nenhuma conta encontrada com este usuário/e-mail.");
+                    }
+                });
+                return;
+            }
+
+            // MODO DE CADASTRO DE OUVINTE
+            if (modoAtual === 'cadastro') {
+                if (!nomeInput) return alert("Por favor, digite seu nome!");
+
+                const idUser = 'ouvinte_' + Date.now();
+                db.ref('contas/' + idUser).set({
+                    nome: nomeInput,
+                    usuario: usuarioInput,
+                    senha: senhaInput,
+                    status: "online",
+                    criadoEm: new Date().toLocaleString('pt-BR')
+                }).then(() => {
+                    localStorage.setItem('userId', idUser);
+                    localStorage.setItem('usuarioNome', nomeInput);
+                    window.location.href = 'ouvinte.html';
+                });
+            } else {
+                // MODO DE LOGIN DE OUVINTE
+                const idUser = userLower.replace(/[^a-z0-9]/g, '_');
+                localStorage.setItem('userId', idUser);
+                localStorage.setItem('usuarioNome', usuarioInput);
+                window.location.href = 'ouvinte.html';
+            }
+        }
     </script>
 </body>
 </html>
