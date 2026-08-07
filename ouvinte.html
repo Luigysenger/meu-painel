@@ -862,6 +862,36 @@
             cursor: default;
         }
 
+        .bloqueado-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(11, 11, 14, 0.88);
+            backdrop-filter: blur(5px);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            border-radius: 18px;
+            box-sizing: border-box;
+        }
+
+        .bloqueado-overlay i {
+            font-size: 32px;
+            color: #f59e0b;
+            margin-bottom: 8px;
+        }
+
+        .bloqueado-overlay p {
+            font-size: 12.5px;
+            font-weight: 700;
+            color: #cbd5e1;
+            margin: 0;
+            line-height: 1.4;
+        }
+
         .ludgins-badge-wallet {
             background: linear-gradient(135deg, #7c3aed, #db2777);
             color: #fff;
@@ -968,7 +998,7 @@
             gap: 4px;
         }
 
-        /* CUSTOMIZAÇÃO DE CARDS (PINCEL) */
+        /* CUSTOMIZAÇÃO DE CARDS (PINCEL COM RISCO VERMELHO E MODAL) */
         .btn-pincel-card {
             position: absolute;
             top: 8px;
@@ -989,6 +1019,23 @@
         }
         .btn-pincel-card:hover {
             background: var(--primary);
+        }
+
+        /* ESTILO DO RISQUINHO VERMELHO NO PINCEL QUANDO BLOQUEADO */
+        .pincel-bloqueado-wrapper {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .risco-vermelho-diagonal {
+            position: absolute;
+            width: 130%;
+            height: 2px;
+            background-color: #ef4444;
+            transform: rotate(-45deg);
+            pointer-events: none;
+            box-shadow: 0 0 4px rgba(239, 68, 68, 0.8);
         }
 
         .modal-personalizacao-card {
@@ -1517,12 +1564,11 @@
             } catch(e) {}
         }
 
-        // ALTERAÇÃO: Mantém os recursos sempre desbloqueados para exibir o painel completo por padrão
-        let desbloqueios = {
-            chat: true,
-            cores: true,
-            horoscopo: true,
-            esportes: true
+        let desbloqueios = JSON.parse(localStorage.getItem('desbloqueios_ouvinte_' + ouvinteId)) || {
+            chat: false,
+            cores: false,
+            horoscopo: false,
+            esportes: false
         };
 
         let customizacoesCards = JSON.parse(localStorage.getItem('customizacoes_cards_' + ouvinteId)) || {};
@@ -1531,7 +1577,8 @@
             document.getElementById('contador-ludgins').innerText = meusLudgins;
             document.getElementById('patente-ouvinte-badge').innerText = patenteAtual;
             renderizarLojaVirtual();
-            renderizarPlaylistDireita();
+            aplicarTravaBloqueios();
+            renderizarPlaylistDireita(); // Atualiza os ícones de pincel (com ou sem risco vermelho)
         }
 
         function formatarTempoOnline(segundos) {
@@ -1712,26 +1759,88 @@
             const container = document.getElementById('container-loja-itens');
             
             const itensLoja = [
-                { id: 'chat', nome: 'Liberar o Chat', custo: 20, adquirido: true },
-                { id: 'cores', nome: 'Painel de Personalização de Cards (Cores & Emojis)', custo: 30, adquirido: true },
-                { id: 'horoscopo', nome: 'Desbloquear Horóscopo', custo: 50, adquirido: true },
-                { id: 'esportes', nome: 'Painel Jogos e Esportes', custo: 70, adquirido: true }
+                { id: 'chat', nome: 'Liberar o Chat', custo: 20, adquirido: desbloqueios.chat },
+                { id: 'cores', nome: 'Painel de Personalização de Cards (Cores & Emojis)', custo: 30, adquirido: desbloqueios.cores },
+                { id: 'horoscopo', nome: 'Desbloquear Horóscopo', custo: 50, adquirido: desbloqueios.horoscopo },
+                { id: 'esportes', nome: 'Painel Jogos e Esportes', custo: 70, adquirido: desbloqueios.esportes }
             ];
 
             let html = "";
             itensLoja.forEach(item => {
-                html += `
-                    <div class="loja-item-btn comprado">
-                        <span><i class="fas fa-check-circle"></i> ${item.nome}</span>
-                        <span><strong>LIBERADO</strong></span>
-                    </div>
-                `;
+                if (item.adquirido) {
+                    html += `
+                        <div class="loja-item-btn comprado">
+                            <span><i class="fas fa-check-circle"></i> ${item.nome}</span>
+                            <span><strong>DESBLOQUEADO</strong></span>
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="loja-item-btn" onclick="comprarItemLoja('${item.id}', ${item.custo})">
+                            <span>${item.nome}</span>
+                            <span class="ludgins-badge-wallet"><i class="fas fa-gem"></i> ${item.custo} Ludgins</span>
+                        </div>
+                    `;
+                }
             });
             container.innerHTML = html;
         }
 
         function comprarItemLoja(idItem, custo) {
-            alert("Todos os painéis e recursos já estão liberados por padrão para exibição completa!");
+            if (meusLudgins < custo) {
+                alert(`Ludgins insuficientes! Você tem ${meusLudgins} Ludgins e precisa de ${custo} Ludgins.`);
+                return;
+            }
+
+            if (confirm(`Deseja gastar ${custo} Ludgins para desbloquear este recurso permanentemente?`)) {
+                meusLudgins -= custo;
+                desbloqueios[idItem] = true;
+                
+                localStorage.setItem('desbloqueios_ouvinte_' + ouvinteId, JSON.stringify(desbloqueios));
+                salvarProgressoLudgins();
+                tocarSomSuaveSucesso();
+
+                if (typeof confetti === 'function') {
+                    confetti({ particleCount: 250, spread: 100, origin: { y: 0.5 } });
+                }
+                alert("Recurso comprado e desbloqueado com sucesso!");
+            }
+        }
+
+        function aplicarTravaBloqueios() {
+            const cardChat = document.getElementById('card-box-chat');
+            gerenciarOverlay(cardChat, desbloqueios.chat, 'Chat', 20);
+
+            const cardHoroscopo = document.getElementById('card-box-horoscopo');
+            gerenciarOverlay(cardHoroscopo, desbloqueios.horoscopo, 'Horóscopo', 50);
+
+            const cardEsportes = document.getElementById('card-box-esportes');
+            gerenciarOverlay(cardEsportes, desbloqueios.esportes, 'Painel Jogos', 70);
+        }
+
+        function gerenciarOverlay(elementoCard, statusDesbloqueado, nomeRecurso, custoReq) {
+            if (!elementoCard) return;
+            let overlayId = 'overlay_' + elementoCard.id;
+            let overlayExistente = document.getElementById(overlayId);
+
+            if (!statusDesbloqueado) {
+                if (!overlayExistente) {
+                    const div = document.createElement('div');
+                    div.id = overlayId;
+                    div.className = 'bloqueado-overlay';
+                    div.innerHTML = `
+                        <i class="fas fa-lock"></i>
+                        <p style="font-size:13.5px; color:#fff; margin-bottom:4px;">${nomeRecurso} Bloqueado</p>
+                        <p>Junte <strong style="color:#c084fc;">${custoReq} Ludgins</strong> ou compre na Loja Virtual para liberar para sempre!</p>
+                    `;
+                    elementoCard.style.position = 'relative';
+                    elementoCard.appendChild(div);
+                }
+            } else {
+                if (overlayExistente) {
+                    overlayExistente.remove();
+                }
+            }
         }
 
         function atualizarRelogio() {
@@ -2022,6 +2131,11 @@
         };
 
         async function carregarHoroscopo(signo, el) {
+            if (!desbloqueios.horoscopo) {
+                alert("Horoscopo bloqueado! Adquira o recurso na sua Loja Virtual acima.");
+                return;
+            }
+
             document.querySelectorAll('.signo-btn').forEach(b => b.classList.remove('ativo'));
             if(el) el.classList.add('ativo');
 
@@ -2178,7 +2292,22 @@
                     htmlIcone = `<i class="fas ${isPlaying ? 'fa-tower-broadcast antena-piscando' : 'fa-radio'} icon-radio"></i>`;
                 }
 
-                let htmlPincel = `<button class="btn-pincel-card" title="Personalizar card" onclick="event.stopPropagation(); abrirModalPersonalizacao('${r.key}')"><i class="fas fa-paint-brush"></i></button>`;
+                // LÓGICA DO PINCEL: Sempre visível em todos os cards da playlist.
+                // Se não foi liberado (desbloqueios.cores == false), mostra com o risquinho vermelho e exibe o alerta ao clicar.
+                // Se liberado, funciona normalmente para personalizar.
+                let htmlPincel = '';
+                if (desbloqueios.cores) {
+                    htmlPincel = `<button class="btn-pincel-card" title="Personalizar card" onclick="event.stopPropagation(); abrirModalPersonalizacao('${r.key}')"><i class="fas fa-paint-brush"></i></button>`;
+                } else {
+                    htmlPincel = `
+                        <button class="btn-pincel-card" title="Recurso Bloqueado" onclick="event.stopPropagation(); alert('Você ainda não tem Ludgins suficientes para liberar a personalização dos cards! Ouça mais a rádio ou compre na Loja Virtual.')">
+                            <span class="pincel-bloqueado-wrapper">
+                                <i class="fas fa-paint-brush"></i>
+                                <span class="risco-vermelho-diagonal"></span>
+                            </span>
+                        </button>
+                    `;
+                }
 
                 container.innerHTML += `
                     <div class="radio-card-quadrado ${isPlaying ? 'playing' : ''}" 
@@ -2347,6 +2476,11 @@
         }
 
         function enviarMensagem() {
+            if (!desbloqueios.chat) {
+                alert("O Chat está bloqueado! Adquira o acesso na Loja Virtual por 20 Ludgins.");
+                return;
+            }
+
             const texto = document.getElementById('texto-mensagem').value.trim();
             if (!texto) return alert("Digite sua mensagem!");
 
