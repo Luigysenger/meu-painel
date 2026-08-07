@@ -1305,10 +1305,19 @@
                 <h2>Painel do Ouvinte</h2>
                 <div class="user-name-title">
                     <span id="nome-ouvinte-display"></span>
-                    <span style="font-size: 12px; color: #a855f7; font-weight: 700;">cronômetro de ludgins: <span id="cronometro-online" class="cronometro-online-box">00:00:00</span></span>
+                    <span style="font-size: 12px; color: #a855f7; font-weight: 700;">Cronômetro de Ludgins: <span id="cronometro-online" class="cronometro-online-box">00:00:00</span></span>
                     <span id="alerta-cronometro" class="alerta-cronometro-msg" style="display: none;" onclick="rolarParaBonusDiario()"></span>
                 </div>
-                <span id="patente-ouvinte-badge" class="patente-tag-header">Bronze</span>
+                <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+                    <span id="patente-ouvinte-badge" class="patente-tag-header">Bronze</span>
+                    <div id="estrelas-container" style="display: flex; gap: 3px; font-size: 13px;">
+                        <i class="far fa-star" style="color: #64748b;" id="estrela-1"></i>
+                        <i class="far fa-star" style="color: #64748b;" id="estrela-2"></i>
+                        <i class="far fa-star" style="color: #64748b;" id="estrela-3"></i>
+                        <i class="far fa-star" style="color: #64748b;" id="estrela-4"></i>
+                        <i class="far fa-star" style="color: #64748b;" id="estrela-5"></i>
+                    </div>
+                </div>
             </div>
 
             <div class="header-widgets">
@@ -1333,13 +1342,13 @@
         </div>
 
         <div class="frase-centro-playlist">
-            <i class="fas fa-headphones" style="margin-right: 6px;"></i> CURTA AQUI SUAS RÁDIOS PREFERIDAS
+            Clique nos cards abaixo para ouvir sua rádio preferida.
         </div>
 
         <!-- PAINEL DE DISPUTA DE OUVINTES -->
         <div class="disputa-ouvintes-card">
             <div class="disputa-titulo">
-                <span><i class="fas fa-fire" style="color: #f59e0b; margin-right: 6px;"></i> VOCE E UM OUVINTE: A cada 30 minutos ele ganha uma estrela, total de 5 estrelas</span>
+                <span><i class="fas fa-fire" style="color: #f59e0b; margin-right: 6px;"></i> DISPUTA DE OUVINTES & PRÊMIOS DA SEMANA</span>
                 <span style="font-size: 11px; color: #9ca3af; font-weight: 600;">Quem acumular mais Ludgins lidera!</span>
             </div>
             <div class="ranking-ouvintes-lista" id="container-ranking-ouvintes"></div>
@@ -1358,7 +1367,7 @@
 
             <!-- CARD 1: ADICIONAR RÁDIOS -->
             <div class="card-box">
-                <h3>AQUI ESTAO AS RADIOS ADICIONADAS</h3>
+                <h3>GERENCIAR SUAS RÁDIOS PREFERIDAS</h3>
                 <div class="radios-section-container">
                     <div>
                         <h3 class="sub-titulo-secao"><i class="fas fa-plus-circle"></i> 1. ADICIONE SUAS RÁDIOS</h3>
@@ -1369,7 +1378,7 @@
 
             <!-- CARD 2: SUAS RÁDIOS PREFERIDAS -->
             <div class="card-box" id="card-box-playlist">
-                <h3>AQUI ESTAO AS RADIOS ADICIONADAS</h3>
+                <h3>GERENCIAR SUAS RÁDIOS PREFERIDAS</h3>
                 <div class="radios-section-container">
                     <div>
                         <h3 class="sub-titulo-secao"><i class="fas fa-sort"></i> 2. ARRASTE PARA REORDENAR</h3>
@@ -1538,7 +1547,7 @@
         }
         let ouvinteNome = ouvinteNomeBruto.trim().split(' ')[0];
 
-        document.getElementById('nome-ouvinte-display').innerText = "OLÁ, " + ouvinteNome.toUpperCase();
+        document.getElementById('nome-ouvinte-display').innerText = "Você é um ouvinte: " + ouvinteNome;
 
         let segundosConectados = 0;
         let meusLudgins = parseInt(localStorage.getItem('ludgins_ouvinte_' + ouvinteId)) || 0;
@@ -1573,12 +1582,29 @@
 
         let customizacoesCards = JSON.parse(localStorage.getItem('customizacoes_cards_' + ouvinteId)) || {};
 
+        function atualizarEstrelasConectadas() {
+            // A cada 30 minutos (1800 segundos), acende uma estrela (até 5 estrelas)
+            const blocos30Min = Math.floor(segundosConectados / 1800);
+            for (let i = 1; i <= 5; i++) {
+                const estrelaEl = document.getElementById('estrela-' + i);
+                if (!estrelaEl) continue;
+                if (i <= blocos30Min) {
+                    estrelaEl.className = 'fas fa-star';
+                    estrelaEl.style.color = '#facc15';
+                } else {
+                    estrelaEl.className = 'far fa-star';
+                    estrelaEl.style.color = '#64748b';
+                }
+            }
+        }
+
         function atualizarInterfaceLudginsEPatente() {
             document.getElementById('contador-ludgins').innerText = meusLudgins;
             document.getElementById('patente-ouvinte-badge').innerText = patenteAtual;
+            atualizarEstrelasConectadas();
             renderizarLojaVirtual();
             aplicarTravaBloqueios();
-            renderizarPlaylistDireita(); // Atualiza os ícones de pincel (com ou sem risco vermelho)
+            renderizarPlaylistDireita();
         }
 
         function formatarTempoOnline(segundos) {
@@ -1595,6 +1621,7 @@
 
                 segundosConectados++;
                 document.getElementById('cronometro-online').innerText = formatarTempoOnline(segundosConectados);
+                atualizarEstrelasConectadas();
 
                 const alertaBox = document.getElementById('alerta-cronometro');
 
@@ -2304,9 +2331,6 @@
                     htmlIcone = `<i class="fas ${isPlaying ? 'fa-tower-broadcast antena-piscando' : 'fa-radio'} icon-radio"></i>`;
                 }
 
-                // LÓGICA DO PINCEL: Sempre visível em todos os cards da playlist.
-                // Se não foi liberado (desbloqueios.cores == false), mostra com o risquinho vermelho e exibe o alerta ao clicar.
-                // Se liberado, funciona normalmente para personalizar.
                 let htmlPincel = '';
                 if (desbloqueios.cores) {
                     htmlPincel = `<button class="btn-pincel-card" title="Personalizar card" onclick="event.stopPropagation(); abrirModalPersonalizacao('${r.key}')"><i class="fas fa-paint-brush"></i></button>`;
@@ -2601,4 +2625,3 @@
     </script>
 </body>
 </html>
-```[cite: 8]
