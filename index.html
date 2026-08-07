@@ -103,24 +103,17 @@
             box-shadow: 0 0 15px rgba(160, 32, 240, 0.5);
         }
 
-        .links-container {
+        .toggle-link {
             margin-top: 20px;
             font-size: 12px;
             color: #aaa;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
         }
 
-        .links-container span {
+        .toggle-link span {
             color: #FFB6C1;
             font-weight: bold;
             cursor: pointer;
             text-decoration: underline;
-        }
-        
-        .links-container span:hover {
-            color: #A020F0;
         }
     </style>
 </head>
@@ -136,12 +129,12 @@
                 <input type="text" id="nome-cadastro" class="input-login" placeholder="Ex: João Silva">
             </div>
 
-            <div class="field-group" id="group-usuario">
+            <div class="field-group">
                 <label>NOME DE USUÁRIO / E-MAIL</label>
                 <input type="text" id="usuario" class="input-login" placeholder="Digite seu usuário ou e-mail" required>
             </div>
 
-            <div class="field-group" id="group-senha">
+            <div class="field-group">
                 <label>SENHA</label>
                 <input type="password" id="senha" class="input-login" placeholder="••••••" required>
             </div>
@@ -149,9 +142,8 @@
             <button type="submit" id="btn-submit" class="btn-entrar">ENTRAR NO PAINEL</button>
         </form>
 
-        <div class="links-container" id="box-links">
-            <div>Não tem uma conta? <span onclick="mudarModo('cadastro')">Criar nova conta</span></div>
-            <div><span onclick="mudarModo('recuperar')">Esqueci minha senha</span></div>
+        <div class="toggle-link" id="box-toggle">
+            Não tem uma conta? <span onclick="mudarModo('cadastro')">Criar nova conta</span>
         </div>
     </div>
 
@@ -165,60 +157,22 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // AUTO-LOGIN: Se já estiver logado, redireciona automaticamente sem zerar nada
-        window.addEventListener('DOMContentLoaded', () => {
-            const savedUser = localStorage.getItem('userId');
-            if (savedUser) {
-                if (savedUser === 'admin') {
-                    window.location.href = 'adm.html';
-                } else {
-                    window.location.href = 'ouvinte.html';
-                }
-            }
-        });
-
         let modoAtual = 'login';
 
         function mudarModo(modo) {
             modoAtual = modo;
-            const titulo = document.getElementById('titulo-form');
-            const sub = document.getElementById('sub-form');
-            const groupNome = document.getElementById('group-nome');
-            const groupUsuario = document.getElementById('group-usuario');
-            const groupSenha = document.getElementById('group-senha');
-            const btnSubmit = document.getElementById('btn-submit');
-            const boxLinks = document.getElementById('box-links');
-
             if (modo === 'cadastro') {
-                titulo.innerText = "CRIAR CONTA";
-                sub.innerText = "Preencha os dados abaixo para se cadastrar";
-                groupNome.style.display = "block";
-                groupUsuario.style.display = "block";
-                groupSenha.style.display = "block";
-                document.getElementById('senha').required = true;
-                btnSubmit.innerText = "CRIAR MINHA CONTA";
-                boxLinks.innerHTML = '<div>Já possui uma conta? <span onclick="mudarModo(\'login\')">Fazer Login</span></div>';
-            } else if (modo === 'recuperar') {
-                titulo.innerText = "RECUPERAR SENHA";
-                sub.innerText = "Digite seu usuário ou e-mail cadastrado";
-                groupNome.style.display = "none";
-                groupUsuario.style.display = "block";
-                groupSenha.style.display = "none";
-                document.getElementById('senha').required = false;
-                btnSubmit.innerText = "BUSCAR / RECUPERAR SENHA";
-                boxLinks.innerHTML = '<div>Lembrou a senha? <span onclick="mudarModo(\'login\')">Fazer Login</span></div>';
+                document.getElementById('titulo-form').innerText = "CRIAR CONTA";
+                document.getElementById('sub-form').innerText = "Preencha os dados abaixo para se cadastrar";
+                document.getElementById('group-nome').style.display = "block";
+                document.getElementById('btn-submit').innerText = "CRIAR MINHA CONTA";
+                document.getElementById('box-toggle').innerHTML = 'Já possui uma conta? <span onclick="mudarModo(\'login\')">Fazer Login</span>';
             } else {
-                titulo.innerText = "BEM-VINDO";
-                sub.innerText = "Informe seus dados para acessar o painel";
-                groupNome.style.display = "none";
-                groupUsuario.style.display = "block";
-                groupSenha.style.display = "block";
-                document.getElementById('senha').required = true;
-                btnSubmit.innerText = "ENTRAR NO PAINEL";
-                boxLinks.innerHTML = `
-                    <div>Não tem uma conta? <span onclick="mudarModo('cadastro')">Criar nova conta</span></div>
-                    <div><span onclick="mudarModo('recuperar')">Esqueci minha senha</span></div>
-                `;
+                document.getElementById('titulo-form').innerText = "BEM-VINDO";
+                document.getElementById('sub-form').innerText = "Informe seus dados para acessar o painel";
+                document.getElementById('group-nome').style.display = "none";
+                document.getElementById('btn-submit').innerText = "ENTRAR NO PAINEL";
+                document.getElementById('box-toggle').innerHTML = 'Não tem uma conta? <span onclick="mudarModo(\'cadastro\')">Criar nova conta</span>';
             }
         }
 
@@ -230,31 +184,15 @@
             const nomeInput = document.getElementById('nome-cadastro').value.trim();
             const userLower = usuarioInput.toLowerCase();
 
-            if (modoAtual === 'login' && (userLower === 'admin' || userLower === 'senger.luigy@gmail.com')) {
+            // ROTA DE ENTRADA DO ADMINISTRADOR
+            if (userLower === 'admin' || userLower === 'senger.luigy@gmail.com') {
                 localStorage.setItem('userId', 'admin');
                 localStorage.setItem('usuarioNome', 'ADMINISTRADOR');
                 window.location.href = 'adm.html';
                 return;
             }
 
-            if (modoAtual === 'recuperar') {
-                if (!usuarioInput) return alert("Digite seu usuário ou e-mail!");
-                
-                db.ref('contas').orderByChild('usuario').equalTo(usuarioInput).once('value', snapshot => {
-                    if (snapshot.exists()) {
-                        let dadosUsuario = null;
-                        snapshot.forEach(childSnap => {
-                            dadosUsuario = childSnap.val();
-                        });
-                        alert("Conta encontrada!\nSeu usuário: " + dadosUsuario.usuario + "\nSua senha: " + dadosUsuario.senha);
-                        mudarModo('login');
-                    } else {
-                        alert("Nenhuma conta encontrada com este usuário/e-mail.");
-                    }
-                });
-                return;
-            }
-
+            // MODO DE CADASTRO DE OUVINTE
             if (modoAtual === 'cadastro') {
                 if (!nomeInput) return alert("Por favor, digite seu nome!");
 
@@ -271,6 +209,7 @@
                     window.location.href = 'ouvinte.html';
                 });
             } else {
+                // MODO DE LOGIN DE OUVINTE
                 const idUser = userLower.replace(/[^a-z0-9]/g, '_');
                 localStorage.setItem('userId', idUser);
                 localStorage.setItem('usuarioNome', usuarioInput);
