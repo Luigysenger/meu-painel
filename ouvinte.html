@@ -1155,8 +1155,8 @@
             display: flex;
             align-items: center;
             justify-content: flex-start;
-            padding-left: 25px;
-            font-size: 12px;
+            padding-left: 15px;
+            font-size: 11px;
             font-weight: 800;
             color: #fff;
             text-shadow: 0 1px 2px rgba(0,0,0,0.9);
@@ -1436,11 +1436,11 @@
             <div class="loja-itens-grid" id="container-loja-itens"></div>
         </div>
 
-        <!-- ROLETA DE PRÊMIOS LIVRE -->
+        <!-- ROLETA DE PRÊMIOS DIÁRIA -->
         <div class="roleta-container-card">
             <div class="disputa-titulo" style="margin-bottom: 6px;">
-                <span><i class="fas fa-dharmachakra" style="color: #facc15; margin-right: 6px;"></i> ROLETA DA SORTE LIVRE</span>
-                <span style="font-size: 11px; color: #9ca3af; font-weight: 600;">Cada compra sobe de patente e dá direito a rolar!</span>
+                <span><i class="fas fa-dharmachakra" style="color: #facc15; margin-right: 6px;"></i> ROLETA DA SORTE DIÁRIA</span>
+                <span style="font-size: 11px; color: #9ca3af; font-weight: 600;">Gire 1 vez por dia para ganhar prêmios!</span>
             </div>
             <div class="roleta-wrapper">
                 <div class="roleta-ponteiro"></div>
@@ -1818,14 +1818,14 @@
             alert("Parabéns! Você resgatou +3 Ludgins de bônus!");
         }
 
-        // --- CONFIGURAÇÃO DA ROLETA DE PRÊMIOS LIVRE ---
+        // --- CONFIGURAÇÃO DA ROLETA DE PRÊMIOS AJUSTADA ---
         const fatiasRoleta = [
-            { premio: "+1 Ludgin", valor: 1, cor: "#9333ea" },
-            { premio: "+3 Ludgins", valor: 3, cor: "#db2777" },
-            { premio: "+5 Ludgins", valor: 5, cor: "#2563eb" },
-            { premio: "Nada", valor: 0, cor: "#334155" },
-            { premio: "+2 Ludgins", valor: 2, cor: "#16a34a" },
-            { premio: "+10 Ludgins", valor: 10, cor: "#ca8a04" }
+            { premio: "3 Ludgins", valor: 3, cor: "#9333ea" },
+            { premio: "5 Ludgins", valor: 5, cor: "#db2777" },
+            { premio: "10 Ludgins", valor: 10, cor: "#2563eb" },
+            { premio: "15 Ludgins", valor: 15, cor: "#16a34a" },
+            { premio: "20 Ludgins", valor: 20, cor: "#ca8a04" },
+            { premio: '<i class="fas fa-gem" style="margin-right:4px;"></i> Ludgins (70)', valor: 70, cor: "#dc2626" }
         ];
 
         function inicializarRoleta() {
@@ -1838,24 +1838,36 @@
                 let rot = index * anguloFatia;
                 htmlFatias += `
                     <div class="roleta-fatia" style="background-color: ${fatia.cor}; transform: rotate(${rot}deg) skewY(-30deg);">
-                        <span style="transform: skewY(30deg) rotate(${anguloFatia / 2}deg); display: inline-block; position: absolute; left: 20px; top: 35px;">${fatia.premio}</span>
+                        <span style="transform: skewY(30deg) rotate(${anguloFatia / 2}deg); display: inline-block; position: absolute; left: 25px; top: 40px; text-align: center; width: 80px; white-space: nowrap;">${fatia.premio}</span>
                     </div>
                 `;
             });
             circulo.innerHTML = htmlFatias;
 
-            verificarStatusRoletaLivre();
+            verificarStatusRoletaDiaria();
         }
 
-        function verificarStatusRoletaLivre() {
+        function verificarStatusRoletaDiaria() {
+            const hoje = new Date().toDateString();
+            const ultimoGiro = localStorage.getItem('ultimo_giro_roleta_' + ouvinteId);
             const btnGirar = document.getElementById('btn-girar-roleta');
             const msgStatus = document.getElementById('roleta-status-msg');
-            btnGirar.disabled = false;
-            msgStatus.innerText = "A roleta está livre! Role quantas vezes quiser.";
+
+            if (ultimoGiro === hoje) {
+                btnGirar.disabled = true;
+                msgStatus.innerText = "Você já girou a roleta hoje. Volte amanhã!";
+            } else {
+                btnGirar.disabled = false;
+                msgStatus.innerText = "Pronto para girar e testar sua sorte!";
+            }
         }
 
         let anguloAtualRoleta = 0;
         function girarRoleta() {
+            const hoje = new Date().toDateString();
+            const ultimoGiro = localStorage.getItem('ultimo_giro_roleta_' + ouvinteId);
+            if (ultimoGiro === hoje) return;
+
             const btnGirar = document.getElementById('btn-girar-roleta');
             btnGirar.disabled = true;
 
@@ -1871,6 +1883,7 @@
             circulo.style.transform = `rotate(${anguloAtualRoleta}deg)`;
 
             setTimeout(() => {
+                localStorage.setItem('ultimo_giro_roleta_' + ouvinteId, hoje);
                 const premioObj = fatiasRoleta[indiceSorteado];
                 
                 if (premioObj.valor > 0) {
@@ -1878,14 +1891,13 @@
                     salvarProgressoLudgins();
                     tocarSomSuaveSucesso();
                     if (typeof confetti === 'function') confetti({ particleCount: 200, spread: 80 });
-                    alert(`Parabéns! A roleta parou em: ${premioObj.premio}!`);
-                } else {
-                    alert(`Que pena! A roleta parou em "Nada". Tente de novo!`);
+                    alert(`Parabéns! A roleta parou em: ${premioObj.valor} Ludgins!`);
                 }
-                btnGirar.disabled = false;
+                document.getElementById('roleta-status-msg').innerText = "Você já girou a roleta hoje. Volte amanhã!";
             }, 4000);
         }
-        
+
+        // Inicializa a roleta ao carregar a página
         inicializarRoleta();
 
         db.ref('ouvintes_online').on('value', snap => {
@@ -1966,16 +1978,6 @@
             container.innerHTML = html;
         }
 
-        function subirPatentePorCompra() {
-            const patentesOrdem = ['Bronze', 'Prata', 'Ouro', 'Diamante', 'Rubi', 'Carretel de Joias'];
-            let indexAtual = patentesOrdem.indexOf(patenteAtual);
-            if (indexAtual !== -1 && indexAtual < patentesOrdem.length - 1) {
-                patenteAtual = patentesOrdem[indexAtual + 1];
-            } else if (indexAtual === -1) {
-                patenteAtual = 'Prata';
-            }
-        }
-
         function comprarItemLoja(idItem, custo) {
             if (meusLudgins < custo) {
                 alert(`Ludgins insuficientes! Você tem ${meusLudgins} Ludgins e precisa de ${custo} Ludgins.`);
@@ -1986,8 +1988,6 @@
                 meusLudgins -= custo;
                 desbloqueios[idItem] = true;
                 
-                subirPatentePorCompra();
-
                 localStorage.setItem('desbloqueios_ouvinte_' + ouvinteId, JSON.stringify(desbloqueios));
                 salvarProgressoLudgins();
                 tocarSomSuaveSucesso();
@@ -1995,7 +1995,7 @@
                 if (typeof confetti === 'function') {
                     confetti({ particleCount: 250, spread: 100, origin: { y: 0.5 } });
                 }
-                alert("Recurso comprado, desbloqueado com sucesso e patente aumentada!");
+                alert("Recurso comprado e desbloqueado com sucesso!");
             }
         }
 
@@ -2685,71 +2685,6 @@
                 document.getElementById('texto-mensagem').value = "";
             });
         }
-
-        function deletarMensagem(msgKey) {
-            if (confirm("Deseja apagar esta mensagem?")) {
-                db.ref('mensagens_ouvintes/' + msgKey).remove();
-            }
-        }
-
-        function carregarChatCompleto() {
-            db.ref('mensagens_ouvintes').on('value', snap => {
-                const container = document.getElementById('lista-respostas-adm');
-                if (!container) return;
-
-                if (!snap.exists()) {
-                    container.innerHTML = "<p style='color:#666; font-size:12px; text-align:center;'>Nenhuma mensagem enviada.</p>";
-                    return;
-                }
-
-                let htmlChat = "";
-                snap.forEach(child => {
-                    const m = child.val();
-                    const msgKey = child.key;
-                    const ehMinha = m.ouvinteId === ouvinteId;
-
-                    if (ehMinha || (m.respostaAdm && m.respostaAdm.trim() !== "")) {
-                        htmlChat += `
-                            <div class="chat-bubble-ouvinte" style="width: 100%; box-sizing: border-box;">
-                                <div class="chat-sender-header">
-                                    <span class="chat-sender-name ouvinte">${m.ouvinte || 'Ouvinte'} (${m.patente || 'Bronze'})</span>
-                                    <div style="display:flex; align-items:center; gap:6px;">
-                                        <span class="chat-time">${m.dataHora || ''}</span>
-                                        ${ehMinha ? `<button class="btn-delete-chat" onclick="deletarMensagem('${msgKey}')" title="Apagar mensagem"><i class="fas fa-trash"></i></button>` : ''}
-                                    </div>
-                                </div>
-                                <div class="chat-text">${m.mensagem}</div>
-                            </div>
-                        `;
-
-                        if (m.respostaAdm && m.respostaAdm.trim() !== "") {
-                            htmlChat += `
-                                <div class="chat-bubble-adm" style="width: 100%; box-sizing: border-box;">
-                                    <div class="chat-sender-header">
-                                        <span class="chat-sender-name adm"><i class="fas fa-headset"></i> Resposta do Admin</span>
-                                        <span class="chat-time">${m.respostaDataHora || ''}</span>
-                                    </div>
-                                    <div class="chat-text">${m.respostaAdm}</div>
-                                </div>
-                            `;
-                        }
-                    }
-                });
-
-                container.innerHTML = htmlChat || "<p style='color:#666; font-size:12px; text-align:center;'>Nenhuma mensagem encontrada.</p>";
-                container.scrollTop = container.scrollHeight;
-            });
-        }
-        carregarChatCompleto();
-
-        function logout() {
-            if (confirm("Deseja sair do painel?")) {
-                localStorage.removeItem('usuarioNome');
-                localStorage.removeItem('usuarioEmail');
-                window.location.reload();
-            }
-        }
     </script>
 </body>
 </html>
-```[cite: 6]
