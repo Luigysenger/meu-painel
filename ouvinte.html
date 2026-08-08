@@ -1436,11 +1436,11 @@
             <div class="loja-itens-grid" id="container-loja-itens"></div>
         </div>
 
-        <!-- ROLETA DE PRÊMIOS DIÁRIA -->
+        <!-- ROLETA DE PRÊMIOS LIVRE -->
         <div class="roleta-container-card">
             <div class="disputa-titulo" style="margin-bottom: 6px;">
-                <span><i class="fas fa-dharmachakra" style="color: #facc15; margin-right: 6px;"></i> ROLETA DA SORTE DIÁRIA</span>
-                <span style="font-size: 11px; color: #9ca3af; font-weight: 600;">Gire 1 vez por dia para ganhar prêmios!</span>
+                <span><i class="fas fa-dharmachakra" style="color: #facc15; margin-right: 6px;"></i> ROLETA DA SORTE LIVRE</span>
+                <span style="font-size: 11px; color: #9ca3af; font-weight: 600;">Cada compra sobe de patente e dá direito a rolar!</span>
             </div>
             <div class="roleta-wrapper">
                 <div class="roleta-ponteiro"></div>
@@ -1818,7 +1818,7 @@
             alert("Parabéns! Você resgatou +3 Ludgins de bônus!");
         }
 
-        // --- CONFIGURAÇÃO DA ROLETA DE PRÊMIOS ---
+        // --- CONFIGURAÇÃO DA ROLETA DE PRÊMIOS LIVRE ---
         const fatiasRoleta = [
             { premio: "+1 Ludgin", valor: 1, cor: "#9333ea" },
             { premio: "+3 Ludgins", valor: 3, cor: "#db2777" },
@@ -1844,38 +1844,24 @@
             });
             circulo.innerHTML = htmlFatias;
 
-            verificarStatusRoletaDiaria();
+            verificarStatusRoletaLivre();
         }
 
-        function verificarStatusRoletaDiaria() {
-            const hoje = new Date().toDateString();
-            const ultimoGiro = localStorage.getItem('ultimo_giro_roleta_' + ouvinteId);
+        function verificarStatusRoletaLivre() {
             const btnGirar = document.getElementById('btn-girar-roleta');
             const msgStatus = document.getElementById('roleta-status-msg');
-
-            if (ultimoGiro === hoje) {
-                btnGirar.disabled = true;
-                msgStatus.innerText = "Você já girou a roleta hoje. Volte amanhã!";
-            } else {
-                btnGirar.disabled = false;
-                msgStatus.innerText = "Pronto para girar e testar sua sorte!";
-            }
+            btnGirar.disabled = false;
+            msgStatus.innerText = "A roleta está livre! Role quantas vezes quiser.";
         }
 
         let anguloAtualRoleta = 0;
         function girarRoleta() {
-            const hoje = new Date().toDateString();
-            const ultimoGiro = localStorage.getItem('ultimo_giro_roleta_' + ouvinteId);
-            if (ultimoGiro === hoje) return;
-
             const btnGirar = document.getElementById('btn-girar-roleta');
             btnGirar.disabled = true;
 
-            // Sorteio index
             const indiceSorteado = Math.floor(Math.random() * fatiasRoleta.length);
             const anguloFatia = 360 / fatiasRoleta.length;
             
-            // Calculo para alinhar a fatia no topo (ponteiro)
             const voltasExtras = 5 * 360;
             const ajusteCentroFatia = anguloFatia / 2;
             const anguloAlvo = voltasExtras + (360 - (indiceSorteado * anguloFatia + ajusteCentroFatia));
@@ -1885,7 +1871,6 @@
             circulo.style.transform = `rotate(${anguloAtualRoleta}deg)`;
 
             setTimeout(() => {
-                localStorage.setItem('ultimo_giro_roleta_' + ouvinteId, hoje);
                 const premioObj = fatiasRoleta[indiceSorteado];
                 
                 if (premioObj.valor > 0) {
@@ -1895,11 +1880,13 @@
                     if (typeof confetti === 'function') confetti({ particleCount: 200, spread: 80 });
                     alert(`Parabéns! A roleta parou em: ${premioObj.premio}!`);
                 } else {
-                    alert(`Que pena! A roleta parou em "Nada". Tente novamente amanhã!`);
+                    alert(`Que pena! A roleta parou em "Nada". Tente de novo!`);
                 }
-                document.getElementById('roleta-status-msg').innerText = "Você já girou a roleta hoje. Volte amanhã!";
+                btnGirar.disabled = false;
             }, 4000);
         }
+        
+        inicializarRoleta();
 
         db.ref('ouvintes_online').on('value', snap => {
             const containerRanking = document.getElementById('container-ranking-ouvintes');
@@ -1979,6 +1966,16 @@
             container.innerHTML = html;
         }
 
+        function subirPatentePorCompra() {
+            const patentesOrdem = ['Bronze', 'Prata', 'Ouro', 'Diamante', 'Rubi', 'Carretel de Joias'];
+            let indexAtual = patentesOrdem.indexOf(patenteAtual);
+            if (indexAtual !== -1 && indexAtual < patentesOrdem.length - 1) {
+                patenteAtual = patentesOrdem[indexAtual + 1];
+            } else if (indexAtual === -1) {
+                patenteAtual = 'Prata';
+            }
+        }
+
         function comprarItemLoja(idItem, custo) {
             if (meusLudgins < custo) {
                 alert(`Ludgins insuficientes! Você tem ${meusLudgins} Ludgins e precisa de ${custo} Ludgins.`);
@@ -1989,6 +1986,8 @@
                 meusLudgins -= custo;
                 desbloqueios[idItem] = true;
                 
+                subirPatentePorCompra();
+
                 localStorage.setItem('desbloqueios_ouvinte_' + ouvinteId, JSON.stringify(desbloqueios));
                 salvarProgressoLudgins();
                 tocarSomSuaveSucesso();
@@ -1996,7 +1995,7 @@
                 if (typeof confetti === 'function') {
                     confetti({ particleCount: 250, spread: 100, origin: { y: 0.5 } });
                 }
-                alert("Recurso comprado e desbloqueado com sucesso!");
+                alert("Recurso comprado, desbloqueado com sucesso e patente aumentada!");
             }
         }
 
@@ -2694,89 +2693,63 @@
         }
 
         function carregarChatCompleto() {
-            db.ref('mensagens_ouvintes').on('value', snapMsgs => {
-                db.ref('respostas_adm').on('value', snapResps => {
-                    const container = document.getElementById('lista-respostas-adm');
-                    container.innerHTML = "";
-                    
-                    const msgs = snapMsgs.val() || {};
-                    const resps = snapResps.val() || {};
+            db.ref('mensagens_ouvintes').on('value', snap => {
+                const container = document.getElementById('lista-respostas-adm');
+                if (!container) return;
 
-                    let listaHistorico = [];
+                if (!snap.exists()) {
+                    container.innerHTML = "<p style='color:#666; font-size:12px; text-align:center;'>Nenhuma mensagem enviada.</p>";
+                    return;
+                }
 
-                    for (let id in msgs) {
-                        const m = msgs[id];
-                        if (m.ouvinteId === ouvinteId || m.ouvinte === ouvinteNome) {
-                            listaHistorico.push({
-                                tipo: 'ouvinte',
-                                id: id,
-                                texto: m.mensagem,
-                                dataHora: m.dataHora || '',
-                                timestamp: m.timestamp || 0
-                            });
-                        }
-                    }
+                let htmlChat = "";
+                snap.forEach(child => {
+                    const m = child.val();
+                    const msgKey = child.key;
+                    const ehMinha = m.ouvinteId === ouvinteId;
 
-                    for (let id in resps) {
-                        const r = resps[id];
-                        if (r.ouvinteId === ouvinteId || r.ouvinte === ouvinteNome) {
-                            listaHistorico.push({
-                                tipo: 'adm',
-                                id: id,
-                                texto: r.resposta,
-                                dataHora: r.dataHora || '',
-                                timestamp: r.timestamp || 0
-                            });
-                        }
-                    }
-
-                    listaHistorico.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
-
-                    if (listaHistorico.length === 0) {
-                        container.innerHTML = "<p style='color:#666; text-align:center; font-size:12px; padding:10px;'>Nenhuma mensagem enviada.</p>";
-                        return;
-                    }
-
-                    listaHistorico.forEach(item => {
-                        if (item.tipo === 'ouvinte') {
-                            container.innerHTML += `
-                                <div class="chat-bubble-ouvinte">
-                                    <div class="chat-sender-header">
-                                        <span class="chat-sender-name ouvinte">Você (${patenteAtual})</span>
-                                        <button class="btn-delete-chat" title="Apagar" onclick="deletarMensagem('${item.id}')">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
+                    if (ehMinha || (m.respostaAdm && m.respostaAdm.trim() !== "")) {
+                        htmlChat += `
+                            <div class="chat-bubble-ouvinte" style="width: 100%; box-sizing: border-box;">
+                                <div class="chat-sender-header">
+                                    <span class="chat-sender-name ouvinte">${m.ouvinte || 'Ouvinte'} (${m.patente || 'Bronze'})</span>
+                                    <div style="display:flex; align-items:center; gap:6px;">
+                                        <span class="chat-time">${m.dataHora || ''}</span>
+                                        ${ehMinha ? `<button class="btn-delete-chat" onclick="deletarMensagem('${msgKey}')" title="Apagar mensagem"><i class="fas fa-trash"></i></button>` : ''}
                                     </div>
-                                    <div class="chat-text">${item.texto}</div>
-                                    <div class="chat-time">${item.dataHora}</div>
                                 </div>
-                            `;
-                        } else {
-                            container.innerHTML += `
-                                <div class="chat-bubble-adm">
+                                <div class="chat-text">${m.mensagem}</div>
+                            </div>
+                        `;
+
+                        if (m.respostaAdm && m.respostaAdm.trim() !== "") {
+                            htmlChat += `
+                                <div class="chat-bubble-adm" style="width: 100%; box-sizing: border-box;">
                                     <div class="chat-sender-header">
-                                        <span class="chat-sender-name adm"><i class="fas fa-user-shield"></i> ADM</span>
+                                        <span class="chat-sender-name adm"><i class="fas fa-headset"></i> Resposta do Admin</span>
+                                        <span class="chat-time">${m.respostaDataHora || ''}</span>
                                     </div>
-                                    <div class="chat-text">${item.texto}</div>
-                                    <div class="chat-time">${item.dataHora}</div>
+                                    <div class="chat-text">${m.respostaAdm}</div>
                                 </div>
                             `;
                         }
-                    });
-
-                    container.scrollTop = container.scrollHeight;
+                    }
                 });
+
+                container.innerHTML = htmlChat || "<p style='color:#666; font-size:12px; text-align:center;'>Nenhuma mensagem encontrada.</p>";
+                container.scrollTop = container.scrollHeight;
             });
         }
-
         carregarChatCompleto();
-        atualizarInterfaceLudginsEPatente();
-        inicializarRoleta();
 
         function logout() {
-            localStorage.clear();
-            window.location.href = 'index.html';
+            if (confirm("Deseja sair do painel?")) {
+                localStorage.removeItem('usuarioNome');
+                localStorage.removeItem('usuarioEmail');
+                window.location.reload();
+            }
         }
     </script>
 </body>
 </html>
+```[cite: 6]
