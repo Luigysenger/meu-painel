@@ -1117,8 +1117,8 @@
         }
         .roleta-wrapper {
             position: relative;
-            width: 260px;
-            height: 260px;
+            width: 280px;
+            height: 280px;
             margin: 15px auto;
         }
         .roleta-ponteiro {
@@ -1138,7 +1138,7 @@
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            border: 5px solid #a855f7;
+            border: 6px solid #a855f7;
             position: relative;
             overflow: hidden;
             transition: transform 4s cubic-bezier(0.15, 0.9, 0.2, 1);
@@ -1152,15 +1152,23 @@
             transform-origin: 100% 100%;
             left: 0;
             top: 0;
+            box-sizing: border-box;
+        }
+        .roleta-fatia-conteudo {
+            position: absolute;
+            left: 35%;
+            top: 35%;
+            transform: skewY(30deg) rotate(0deg);
+            transform-origin: 0 0;
             display: flex;
             align-items: center;
-            justify-content: flex-start;
-            padding-left: 15px;
-            font-size: 11px;
+            justify-content: center;
+            gap: 4px;
+            font-size: 11.5px;
             font-weight: 800;
             color: #fff;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.9);
-            box-sizing: border-box;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+            white-space: nowrap;
         }
         .btn-girar-roleta {
             background: linear-gradient(135deg, #eab308, #ca8a04);
@@ -1676,7 +1684,7 @@
             document.getElementById('patente-ouvinte-badge').innerText = patenteAtual;
             renderizarLojaVirtual();
             aplicarTravaBloqueios();
-            renderizarPlaylistDireita(); // Atualiza os ícones de pincel (com ou sem risco vermelho)
+            renderizarPlaylistDireita();
         }
 
         function formatarTempoOnline(segundos) {
@@ -1820,12 +1828,12 @@
 
         // --- CONFIGURAÇÃO DA ROLETA DE PRÊMIOS AJUSTADA ---
         const fatiasRoleta = [
-            { premio: "3 Ludgins", valor: 3, cor: "#9333ea" },
-            { premio: "5 Ludgins", valor: 5, cor: "#db2777" },
-            { premio: "10 Ludgins", valor: 10, cor: "#2563eb" },
-            { premio: "15 Ludgins", valor: 15, cor: "#16a34a" },
-            { premio: "20 Ludgins", valor: 20, cor: "#ca8a04" },
-            { premio: '<i class="fas fa-gem" style="margin-right:4px;"></i> Ludgins (70)', valor: 70, cor: "#dc2626" }
+            { tipo: 'valor', valor: 3, texto: '3 Ludgins', cor: '#9333ea' },
+            { tipo: 'valor', valor: 5, texto: '5 Ludgins', cor: '#db2777' },
+            { tipo: 'valor', valor: 10, texto: '10 Ludgins', cor: '#2563eb' },
+            { tipo: 'valor', valor: 15, texto: '15 Ludgins', cor: '#16a34a' },
+            { tipo: 'valor', valor: 20, texto: '20 Ludgins', cor: '#ca8a04' },
+            { tipo: 'especial', valor: 70, texto: 'ludgins', icone: '<i class="fas fa-gem" style="color:#facc15; font-size:14px;"></i>', cor: '#7c3aed' }
         ];
 
         function inicializarRoleta() {
@@ -1836,9 +1844,19 @@
             let htmlFatias = '';
             fatiasRoleta.forEach((fatia, index) => {
                 let rot = index * anguloFatia;
+                let conteudoHtml = '';
+
+                if (fatia.tipo === 'especial') {
+                    conteudoHtml = `${fatia.icone} <span>${fatia.texto}</span>`;
+                } else {
+                    conteudoHtml = `<span>${fatia.texto}</span>`;
+                }
+
                 htmlFatias += `
                     <div class="roleta-fatia" style="background-color: ${fatia.cor}; transform: rotate(${rot}deg) skewY(-30deg);">
-                        <span style="transform: skewY(30deg) rotate(${anguloFatia / 2}deg); display: inline-block; position: absolute; left: 25px; top: 40px; text-align: center; width: 80px; white-space: nowrap;">${fatia.premio}</span>
+                        <div class="roleta-fatia-conteudo" style="transform: skewY(30deg) rotate(${anguloFatia / 2}deg);">
+                            ${conteudoHtml}
+                        </div>
                     </div>
                 `;
             });
@@ -1886,19 +1904,20 @@
                 localStorage.setItem('ultimo_giro_roleta_' + ouvinteId, hoje);
                 const premioObj = fatiasRoleta[indiceSorteado];
                 
-                if (premioObj.valor > 0) {
-                    meusLudgins += premioObj.valor;
-                    salvarProgressoLudgins();
-                    tocarSomSuaveSucesso();
-                    if (typeof confetti === 'function') confetti({ particleCount: 200, spread: 80 });
-                    alert(`Parabéns! A roleta parou em: ${premioObj.valor} Ludgins!`);
+                meusLudgins += premioObj.valor;
+                salvarProgressoLudgins();
+                tocarSomSuaveSucesso();
+                if (typeof confetti === 'function') confetti({ particleCount: 200, spread: 80 });
+                
+                if (premioObj.tipo === 'especial') {
+                    alert(`Incrível! Você tirou o prêmio máximo e ganhou 70 Ludgins!`);
+                } else {
+                    alert(`Parabéns! A roleta parou em: ${premioObj.texto}!`);
                 }
+
                 document.getElementById('roleta-status-msg').innerText = "Você já girou a roleta hoje. Volte amanhã!";
             }, 4000);
         }
-
-        // Inicializa a roleta ao carregar a página
-        inicializarRoleta();
 
         db.ref('ouvintes_online').on('value', snap => {
             const containerRanking = document.getElementById('container-ranking-ouvintes');
@@ -2670,21 +2689,67 @@
                 return;
             }
 
-            const texto = document.getElementById('texto-mensagem').value.trim();
-            if (!texto) return alert("Digite sua mensagem!");
+            const campo = document.getElementById('texto-mensagem');
+            const texto = campo.value.trim();
+            if (!texto) return;
 
-            db.ref('mensagens_ouvintes').push({
-                ouvinteId: ouvinteId,
-                ouvinte: ouvinteNome,
-                patente: patenteAtual,
-                ludgins: meusLudgins,
-                mensagem: texto,
-                dataHora: new Date().toLocaleString('pt-BR'),
+            db.ref('mensagens_chat/' + ouvinteId).push({
+                remetente: ouvinteNome,
+                tipo: 'ouvinte',
+                texto: texto,
                 timestamp: firebase.database.ServerValue.TIMESTAMP
-            }).then(() => {
-                document.getElementById('texto-mensagem').value = "";
             });
+
+            campo.value = "";
         }
+
+        db.ref('mensagens_chat/' + ouvinteId).on('value', snap => {
+            const container = document.getElementById('lista-respostas-adm');
+            if (!container) return;
+
+            if (!snap.exists()) {
+                container.innerHTML = "<p style='color:#666; text-align:center; font-size:11.5px; padding:10px;'>Nenhuma mensagem enviada ainda.</p>";
+                return;
+            }
+
+            let htmlChat = "";
+            snap.forEach(child => {
+                const msg = child.val();
+                const dataFormatada = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '';
+                const ehAdm = msg.tipo === 'adm';
+
+                htmlChat += `
+                    <div class="${ehAdm ? 'chat-bubble-adm' : 'chat-bubble-ouvinte'}">
+                        <div class="chat-sender-header">
+                            <span class="chat-sender-name ${ehAdm ? 'adm' : 'ouvinte'}">${ehAdm ? '👑 ADM LUIGY' : ouvinteNome}</span>
+                            <button class="btn-delete-chat" onclick="deletarMensagemChat('${child.key}')"><i class="fas fa-trash"></i></button>
+                        </div>
+                        <div class="chat-text">${msg.texto}</div>
+                        <div class="chat-time">${dataFormatada}</div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = htmlChat;
+            container.scrollTop = container.scrollHeight;
+        });
+
+        function deletarMensagemChat(key) {
+            db.ref('mensagens_chat/' + ouvinteId + '/' + key).remove();
+        }
+
+        function logout() {
+            if (confirm("Deseja realmente sair do painel?")) {
+                localStorage.removeItem('userId');
+                localStorage.removeItem('usuarioNome');
+                localStorage.removeItem('usuarioEmail');
+                window.location.reload();
+            }
+        }
+
+        window.onload = () => {
+            inicializarRoleta();
+        };
     </script>
 </body>
 </html>
