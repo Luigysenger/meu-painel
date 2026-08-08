@@ -1517,6 +1517,10 @@
     <audio id="audio-ouvinte"></audio>
 
     <script>
+        // ----------------------------------------------------
+        // [PLACA 1]: CONFIGURAÇÃO INICIAL DO FIREBASE E SESSÃO
+        // Inicializa o Firebase, obtém e armazena o identificador e nome único do ouvinte.
+        // ----------------------------------------------------
         const firebaseConfig = {
             apiKey: "ef1aa464f6bacacd0ff6d26c8179aee0",
             authDomain: "meu-painel-f2efe.firebaseapp.com",
@@ -1547,6 +1551,10 @@
         let isRadioTocando = false;
         let cardSendoEditadoKey = null;
 
+        // ----------------------------------------------------
+        // [PLACA 2]: EFEITOS SONOROS E ÁUDIO
+        // Função utilitária para emitir um bip de sucesso customizado via Web Audio API.
+        // ----------------------------------------------------
         function tocarSomSuaveSucesso() {
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1573,6 +1581,10 @@
 
         let customizacoesCards = JSON.parse(localStorage.getItem('customizacoes_cards_' + ouvinteId)) || {};
 
+        // ----------------------------------------------------
+        // [PLACA 3]: ATUALIZAÇÃO DA INTERFACE DE LUDGINS E PATENTE
+        // Atualiza os contadores na tela, renderiza a loja e aplica as travas de bloqueio.
+        // ----------------------------------------------------
         function atualizarInterfaceLudginsEPatente() {
             document.getElementById('contador-ludgins').innerText = meusLudgins;
             document.getElementById('patente-ouvinte-badge').innerText = patenteAtual;
@@ -1581,6 +1593,10 @@
             renderizarPlaylistDireita();
         }
 
+        // ----------------------------------------------------
+        // [PLACA 4]: FORMATADOR DE TEMPO ONLINE
+        // Transforma segundos totais em uma string formatada em HH:MM:SS.
+        // ----------------------------------------------------
         function formatarTempoOnline(segundos) {
             const h = Math.floor(segundos / 3600).toString().padStart(2, '0');
             const m = Math.floor((segundos % 3600) / 60).toString().padStart(2, '0');
@@ -1588,6 +1604,10 @@
             return `${h}:${m}:${s}`;
         }
 
+        // ----------------------------------------------------
+        // [PLACA 5]: CRONÔMETRO DE LUDGINS E TEMPO CONECTADO
+        // Conta o tempo em segundos apenas quando a rádio está tocando, recompensando o ouvinte com Ludgins progressivos.
+        // ----------------------------------------------------
         function iniciarCronometroOnline() {
             if (timerOnlineInterval) return;
             timerOnlineInterval = setInterval(() => {
@@ -1660,11 +1680,19 @@
         }
         iniciarCronometroOnline();
 
+        // ----------------------------------------------------
+        // [PLACA 6]: ROLAGEM PARA O BÔNUS DIÁRIO
+        // Direciona suavemente a visão do usuário para o botão de resgate do bônus.
+        // ----------------------------------------------------
         function rolarParaBonusDiario() {
             document.getElementById('secao-bonus-diario').scrollIntoView({ behavior: 'smooth', block: 'center' });
             document.getElementById('alerta-cronometro').style.display = 'none';
         }
 
+        // ----------------------------------------------------
+        // [PLACA 7]: VERIFICAÇÃO DE PATENTE
+        // Promove a patente do usuário de acordo com o total acumulado de Ludgins.
+        // ----------------------------------------------------
         function verificarPatentePorTempo() {
             let novaPatente = patenteAtual;
             if (meusLudgins >= 100) novaPatente = 'Carretel de Joias';
@@ -1683,6 +1711,10 @@
             }
         }
 
+        // ----------------------------------------------------
+        // [PLACA 8]: SALVAMENTO E SINCRONIZAÇÃO DE LUDGINS
+        // Persiste as informações locais de pontuação no localStorage e atualiza no banco em tempo real.
+        // ----------------------------------------------------
         function salvarProgressoLudgins() {
             localStorage.setItem('ludgins_ouvinte_' + ouvinteId, meusLudgins);
             localStorage.setItem('patente_ouvinte_' + ouvinteId, patenteAtual);
@@ -1690,6 +1722,10 @@
             sincronizarFirebaseOuvinteOnline();
         }
 
+        // ----------------------------------------------------
+        // [PLACA 9]: SINCRONIZAÇÃO COM O FIREBASE ONLINE
+        // Atualiza a listagem de ouvintes ativos e pontuações no Realtime Database.
+        // ----------------------------------------------------
         function sincronizarFirebaseOuvinteOnline() {
             db.ref('ouvintes_online/' + ouvinteId).update({
                 nome: ouvinteNome,
@@ -1700,6 +1736,10 @@
         }
         sincronizarFirebaseOuvinteOnline();
 
+        // ----------------------------------------------------
+        // [PLACA 10]: RESGATE DE BÔNUS DIÁRIO CENTRAL
+        // Permite ao usuário resgatar Ludgins diários uma vez por dia, validando por data local.
+        // ----------------------------------------------------
         function resgatarBonusLudginsCentral() {
             const hoje = new Date().toDateString();
             const ultimoResgate = localStorage.getItem('ultimo_resgate_bonus_' + ouvinteId);
@@ -1720,6 +1760,10 @@
             alert("Parabéns! Você resgatou +3 Ludgins de bônus!");
         }
 
+        // ----------------------------------------------------
+        // [PLACA 11]: ESCUTA DO RANKING DE OUVINTES EM TEMPO REAL
+        // Constrói e ordena a tabela de disputa de ouvintes online com base nos dados do Firebase.
+        // ----------------------------------------------------
         db.ref('ouvintes_online').on('value', snap => {
             const containerRanking = document.getElementById('container-ranking-ouvintes');
             if (!containerRanking) return;
@@ -1767,6 +1811,10 @@
             containerRanking.innerHTML = htmlRanking;
         });
 
+        // ----------------------------------------------------
+        // [PLACA 12]: RENDERIZAÇÃO DA LOJA VIRTUAL
+        // Lista os itens disponíveis para compra e desbloqueio no painel.
+        // ----------------------------------------------------
         function renderizarLojaVirtual() {
             const container = document.getElementById('container-loja-itens');
             
@@ -1798,6 +1846,10 @@
             container.innerHTML = html;
         }
 
+        // ----------------------------------------------------
+        // [PLACA 13]: COMPRA DE ITENS DA LOJA
+        // Debita os Ludgins do saldo do usuário e libera permanentemente o recurso selecionado.
+        // ----------------------------------------------------
         function comprarItemLoja(idItem, custo) {
             if (meusLudgins < custo) {
                 alert(`Ludgins insuficientes! Você tem ${meusLudgins} Ludgins e precisa de ${custo} Ludgins.`);
@@ -1819,6 +1871,10 @@
             }
         }
 
+        // ----------------------------------------------------
+        // [PLACA 14]: APLICAÇÃO DE TRAVAS E BLOQUEIOS DE CARDS
+        // Adiciona ou remove overlays de bloqueio sobre os cards dependendo do status de aquisição.
+        // ----------------------------------------------------
         function aplicarTravaBloqueios() {
             const cardChat = document.getElementById('card-box-chat');
             gerenciarOverlay(cardChat, desbloqueios.chat, 'Chat', 20);
@@ -1830,6 +1886,10 @@
             gerenciarOverlay(cardEsportes, desbloqueios.esportes, 'Painel Jogos', 70);
         }
 
+        // ----------------------------------------------------
+        // [PLACA 15]: GERENCIADOR DE OVERLAYS DE BLOQUEIO
+        // Cria a camada visual restritiva caso o recurso ainda não tenha sido desbloqueado.
+        // ----------------------------------------------------
         function gerenciarOverlay(elementoCard, statusDesbloqueado, nomeRecurso, custoReq) {
             if (!elementoCard) return;
             let overlayId = 'overlay_' + elementoCard.id;
@@ -1855,6 +1915,10 @@
             }
         }
 
+        // ----------------------------------------------------
+        // [PLACA 16]: RELÓGIO DIGITAL EM TEMPO REAL
+        // Atualiza o horário atual no cabeçalho a cada segundo.
+        // ----------------------------------------------------
         function atualizarRelogio() {
             const agora = new Date();
             document.getElementById('relogio-digital').innerText = agora.toLocaleTimeString('pt-BR');
@@ -1862,6 +1926,10 @@
         setInterval(atualizarRelogio, 1000);
         atualizarRelogio();
 
+        // ----------------------------------------------------
+        // [PLACA 17]: CARROSSEL DE CLIMA DINÂMICO
+        // Busca dados meteorológicos atualizados via API aberta para diversas cidades brasileiras em rotação.
+        // ----------------------------------------------------
         const cidadesClima = [
             { nome: 'Cascavel', lat: -24.9578, lon: -53.4595 },
             { nome: 'Curitiba', lat: -25.4284, lon: -49.2733 },
@@ -1906,6 +1974,10 @@
         atualizarCarrosselClima();
         setInterval(atualizarCarrosselClima, 6000);
 
+        // ----------------------------------------------------
+        // [PLACA 18]: CARREGAMENTO DOS JOGOS DA SEMANA
+        // Renderiza partidas de futebol simuladas ou em tempo real com placares e artilheiros.
+        // ----------------------------------------------------
         function carregarJogosBrasileiraoSemana() {
             const containerEsportes = document.getElementById('lista-jogos-esportes');
             
@@ -1999,6 +2071,10 @@
         carregarJogosBrasileiraoSemana();
         setInterval(carregarJogosBrasileiraoSemana, 30000);
 
+        // ----------------------------------------------------
+        // [PLACA 19]: DADOS DAS TABELAS DE CLASSIFICAÇÃO
+        // Informações estruturadas para o Brasileirão e Copa do Brasil.
+        // ----------------------------------------------------
         const tabelaBrasileiraoDados = [
             { pos: 1, var: 0, time: "Palmeiras", pts: 47, j: 21, v: 14, sg: 22 },
             { pos: 2, var: 0, time: "Flamengo", pts: 39, j: 20, v: 11, sg: 19 },
@@ -2033,6 +2109,10 @@
             { pos: "Quartas", var: 0, time: "Athletico-PR", fase: "Classificado" }
         ];
 
+        // ----------------------------------------------------
+        // [PLACA 20]: ABERTURA DO MODAL DE TABELAS
+        // Exibe o modal flutuante contendo a tabela de classificação esportiva escolhida.
+        // ----------------------------------------------------
         function abrirModalTabela(tipo) {
             const modal = document.getElementById('modal-tabela');
             const titulo = document.getElementById('modal-titulo-tabela');
@@ -2111,6 +2191,10 @@
             modal.style.display = 'flex';
         }
 
+        // ----------------------------------------------------
+        // [PLACA 21]: FECHAMENTO DE MODAIS
+        // Esconde o modal de tabelas da tela.
+        // ----------------------------------------------------
         function fecharModalTabela() {
             document.getElementById('modal-tabela').style.display = 'none';
         }
@@ -2121,13 +2205,31 @@
             }
         }
 
+        // ----------------------------------------------------
+        // [PLACA 22]: HORÓSCOPO DO DIA
+        // Exibe previsões astrais baseadas no signo selecionado e na data atual.
+        // ----------------------------------------------------
         const nomesSignos = {
             aries: 'Áries', taurus: 'Touro', gemini: 'Gêmeos', cancer: 'Câncer',
             leo: 'Leão', virgo: 'Virgem', libra: 'Libra', scorpio: 'Escorpião',
             sagittarius: 'Sagitário', capricorn: 'Capricórnio', aquarius: 'Aquário', pisces: 'Peixes'
         };
 
-        // Integração da API de Horóscopo (aztro) atualizada diariamente
+        const baseHoroscopoDinamico = {
+            aries: ["Dia de energia renovada. Bom momento para tomar iniciativas e focar nos seus objetivos pessoais."],
+            taurus: ["Estabilidade em alta. Mantenha os pés no chão e aproveite momentos de tranquilidade e conforto."],
+            gemini: ["Comunicação afiada hoje! Ótima oportunidade para trocar ideias e fazer novos contatos."],
+            cancer: ["Intuição aguçada. Volte a atenção para a família e para o que traz segurança emocional."],
+            leo: ["Seu brilho pessoal está destacado. Confie no seu potencial para liderar e inspirar os outros."],
+            virgo: ["Organização e foco nos detalhes trarão excelentes resultados nas suas tarefas diárias."],
+            libra: ["Busque o equilíbrio em suas relações. Um dia favorável para harmonia e acordos amigáveis."],
+            scorpio: ["Momento de transformação e foco profundo. Sua determinação vai te ajudar a superar desafios."],
+            sagittarius: ["Espírito otimista e busca por novidades. Excelente dia para aprender algo novo."],
+            capricorn: ["Foco no trabalho e nas metas de longo prazo. Sua disciplina trará bons frutos."],
+            aquarius: ["Ideias inovadoras em alta. Esteja aberto para colaborar com amigos e pensar no futuro."],
+            pisces: ["Sensibilidade e criatividade elevadas. Confie nos seus sentimentos para tomar decisões."]
+        };
+
         async function carregarHoroscopo(signo, el) {
             if (!desbloqueios.horoscopo) {
                 alert("Horóscopo bloqueado! Adquira o recurso na sua Loja Virtual acima.");
@@ -2138,24 +2240,27 @@
             if(el) el.classList.add('ativo');
 
             const container = document.getElementById('horoscopo-texto');
-            container.innerHTML = `<i class="fas fa-spinner fa-spin" style="color:#c084fc;"></i> Consultando astros de hoje...`;
+            container.innerHTML = `<i class="fas fa-spinner fa-spin" style="color:#c084fc;"></i> Consultando astros...`;
 
-            try {
-                const response = await fetch(`https://aztro.sameerkumar.website/?sign=${signo}&day=today`, {
-                    method: 'POST'
-                });
-                const data = await response.json();
-
-                if (data && data.description) {
-                    container.innerHTML = `<div><span class="signo-titulo">✨ ${nomesSignos[signo]}</span>${data.description}</div>`;
-                } else {
-                    throw new Error();
-                }
-            } catch (err) {
-                container.innerHTML = `<div><span class="signo-titulo">✨ ${nomesSignos[signo]}</span>Hoje é um dia propício para focar em suas metas e buscar novos horizontes com determinação e equilíbrio. Os astros estão a favor do seu crescimento pessoal!</div>`;
+            const hojeStr = new Date().toISOString().slice(0, 10);
+            let hashData = 0;
+            for (let i = 0; i < hojeStr.length; i++) {
+                hashData += hojeStr.charCodeAt(i);
             }
+
+            const listaFrases = baseHoroscopoDinamico[signo] || baseHoroscopoDinamico['aries'];
+            const indiceDoDia = hashData % listaFrases.length;
+            const textoDoDia = listaFrases[indiceDoDia];
+
+            setTimeout(() => {
+                container.innerHTML = `<div><span class="signo-titulo">✨ ${nomesSignos[signo]}</span>${textoDoDia}</div>`;
+            }, 300);
         }
 
+        // ----------------------------------------------------
+        // [PLACA 23]: NOTÍCIAS DO BRASIL (RSS TICKER)
+        // Busca notícias nacionais atualizadas via feed RSS e alimenta o letreiro em rolagem contínua.
+        // ----------------------------------------------------
         async function carregarNoticiasBrasil() {
             try {
                 const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fg1.globo.com%2Fdynamo%2Frss2.xml');
@@ -2191,6 +2296,10 @@
         carregarNoticiasBrasil();
         setInterval(carregarNoticiasBrasil, 180000);
 
+        // ----------------------------------------------------
+        // [PLACA 24]: GERENCIAMENTO DE RÁDIOS E PREFERÊNCIAS
+        // Controla o catálogo geral de rádios e a playlist personalizada do ouvinte sincronizada no Firebase.
+        // ----------------------------------------------------
         let todasRadios = [];
         let playlistKeys = JSON.parse(localStorage.getItem('playlist_keys_ouvinte') || '[]');
         let radioTocandoKey = null;
@@ -2243,6 +2352,10 @@
             renderizarPlaylistDireita();
         }
 
+        // ----------------------------------------------------
+        // [PLACA 25]: RENDERIZAÇÃO DO CATÁLOGO DE RÁDIOS (ESQUERDA)
+        // Monta a lista de rádios disponíveis para adicionar ou remover da playlist.
+        // ----------------------------------------------------
         function renderizarCatologoEsquerda() {
             const container = document.getElementById('catalogo-radios');
             container.innerHTML = "";
@@ -2264,6 +2377,10 @@
             });
         }
 
+        // ----------------------------------------------------
+        // [PLACA 26]: RENDERIZAÇÃO DA PLAYLIST DO OUVINTE (DIREITA)
+        // Monta os cards interativos da playlist na tela, incluindo o botão de pincel com trava ou risco vermelho se bloqueado.
+        // ----------------------------------------------------
         function renderizarPlaylistDireita() {
             const container = document.getElementById('grid-playlist');
             container.innerHTML = "";
@@ -2291,6 +2408,7 @@
                     htmlIcone = `<i class="fas ${isPlaying ? 'fa-tower-broadcast antena-piscando' : 'fa-radio'} icon-radio"></i>`;
                 }
 
+                // LÓGICA DO PINCEL: Sempre visível. Se o recurso de personalização de cores não foi comprado, exibe com o risco vermelho.
                 let htmlPincel = '';
                 if (desbloqueios.cores) {
                     htmlPincel = `<button class="btn-pincel-card" title="Personalizar card" onclick="event.stopPropagation(); abrirModalPersonalizacao('${r.key}')"><i class="fas fa-paint-brush"></i></button>`;
@@ -2318,6 +2436,10 @@
             });
         }
 
+        // ----------------------------------------------------
+        // [PLACA 27]: MODAL DE PERSONALIZAÇÃO DE CARDS
+        // Abre o painel para escolha de cores predefinidas e emojis para cada card da rádio.
+        // ----------------------------------------------------
         const listaCoresPredefinidas = ['#9333ea', '#ff007f', '#2563eb', '#16a34a', '#ca8a04', '#dc2626', '#0891b2', '#4f46e5', '#db2777', '#334155'];
         const lista10Emojis = ['📻', '🎵', '🎧', '🎸', '🎷', '🎤', '🎹', '🎶', '🌟', '🔥'];
 
@@ -2369,12 +2491,20 @@
             fecharModalPersonalizacao();
         }
 
+        // ----------------------------------------------------
+        // [PLACA 28]: PERSISTÊNCIA DE CUSTOMIZAÇÕES DE CARDS
+        // Salva as alterações de estilo e ícones dos cards no localStorage e no Firebase.
+        // ----------------------------------------------------
         function persistirCustomizacoesCards() {
             localStorage.setItem('customizacoes_cards_' + ouvinteId, JSON.stringify(customizacoesCards));
             db.ref('ouvintes_preferencias/' + ouvinteId + '/customizacoes_cards').set(customizacoesCards);
             renderizarPlaylistDireita();
         }
 
+        // ----------------------------------------------------
+        // [PLACA 29]: ALTERNÂNCIA DE RÁDIOS NA PLAYLIST
+        // Adiciona ou remove rádios da playlist pessoal do ouvinte.
+        // ----------------------------------------------------
         function togglePlaylistRadio(key) {
             const index = playlistKeys.indexOf(key);
             if (index > -1) {
@@ -2387,6 +2517,10 @@
             renderizarPainelRadios();
         }
 
+        // ----------------------------------------------------
+        // [PLACA 30]: ORDENAÇÃO POR ARRASTE (SORTABLEJS)
+        // Permite reordenar os cards da playlist arrastando-os com o mouse ou toque.
+        // ----------------------------------------------------
         new Sortable(document.getElementById('grid-playlist'), {
             animation: 150,
             delay: 100,
@@ -2402,6 +2536,10 @@
             }
         });
 
+        // ----------------------------------------------------
+        // [PLACA 31]: REPRODUÇÃO DE RÁDIO
+        // Carrega e executa a stream de áudio correspondente à rádio selecionada.
+        // ----------------------------------------------------
         function tocarRadioPorKey(key) {
             const radio = todasRadios.find(r => r.key === key);
             if (!radio) return;
@@ -2420,6 +2558,10 @@
             }
         }
 
+        // ----------------------------------------------------
+        // [PLACA 32]: TROCA DE RÁDIO (PRÓXIMA / ANTERIOR)
+        // Permite avançar ou retroceder entre as rádios da playlist ativa.
+        // ----------------------------------------------------
         function mudarRadio(direcao) {
             const radiosPlaylist = playlistKeys
                 .map(key => todasRadios.find(r => r.key === key))
@@ -2436,6 +2578,10 @@
             tocarRadioPorKey(radiosPlaylist[nextIndex].key);
         }
 
+        // ----------------------------------------------------
+        // [PLACA 33]: CONTROLE DE PLAY / PAUSE
+        // Alterna o estado de reprodução do player de áudio.
+        // ----------------------------------------------------
         function togglePlay() {
             if (!player.src) return;
             if (player.paused) {
@@ -2464,6 +2610,10 @@
             renderizarPlaylistDireita();
         });
 
+        // ----------------------------------------------------
+        // [PLACA 34]: ENVIO DE MENSAGENS E CHAT
+        // Trata o evento da tecla Enter para envio rápido de mensagens ao Administrador.
+        // ----------------------------------------------------
         function handleKeyDown(event) {
             if (event.key === 'Enter' && !event.shiftKey) {
                 event.preventDefault();
@@ -2493,12 +2643,16 @@
             });
         }
 
-        function deletarMensagem(msgKey) {
+        function deetarMensagem(msgKey) {
             if (confirm("Deseja apagar esta mensagem?")) {
                 db.ref('mensagens_ouvintes/' + msgKey).remove();
             }
         }
 
+        // ----------------------------------------------------
+        // [PLACA 35]: CARREGAMENTO E EXIBIÇÃO DO HISTÓRICO DE CHAT
+        // Sincroniza e exibe na tela as mensagens enviadas pelo ouvinte e as respostas recebidas do ADM.
+        // ----------------------------------------------------
         function carregarChatCompleto() {
             db.ref('mensagens_ouvintes').on('value', snapMsgs => {
                 db.ref('respostas_adm').on('value', snapResps => {
@@ -2578,6 +2732,10 @@
         carregarChatCompleto();
         atualizarInterfaceLudginsEPatente();
 
+        // ----------------------------------------------------
+        // [PLACA 36]: LOGOUT / SAÍDA DO SISTEMA
+        // Limpa o armazenamento local da sessão e redireciona para a tela de login.
+        // ----------------------------------------------------
         function logout() {
             localStorage.clear();
             window.location.href = 'index.html';
