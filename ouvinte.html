@@ -1105,96 +1105,6 @@
             background: var(--primary);
         }
 
-        /* ESTILOS DA ROLETA DE PRÊMIOS */
-        .roleta-container-card {
-            background: linear-gradient(135deg, #1b112d, #14141c);
-            border: 1px solid #a855f7;
-            border-radius: 14px;
-            padding: 16px;
-            margin-bottom: 12px;
-            box-shadow: 0 0 15px rgba(147, 51, 234, 0.2);
-            text-align: center;
-        }
-        .roleta-wrapper {
-            position: relative;
-            width: 280px;
-            height: 280px;
-            margin: 15px auto;
-        }
-        .roleta-ponteiro {
-            position: absolute;
-            top: -12px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 10px solid transparent;
-            border-right: 10px solid transparent;
-            border-bottom: 20px solid #facc15;
-            z-index: 5;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
-        }
-        .roleta-circulo {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            border: 6px solid #a855f7;
-            position: relative;
-            overflow: hidden;
-            transition: transform 4s cubic-bezier(0.15, 0.9, 0.2, 1);
-            box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
-            background: #222;
-        }
-        .roleta-fatia {
-            position: absolute;
-            width: 50%;
-            height: 50%;
-            transform-origin: 100% 100%;
-            left: 0;
-            top: 0;
-            box-sizing: border-box;
-        }
-        .roleta-fatia-conteudo {
-            position: absolute;
-            left: 35%;
-            top: 35%;
-            transform: skewY(30deg) rotate(0deg);
-            transform-origin: 0 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            font-size: 11.5px;
-            font-weight: 800;
-            color: #fff;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.9);
-            white-space: nowrap;
-        }
-        .btn-girar-roleta {
-            background: linear-gradient(135deg, #eab308, #ca8a04);
-            color: #000;
-            border: none;
-            padding: 10px 24px;
-            border-radius: 10px;
-            font-weight: 800;
-            font-size: 13px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(234, 179, 8, 0.4);
-            transition: all 0.2s;
-            margin-top: 5px;
-        }
-        .btn-girar-roleta:hover {
-            transform: scale(1.05);
-            background: linear-gradient(135deg, #facc15, #eab308);
-        }
-        .btn-girar-roleta:disabled {
-            background: #4b5563;
-            color: #9ca3af;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
         .player-footer { 
             position: fixed; 
             bottom: 54px; 
@@ -1444,22 +1354,6 @@
             <div class="loja-itens-grid" id="container-loja-itens"></div>
         </div>
 
-        <!-- ROLETA DE PRÊMIOS DIÁRIA -->
-        <div class="roleta-container-card">
-            <div class="disputa-titulo" style="margin-bottom: 6px;">
-                <span><i class="fas fa-dharmachakra" style="color: #facc15; margin-right: 6px;"></i> ROLETA DA SORTE DIÁRIA</span>
-                <span style="font-size: 11px; color: #9ca3af; font-weight: 600;">Gire 1 vez por dia para ganhar prêmios!</span>
-            </div>
-            <div class="roleta-wrapper">
-                <div class="roleta-ponteiro"></div>
-                <div class="roleta-circulo" id="roleta-circulo">
-                    <!-- Fatias injetadas via JS -->
-                </div>
-            </div>
-            <button class="btn-girar-roleta" id="btn-girar-roleta" onclick="girarRoleta()">Girar Roleta Agora!</button>
-            <div id="roleta-status-msg" style="font-size: 11.5px; color: #c084fc; margin-top: 6px; font-weight: 700;"></div>
-        </div>
-
         <div class="main-container">
 
             <!-- CARD 1: ADICIONAR RÁDIOS -->
@@ -1684,7 +1578,7 @@
             document.getElementById('patente-ouvinte-badge').innerText = patenteAtual;
             renderizarLojaVirtual();
             aplicarTravaBloqueios();
-            renderizarPlaylistDireita();
+            renderizarPlaylistDireita(); // Atualiza os ícones de pincel (com ou sem risco vermelho)
         }
 
         function formatarTempoOnline(segundos) {
@@ -1824,99 +1718,6 @@
                 confetti({ particleCount: 250, spread: 100, origin: { y: 0.6 } });
             }
             alert("Parabéns! Você resgatou +3 Ludgins de bônus!");
-        }
-
-        // --- CONFIGURAÇÃO DA ROLETA DE PRÊMIOS AJUSTADA ---
-        const fatiasRoleta = [
-            { tipo: 'valor', valor: 3, texto: '3 Ludgins', cor: '#9333ea' },
-            { tipo: 'valor', valor: 5, texto: '5 Ludgins', cor: '#db2777' },
-            { tipo: 'valor', valor: 10, texto: '10 Ludgins', cor: '#2563eb' },
-            { tipo: 'valor', valor: 15, texto: '15 Ludgins', cor: '#16a34a' },
-            { tipo: 'valor', valor: 20, texto: '20 Ludgins', cor: '#ca8a04' },
-            { tipo: 'especial', valor: 70, texto: 'ludgins', icone: '<i class="fas fa-gem" style="color:#facc15; font-size:14px;"></i>', cor: '#7c3aed' }
-        ];
-
-        function inicializarRoleta() {
-            const circulo = document.getElementById('roleta-circulo');
-            const totalFatias = fatiasRoleta.length;
-            const anguloFatia = 360 / totalFatias;
-            
-            let htmlFatias = '';
-            fatiasRoleta.forEach((fatia, index) => {
-                let rot = index * anguloFatia;
-                let conteudoHtml = '';
-
-                if (fatia.tipo === 'especial') {
-                    conteudoHtml = `${fatia.icone} <span>${fatia.texto}</span>`;
-                } else {
-                    conteudoHtml = `<span>${fatia.texto}</span>`;
-                }
-
-                htmlFatias += `
-                    <div class="roleta-fatia" style="background-color: ${fatia.cor}; transform: rotate(${rot}deg) skewY(-30deg);">
-                        <div class="roleta-fatia-conteudo" style="transform: skewY(30deg) rotate(${anguloFatia / 2}deg);">
-                            ${conteudoHtml}
-                        </div>
-                    </div>
-                `;
-            });
-            circulo.innerHTML = htmlFatias;
-
-            verificarStatusRoletaDiaria();
-        }
-
-        function verificarStatusRoletaDiaria() {
-            const hoje = new Date().toDateString();
-            const ultimoGiro = localStorage.getItem('ultimo_giro_roleta_' + ouvinteId);
-            const btnGirar = document.getElementById('btn-girar-roleta');
-            const msgStatus = document.getElementById('roleta-status-msg');
-
-            if (ultimoGiro === hoje) {
-                btnGirar.disabled = true;
-                msgStatus.innerText = "Você já girou a roleta hoje. Volte amanhã!";
-            } else {
-                btnGirar.disabled = false;
-                msgStatus.innerText = "Pronto para girar e testar sua sorte!";
-            }
-        }
-
-        let anguloAtualRoleta = 0;
-        function girarRoleta() {
-            const hoje = new Date().toDateString();
-            const ultimoGiro = localStorage.getItem('ultimo_giro_roleta_' + ouvinteId);
-            if (ultimoGiro === hoje) return;
-
-            const btnGirar = document.getElementById('btn-girar-roleta');
-            btnGirar.disabled = true;
-
-            const indiceSorteado = Math.floor(Math.random() * fatiasRoleta.length);
-            const anguloFatia = 360 / fatiasRoleta.length;
-            
-            const voltasExtras = 5 * 360;
-            const ajusteCentroFatia = anguloFatia / 2;
-            const anguloAlvo = voltasExtras + (360 - (indiceSorteado * anguloFatia + ajusteCentroFatia));
-
-            anguloAtualRoleta += anguloAlvo;
-            const circulo = document.getElementById('roleta-circulo');
-            circulo.style.transform = `rotate(${anguloAtualRoleta}deg)`;
-
-            setTimeout(() => {
-                localStorage.setItem('ultimo_giro_roleta_' + ouvinteId, hoje);
-                const premioObj = fatiasRoleta[indiceSorteado];
-                
-                meusLudgins += premioObj.valor;
-                salvarProgressoLudgins();
-                tocarSomSuaveSucesso();
-                if (typeof confetti === 'function') confetti({ particleCount: 200, spread: 80 });
-                
-                if (premioObj.tipo === 'especial') {
-                    alert(`Incrível! Você tirou o prêmio máximo e ganhou 70 Ludgins!`);
-                } else {
-                    alert(`Parabéns! A roleta parou em: ${premioObj.texto}!`);
-                }
-
-                document.getElementById('roleta-status-msg').innerText = "Você já girou a roleta hoje. Volte amanhã!";
-            }, 4000);
         }
 
         db.ref('ouvintes_online').on('value', snap => {
@@ -2503,6 +2304,9 @@
                     htmlIcone = `<i class="fas ${isPlaying ? 'fa-tower-broadcast antena-piscando' : 'fa-radio'} icon-radio"></i>`;
                 }
 
+                // LÓGICA DO PINCEL: Sempre visível em todos os cards da playlist.
+                // Se não foi liberado (desbloqueios.cores == false), mostra com o risquinho vermelho e exibe o alerta ao clicar.
+                // Se liberado, funciona normalmente para personalizar.
                 let htmlPincel = '';
                 if (desbloqueios.cores) {
                     htmlPincel = `<button class="btn-pincel-card" title="Personalizar card" onclick="event.stopPropagation(); abrirModalPersonalizacao('${r.key}')"><i class="fas fa-paint-brush"></i></button>`;
@@ -2689,67 +2493,112 @@
                 return;
             }
 
-            const campo = document.getElementById('texto-mensagem');
-            const texto = campo.value.trim();
-            if (!texto) return;
+            const texto = document.getElementById('texto-mensagem').value.trim();
+            if (!texto) return alert("Digite sua mensagem!");
 
-            db.ref('mensagens_chat/' + ouvinteId).push({
-                remetente: ouvinteNome,
-                tipo: 'ouvinte',
-                texto: texto,
+            db.ref('mensagens_ouvintes').push({
+                ouvinteId: ouvinteId,
+                ouvinte: ouvinteNome,
+                patente: patenteAtual,
+                ludgins: meusLudgins,
+                mensagem: texto,
+                dataHora: new Date().toLocaleString('pt-BR'),
                 timestamp: firebase.database.ServerValue.TIMESTAMP
+            }).then(() => {
+                document.getElementById('texto-mensagem').value = "";
             });
-
-            campo.value = "";
         }
 
-        db.ref('mensagens_chat/' + ouvinteId).on('value', snap => {
-            const container = document.getElementById('lista-respostas-adm');
-            if (!container) return;
-
-            if (!snap.exists()) {
-                container.innerHTML = "<p style='color:#666; text-align:center; font-size:11.5px; padding:10px;'>Nenhuma mensagem enviada ainda.</p>";
-                return;
+        function deletarMensagem(msgKey) {
+            if (confirm("Deseja apagar esta mensagem?")) {
+                db.ref('mensagens_ouvintes/' + msgKey).remove();
             }
-
-            let htmlChat = "";
-            snap.forEach(child => {
-                const msg = child.val();
-                const dataFormatada = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '';
-                const ehAdm = msg.tipo === 'adm';
-
-                htmlChat += `
-                    <div class="${ehAdm ? 'chat-bubble-adm' : 'chat-bubble-ouvinte'}">
-                        <div class="chat-sender-header">
-                            <span class="chat-sender-name ${ehAdm ? 'adm' : 'ouvinte'}">${ehAdm ? '👑 ADM LUIGY' : ouvinteNome}</span>
-                            <button class="btn-delete-chat" onclick="deletarMensagemChat('${child.key}')"><i class="fas fa-trash"></i></button>
-                        </div>
-                        <div class="chat-text">${msg.texto}</div>
-                        <div class="chat-time">${dataFormatada}</div>
-                    </div>
-                `;
-            });
-
-            container.innerHTML = htmlChat;
-            container.scrollTop = container.scrollHeight;
-        });
-
-        function deletarMensagemChat(key) {
-            db.ref('mensagens_chat/' + ouvinteId + '/' + key).remove();
         }
+
+        function carregarChatCompleto() {
+            db.ref('mensagens_ouvintes').on('value', snapMsgs => {
+                db.ref('respostas_adm').on('value', snapResps => {
+                    const container = document.getElementById('lista-respostas-adm');
+                    container.innerHTML = "";
+                    
+                    const msgs = snapMsgs.val() || {};
+                    const resps = snapResps.val() || {};
+
+                    let listaHistorico = [];
+
+                    for (let id in msgs) {
+                        const m = msgs[id];
+                        if (m.ouvinteId === ouvinteId || m.ouvinte === ouvinteNome) {
+                            listaHistorico.push({
+                                tipo: 'ouvinte',
+                                id: id,
+                                texto: m.mensagem,
+                                dataHora: m.dataHora || '',
+                                timestamp: m.timestamp || 0
+                            });
+                        }
+                    }
+
+                    for (let id in resps) {
+                        const r = resps[id];
+                        if (r.ouvinteId === ouvinteId || r.ouvinte === ouvinteNome) {
+                            listaHistorico.push({
+                                tipo: 'adm',
+                                id: id,
+                                texto: r.resposta,
+                                dataHora: r.dataHora || '',
+                                timestamp: r.timestamp || 0
+                            });
+                        }
+                    }
+
+                    listaHistorico.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+
+                    if (listaHistorico.length === 0) {
+                        container.innerHTML = "<p style='color:#666; text-align:center; font-size:12px; padding:10px;'>Nenhuma mensagem enviada.</p>";
+                        return;
+                    }
+
+                    listaHistorico.forEach(item => {
+                        if (item.tipo === 'ouvinte') {
+                            container.innerHTML += `
+                                <div class="chat-bubble-ouvinte">
+                                    <div class="chat-sender-header">
+                                        <span class="chat-sender-name ouvinte">Você (${patenteAtual})</span>
+                                        <button class="btn-delete-chat" title="Apagar" onclick="deletarMensagem('${item.id}')">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                    <div class="chat-text">${item.texto}</div>
+                                    <div class="chat-time">${item.dataHora}</div>
+                                </div>
+                            `;
+                        } else {
+                            container.innerHTML += `
+                                <div class="chat-bubble-adm">
+                                    <div class="chat-sender-header">
+                                        <span class="chat-sender-name adm"><i class="fas fa-user-shield"></i> ADM</span>
+                                    </div>
+                                    <div class="chat-text">${item.texto}</div>
+                                    <div class="chat-time">${item.dataHora}</div>
+                                </div>
+                            `;
+                        }
+                    });
+
+                    container.scrollTop = container.scrollHeight;
+                });
+            });
+        }
+
+        carregarChatCompleto();
+        atualizarInterfaceLudginsEPatente();
 
         function logout() {
-            if (confirm("Deseja realmente sair do painel?")) {
-                localStorage.removeItem('userId');
-                localStorage.removeItem('usuarioNome');
-                localStorage.removeItem('usuarioEmail');
-                window.location.reload();
-            }
+            localStorage.clear();
+            window.location.href = 'index.html';
         }
-
-        window.onload = () => {
-            inicializarRoleta();
-        };
     </script>
 </body>
 </html>
+```[cite: 9]
