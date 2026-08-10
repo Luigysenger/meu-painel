@@ -1648,13 +1648,6 @@
         let isRadioTocando = false;
         let cardSendoEditadoKey = null;
 
-        function logout() {
-            if (confirm("Deseja realmente sair e retornar ao painel de login? Seu progresso está salvo.")) {
-                db.ref('ouvintes_online/' + ouvinteId).remove().catch(() => {});
-                window.location.href = "login.html"; // Ajuste para a URL ou página de login do seu projeto se necessário
-            }
-        }
-
         function tocarSomSuaveSucesso() {
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -2039,6 +2032,9 @@
         atualizarCarrosselClima();
         setInterval(atualizarCarrosselClima, 6000);
 
+        // =========================================================================
+        // IMPLEMENTAÇÃO DE ATUALIZAÇÃO AUTOMÁTICA DE JOGOS DA SEMANA ATUAL E PRÓXIMA VIA FIREBASE
+        // =========================================================================
         function obterJogosPadraoDinamicos() {
             const hoje = new Date();
             const domingoAtual = new Date(hoje);
@@ -2417,6 +2413,9 @@
             });
         }
 
+        // =========================================================================
+        // AJUSTE: DETECÇÃO AUTOMÁTICA EM TEMPO REAL PARA CADA NOVO CAMPO/RÁDIO CRIADA
+        // =========================================================================
         db.ref('radios').on('value', snap => {
             todasRadios = [];
             snap.forEach(child => {
@@ -2425,6 +2424,8 @@
 
             todasRadios.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
 
+            // Ajuste automático: Se novas rádios foram cadastradas e criadas no painel principal,
+            // inclui-as automaticamente na playlist para não exigir intervenção manual.
             let chavesAtuaisNoBanco = todasRadios.map(r => r.key);
             let houveNovaRadioCriada = false;
 
@@ -2669,25 +2670,32 @@
             renderizarPlaylistDireita();
         });
 
+        function logout() {
+            localStorage.clear();
+            window.location.reload();
+        }
+
         function enviarMensagem() {
             if (!desbloqueios.chat) {
-                alert("O Chat está bloqueado! Junte Ludgins ou desbloqueie na Loja Virtual.");
+                alert("Chat bloqueado! Adquira o recurso na sua Loja Virtual acima.");
                 return;
             }
 
-            const txtArea = document.getElementById('texto-mensagem');
-            const mensagem = txtArea.value.trim();
-            if (!mensagem) return;
+            const textoInput = document.getElementById('texto-mensagem');
+            const texto = textoInput.value.trim();
+            if (!texto) return;
 
-            const novaMsgRef = db.ref('chat_ouvintes').push();
+            const novaMsgRef = db.ref('mensagens_ouvintes').push();
             novaMsgRef.set({
                 ouvinteId: ouvinteId,
-                nome: ouvinteNome,
-                texto: mensagem,
+                ouvinteNome: ouvinteNome,
+                texto: texto,
+                respostaAdm: "",
                 timestamp: firebase.database.ServerValue.TIMESTAMP
             });
 
-            txtArea.value = "";
+            textoInput.value = "";
+            tocarSomSuaveSucesso();
         }
 
         function handleKeyDown(event) {
@@ -2697,54 +2705,55 @@
             }
         }
 
-        db.ref('chat_ouvintes').on('value', snap => {
-            const containerChat = document.getElementById('lista-respostas-adm');
-            if (!containerChat) return;
+        db.ref('mensagens_ouvintes').on('value', snap => {
+            const container = document.getElementById('lista-respostas-adm');
+            if (!container) return;
 
             if (!snap.exists()) {
-                containerChat.innerHTML = "<p style='color:#666; font-size:11.5px; text-align:center;'>Nenhuma mensagem ainda.</p>";
+                container.innerHTML = "<p style='color:#666; font-size:11.5px; text-align:center; padding:10px;'>Nenhuma mensagem enviada ainda.</p>";
                 return;
             }
 
             let htmlChat = "";
             snap.forEach(child => {
-                const m = child.val();
-                const keyMsg = child.key;
-                const horaFormatada = m.timestamp ? new Date(m.timestamp).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'}) : '';
+                const msg = child.val();
+                const msgKey = child.key;
 
-                if (m.ouvinteId === ouvinteId || m.remetente === ouvinteId) {
+                if (msg.ouvinteId === ouvinteId) {
+                    const dataHora = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
+
                     htmlChat += `
                         <div class="chat-bubble-ouvinte">
                             <div class="chat-sender-header">
-                                <span class="chat-sender-name ouvinte">${m.nome || ouvinteNome} (Você)</span>
-                                <button class="btn-delete-chat" onclick="deletarMensagemChat('${keyMsg}')" title="Apagar"><i class="fas fa-trash"></i></button>
+                                <span class="chat-sender-name ouvinte">${msg.ouvinteNome || 'Você'}</span>
+                                <button class="btn-delete-chat" onclick="deletarMensagemOuvinte('${msgKey}')" title="Excluir"><i class="fas fa-trash"></i></button>
                             </div>
-                            <div class="chat-text">${m.texto}</div>
-                            <div class="chat-time">${horaFormatada}</div>
+                            <div class="chat-text">${msg.texto}</div>
+                            <div class="chat-time">${dataHora}</div>
                         </div>
                     `;
-                }
 
-                if (m.respostaAdm && (m.ouvinteId === ouvinteId || m.remetente === ouvinteId)) {
-                    htmlChat += `
-                        <div class="chat-bubble-adm">
-                            <div class="chat-sender-header">
-                                <span class="chat-sender-name adm"><i class="fas fa-shield-alt"></i> ADM (Resposta)</span>
+                    if (msg.respostaAdm && msg.respostaAdm.trim() !== "") {
+                        htmlChat += `
+                            <div class="chat-bubble-adm">
+                                <div class="chat-sender-header">
+                                    <span class="chat-sender-name adm"><i class="fas fa-headset"></i> Administrador</span>
+                                </div>
+                                <div class="chat-text">${msg.respostaAdm}</div>
+                                <div class="chat-time">Resposta do ADM</div>
                             </div>
-                            <div class="chat-text">${m.respostaAdm}</div>
-                            <div class="chat-time">Admin</div>
-                        </div>
-                    `;
+                        `;
+                    }
                 }
             });
 
-            containerChat.innerHTML = htmlChat || "<p style='color:#666; font-size:11.5px; text-align:center;'>Nenhuma mensagem encontrada para você.</p>";
-            containerChat.scrollTop = containerChat.scrollHeight;
+            container.innerHTML = htmlChat || "<p style='color:#666; font-size:11.5px; text-align:center; padding:10px;'>Nenhuma mensagem sua encontrada.</p>";
+            container.scrollTop = container.scrollHeight;
         });
 
-        function deletarMensagemChat(key) {
-            if (confirm("Deseja apagar esta mensagem?")) {
-                db.ref('chat_ouvintes/' + key).remove();
+        function deletarMensagemOuvinte(key) {
+            if (confirm("Deseja realmente apagar esta mensagem?")) {
+                db.ref('mensagens_ouvintes/' + key).remove();
             }
         }
     </script>
