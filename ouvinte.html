@@ -2032,9 +2032,6 @@
         atualizarCarrosselClima();
         setInterval(atualizarCarrosselClima, 6000);
 
-        // =========================================================================
-        // IMPLEMENTAÇÃO DE ATUALIZAÇÃO AUTOMÁTICA DE JOGOS DA SEMANA ATUAL E PRÓXIMA VIA FIREBASE
-        // =========================================================================
         function obterJogosPadraoDinamicos() {
             const hoje = new Date();
             const domingoAtual = new Date(hoje);
@@ -2413,9 +2410,6 @@
             });
         }
 
-        // =========================================================================
-        // AJUSTE: DETECÇÃO AUTOMÁTICA EM TEMPO REAL PARA CADA NOVO CAMPO/RÁDIO CRIADA
-        // =========================================================================
         db.ref('radios').on('value', snap => {
             todasRadios = [];
             snap.forEach(child => {
@@ -2424,8 +2418,6 @@
 
             todasRadios.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
 
-            // Ajuste automático: Se novas rádios foram cadastradas e criadas no painel principal,
-            // inclui-as automaticamente na playlist para não exigir intervenção manual.
             let chavesAtuaisNoBanco = todasRadios.map(r => r.key);
             let houveNovaRadioCriada = false;
 
@@ -2670,32 +2662,23 @@
             renderizarPlaylistDireita();
         });
 
-        function logout() {
-            localStorage.clear();
-            window.location.reload();
-        }
-
+        // Funções de Chat e Logout corrigidas para o botão funcionar corretamente
         function enviarMensagem() {
             if (!desbloqueios.chat) {
-                alert("Chat bloqueado! Adquira o recurso na sua Loja Virtual acima.");
+                alert("O Chat está bloqueado! Adquira o recurso na sua Loja Virtual acima.");
                 return;
             }
-
             const textoInput = document.getElementById('texto-mensagem');
-            const texto = textoInput.value.trim();
-            if (!texto) return;
+            const mensagem = textoInput.value.trim();
+            if (!mensagem) return;
 
-            const novaMsgRef = db.ref('mensagens_ouvintes').push();
-            novaMsgRef.set({
-                ouvinteId: ouvinteId,
-                ouvinteNome: ouvinteNome,
-                texto: texto,
-                respostaAdm: "",
+            db.ref('ouvintes_chat/' + ouvinteId).push({
+                remetente: ouvinteNome,
+                tipo: 'ouvinte',
+                mensagem: mensagem,
                 timestamp: firebase.database.ServerValue.TIMESTAMP
             });
-
-            textoInput.value = "";
-            tocarSomSuaveSucesso();
+            textoInput.value = '';
         }
 
         function handleKeyDown(event) {
@@ -2705,57 +2688,73 @@
             }
         }
 
-        db.ref('mensagens_ouvintes').on('value', snap => {
-            const container = document.getElementById('lista-respostas-adm');
-            if (!container) return;
+        db.ref('ouvintes_chat/' + ouvinteId).on('value', snap => {
+            const containerChat = document.getElementById('lista-respostas-adm');
+            if (!containerChat) return;
 
             if (!snap.exists()) {
-                container.innerHTML = "<p style='color:#666; font-size:11.5px; text-align:center; padding:10px;'>Nenhuma mensagem enviada ainda.</p>";
+                containerChat.innerHTML = "<p style='color:#666; font-size:11.5px; text-align:center; padding:10px;'>Nenhuma mensagem enviada ainda.</p>";
                 return;
             }
 
             let htmlChat = "";
             snap.forEach(child => {
-                const msg = child.val();
-                const msgKey = child.key;
+                const msgData = child.val();
+                const isAdm = msgData.tipo === 'adm';
+                const horaFormatada = msgData.timestamp ? new Date(msgData.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
 
-                if (msg.ouvinteId === ouvinteId) {
-                    const dataHora = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
-
+                if (isAdm) {
+                    htmlChat += `
+                        <div class="chat-bubble-adm">
+                            <div class="chat-sender-header">
+                                <span class="chat-sender-name adm"><i class="fas fa-user-shield"></i> Administrador</span>
+                                <button class="btn-delete-chat" onclick="deletarMensagemChat('${child.key}')"><i class="fas fa-trash"></i></button>
+                            </div>
+                            <div class="chat-text">${msgData.mensagem}</div>
+                            <div class="chat-time">${horaFormatada}</div>
+                        </div>
+                    `;
+                } else {
                     htmlChat += `
                         <div class="chat-bubble-ouvinte">
                             <div class="chat-sender-header">
-                                <span class="chat-sender-name ouvinte">${msg.ouvinteNome || 'Você'}</span>
-                                <button class="btn-delete-chat" onclick="deletarMensagemOuvinte('${msgKey}')" title="Excluir"><i class="fas fa-trash"></i></button>
+                                <span class="chat-sender-name ouvinte"><i class="fas fa-user"></i> Você (${ouvinteNome})</span>
+                                <button class="btn-delete-chat" onclick="deletarMensagemChat('${child.key}')"><i class="fas fa-trash"></i></button>
                             </div>
-                            <div class="chat-text">${msg.texto}</div>
-                            <div class="chat-time">${dataHora}</div>
+                            <div class="chat-text">${msgData.mensagem}</div>
+                            <div class="chat-time">${horaFormatada}</div>
                         </div>
                     `;
-
-                    if (msg.respostaAdm && msg.respostaAdm.trim() !== "") {
-                        htmlChat += `
-                            <div class="chat-bubble-adm">
-                                <div class="chat-sender-header">
-                                    <span class="chat-sender-name adm"><i class="fas fa-headset"></i> Administrador</span>
-                                </div>
-                                <div class="chat-text">${msg.respostaAdm}</div>
-                                <div class="chat-time">Resposta do ADM</div>
-                            </div>
-                        `;
-                    }
                 }
             });
 
-            container.innerHTML = htmlChat || "<p style='color:#666; font-size:11.5px; text-align:center; padding:10px;'>Nenhuma mensagem sua encontrada.</p>";
-            container.scrollTop = container.scrollHeight;
+            containerChat.innerHTML = htmlChat;
+            containerChat.scrollTop = containerChat.scrollHeight;
         });
 
-        function deletarMensagemOuvinte(key) {
-            if (confirm("Deseja realmente apagar esta mensagem?")) {
-                db.ref('mensagens_ouvintes/' + key).remove();
+        function deletarMensagemChat(msgKey) {
+            if (confirm("Deseja apagar esta mensagem do histórico?")) {
+                db.ref('ouvintes_chat/' + ouvinteId + '/' + msgKey).remove();
+            }
+        }
+
+        function logout() {
+            if (confirm("Tem certeza que deseja sair do Painel do Ouvinte?")) {
+                // Remove dados de sessão do ouvinte no localStorage
+                localStorage.removeItem('userId');
+                localStorage.removeItem('usuarioNome');
+                localStorage.removeItem('usuarioEmail');
+                
+                // Remove o registro do usuário ativo no Firebase online
+                db.ref('ouvintes_online/' + ouvinteId).remove().then(() => {
+                    // Redireciona para a tela de login (ajuste o arquivo HTML de destino se necessário, ex: index.html ou login.html)
+                    window.location.href = 'index.html';
+                }).catch(() => {
+                    window.location.href = 'index.html';
+                });
             }
         }
     </script>
 </body>
 </html>
+```[cite: 7]
