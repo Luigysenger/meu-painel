@@ -1649,8 +1649,9 @@
         let cardSendoEditadoKey = null;
 
         function logout() {
-            if (confirm("Deseja realmente sair e retornar ao painel de login? Seus Ludgins e itens desbloqueados continuarão salvos na sua conta.")) {
-                window.location.href = "login.html"; // Altere "login.html" para o arquivo ou URL do seu painel de login inicial se necessário
+            if (confirm("Deseja realmente sair e retornar ao painel de login? Seu progresso está salvo.")) {
+                db.ref('ouvintes_online/' + ouvinteId).remove().catch(() => {});
+                window.location.href = "login.html"; // Ajuste para a URL ou página de login do seu projeto se necessário
             }
         }
 
@@ -2038,9 +2039,6 @@
         atualizarCarrosselClima();
         setInterval(atualizarCarrosselClima, 6000);
 
-        // =========================================================================
-        // IMPLEMENTAÇÃO DE ATUALIZAÇÃO AUTOMÁTICA DE JOGOS DA SEMANA ATUAL E PRÓXIMA VIA FIREBASE
-        // =========================================================================
         function obterJogosPadraoDinamicos() {
             const hoje = new Date();
             const domingoAtual = new Date(hoje);
@@ -2419,9 +2417,6 @@
             });
         }
 
-        // =========================================================================
-        // AJUSTE: DETECÇÃO AUTOMÁTICA EM TEMPO REAL PARA CADA NOVO CAMPO/RÁDIO CRIADA
-        // =========================================================================
         db.ref('radios').on('value', snap => {
             todasRadios = [];
             snap.forEach(child => {
@@ -2430,8 +2425,6 @@
 
             todasRadios.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
 
-            // Ajuste automático: Se novas rádios foram cadastradas e criadas no painel principal,
-            // inclui-as automaticamente na playlist para não exigir intervenção manual.
             let chavesAtuaisNoBanco = todasRadios.map(r => r.key);
             let houveNovaRadioCriada = false;
 
@@ -2675,6 +2668,85 @@
             document.getElementById('btn-play').innerHTML = '<i class="fas fa-play"></i>';
             renderizarPlaylistDireita();
         });
+
+        function enviarMensagem() {
+            if (!desbloqueios.chat) {
+                alert("O Chat está bloqueado! Junte Ludgins ou desbloqueie na Loja Virtual.");
+                return;
+            }
+
+            const txtArea = document.getElementById('texto-mensagem');
+            const mensagem = txtArea.value.trim();
+            if (!mensagem) return;
+
+            const novaMsgRef = db.ref('chat_ouvintes').push();
+            novaMsgRef.set({
+                ouvinteId: ouvinteId,
+                nome: ouvinteNome,
+                texto: mensagem,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            });
+
+            txtArea.value = "";
+        }
+
+        function handleKeyDown(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                enviarMensagem();
+            }
+        }
+
+        db.ref('chat_ouvintes').on('value', snap => {
+            const containerChat = document.getElementById('lista-respostas-adm');
+            if (!containerChat) return;
+
+            if (!snap.exists()) {
+                containerChat.innerHTML = "<p style='color:#666; font-size:11.5px; text-align:center;'>Nenhuma mensagem ainda.</p>";
+                return;
+            }
+
+            let htmlChat = "";
+            snap.forEach(child => {
+                const m = child.val();
+                const keyMsg = child.key;
+                const horaFormatada = m.timestamp ? new Date(m.timestamp).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'}) : '';
+
+                if (m.ouvinteId === ouvinteId || m.remetente === ouvinteId) {
+                    htmlChat += `
+                        <div class="chat-bubble-ouvinte">
+                            <div class="chat-sender-header">
+                                <span class="chat-sender-name ouvinte">${m.nome || ouvinteNome} (Você)</span>
+                                <button class="btn-delete-chat" onclick="deletarMensagemChat('${keyMsg}')" title="Apagar"><i class="fas fa-trash"></i></button>
+                            </div>
+                            <div class="chat-text">${m.texto}</div>
+                            <div class="chat-time">${horaFormatada}</div>
+                        </div>
+                    `;
+                }
+
+                if (m.respostaAdm && (m.ouvinteId === ouvinteId || m.remetente === ouvinteId)) {
+                    htmlChat += `
+                        <div class="chat-bubble-adm">
+                            <div class="chat-sender-header">
+                                <span class="chat-sender-name adm"><i class="fas fa-shield-alt"></i> ADM (Resposta)</span>
+                            </div>
+                            <div class="chat-text">${m.respostaAdm}</div>
+                            <div class="chat-time">Admin</div>
+                        </div>
+                    `;
+                }
+            });
+
+            containerChat.innerHTML = htmlChat || "<p style='color:#666; font-size:11.5px; text-align:center;'>Nenhuma mensagem encontrada para você.</p>";
+            containerChat.scrollTop = containerChat.scrollHeight;
+        });
+
+        function deletarMensagemChat(key) {
+            if (confirm("Deseja apagar esta mensagem?")) {
+                db.ref('chat_ouvintes/' + key).remove();
+            }
+        }
     </script>
 </body>
 </html>
