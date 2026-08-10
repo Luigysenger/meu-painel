@@ -2037,7 +2037,6 @@
         // =========================================================================
         function obterJogosPadraoDinamicos() {
             const hoje = new Date();
-            // Calcula o início da semana atual (Domingo)
             const domingoAtual = new Date(hoje);
             domingoAtual.setDate(hoje.getDate() - hoje.getDay());
 
@@ -2055,15 +2054,11 @@
                 return `${dSem}, ${dia}/${mes}`;
             }
 
-            // Jogos da Semana Atual e Próxima gerados dinamicamente com base na data real
             return [
-                // JOGOS DA SEMANA ATUAL
                 { id: "j1", semana: "atual", campeonato: "Brasileirão Série A", timeA: "Palmeiras", timeB: "Flamengo", data: formatarDataSimples(addDias(domingoAtual, 3)), hora: "19:00", timestamp: addDias(domingoAtual, 3).setHours(19,0,0,0), golsA: 2, golsB: 1, artilheiros: [{ min: "15'", autor: "Estevão (Palmeiras)" }, { min: "44'", autor: "Pedro (Flamengo)" }] },
                 { id: "j2", semana: "atual", campeonato: "Copa do Brasil", timeA: "São Paulo", timeB: "Corinthians", data: formatarDataSimples(addDias(domingoAtual, 4)), hora: "21:30", timestamp: addDias(domingoAtual, 4).setHours(21,30,0,0), golsA: 0, golsB: 0, artilheiros: [] },
                 { id: "j3", semana: "atual", campeonato: "Brasileirão Série A", timeA: "Grêmio", timeB: "Internacional", data: formatarDataSimples(addDias(domingoAtual, 5)), hora: "16:00", timestamp: addDias(domingoAtual, 5).setHours(16,0,0,0), golsA: 0, golsB: 0, artilheiros: [] },
                 { id: "j4", semana: "atual", campeonato: "Brasileirão Série A", timeA: "Atlético-MG", timeB: "Cruzeiro", data: formatarDataSimples(addDias(domingoAtual, 6)), hora: "18:30", timestamp: addDias(domingoAtual, 6).setHours(18,30,0,0), golsA: 0, golsB: 0, artilheiros: [] },
-                
-                // JOGOS DA PRÓXIMA SEMANA (Semana Seguinte automática)
                 { id: "j5", semana: "proxima", campeonato: "Brasileirão Série A", timeA: "Fluminense", timeB: "Botafogo", data: formatarDataSimples(addDias(domingoAtual, 10)), hora: "19:00", timestamp: addDias(domingoAtual, 10).setHours(19,0,0,0), golsA: 0, golsB: 0, artilheiros: [] },
                 { id: "j6", semana: "proxima", campeonato: "Copa do Brasil", timeA: "Athletico-PR", timeB: "Bahia", data: formatarDataSimples(addDias(domingoAtual, 11)), hora: "21:30", timestamp: addDias(domingoAtual, 11).setHours(21,30,0,0), golsA: 0, golsB: 0, artilheiros: [] },
                 { id: "j7", semana: "proxima", campeonato: "Brasileirão Série A", timeA: "Vasco", timeB: "Santos", data: formatarDataSimples(addDias(domingoAtual, 12)), hora: "16:00", timestamp: addDias(domingoAtual, 12).setHours(16,0,0,0), golsA: 0, golsB: 0, artilheiros: [] },
@@ -2071,7 +2066,6 @@
             ];
         }
 
-        // Sincroniza e alimenta automaticamente os jogos no Firebase na lista "futebol"
         function inicializarAlimentarJogosFirebase() {
             const refFutebol = db.ref('futebol/jogos_semana');
             refFutebol.once('value', snap => {
@@ -2087,7 +2081,6 @@
         }
         inicializarAlimentarJogosFirebase();
 
-        // Ouve em tempo real as atualizações vindas do Firebase na lista "futebol"
         db.ref('futebol/jogos_semana').on('value', snap => {
             const containerEsportes = document.getElementById('lista-jogos-esportes');
             if (!containerEsportes) return;
@@ -2103,19 +2096,13 @@
             });
 
             const agoraTime = new Date().getTime();
-            
-            // Filtra primeiro os jogos da semana atual em andamento ou próximos
             let jogosAtuais = todosJogos.filter(j => j.semana === 'atual' || !j.semana);
-            
-            // Verifica se todos os jogos da semana atual já passaram (encerrados há mais de 2h ou fim de semana concluído)
             let todosAtuaisEncerrados = jogosAtuais.length > 0 && jogosAtuais.every(j => agoraTime > (j.timestamp + 120 * 60 * 1000));
 
-            // Define qual bloco de jogos exibir de forma inteligente e automática
             let jogosParaExibir = [];
             let tituloSecaoDinamica = "";
 
             if (todosAtuaisEncerrados) {
-                // Terminando os jogos da semana atual, muda automaticamente para a próxima semana!
                 jogosParaExibir = todosJogos.filter(j => j.semana === 'proxima');
                 tituloSecaoDinamica = `<div style="background: rgba(168,85,247,0.15); border: 1px solid rgba(168,85,247,0.3); color: #d8b4fe; font-size: 10px; font-weight: 800; text-align: center; padding: 4px; border-radius: 6px; margin-bottom: 6px;"><i class="fas fa-calendar-alt"></i> JOGOS DA PRÓXIMA SEMANA (ATUALIZADO)</div>`;
             } else {
@@ -2178,7 +2165,6 @@
             containerEsportes.innerHTML = htmlJogos;
         });
 
-        // Tabelas de Classificação (Brasileirão e Copa do Brasil atualizadas com posições e variações)
         const tabelaBrasileiraoDados = [
             { pos: 1, var: 0, time: "Palmeiras", pts: 47, j: 21, v: 14, sg: 22 },
             { pos: 2, var: 1, time: "Flamengo", pts: 39, j: 20, v: 11, sg: 19 },
@@ -2202,7 +2188,6 @@
             { pos: 20, var: 0, time: "Chapecoense", pts: 10, j: 20, v: 1, sg: -22 }
         ];
 
-        // Tabela da Copa do Brasil ajustada com pontuações/estatísticas completas assim como o Brasileirão
         const tabelaCopaDoBrasilDados = [
             { pos: 1, var: 2, time: "Flamengo", pts: 18, j: 8, v: 5, sg: 9 },
             { pos: 2, var: -1, time: "Palmeiras", pts: 16, j: 8, v: 5, sg: 7 },
@@ -2428,6 +2413,9 @@
             });
         }
 
+        // =========================================================================
+        // AJUSTE: DETECÇÃO AUTOMÁTICA EM TEMPO REAL PARA CADA NOVO CAMPO/RÁDIO CRIADA
+        // =========================================================================
         db.ref('radios').on('value', snap => {
             todasRadios = [];
             snap.forEach(child => {
@@ -2436,8 +2424,19 @@
 
             todasRadios.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
 
-            if (!localStorage.getItem('playlist_iniciada') && playlistKeys.length === 0) {
-                playlistKeys = todasRadios.map(r => r.key);
+            // Ajuste automático: Se novas rádios foram cadastradas e criadas no painel principal,
+            // inclui-as automaticamente na playlist para não exigir intervenção manual.
+            let chavesAtuaisNoBanco = todasRadios.map(r => r.key);
+            let houveNovaRadioCriada = false;
+
+            chavesAtuaisNoBanco.forEach(key => {
+                if (!playlistKeys.includes(key)) {
+                    playlistKeys.push(key);
+                    houveNovaRadioCriada = true;
+                }
+            });
+
+            if (houveNovaRadioCriada || (!localStorage.getItem('playlist_iniciada') && playlistKeys.length === 0)) {
                 salvarPreferenciasOuvinte();
                 localStorage.setItem('playlist_iniciada', 'true');
             }
@@ -2671,123 +2670,87 @@
             renderizarPlaylistDireita();
         });
 
-        function handleKeyDown(event) {
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                enviarMensagem();
-            }
+        function logout() {
+            localStorage.clear();
+            window.location.reload();
         }
 
         function enviarMensagem() {
             if (!desbloqueios.chat) {
-                alert("O Chat está bloqueado! Adquira o acesso na Loja Virtual por 20 Ludgins.");
+                alert("O Chat está bloqueado! Desbloqueie na Loja Virtual usando Ludgins.");
+                return;
+            }
+            const txtArea = document.getElementById('texto-mensagem');
+            const texto = txtArea.value.trim();
+            if (!texto) return;
+
+            const novaMsgRef = db.ref('chat_ouvinte_' + ouvinteId).push();
+            novaMsgRef.set({
+                remetente: 'ouvinte',
+                nome: ouvinteNome,
+                texto: texto,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            });
+
+            txtArea.value = "";
+            tocarSomSuaveSucesso();
+        }
+
+        function handleKeyDown(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                enviarMensagem();
+            }
+        }
+
+        db.ref('chat_ouvinte_' + ouvinteId).on('value', snap => {
+            const containerChat = document.getElementById('lista-respostas-adm');
+            if (!containerChat) return;
+
+            if (!snap.exists()) {
+                containerChat.innerHTML = "<p style='color:#666; text-align:center; font-size:11.5px; padding:10px;'>Nenhuma mensagem enviada ainda.</p>";
                 return;
             }
 
-            const texto = document.getElementById('texto-mensagem').value.trim();
-            if (!texto) return alert("Digite sua mensagem!");
+            let htmlChat = "";
+            snap.forEach(child => {
+                const msg = child.val();
+                const ehAdm = msg.remetente === 'adm';
+                const horaFormatada = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
 
-            db.ref('mensagens_ouvintes').push({
-                ouvinteId: ouvinteId,
-                ouvinte: ouvinteNome,
-                patente: patenteAtual,
-                ludgins: meusLudgins,
-                mensagem: texto,
-                dataHora: new Date().toLocaleString('pt-BR'),
-                timestamp: firebase.database.ServerValue.TIMESTAMP
-            }).then(() => {
-                document.getElementById('texto-mensagem').value = "";
+                if (ehAdm) {
+                    htmlChat += `
+                        <div class="chat-bubble-adm">
+                            <div class="chat-sender-header">
+                                <span class="chat-sender-name adm"><i class="fas fa-user-shield"></i> Administrador</span>
+                                <button class="btn-delete-chat" onclick="deletarMensagemChat('${child.key}')"><i class="fas fa-trash"></i></button>
+                            </div>
+                            <div class="chat-text">${msg.texto}</div>
+                            <div class="chat-time">${horaFormatada}</div>
+                        </div>
+                    `;
+                } else {
+                    htmlChat += `
+                        <div class="chat-bubble-ouvinte">
+                            <div class="chat-sender-header">
+                                <span class="chat-sender-name ouvinte"><i class="fas fa-user"></i> Você (${ouvinteNome})</span>
+                                <button class="btn-delete-chat" onclick="deletarMensagemChat('${child.key}')"><i class="fas fa-trash"></i></button>
+                            </div>
+                            <div class="chat-text">${msg.texto}</div>
+                            <div class="chat-time">${horaFormatada}</div>
+                        </div>
+                    `;
+                }
             });
-        }
 
-        function deletarMensagem(msgKey) {
-            if (confirm("Deseja apagar esta mensagem?")) {
-                db.ref('mensagens_ouvintes/' + msgKey).remove();
+            containerChat.innerHTML = htmlChat;
+            containerChat.scrollTop = containerChat.scrollHeight;
+        });
+
+        function deletarMensagemChat(keyMsg) {
+            if (confirm("Deseja excluir esta mensagem do histórico?")) {
+                db.ref('chat_ouvinte_' + ouvinteId + '/' + keyMsg).remove();
             }
-        }
-
-        function carregarChatCompleto() {
-            db.ref('mensagens_ouvintes').on('value', snapMsgs => {
-                db.ref('respostas_adm').on('value', snapResps => {
-                    const container = document.getElementById('lista-respostas-adm');
-                    container.innerHTML = "";
-                    
-                    const msgs = snapMsgs.val() || {};
-                    const resps = snapResps.val() || {};
-
-                    let listaHistorico = [];
-
-                    for (let id in msgs) {
-                        const m = msgs[id];
-                        if (m.ouvinteId === ouvinteId || m.ouvinte === ouvinteNome) {
-                            listaHistorico.push({
-                                tipo: 'ouvinte',
-                                id: id,
-                                texto: m.mensagem,
-                                dataHora: m.dataHora || '',
-                                timestamp: m.timestamp || 0
-                            });
-                        }
-                    }
-
-                    for (let id in resps) {
-                        const r = resps[id];
-                        if (r.ouvinteId === ouvinteId || r.ouvinte === ouvinteNome) {
-                            listaHistorico.push({
-                                tipo: 'adm',
-                                id: id,
-                                texto: r.resposta,
-                                dataHora: r.dataHora || '',
-                                timestamp: r.timestamp || 0
-                            });
-                        }
-                    }
-
-                    listaHistorico.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
-
-                    if (listaHistorico.length === 0) {
-                        container.innerHTML = "<p style='color:#666; text-align:center; font-size:12px; padding:10px;'>Nenhuma mensagem enviada.</p>";
-                        return;
-                    }
-
-                    listaHistorico.forEach(item => {
-                        if (item.tipo === 'ouvinte') {
-                            container.innerHTML += `
-                                <div class="chat-bubble-ouvinte">
-                                    <div class="chat-sender-header">
-                                        <span class="chat-sender-name ouvinte">Você (${patenteAtual})</span>
-                                        <button class="btn-delete-chat" title="Apagar" onclick="deletarMensagem('${item.id}')">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </div>
-                                    <div class="chat-text">${item.texto}</div>
-                                    <div class="chat-time">${item.dataHora}</div>
-                                </div>
-                            `;
-                        } else {
-                            container.innerHTML += `
-                                <div class="chat-bubble-adm">
-                                    <div class="chat-sender-header">
-                                        <span class="chat-sender-name adm"><i class="fas fa-shield-alt"></i> Administrador</span>
-                                    </div>
-                                    <div class="chat-text">${item.texto}</div>
-                                    <div class="chat-time">${item.dataHora}</div>
-                                </div>
-                            `;
-                        }
-                    });
-
-                    container.scrollTop = container.scrollHeight;
-                });
-            });
-        }
-        carregarChatCompleto();
-
-        function logout() {
-            localStorage.removeItem('playlist_iniciada');
-            localStorage.removeItem('usuarioNome');
-            localStorage.removeItem('usuarioEmail');
-            window.location.href = 'index.html';
         }
     </script>
 </body>
