@@ -2032,9 +2032,6 @@
         atualizarCarrosselClima();
         setInterval(atualizarCarrosselClima, 6000);
 
-        // =========================================================================
-        // IMPLEMENTAÇÃO DE ATUALIZAÇÃO AUTOMÁTICA DE JOGOS DA SEMANA ATUAL E PRÓXIMA VIA FIREBASE
-        // =========================================================================
         function obterJogosPadraoDinamicos() {
             const hoje = new Date();
             const domingoAtual = new Date(hoje);
@@ -2413,9 +2410,6 @@
             });
         }
 
-        // =========================================================================
-        // AJUSTE: DETECÇÃO AUTOMÁTICA EM TEMPO REAL PARA CADA NOVO CAMPO/RÁDIO CRIADA
-        // =========================================================================
         db.ref('radios').on('value', snap => {
             todasRadios = [];
             snap.forEach(child => {
@@ -2424,8 +2418,6 @@
 
             todasRadios.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
 
-            // Ajuste automático: Se novas rádios foram cadastradas e criadas no painel principal,
-            // inclui-as automaticamente na playlist para não exigir intervenção manual.
             let chavesAtuaisNoBanco = todasRadios.map(r => r.key);
             let houveNovaRadioCriada = false;
 
@@ -2672,7 +2664,76 @@
 
         function logout() {
             localStorage.clear();
-            window.location.href = 'index.html';
+            window.location.reload();
+        }
+
+        function enviarMensagem() {
+            if (!desbloqueios.chat) {
+                alert("O Chat está bloqueado! Desbloqueie na Loja Virtual com Ludgins.");
+                return;
+            }
+
+            const input = document.getElementById('texto-mensagem');
+            const texto = input.value.trim();
+            if (!texto) return;
+
+            const msgId = 'msg_' + Date.now();
+            db.ref('mensagens_ouvintes/' + ouvinteId + '/' + msgId).set({
+                remetente: ouvinteNome,
+                tipo: 'ouvinte',
+                texto: texto,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            });
+
+            input.value = "";
+            tocarSomSuaveSucesso();
+        }
+
+        function handleKeyDown(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                enviarMensagem();
+            }
+        }
+
+        db.ref('mensagens_ouvintes/' + ouvinteId).on('value', snap => {
+            const containerChat = document.getElementById('lista-respostas-adm');
+            if (!containerChat) return;
+
+            if (!snap.exists()) {
+                containerChat.innerHTML = "<p style='color:#666; font-size:11.5px; text-align:center; padding:10px;'>Nenhuma mensagem enviada ainda.</p>";
+                return;
+            }
+
+            let htmlMensagens = "";
+            snap.forEach(child => {
+                const m = child.val();
+                const mKey = child.key;
+                const horaFormatada = m.timestamp ? new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+                const ehAdm = m.tipo === 'adm';
+
+                htmlMensagens += `
+                    <div class="${ehAdm ? 'chat-bubble-adm' : 'chat-bubble-ouvinte'}">
+                        <div class="chat-sender-header">
+                            <span class="chat-sender-name ${ehAdm ? 'adm' : 'ouvinte'}">
+                                <i class="fas ${ehAdm ? 'fa-user-shield' : 'fa-user'}"></i> ${ehAdm ? 'Administrador' : (m.remetente || ouvinteNome)}
+                            </span>
+                            ${!ehAdm ? `<button class="btn-delete-chat" onclick="deletarMensagemOuvinte('${mKey}')" title="Apagar"><i class="fas fa-trash"></i></button>` : ''}
+                        </div>
+                        <div class="chat-text">${m.texto}</div>
+                        <div class="chat-time">${horaFormatada}</div>
+                    </div>
+                `;
+            });
+
+            containerChat.innerHTML = htmlMensagens;
+            containerChat.scrollTop = containerChat.scrollHeight;
+        });
+
+        function deletarMensagemOuvinte(msgKey) {
+            if (confirm("Deseja realmente apagar esta mensagem?")) {
+                db.ref('mensagens_ouvintes/' + ouvinteId + '/' + msgKey).remove();
+            }
         }
     </script>
 </body>
