@@ -2032,6 +2032,9 @@
         atualizarCarrosselClima();
         setInterval(atualizarCarrosselClima, 6000);
 
+        // =========================================================================
+        // IMPLEMENTAÇÃO DE ATUALIZAÇÃO AUTOMÁTICA DE JOGOS DA SEMANA ATUAL E PRÓXIMA VIA FIREBASE
+        // =========================================================================
         function obterJogosPadraoDinamicos() {
             const hoje = new Date();
             const domingoAtual = new Date(hoje);
@@ -2410,6 +2413,9 @@
             });
         }
 
+        // =========================================================================
+        // AJUSTE: DETECÇÃO AUTOMÁTICA EM TEMPO REAL PARA CADA NOVO CAMPO/RÁDIO CRIADA
+        // =========================================================================
         db.ref('radios').on('value', snap => {
             todasRadios = [];
             snap.forEach(child => {
@@ -2418,6 +2424,8 @@
 
             todasRadios.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
 
+            // Ajuste automático: Se novas rádios foram cadastradas e criadas no painel principal,
+            // inclui-as automaticamente na playlist para não exigir intervenção manual.
             let chavesAtuaisNoBanco = todasRadios.map(r => r.key);
             let houveNovaRadioCriada = false;
 
@@ -2662,99 +2670,10 @@
             renderizarPlaylistDireita();
         });
 
-        // Funções de Chat e Logout corrigidas para o botão funcionar corretamente
-        function enviarMensagem() {
-            if (!desbloqueios.chat) {
-                alert("O Chat está bloqueado! Adquira o recurso na sua Loja Virtual acima.");
-                return;
-            }
-            const textoInput = document.getElementById('texto-mensagem');
-            const mensagem = textoInput.value.trim();
-            if (!mensagem) return;
-
-            db.ref('ouvintes_chat/' + ouvinteId).push({
-                remetente: ouvinteNome,
-                tipo: 'ouvinte',
-                mensagem: mensagem,
-                timestamp: firebase.database.ServerValue.TIMESTAMP
-            });
-            textoInput.value = '';
-        }
-
-        function handleKeyDown(event) {
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                enviarMensagem();
-            }
-        }
-
-        db.ref('ouvintes_chat/' + ouvinteId).on('value', snap => {
-            const containerChat = document.getElementById('lista-respostas-adm');
-            if (!containerChat) return;
-
-            if (!snap.exists()) {
-                containerChat.innerHTML = "<p style='color:#666; font-size:11.5px; text-align:center; padding:10px;'>Nenhuma mensagem enviada ainda.</p>";
-                return;
-            }
-
-            let htmlChat = "";
-            snap.forEach(child => {
-                const msgData = child.val();
-                const isAdm = msgData.tipo === 'adm';
-                const horaFormatada = msgData.timestamp ? new Date(msgData.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
-
-                if (isAdm) {
-                    htmlChat += `
-                        <div class="chat-bubble-adm">
-                            <div class="chat-sender-header">
-                                <span class="chat-sender-name adm"><i class="fas fa-user-shield"></i> Administrador</span>
-                                <button class="btn-delete-chat" onclick="deletarMensagemChat('${child.key}')"><i class="fas fa-trash"></i></button>
-                            </div>
-                            <div class="chat-text">${msgData.mensagem}</div>
-                            <div class="chat-time">${horaFormatada}</div>
-                        </div>
-                    `;
-                } else {
-                    htmlChat += `
-                        <div class="chat-bubble-ouvinte">
-                            <div class="chat-sender-header">
-                                <span class="chat-sender-name ouvinte"><i class="fas fa-user"></i> Você (${ouvinteNome})</span>
-                                <button class="btn-delete-chat" onclick="deletarMensagemChat('${child.key}')"><i class="fas fa-trash"></i></button>
-                            </div>
-                            <div class="chat-text">${msgData.mensagem}</div>
-                            <div class="chat-time">${horaFormatada}</div>
-                        </div>
-                    `;
-                }
-            });
-
-            containerChat.innerHTML = htmlChat;
-            containerChat.scrollTop = containerChat.scrollHeight;
-        });
-
-        function deletarMensagemChat(msgKey) {
-            if (confirm("Deseja apagar esta mensagem do histórico?")) {
-                db.ref('ouvintes_chat/' + ouvinteId + '/' + msgKey).remove();
-            }
-        }
-
         function logout() {
-            if (confirm("Tem certeza que deseja sair do Painel do Ouvinte?")) {
-                // Remove dados de sessão do ouvinte no localStorage
-                localStorage.removeItem('userId');
-                localStorage.removeItem('usuarioNome');
-                localStorage.removeItem('usuarioEmail');
-                
-                // Remove o registro do usuário ativo no Firebase online
-                db.ref('ouvintes_online/' + ouvinteId).remove().then(() => {
-                    // Redireciona para a tela de login (ajuste o arquivo HTML de destino se necessário, ex: index.html ou login.html)
-                    window.location.href = 'index.html';
-                }).catch(() => {
-                    window.location.href = 'index.html';
-                });
-            }
+            localStorage.clear();
+            window.location.href = 'index.html';
         }
     </script>
 </body>
 </html>
-```[cite: 7]
