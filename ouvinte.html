@@ -2653,15 +2653,100 @@
             }
         }
 
-        player.addEventListener('ended', () => {
-            mudarRadio(1);
+        player.addEventListener('play', () => {
+            isRadioTocando = true;
+            document.getElementById('btn-play').innerHTML = '<i class="fas fa-pause"></i>';
+            renderizarPlaylistDireita();
         });
 
+        player.addEventListener('pause', () => {
+            isRadioTocando = false;
+            document.getElementById('btn-play').innerHTML = '<i class="fas fa-play"></i>';
+            renderizarPlaylistDireita();
+        });
+
+        function enviarMensagem() {
+            if (!desbloqueios.chat) {
+                alert("O Chat está bloqueado! Adquira o acesso na Loja Virtual acima.");
+                return;
+            }
+            const input = document.getElementById('texto-mensagem');
+            const texto = input.value.trim();
+            if (!texto) return;
+
+            const msgId = 'msg_' + Date.now();
+            db.ref('mensagens_chat/' + ouvinteId + '/' + msgId).set({
+                remetente: ouvinteNome,
+                texto: texto,
+                tipo: 'ouvinte',
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            });
+
+            input.value = "";
+        }
+
+        function handleKeyDown(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                enviarMensagem();
+            }
+        }
+
+        db.ref('mensagens_chat/' + ouvinteId).on('value', snap => {
+            const container = document.getElementById('lista-respostas-adm');
+            if (!container) return;
+
+            if (!snap.exists()) {
+                container.innerHTML = "<p style='color:#666; font-size:11.5px; text-align:center; padding:10px;'>Nenhuma mensagem enviada ainda.</p>";
+                return;
+            }
+
+            let html = "";
+            snap.forEach(child => {
+                const m = child.val();
+                const hora = m.timestamp ? new Date(m.timestamp).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'}) : '';
+
+                if (m.tipo === 'adm') {
+                    html += `
+                        <div class="chat-bubble-adm">
+                            <div class="chat-sender-header">
+                                <span class="chat-sender-name adm"><i class="fas fa-user-shield"></i> Administrador</span>
+                                <button class="btn-delete-chat" onclick="deletarMensagemChat('${child.key}')"><i class="fas fa-trash"></i></button>
+                            </div>
+                            <div class="chat-text">${m.texto}</div>
+                            <div class="chat-time">${hora}</div>
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="chat-bubble-ouvinte">
+                            <div class="chat-sender-header">
+                                <span class="chat-sender-name ouvinte"><i class="fas fa-user"></i> ${m.remetente || 'Você'}</span>
+                                <button class="btn-delete-chat" onclick="deletarMensagemChat('${child.key}')"><i class="fas fa-trash"></i></button>
+                            </div>
+                            <div class="chat-text">${m.texto}</div>
+                            <div class="chat-time">${hora}</div>
+                        </div>
+                    `;
+                }
+            });
+
+            container.innerHTML = html;
+            container.scrollTop = container.scrollHeight;
+        });
+
+        function deletarMensagemChat(msgId) {
+            if (confirm("Deseja apagar esta mensagem do histórico?")) {
+                db.ref('mensagens_chat/' + ouvinteId + '/' + msgId).remove();
+            }
+        }
+
         function logout() {
-            localStorage.removeItem('userId');
-            localStorage.removeItem('usuarioNome');
-            localStorage.removeItem('usuarioEmail');
-            window.location.reload();
+            if (confirm("Deseja sair do painel?")) {
+                localStorage.removeItem('usuarioNome');
+                localStorage.removeItem('usuarioEmail');
+                window.location.reload();
+            }
         }
     </script>
 </body>
