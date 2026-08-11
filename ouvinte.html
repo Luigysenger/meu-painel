@@ -2032,130 +2032,465 @@
         atualizarCarrosselClima();
         setInterval(atualizarCarrosselClima, 6000);
 
+        // FUTEBOL - API-FOOTBALL + FIREBASE
+        // A API-Football alimenta o Firebase e o painel apenas escuta o Firebase.
+        // O visual e o restante do painel permanecem intactos.
         // =========================================================================
-        // IMPLEMENTAÇÃO DE ATUALIZAÇÃO AUTOMÁTICA DE JOGOS DA SEMANA ATUAL E PRÓXIMA VIA FIREBASE
-        // =========================================================================
-        function obterJogosPadraoDinamicos() {
-            const hoje = new Date();
-            const domingoAtual = new Date(hoje);
-            domingoAtual.setDate(hoje.getDate() - hoje.getDay());
 
-            function addDias(baseDate, dias) {
-                let d = new Date(baseDate);
-                d.setDate(d.getDate() + dias);
-                return d;
-            }
+        const API_FOOTBALL_BASE = 'https://v3.football.api-sports.io';
+        const FUSO_FUTEBOL = 'America/Sao_Paulo';
+        const INTERVALO_LIVE_MS = 60000;
+        const INTERVALO_JOGOS_SEMANA_MS = 6 * 60 * 60 * 1000;
+        const DURACAO_ALERTA_GOL_MS = 10000;
+        const LIMITE_JOGOS_EXIBICAO = 80;
 
-            function formatarDataSimples(d) {
-                const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-                let dSem = diasSemana[d.getDay()];
-                let dia = String(d.getDate()).padStart(2, '0');
-                let mes = String(d.getMonth() + 1).padStart(2, '0');
-                return `${dSem}, ${dia}/${mes}`;
-            }
+        // IDs oficiais usados pela API-Football para competições brasileiras.
+        // Se você adicionar outros campeonatos depois, basta acrescentar o ID aqui.
+        const LIGAS_FUTEBOL = [
+            { id: 71, nome: 'Brasileirão Série A' },
+            { id: 72, nome: 'Brasileirão Série B' },
+            { id: 73, nome: 'Copa do Brasil' }
+        ];
 
-            return [
-                { id: "j1", semana: "atual", campeonato: "Brasileirão Série A", timeA: "Palmeiras", timeB: "Flamengo", data: formatarDataSimples(addDias(domingoAtual, 3)), hora: "19:00", timestamp: addDias(domingoAtual, 3).setHours(19,0,0,0), golsA: 2, golsB: 1, artilheiros: [{ min: "15'", autor: "Estevão (Palmeiras)" }, { min: "44'", autor: "Pedro (Flamengo)" }] },
-                { id: "j2", semana: "atual", campeonato: "Copa do Brasil", timeA: "São Paulo", timeB: "Corinthians", data: formatarDataSimples(addDias(domingoAtual, 4)), hora: "21:30", timestamp: addDias(domingoAtual, 4).setHours(21,30,0,0), golsA: 0, golsB: 0, artilheiros: [] },
-                { id: "j3", semana: "atual", campeonato: "Brasileirão Série A", timeA: "Grêmio", timeB: "Internacional", data: formatarDataSimples(addDias(domingoAtual, 5)), hora: "16:00", timestamp: addDias(domingoAtual, 5).setHours(16,0,0,0), golsA: 0, golsB: 0, artilheiros: [] },
-                { id: "j4", semana: "atual", campeonato: "Brasileirão Série A", timeA: "Atlético-MG", timeB: "Cruzeiro", data: formatarDataSimples(addDias(domingoAtual, 6)), hora: "18:30", timestamp: addDias(domingoAtual, 6).setHours(18,30,0,0), golsA: 0, golsB: 0, artilheiros: [] },
-                { id: "j5", semana: "proxima", campeonato: "Brasileirão Série A", timeA: "Fluminense", timeB: "Botafogo", data: formatarDataSimples(addDias(domingoAtual, 10)), hora: "19:00", timestamp: addDias(domingoAtual, 10).setHours(19,0,0,0), golsA: 0, golsB: 0, artilheiros: [] },
-                { id: "j6", semana: "proxima", campeonato: "Copa do Brasil", timeA: "Athletico-PR", timeB: "Bahia", data: formatarDataSimples(addDias(domingoAtual, 11)), hora: "21:30", timestamp: addDias(domingoAtual, 11).setHours(21,30,0,0), golsA: 0, golsB: 0, artilheiros: [] },
-                { id: "j7", semana: "proxima", campeonato: "Brasileirão Série A", timeA: "Vasco", timeB: "Santos", data: formatarDataSimples(addDias(domingoAtual, 12)), hora: "16:00", timestamp: addDias(domingoAtual, 12).setHours(16,0,0,0), golsA: 0, golsB: 0, artilheiros: [] },
-                { id: "j8", semana: "proxima", campeonato: "Brasileirão Série A", timeA: "Fortaleza", timeB: "Red Bull Bragantino", data: formatarDataSimples(addDias(domingoAtual, 13)), hora: "18:30", timestamp: addDias(domingoAtual, 13).setHours(18,30,0,0), golsA: 0, golsB: 0, artilheiros: [] }
-            ];
+        let apiFootballKey = null;
+        let jogosFutebolCache = {};
+        let placaresAnteriores = {};
+        let timerAtualizacaoFutebol = null;
+        let timerAtualizacaoJogosSemana = null;
+        let alertaGolTimer = null;
+
+        function escapeHtmlFutebol(valor) {
+            return String(valor ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
         }
 
-        function inicializarAlimentarJogosFirebase() {
-            const refFutebol = db.ref('futebol/jogos_semana');
-            refFutebol.once('value', snap => {
-                if (!snap.exists()) {
-                    const jogosIniciais = obterJogosPadraoDinamicos();
-                    let objMap = {};
-                    jogosIniciais.forEach(j => {
-                        objMap[j.id] = j;
-                    });
-                    refFutebol.set(objMap);
-                }
+        function formatarDataFutebol(dataISO) {
+            if (!dataISO) return '';
+            const d = new Date(dataISO);
+            if (Number.isNaN(d.getTime())) return '';
+            return d.toLocaleDateString('pt-BR', {
+                timeZone: FUSO_FUTEBOL,
+                weekday: 'short',
+                day: '2-digit',
+                month: '2-digit'
+            }).replace('.', '');
+        }
+
+        function formatarHoraFutebol(dataISO) {
+            if (!dataISO) return '--:--';
+            const d = new Date(dataISO);
+            if (Number.isNaN(d.getTime())) return '--:--';
+            return d.toLocaleTimeString('pt-BR', {
+                timeZone: FUSO_FUTEBOL,
+                hour: '2-digit',
+                minute: '2-digit'
             });
         }
-        inicializarAlimentarJogosFirebase();
 
-        db.ref('futebol/jogos_semana').on('value', snap => {
+        function obterIntervaloSemana() {
+            const agora = new Date();
+            const dia = agora.getDay();
+            const inicio = new Date(agora);
+            inicio.setDate(agora.getDate() - dia);
+            inicio.setHours(0, 0, 0, 0);
+
+            const fim = new Date(inicio);
+            fim.setDate(inicio.getDate() + 13);
+            fim.setHours(23, 59, 59, 999);
+
+            function isoData(d) {
+                const ano = d.getFullYear();
+                const mes = String(d.getMonth() + 1).padStart(2, '0');
+                const diaMes = String(d.getDate()).padStart(2, '0');
+                return `${ano}-${mes}-${diaMes}`;
+            }
+
+            return { inicio: isoData(inicio), fim: isoData(fim) };
+        }
+
+        function identificarSemanaJogo(timestamp) {
+            const agora = new Date();
+            const dia = agora.getDay();
+            const inicioAtual = new Date(agora);
+            inicioAtual.setDate(agora.getDate() - dia);
+            inicioAtual.setHours(0, 0, 0, 0);
+
+            const inicioProxima = new Date(inicioAtual);
+            inicioProxima.setDate(inicioAtual.getDate() + 7);
+
+            const dataJogo = new Date(timestamp);
+            if (dataJogo >= inicioProxima) return 'proxima';
+            return 'atual';
+        }
+
+        function obterStatusFutebol(status) {
+            const codigo = status?.short || '';
+            const encerrados = ['FT', 'AET', 'PEN', 'CANC', 'PST', 'ABD', 'AWD', 'WO'];
+            const aoVivo = ['1H', 'HT', '2H', 'ET', 'BT', 'P', 'LIVE'];
+
+            if (aoVivo.includes(codigo)) return 'AO VIVO';
+            if (encerrados.includes(codigo)) return 'ENCERRADO';
+            return 'AGENDADO';
+        }
+
+        function normalizarEventoGol(evento) {
+            if (!evento || evento.type !== 'Goal') return null;
+            const minutoBase = evento.time?.elapsed ?? '';
+            const minutoExtra = evento.time?.extra ? `+${evento.time.extra}` : '';
+            const minuto = minutoBase !== '' ? `${minutoBase}${minutoExtra}'` : '';
+            const jogador = evento.player?.name || 'Jogador';
+            const time = evento.team?.name || '';
+            let detalhe = evento.detail || 'Normal Goal';
+            if (detalhe === 'Own Goal') detalhe = 'Gol contra';
+            if (detalhe === 'Penalty') detalhe = 'Pênalti';
+
+            return {
+                id: `${evento.time?.elapsed || 0}_${evento.player?.id || jogador}_${time}_${detalhe}`,
+                min: minuto,
+                autor: `${jogador} (${time})`,
+                detalhe
+            };
+        }
+
+        function converterFixtureParaJogo(fixture) {
+            const timestamp = Number(fixture.fixture?.timestamp || 0) * 1000;
+            const status = obterStatusFutebol(fixture.fixture?.status);
+            const ligaNome = fixture.league?.name || 'Futebol';
+            const home = fixture.teams?.home || {};
+            const away = fixture.teams?.away || {};
+            const golsA = Number.isFinite(fixture.goals?.home) ? fixture.goals.home : 0;
+            const golsB = Number.isFinite(fixture.goals?.away) ? fixture.goals.away : 0;
+
+            return {
+                id: `api_${fixture.fixture.id}`,
+                fixtureId: fixture.fixture.id,
+                semana: identificarSemanaJogo(timestamp),
+                campeonato: ligaNome,
+                campeonatoId: fixture.league?.id || null,
+                temporada: fixture.league?.season || null,
+                timeA: home.name || 'Casa',
+                timeB: away.name || 'Fora',
+                escudoA: home.logo || '',
+                escudoB: away.logo || '',
+                data: formatarDataFutebol(fixture.fixture?.date),
+                hora: formatarHoraFutebol(fixture.fixture?.date),
+                timestamp,
+                golsA,
+                golsB,
+                statusCodigo: fixture.fixture?.status?.short || '',
+                statusLongo: fixture.fixture?.status?.long || '',
+                minuto: fixture.fixture?.status?.elapsed ?? null,
+                artilheiros: [],
+                eventosAtualizadosEm: Date.now(),
+                atualizadoEm: Date.now()
+            };
+        }
+
+        async function obterApiFootballKey() {
+            if (apiFootballKey) return apiFootballKey;
+
+            try {
+                const snap = await db.ref('futebol/api_key').once('value');
+                const chaveBanco = snap.val();
+                if (chaveBanco && typeof chaveBanco === 'string') {
+                    apiFootballKey = chaveBanco.trim();
+                }
+            } catch (e) {
+                console.warn('Não foi possível ler futebol/api_key do Firebase.', e);
+            }
+
+            // Mantém compatibilidade caso a chave já esteja salva no navegador.
+            if (!apiFootballKey) {
+                apiFootballKey = localStorage.getItem('api_football_key') || '';
+            }
+
+            return apiFootballKey;
+        }
+
+        async function consultarApiFootball(endpoint, parametros = {}) {
+            const chave = await obterApiFootballKey();
+            if (!chave) throw new Error('Chave da API-Football não encontrada em futebol/api_key.');
+
+            const url = new URL(API_FOOTBALL_BASE + endpoint);
+            Object.entries(parametros).forEach(([k, v]) => {
+                if (v !== undefined && v !== null && v !== '') url.searchParams.set(k, v);
+            });
+
+            const resposta = await fetch(url.toString(), {
+                method: 'GET',
+                headers: {
+                    'x-apisports-key': chave,
+                    'Accept': 'application/json'
+                },
+                cache: 'no-store'
+            });
+
+            if (!resposta.ok) {
+                throw new Error(`API-Football HTTP ${resposta.status}`);
+            }
+
+            const dados = await resposta.json();
+            if (dados.errors && Object.keys(dados.errors).length > 0) {
+                throw new Error(JSON.stringify(dados.errors));
+            }
+            return dados;
+        }
+
+        async function buscarJogosDaSemanaNaApi() {
+            const intervalo = obterIntervaloSemana();
+            const acumulados = [];
+
+            for (const liga of LIGAS_FUTEBOL) {
+                try {
+                    const dados = await consultarApiFootball('/fixtures', {
+                        league: liga.id,
+                        season: new Date().getFullYear(),
+                        from: intervalo.inicio,
+                        to: intervalo.fim,
+                        timezone: FUSO_FUTEBOL
+                    });
+
+                    if (Array.isArray(dados.response)) {
+                        dados.response.forEach(fixture => {
+                            const jogo = converterFixtureParaJogo(fixture);
+                            acumulados.push(jogo);
+                        });
+                    }
+                } catch (erroLiga) {
+                    console.warn(`Falha ao carregar ${liga.nome}:`, erroLiga);
+                }
+            }
+
+            const mapa = {};
+            acumulados.forEach(jogo => {
+                mapa[jogo.id] = jogo;
+            });
+            return mapa;
+        }
+
+        async function buscarEventosDoJogo(jogo) {
+            if (!jogo?.fixtureId) return [];
+            try {
+                const dados = await consultarApiFootball('/fixtures/events', { fixture: jogo.fixtureId });
+                if (!Array.isArray(dados.response)) return [];
+                return dados.response
+                    .map(normalizarEventoGol)
+                    .filter(Boolean);
+            } catch (e) {
+                console.warn('Falha ao consultar eventos do jogo', jogo.fixtureId, e);
+                return [];
+            }
+        }
+
+        async function sincronizarJogosSemanaComFirebase() {
+            try {
+                const mapa = await buscarJogosDaSemanaNaApi();
+                if (!Object.keys(mapa).length) {
+                    console.warn('API-Football não retornou jogos para o intervalo consultado.');
+                    return;
+                }
+
+                const updates = {};
+                Object.values(mapa).forEach(jogo => {
+                    const anterior = jogosFutebolCache[jogo.id];
+                    if (anterior) {
+                        // Preserva eventos se a API de eventos ainda não foi consultada.
+                        if (!jogo.artilheiros.length && Array.isArray(anterior.artilheiros)) {
+                            jogo.artilheiros = anterior.artilheiros;
+                        }
+                    }
+                    updates[`futebol/jogos_semana/${jogo.id}`] = jogo;
+                });
+
+                await db.ref().update(updates);
+                jogosFutebolCache = { ...jogosFutebolCache, ...mapa };
+            } catch (e) {
+                console.warn('Sincronização semanal da API-Football falhou:', e);
+            }
+        }
+
+        async function atualizarJogosAoVivo() {
+            try {
+                const aoVivo = await consultarApiFootball('/fixtures', {
+                    live: LIGAS_FUTEBOL.map(l => l.id).join('-'),
+                    timezone: FUSO_FUTEBOL
+                });
+
+                if (!Array.isArray(aoVivo.response)) return;
+
+                for (const fixture of aoVivo.response) {
+                    const jogoNovo = converterFixtureParaJogo(fixture);
+                    const chave = jogoNovo.id;
+                    const anterior = jogosFutebolCache[chave] || {};
+
+                    const placarAnteriorA = Number(anterior.golsA ?? jogoNovo.golsA);
+                    const placarAnteriorB = Number(anterior.golsB ?? jogoNovo.golsB);
+                    const houveGol = jogoNovo.golsA > placarAnteriorA || jogoNovo.golsB > placarAnteriorB;
+
+                    let eventos = Array.isArray(anterior.artilheiros) ? anterior.artilheiros : [];
+                    if (houveGol || eventos.length === 0) {
+                        eventos = await buscarEventosDoJogo(jogoNovo);
+                    }
+
+                    jogoNovo.artilheiros = eventos;
+                    jogoNovo.eventosAtualizadosEm = Date.now();
+
+                    if (houveGol) {
+                        mostrarAlertaGol(jogoNovo, placarAnteriorA, placarAnteriorB);
+                    }
+
+                    jogosFutebolCache[chave] = jogoNovo;
+
+                    await db.ref(`futebol/jogos_semana/${chave}`).update(jogoNovo);
+                }
+            } catch (e) {
+                console.warn('Atualização de jogos ao vivo falhou:', e);
+            }
+        }
+
+        function mostrarAlertaGol(jogo, placarAnteriorA, placarAnteriorB) {
+            const container = document.getElementById('lista-jogos-esportes');
+            if (!container) return;
+
+            let autor = '';
+            if (Array.isArray(jogo.artilheiros) && jogo.artilheiros.length) {
+                const ultimo = jogo.artilheiros[jogo.artilheiros.length - 1];
+                autor = ultimo?.autor ? `<div style="font-size:10px; color:#d1fae5; margin-top:3px;">${escapeHtmlFutebol(ultimo.autor)} ${ultimo.min ? '• ' + escapeHtmlFutebol(ultimo.min) : ''}</div>` : '';
+            }
+
+            const timeDoGol = jogo.golsA > placarAnteriorA ? jogo.timeA : jogo.timeB;
+            const alertaId = 'alerta-gol-futebol';
+            let alerta = document.getElementById(alertaId);
+
+            if (!alerta) {
+                alerta = document.createElement('div');
+                alerta.id = alertaId;
+                alerta.style.cssText = `
+                    background: linear-gradient(135deg, rgba(22,163,74,.97), rgba(5,150,105,.97));
+                    border: 1px solid rgba(134,239,172,.7);
+                    color: #fff;
+                    border-radius: 10px;
+                    padding: 10px 12px;
+                    margin-bottom: 8px;
+                    text-align: center;
+                    box-shadow: 0 0 22px rgba(34,197,94,.35);
+                    animation: golFutebolPulse .7s infinite alternate;
+                    position: relative;
+                    z-index: 2;
+                `;
+                container.prepend(alerta);
+            }
+
+            alerta.innerHTML = `
+                <div style="font-size:12px; font-weight:900; letter-spacing:.5px;">⚽ GOOOOOL!</div>
+                <div style="font-size:11px; font-weight:800; margin-top:2px;">${escapeHtmlFutebol(timeDoGol)}</div>
+                <div style="font-size:15px; font-weight:900; margin-top:2px;">${jogo.golsA} x ${jogo.golsB}</div>
+                ${autor}
+            `;
+
+            clearTimeout(alertaGolTimer);
+            alertaGolTimer = setTimeout(() => {
+                if (alerta) alerta.remove();
+            }, DURACAO_ALERTA_GOL_MS);
+        }
+
+        // Exibe os jogos reais recebidos pelo Firebase. O Firebase continua sendo
+        // a camada em tempo real do painel, enquanto a API fornece os dados esportivos.
+        function renderizarJogosFirebase(snap) {
             const containerEsportes = document.getElementById('lista-jogos-esportes');
             if (!containerEsportes) return;
 
             if (!snap.exists()) {
-                containerEsportes.innerHTML = "<p style='color:#666; font-size:11.5px; text-align:center; margin:10px 0;'>Nenhum jogo cadastrado.</p>";
+                containerEsportes.innerHTML = `<p style="color:#666; font-size:11.5px; text-align:center; margin:10px 0;">Nenhum jogo cadastrado.</p>`;
                 return;
             }
 
-            let todosJogos = [];
+            const todosJogos = [];
             snap.forEach(child => {
-                todosJogos.push(child.val());
+                const valor = child.val();
+                if (valor && valor.fixtureId) todosJogos.push(valor);
             });
 
-            const agoraTime = new Date().getTime();
-            let jogosAtuais = todosJogos.filter(j => j.semana === 'atual' || !j.semana);
-            let todosAtuaisEncerrados = jogosAtuais.length > 0 && jogosAtuais.every(j => agoraTime > (j.timestamp + 120 * 60 * 1000));
+            // Compatibilidade: se ainda existirem jogos antigos sem fixtureId,
+            // eles continuam podendo ser exibidos.
+            snap.forEach(child => {
+                const valor = child.val();
+                if (valor && !valor.fixtureId) todosJogos.push(valor);
+            });
 
-            let jogosParaExibir = [];
-            let tituloSecaoDinamica = "";
+            jogosFutebolCache = {};
+            todosJogos.forEach(j => {
+                const chave = j.id || childKeySeguro(j);
+                jogosFutebolCache[chave] = j;
+            });
 
-            if (todosAtuaisEncerrados) {
-                jogosParaExibir = todosJogos.filter(j => j.semana === 'proxima');
-                tituloSecaoDinamica = `<div style="background: rgba(168,85,247,0.15); border: 1px solid rgba(168,85,247,0.3); color: #d8b4fe; font-size: 10px; font-weight: 800; text-align: center; padding: 4px; border-radius: 6px; margin-bottom: 6px;"><i class="fas fa-calendar-alt"></i> JOGOS DA PRÓXIMA SEMANA (ATUALIZADO)</div>`;
-            } else {
-                jogosParaExibir = jogosAtuais;
-                tituloSecaoDinamica = `<div style="background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.25); color: #4ade80; font-size: 10px; font-weight: 800; text-align: center; padding: 4px; border-radius: 6px; margin-bottom: 6px;"><i class="fas fa-bolt"></i> JOGOS DA SEMANA ATUAL</div>`;
-            }
+            todosJogos.sort((a, b) => {
+                const prioridadeA = obterPrioridadeJogo(a);
+                const prioridadeB = obterPrioridadeJogo(b);
+                if (prioridadeA !== prioridadeB) return prioridadeA - prioridadeB;
+                return (a.timestamp || 0) - (b.timestamp || 0);
+            });
 
-            let htmlJogos = tituloSecaoDinamica;
+            let jogosParaExibir = todosJogos.slice(0, LIMITE_JOGOS_EXIBICAO);
+            const temAoVivo = jogosParaExibir.some(j => obterStatusFutebol({ short: j.statusCodigo }) === 'AO VIVO');
+            const semanaAtual = jogosParaExibir.some(j => j.semana === 'atual');
+            const titulo = temAoVivo
+                ? `<div style="background:rgba(34,197,94,.10); border:1px solid rgba(34,197,94,.25); color:#4ade80; font-size:10px; font-weight:800; text-align:center; padding:4px; border-radius:6px; margin-bottom:6px;"><i class="fas fa-bolt"></i> JOGOS DA SEMANA • TEM PARTIDA AO VIVO</div>`
+                : (semanaAtual
+                    ? `<div style="background:rgba(34,197,94,.10); border:1px solid rgba(34,197,94,.25); color:#4ade80; font-size:10px; font-weight:800; text-align:center; padding:4px; border-radius:6px; margin-bottom:6px;"><i class="fas fa-calendar-week"></i> JOGOS DA SEMANA ATUALIZADOS</div>`
+                    : `<div style="background:rgba(168,85,247,.15); border:1px solid rgba(168,85,247,.3); color:#d8b4fe; font-size:10px; font-weight:800; text-align:center; padding:4px; border-radius:6px; margin-bottom:6px;"><i class="fas fa-calendar-alt"></i> PRÓXIMOS JOGOS</div>`);
+
+            let htmlJogos = titulo;
 
             jogosParaExibir.forEach(j => {
-                let status = "AGENDADO";
-                let tempoExibicao = j.hora;
-                const duracaoPartidaMs = 110 * 60 * 1000;
+                const status = obterStatusFutebol({ short: j.statusCodigo });
+                const aoVivo = status === 'AO VIVO';
+                const encerrado = status === 'ENCERRADO';
+                const mostrarPlacar = aoVivo || encerrado || Number(j.golsA) > 0 || Number(j.golsB) > 0;
+                let tempoExibicao = j.hora || '--:--';
 
-                if (agoraTime >= j.timestamp && agoraTime <= (j.timestamp + duracaoPartidaMs)) {
-                    status = "AO VIVO";
-                    const minutosRolando = Math.floor((agoraTime - j.timestamp) / 60000);
-                    tempoExibicao = minutosRolando + "'";
-                } else if (agoraTime > (j.timestamp + duracaoPartidaMs)) {
-                    status = "ENCERRADO";
-                    tempoExibicao = "Fim";
+                if (aoVivo) {
+                    tempoExibicao = j.minuto !== null && j.minuto !== undefined ? `${j.minuto}'` : 'AO VIVO';
+                } else if (encerrado) {
+                    tempoExibicao = 'Fim';
                 }
 
-                const aoVivo = status === "AO VIVO";
-                const mostrarPlacar = aoVivo || status === 'ENCERRADO';
-
-                let htmlArtilheiros = "";
-                if (mostrarPlacar && j.artilheiros && j.artilheiros.length > 0) {
-                    htmlArtilheiros += `<div class="gols-artilheiros-box">`;
-                    j.artilheiros.forEach(g => {
+                let htmlArtilheiros = '';
+                if ((aoVivo || encerrado) && Array.isArray(j.artilheiros) && j.artilheiros.length) {
+                    htmlArtilheiros = `<div class="gols-artilheiros-box">`;
+                    j.artilheiros.slice(-8).forEach(g => {
                         htmlArtilheiros += `
                             <div class="gol-item-linha">
                                 <i class="fas fa-futbol"></i>
-                                <span><strong>${g.min}</strong> - ${g.autor}</span>
+                                <span><strong>${escapeHtmlFutebol(g.min)}</strong> - ${escapeHtmlFutebol(g.autor)}</span>
                             </div>
                         `;
                     });
                     htmlArtilheiros += `</div>`;
                 }
 
+                const escudoA = j.escudoA ? `<img src="${escapeHtmlFutebol(j.escudoA)}" alt="" style="width:22px;height:22px;object-fit:contain;margin-right:5px;vertical-align:middle;">` : '';
+                const escudoB = j.escudoB ? `<img src="${escapeHtmlFutebol(j.escudoB)}" alt="" style="width:22px;height:22px;object-fit:contain;margin-left:5px;vertical-align:middle;">` : '';
+
                 htmlJogos += `
-                    <div class="jogo-card-item">
+                    <div class="jogo-card-item ${aoVivo ? 'jogo-ao-vivo-destaque' : ''}">
                         <div>
-                            <span class="campeonato-badge-jogo"><i class="fas fa-trophy" style="font-size: 8.5px; margin-right: 3px;"></i> ${j.campeonato}</span>
+                            <span class="campeonato-badge-jogo"><i class="fas fa-trophy" style="font-size:8.5px;margin-right:3px;"></i> ${escapeHtmlFutebol(j.campeonato || 'Futebol')}</span>
                         </div>
                         <div class="jogo-header-info">
-                            <span><i class="far fa-calendar-alt"></i> ${j.data}</span>
-                            ${aoVivo ? '<span class="live-tag-badge"><i class="fas fa-circle"></i> AO VIVO ' + tempoExibicao + '</span>' : '<span>' + (status === 'AGENDADO' ? 'Às ' + j.hora : 'Encerrado') + '</span>'}
+                            <span><i class="far fa-calendar-alt"></i> ${escapeHtmlFutebol(j.data || '')}</span>
+                            ${aoVivo
+                                ? `<span class="live-tag-badge"><i class="fas fa-circle"></i> AO VIVO ${escapeHtmlFutebol(tempoExibicao)}</span>`
+                                : `<span>${encerrado ? 'Encerrado' : 'Às ' + escapeHtmlFutebol(j.hora || '--:--')}</span>`}
                         </div>
                         <div class="jogo-placares-row">
-                            <span class="time-nome-box home" title="${j.timeA}">${j.timeA}</span>
-                            <span class="placar-central-num">${mostrarPlacar ? j.golsA + ' x ' + j.golsB : 'VS'}</span>
-                            <span class="time-nome-box away" title="${j.timeB}">${j.timeB}</span>
+                            <span class="time-nome-box home" title="${escapeHtmlFutebol(j.timeA)}">${escudoA}${escapeHtmlFutebol(j.timeA)}</span>
+                            <span class="placar-central-num ${aoVivo ? 'placar-ao-vivo' : ''}">${mostrarPlacar ? `${Number(j.golsA || 0)} x ${Number(j.golsB || 0)}` : 'VS'}</span>
+                            <span class="time-nome-box away" title="${escapeHtmlFutebol(j.timeB)}">${escapeHtmlFutebol(j.timeB)}${escudoB}</span>
                         </div>
                         ${htmlArtilheiros}
                     </div>
@@ -2163,7 +2498,117 @@
             });
 
             containerEsportes.innerHTML = htmlJogos;
-        });
+        }
+
+        function childKeySeguro(jogo) {
+            return `fallback_${jogo.timeA || ''}_${jogo.timeB || ''}_${jogo.timestamp || ''}`.replace(/[^a-zA-Z0-9_-]/g, '_');
+        }
+
+        function obterPrioridadeJogo(j) {
+            const status = obterStatusFutebol({ short: j.statusCodigo });
+            if (status === 'AO VIVO') return 0;
+            if (status === 'AGENDADO') return 1;
+            return 2;
+        }
+
+        db.ref('futebol/jogos_semana').on('value', renderizarJogosFirebase);
+
+        const ID_SINCRONIZADOR_FUTEBOL = 'futebol/sincronizador';
+        const LEASE_FUTEBOL_MS = 90000;
+        const RENOVACAO_LEASE_MS = 30000;
+        let souSincronizadorFutebol = false;
+        let timerLeaseFutebol = null;
+
+        async function tentarAssumirSincronizadorFutebol() {
+            const ref = db.ref(ID_SINCRONIZADOR_FUTEBOL);
+            const agora = Date.now();
+            let consegui = false;
+
+            try {
+                const resultado = await ref.transaction(atual => {
+                    if (!atual || !atual.id || !atual.ate || atual.ate < agora || atual.id === ouvinteId) {
+                        consegui = true;
+                        return {
+                            id: ouvinteId,
+                            ate: agora + LEASE_FUTEBOL_MS,
+                            atualizadoEm: firebase.database.ServerValue.TIMESTAMP
+                        };
+                    }
+                    return;
+                });
+
+                souSincronizadorFutebol = !!(resultado.committed && consegui);
+            } catch (e) {
+                souSincronizadorFutebol = false;
+            }
+
+            return souSincronizadorFutebol;
+        }
+
+        async function renovarLeaseFutebol() {
+            if (!souSincronizadorFutebol) {
+                await tentarAssumirSincronizadorFutebol();
+                return;
+            }
+
+            try {
+                const snap = await db.ref(ID_SINCRONIZADOR_FUTEBOL).once('value');
+                const atual = snap.val();
+                if (!atual || atual.id !== ouvinteId) {
+                    souSincronizadorFutebol = false;
+                    return;
+                }
+
+                await db.ref(ID_SINCRONIZADOR_FUTEBOL).update({
+                    ate: Date.now() + LEASE_FUTEBOL_MS,
+                    atualizadoEm: firebase.database.ServerValue.TIMESTAMP
+                });
+            } catch (e) {
+                souSincronizadorFutebol = false;
+            }
+        }
+
+        async function executarSincronizacaoSeForLider() {
+            await tentarAssumirSincronizadorFutebol();
+            if (!souSincronizadorFutebol) return;
+
+            await sincronizarJogosSemanaComFirebase();
+            await atualizarJogosAoVivo();
+        }
+
+        async function iniciarSistemaFutebolApi() {
+            // Não apagamos o conteúdo existente do Firebase. Primeiro tentamos
+            // sincronizar a programação real e depois mantemos o listener ativo.
+            await obterApiFootballKey();
+            await executarSincronizacaoSeForLider();
+
+            clearInterval(timerLeaseFutebol);
+            timerLeaseFutebol = setInterval(async () => {
+                await renovarLeaseFutebol();
+            }, RENOVACAO_LEASE_MS);
+
+            clearInterval(timerAtualizacaoJogosSemana);
+            timerAtualizacaoJogosSemana = setInterval(async () => {
+                if (!souSincronizadorFutebol) {
+                    await tentarAssumirSincronizadorFutebol();
+                }
+                if (souSincronizadorFutebol) {
+                    await sincronizarJogosSemanaComFirebase();
+                }
+            }, INTERVALO_JOGOS_SEMANA_MS);
+
+            clearInterval(timerAtualizacaoFutebol);
+            timerAtualizacaoFutebol = setInterval(async () => {
+                if (!souSincronizadorFutebol) {
+                    await tentarAssumirSincronizadorFutebol();
+                }
+                if (souSincronizadorFutebol) {
+                    await atualizarJogosAoVivo();
+                }
+            }, INTERVALO_LIVE_MS);
+        }
+
+        iniciarSistemaFutebolApi();
 
         const tabelaBrasileiraoDados = [
             { pos: 1, var: 0, time: "Palmeiras", pts: 47, j: 21, v: 14, sg: 22 },
@@ -2413,6 +2858,9 @@
             });
         }
 
+        // =========================================================================
+        // AJUSTE: DETECÇÃO AUTOMÁTICA EM TEMPO REAL PARA CADA NOVO CAMPO/RÁDIO CRIADA
+        // =========================================================================
         db.ref('radios').on('value', snap => {
             todasRadios = [];
             snap.forEach(child => {
@@ -2421,6 +2869,8 @@
 
             todasRadios.sort((a, b) => (a.posicao || 0) - (b.posicao || 0));
 
+            // Ajuste automático: Se novas rádios foram cadastradas e criadas no painel principal,
+            // inclui-as automaticamente na playlist para não exigir intervenção manual.
             let chavesAtuaisNoBanco = todasRadios.map(r => r.key);
             let houveNovaRadioCriada = false;
 
@@ -2665,87 +3115,86 @@
             renderizarPlaylistDireita();
         });
 
+        function logout() {
+            localStorage.clear();
+            window.location.reload();
+        }
+
         function enviarMensagem() {
             if (!desbloqueios.chat) {
-                alert("O Chat está bloqueado! Adquira o acesso na Loja Virtual acima.");
+                alert("O Chat está bloqueado! Desbloqueie na Loja Virtual usando Ludgins.");
                 return;
             }
-            const input = document.getElementById('texto-mensagem');
-            const texto = input.value.trim();
+            const txtArea = document.getElementById('texto-mensagem');
+            const texto = txtArea.value.trim();
             if (!texto) return;
 
-            const msgId = 'msg_' + Date.now();
-            db.ref('mensagens_chat/' + ouvinteId + '/' + msgId).set({
-                remetente: ouvinteNome,
+            const novaMsgRef = db.ref('chat_ouvinte_' + ouvinteId).push();
+            novaMsgRef.set({
+                remetente: 'ouvinte',
+                nome: ouvinteNome,
                 texto: texto,
-                tipo: 'ouvinte',
                 timestamp: firebase.database.ServerValue.TIMESTAMP
             });
 
-            input.value = "";
+            txtArea.value = "";
+            tocarSomSuaveSucesso();
         }
 
-        function handleKeyDown(event) {
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
+        function handleKeyDown(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
                 enviarMensagem();
             }
         }
 
-        db.ref('mensagens_chat/' + ouvinteId).on('value', snap => {
-            const container = document.getElementById('lista-respostas-adm');
-            if (!container) return;
+        db.ref('chat_ouvinte_' + ouvinteId).on('value', snap => {
+            const containerChat = document.getElementById('lista-respostas-adm');
+            if (!containerChat) return;
 
             if (!snap.exists()) {
-                container.innerHTML = "<p style='color:#666; font-size:11.5px; text-align:center; padding:10px;'>Nenhuma mensagem enviada ainda.</p>";
+                containerChat.innerHTML = "<p style='color:#666; text-align:center; font-size:11.5px; padding:10px;'>Nenhuma mensagem enviada ainda.</p>";
                 return;
             }
 
-            let html = "";
+            let htmlChat = "";
             snap.forEach(child => {
-                const m = child.val();
-                const hora = m.timestamp ? new Date(m.timestamp).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'}) : '';
+                const msg = child.val();
+                const ehAdm = msg.remetente === 'adm';
+                const horaFormatada = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
 
-                if (m.tipo === 'adm') {
-                    html += `
+                if (ehAdm) {
+                    htmlChat += `
                         <div class="chat-bubble-adm">
                             <div class="chat-sender-header">
                                 <span class="chat-sender-name adm"><i class="fas fa-user-shield"></i> Administrador</span>
                                 <button class="btn-delete-chat" onclick="deletarMensagemChat('${child.key}')"><i class="fas fa-trash"></i></button>
                             </div>
-                            <div class="chat-text">${m.texto}</div>
-                            <div class="chat-time">${hora}</div>
+                            <div class="chat-text">${msg.texto}</div>
+                            <div class="chat-time">${horaFormatada}</div>
                         </div>
                     `;
                 } else {
-                    html += `
+                    htmlChat += `
                         <div class="chat-bubble-ouvinte">
                             <div class="chat-sender-header">
-                                <span class="chat-sender-name ouvinte"><i class="fas fa-user"></i> ${m.remetente || 'Você'}</span>
+                                <span class="chat-sender-name ouvinte"><i class="fas fa-user"></i> Você (${ouvinteNome})</span>
                                 <button class="btn-delete-chat" onclick="deletarMensagemChat('${child.key}')"><i class="fas fa-trash"></i></button>
                             </div>
-                            <div class="chat-text">${m.texto}</div>
-                            <div class="chat-time">${hora}</div>
+                            <div class="chat-text">${msg.texto}</div>
+                            <div class="chat-time">${horaFormatada}</div>
                         </div>
                     `;
                 }
             });
 
-            container.innerHTML = html;
-            container.scrollTop = container.scrollHeight;
+            containerChat.innerHTML = htmlChat;
+            containerChat.scrollTop = containerChat.scrollHeight;
         });
 
-        function deletarMensagemChat(msgId) {
-            if (confirm("Deseja apagar esta mensagem do histórico?")) {
-                db.ref('mensagens_chat/' + ouvinteId + '/' + msgId).remove();
-            }
-        }
-
-        function logout() {
-            if (confirm("Deseja sair do painel?")) {
-                localStorage.removeItem('usuarioNome');
-                localStorage.removeItem('usuarioEmail');
-                window.location.reload();
+        function deletarMensagemChat(keyMsg) {
+            if (confirm("Deseja excluir esta mensagem do histórico?")) {
+                db.ref('chat_ouvinte_' + ouvinteId + '/' + keyMsg).remove();
             }
         }
     </script>
